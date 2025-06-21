@@ -1,3 +1,5 @@
 #pragma once
 
-void greet();
+void orgeInitialize();
+
+void orgeTerminate();

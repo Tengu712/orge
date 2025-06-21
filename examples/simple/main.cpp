@@ -1,6 +1,7 @@
 #include <orge.hpp>
 
 int main() {
-	greet();
+	orgeInitialize();
+	orgeTerminate();
 	return 0;
 }

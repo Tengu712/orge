@@ -12,18 +12,20 @@
 - CMake
 - Ninja (option)
 
-次を実行:
+次を実行して依存ライブラリをビルド:
 
 ```sh
-# Vulkan-Headersをビルド
-cmake -S thirdparty/Vulkan-Headers -B thirdparty/Vulkan-Headers/build
-cmake --install thirdparty/Vulkan-Headers/build --prefix build/deps/Vulkan-Headers
+cd thirdparty
+setup.bat
+```
 
-# orgeをビルド
+次を実行してorgeをビルド:
+
+```sh
 cmake -G Ninja -S . -B build
 cmake --build build
 ```
 
 ただし、examples下の例をビルドする場合、orgeのCMake構成時に次のフラグを指定する:
 
-- simple: `-DBUILD_EXAMPLE_SIMPLE=ON`
+- simple: `-D BUILD_EXAMPLE_SIMPLE=ON`
