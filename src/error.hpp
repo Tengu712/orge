@@ -9,10 +9,15 @@
 
 #pragma once
 
+/// Error値がError::Noneでなければその値を早期returnするマクロ関数
+#define CHECK(n) if (auto e = (n); e != Error::None) return e;
+
 enum class Error {
 	None = 0,
 	CreateInstance,
 	CreateWindow,
+	SelectPhysicalDevice,
+	CreateDevice,
 };
 
 const char *convertErrorMessage(Error from);

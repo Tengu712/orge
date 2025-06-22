@@ -3,12 +3,11 @@
 #include "renderer.hpp"
 #include "window.hpp"
 
-#define CHECK(n) if (const auto e = (n); e != Error::None) return e;
-
 namespace graphics {
 
 Error initialize(const char *title, int width, int height) {
 	CHECK(renderer::createInstance());
+	CHECK(renderer::createDevice());
 	CHECK(window::createWindow(title, width, height));
 	return Error::None;
 }
