@@ -1,5 +1,5 @@
 #pragma once
 
-void orgeInitialize();
+bool orgeInitialize();
 
 void orgeTerminate();

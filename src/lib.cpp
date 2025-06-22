@@ -1,16 +1,26 @@
+#include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>
-#include <iostream>
 
 namespace {
-	vk::Instance g_instance = nullptr;
+	vk::Instance g_instance;
 }
 
-void orgeInitialize() {
-	vk::InstanceCreateInfo ci;
-	g_instance = vk::createInstance(ci);
-	std::cout << "Hello, world!" << std::endl;
+bool orgeInitialize() {
+	try {
+		vk::InstanceCreateInfo ci;
+		g_instance = vk::createInstance(ci);
+	} catch (...) {
+		return false;
+	}
+
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		return false;
+	}
+
+	return true;
 }
 
 void orgeTerminate() {
+	SDL_Quit();
 	g_instance.destroy();
 }

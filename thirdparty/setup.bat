@@ -18,3 +18,16 @@ cmake ^
 cmake ^
 	--install Vulkan-Loader/build ^
 	--prefix ../build/deps/Vulkan-Loader
+
+cmake ^
+	-S SDL ^
+	-B SDL/build ^
+	-G Ninja ^
+	-D CMAKE_BUILD_TYPE=Release ^
+	-D SDL_SHARED=OFF ^
+	-D SDL_STATIC=ON
+cmake ^
+	--build SDL/build
+cmake ^
+	--install SDL/build ^
+	--prefix ../build/deps/SDL
