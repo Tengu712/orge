@@ -2,17 +2,14 @@
 #include <orge.hpp>
 
 int main() {
-	std::cout << "1" << std::endl;
-
-	if (!orgeInitialize()) {
-		std::cout << "failed to initialize orge." << std::endl;
+	if (const auto e = orgeInitialize("simple", 640, 480); e != 0) {
+		std::cout << orgeConvertErrorMessage(e) << std::endl;
 		return 1;
 	}
 
-	std::cout << "2" << std::endl;
+	std::cin.get();
 
 	orgeTerminate();
 
-	std::cout << "3" << std::endl;
 	return 0;
 }
