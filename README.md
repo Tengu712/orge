@@ -10,7 +10,7 @@
 
 - C/C++コンパイラ
 - CMake
-- Ninja (option)
+- Ninja
 
 次を実行して依存ライブラリをビルド:
 
