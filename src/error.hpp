@@ -20,6 +20,7 @@ enum class Error {
 	GetQueueFamilyIndex,
 	CreateDevice,
 	CreateCommandPool,
+	CreateSurface,
 };
 
 const char *convertErrorMessage(Error from);

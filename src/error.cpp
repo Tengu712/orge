@@ -10,6 +10,7 @@ const char *convertErrorMessage(Error from) {
 		case GetQueueFamilyIndex: return "failed to get a queue family index.";
 		case CreateDevice: return "failed to create a Vulkan device.";
 		case CreateCommandPool: return "failed to create a command pool.";
+		case CreateSurface: return "failed to create a surface.";
 		default: return "undefined error happened.";
 	}
 }
