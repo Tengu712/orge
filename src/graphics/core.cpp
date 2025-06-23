@@ -1,10 +1,10 @@
-#include "renderer.hpp"
+#include "core.hpp"
 
 #include <algorithm>
 #include <optional>
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::renderer {
+namespace graphics::core {
 
 vk::Instance g_instance;
 vk::PhysicalDevice g_physicalDevice;
@@ -102,6 +102,7 @@ void terminate() {
 	}
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);
+		g_commandPool = nullptr;
 	}
 	if (g_device) {
 		g_device.destroy();
@@ -113,4 +114,4 @@ void terminate() {
 	}
 }
 
-} // namespace graphics::renderer
+} // namespace graphics::core

@@ -4,10 +4,10 @@
 
 #include "../error.hpp"
 
-namespace graphics::renderer {
+namespace graphics::core {
 
 Error initialize();
 
 void terminate();
 
-} // namespace graphics::renderer
+} // namespace graphics::core

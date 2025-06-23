@@ -21,8 +21,8 @@ find_package(SDL3 CONFIG REQUIRED)
 # orge
 add_library(orge STATIC
 	src/error.cpp
+	src/graphics/core.cpp
 	src/graphics/graphics.cpp
-	src/graphics/renderer.cpp
 	src/graphics/window.cpp
 	src/orge.cpp
 )
