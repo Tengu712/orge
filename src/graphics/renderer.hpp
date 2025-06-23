@@ -6,8 +6,8 @@
 
 namespace graphics::renderer {
 
-Error createInstance();
-Error createDevice();
+Error initialize();
+
 void terminate();
 
 } // namespace graphics::renderer

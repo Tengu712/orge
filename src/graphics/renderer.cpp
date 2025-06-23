@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 
+#include <algorithm>
 #include <optional>
 #include <vulkan/vulkan.hpp>
 
@@ -8,6 +9,8 @@ namespace graphics::renderer {
 vk::Instance g_instance;
 vk::PhysicalDevice g_physicalDevice;
 vk::Device g_device;
+vk::Queue g_queue;
+vk::CommandPool g_commandPool;
 
 Error createInstance() {
 	const auto ai = vk::ApplicationInfo()
@@ -37,40 +40,69 @@ Error selectPhysicalDevice() {
 	return Error::None;
 }
 
-std::optional<size_t> getQueueFamilyIndex() {
+std::optional<uint32_t> getQueueFamilyIndex() {
 	const auto props = g_physicalDevice.getQueueFamilyProperties();
-	for (size_t i = 0; i < props.size(); ++i) {
-		if (props[i].queueFlags & vk::QueueFlagBits::eGraphics) {
-			return i;
-		}
+	const auto iter = std::find_if(props.cbegin(), props.cend(), [](const auto &n) { return n.queueFlags & vk::QueueFlagBits::eGraphics; });
+	if (iter == props.cend()) {
+		return std::nullopt;
 	}
-	return std::nullopt;
+	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
 
-Error createDevice() {
-	CHECK(selectPhysicalDevice());
-
-	const auto queueFamilyIndex = getQueueFamilyIndex();
-	if (!queueFamilyIndex) {
-		return Error::CreateDevice;
-	}
-
+Error createDevice(uint32_t queueFamilyIndex) {
 	const auto priority = 1.0f;
 	const auto qci = vk::DeviceQueueCreateInfo()
-		.setQueueFamilyIndex(static_cast<uint32_t>(queueFamilyIndex.value()))
+		.setQueueFamilyIndex(queueFamilyIndex)
 		.setQueuePriorities(priority);
 	const auto ci = vk::DeviceCreateInfo()
 		.setQueueCreateInfos(qci);
 	try {
 		g_device = g_physicalDevice.createDevice(ci);
-	} catch(...) {
+	} catch (...) {
 		return Error::CreateDevice;
 	}
+	return Error::None;
+}
+
+void getQueue(uint32_t queueFamilyIndex) {
+	g_queue = g_device.getQueue(queueFamilyIndex, 0);
+}
+
+Error createCommandPool(uint32_t queueFamilyIndex) {
+	const auto ci = vk::CommandPoolCreateInfo()
+		.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
+		.setQueueFamilyIndex(queueFamilyIndex);
+	try {
+		g_commandPool = g_device.createCommandPool(ci);
+	} catch (...) {
+		return Error::CreateCommandPool;
+	}
+	return Error::None;
+}
+
+Error initialize() {
+	CHECK(createInstance());
+
+	CHECK(selectPhysicalDevice());
+	const auto queueFamilyIndex = getQueueFamilyIndex();
+	if (!queueFamilyIndex) {
+		return Error::GetQueueFamilyIndex;
+	}
+	CHECK(createDevice(queueFamilyIndex.value()));
+
+	getQueue(queueFamilyIndex.value());
+	CHECK(createCommandPool(queueFamilyIndex.value()));
 
 	return Error::None;
 }
 
 void terminate() {
+	if (g_device) {
+		g_device.waitIdle();
+	}
+	if (g_device && g_commandPool) {
+		g_device.destroyCommandPool(g_commandPool);
+	}
 	if (g_device) {
 		g_device.destroy();
 		g_device = nullptr;

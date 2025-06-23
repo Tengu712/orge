@@ -17,7 +17,9 @@ enum class Error {
 	CreateInstance,
 	CreateWindow,
 	SelectPhysicalDevice,
+	GetQueueFamilyIndex,
 	CreateDevice,
+	CreateCommandPool,
 };
 
 const char *convertErrorMessage(Error from);

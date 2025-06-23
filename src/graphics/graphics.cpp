@@ -6,8 +6,7 @@
 namespace graphics {
 
 Error initialize(const char *title, int width, int height) {
-	CHECK(renderer::createInstance());
-	CHECK(renderer::createDevice());
+	CHECK(renderer::initialize());
 	CHECK(window::createWindow(title, width, height));
 	return Error::None;
 }
