@@ -13,6 +13,8 @@ vk::SurfaceKHR g_surface;
 vk::SwapchainKHR g_swapchain;
 uint32_t g_imageCount;
 std::vector<vk::ImageView> g_imageViews;
+vk::Semaphore g_waitForImageEnabledSemaphore;
+vk::Semaphore g_waitForRenderingSemaphore;
 
 std::span<const char *const> getExtensions() {
 	return std::span(EXTENSIONS);
@@ -83,16 +85,36 @@ Error createImageViews(const vk::Device &device) {
 	return Error::None;
 }
 
+Error createSemaphores(const vk::Device &device) {
+	const auto ci = vk::SemaphoreCreateInfo();
+	try {
+		g_waitForImageEnabledSemaphore = device.createSemaphore(ci);
+		g_waitForRenderingSemaphore    = device.createSemaphore(ci);
+	} catch (...) {
+		return Error::CreateSemaphoresForSwapchain;
+	}
+	return Error::None;
+}
+
 Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface) {
 	g_surface = surface;
 
 	CHECK(createSwapchain(physicalDevice, device));
 	CHECK(createImageViews(device));
+	CHECK(createSemaphores(device));
 
 	return Error::None;
 }
 
 void terminate(const vk::Device &device) {
+	if (g_waitForRenderingSemaphore) {
+		device.destroySemaphore(g_waitForRenderingSemaphore);
+		g_waitForRenderingSemaphore = nullptr;
+	}
+	if (g_waitForImageEnabledSemaphore) {
+		device.destroySemaphore(g_waitForImageEnabledSemaphore);
+		g_waitForImageEnabledSemaphore = nullptr;
+	}
 	if (!g_imageViews.empty()) {
 		for (auto& imageView : g_imageViews) {
 			device.destroyImageView(imageView);

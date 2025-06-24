@@ -15,6 +15,7 @@ const char *convertErrorMessage(Error from) {
 		case DoubleBufferingUnavailable: return "the surface not support double buffering.";
 		case CreateSwapchain: return "failed to create a swapchain.";
 		case CreateSwapchainImageView: return "failed to create swapchain image views.";
+		case CreateSemaphoresForSwapchain: return "failed to create smephores for swapchain.";
 		default: return "undefined error happened.";
 	}
 }

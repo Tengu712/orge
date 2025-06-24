@@ -25,6 +25,7 @@ enum class Error {
 	DoubleBufferingUnavailable,
 	CreateSwapchain,
 	CreateSwapchainImageView,
+	CreateSemaphoresForSwapchain,
 };
 
 const char *convertErrorMessage(Error from);
