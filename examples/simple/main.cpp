@@ -1,5 +1,5 @@
 #include <iostream>
-#include <orge.hpp>
+#include <orge.h>
 
 int main() {
 	if (const auto e = orgeInitialize("simple", 640, 480); e != 0) {

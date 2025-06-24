@@ -1,4 +1,4 @@
-#include <orge.hpp>
+#include <orge.h>
 
 #include "error.hpp"
 #include "graphics/graphics.hpp"
