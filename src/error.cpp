@@ -14,6 +14,7 @@ const char *convertErrorMessage(Error from) {
 		case InvalidColorSpace: return "the surface color space is invalid.";
 		case DoubleBufferingUnavailable: return "the surface not support double buffering.";
 		case CreateSwapchain: return "failed to create a swapchain.";
+		case CreateSwapchainImageView: return "failed to create swapchain image views.";
 		default: return "undefined error happened.";
 	}
 }

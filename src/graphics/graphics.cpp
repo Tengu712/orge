@@ -130,6 +130,7 @@ void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
 	}
+	swapchain::terminate(g_device);
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);
 		g_commandPool = nullptr;

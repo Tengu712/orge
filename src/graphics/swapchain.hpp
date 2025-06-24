@@ -14,6 +14,6 @@ std::span<const char *const> getExtensions();
 
 Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface);
 
-void terminate();
+void terminate(const vk::Device &device);
 
 } // namespace graphics::swapchain

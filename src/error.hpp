@@ -24,6 +24,7 @@ enum class Error {
 	InvalidColorSpace,
 	DoubleBufferingUnavailable,
 	CreateSwapchain,
+	CreateSwapchainImageView,
 };
 
 const char *convertErrorMessage(Error from);
