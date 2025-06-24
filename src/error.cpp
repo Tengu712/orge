@@ -11,6 +11,9 @@ const char *convertErrorMessage(Error from) {
 		case CreateDevice: return "failed to create a Vulkan device.";
 		case CreateCommandPool: return "failed to create a command pool.";
 		case CreateSurface: return "failed to create a surface.";
+		case InvalidColorSpace: return "the surface color space is invalid.";
+		case DoubleBufferingUnavailable: return "the surface not support double buffering.";
+		case CreateSwapchain: return "failed to create a swapchain.";
 		default: return "undefined error happened.";
 	}
 }

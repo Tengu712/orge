@@ -21,6 +21,9 @@ enum class Error {
 	CreateDevice,
 	CreateCommandPool,
 	CreateSurface,
+	InvalidColorSpace,
+	DoubleBufferingUnavailable,
+	CreateSwapchain,
 };
 
 const char *convertErrorMessage(Error from);

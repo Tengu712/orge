@@ -58,17 +58,22 @@ std::optional<uint32_t> getQueueFamilyIndex() {
 }
 
 Error createDevice(uint32_t queueFamilyIndex) {
+	const auto extensions = swapchain::getExtensions();
+
 	const auto priority = 1.0f;
 	const auto qci = vk::DeviceQueueCreateInfo()
 		.setQueueFamilyIndex(queueFamilyIndex)
 		.setQueuePriorities(priority);
 	const auto ci = vk::DeviceCreateInfo()
-		.setQueueCreateInfos(qci);
+		.setQueueCreateInfos(qci)
+		.setPEnabledExtensionNames(extensions);
+
 	try {
 		g_device = g_physicalDevice.createDevice(ci);
 	} catch (...) {
 		return Error::CreateDevice;
 	}
+
 	return Error::None;
 }
 
@@ -116,7 +121,7 @@ Error initialize(const char *title, int width, int height) {
 	if (!surface) {
 		return Error::CreateSurface;
 	}
-	CHECK(swapchain::initialize(surface.value()));
+	CHECK(swapchain::initialize(g_physicalDevice, g_device, surface.value()));
 
 	return Error::None;
 }
