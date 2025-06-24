@@ -7,7 +7,13 @@ int main() {
 		return 1;
 	}
 
-	std::cin.get();
+	int count = 0;
+	while (orgePollEvents()) {
+		if (count % 60 == 0) {
+			std::cout << count / 60 << std::endl;
+		}
+		count += 1;
+	}
 
 	orgeTerminate();
 

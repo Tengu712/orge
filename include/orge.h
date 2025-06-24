@@ -12,5 +12,13 @@ const char *orgeConvertErrorMessage(int from);
 /// 0以外であれば失敗を意味する。
 int orgeInitialize(const char *windowTitle, int windowInnerWidth, int windowInnerHeight);
 
+/// orgeのウィンドウイベントをすべて処理する関数
+///
+/// 毎フレーム初めに呼ぶこと。
+/// 特に、メインループの条件式に使うと良い。
+///
+/// ウィンドウが閉じられたとき、0が返される。
+int orgePollEvents(void);
+
 /// orgeを終了する関数
-void orgeTerminate();
+void orgeTerminate(void);

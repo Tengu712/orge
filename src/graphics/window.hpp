@@ -22,6 +22,13 @@ std::span<const char *const> getExtensions();
 /// 既にウィンドウが生成されていることを期待する。
 std::optional<vk::SurfaceKHR> createSurface(const vk::Instance &instance);
 
+/// ウィンドウイベントをすべて処理する関数
+///
+/// ウィンドウが閉じられたときにfalseを返す。
+///
+/// 既にウィンドウが生成されていることを期待する。
+bool pollEvents();
+
 void terminate();
 
 } // namespace graphics::window
