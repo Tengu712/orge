@@ -25,7 +25,8 @@ jobs:
       with:
         path: build/deps
         key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/**') }}
-        restore-keys: ${{ runner.os }}-thirdparty-
+        restore-keys: |
+          ${{ runner.os }}-thirdparty-
 
     - name: Setup thirdparty libraries
       if: steps.cache-thirdparty.outputs.cache-hit != 'true'
