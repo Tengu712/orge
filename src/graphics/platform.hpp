@@ -12,6 +12,24 @@
 
 namespace graphics::platform {
 
+#ifdef __APPLE__
+constexpr vk::Format getRenderTargetPixelFormat() {
+	return vk::Format::eB8G8R8A8Unorm;
+}
+
+constexpr vk::ColorSpaceKHR getRenderTargetColorSpace() {
+	return vk::ColorSpaceKHR::eSrgbNonlinear;
+}
+#else
+constexpr vk::Format getRenderTargetPixelFormat() {
+	return vk::Format::eR8G8B8A8Srgb;
+}
+
+constexpr vk::ColorSpaceKHR getRenderTargetColorSpace() {
+	return vk::ColorSpaceKHR::eSrgbNonlinear;
+}
+#endif
+
 Error initialize();
 
 vk::InstanceCreateFlags getInstanceCreateFlags();
