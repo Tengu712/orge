@@ -19,7 +19,7 @@ vk::CommandPool g_commandPool;
 
 std::vector<const char *> getInstanceExtensions() {
 	const auto platform_extensions = platform::getInstanceExtensions();
-	const auto window_extensions = window::getExtensions();
+	const auto window_extensions = window::getInstanceExtensions();
 
 	std::vector<const char *> extensions;
 	extensions.reserve(platform_extensions.size() + window_extensions.size());
@@ -74,7 +74,7 @@ std::optional<uint32_t> getQueueFamilyIndex() {
 
 std::vector<const char *> getDeviceExtensions() {
 	const auto platform_extensions = platform::getDeviceExtensions();
-	const auto swapchain_extensions = swapchain::getExtensions();
+	const auto swapchain_extensions = swapchain::getDeviceExtensions();
 
 	std::vector<const char *> extensions;
 	extensions.reserve(platform_extensions.size() + swapchain_extensions.size());

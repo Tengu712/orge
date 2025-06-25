@@ -15,7 +15,7 @@ Error createWindow(const char *title, int width, int height);
 /// Vulkanインスタンスに必要なextensionsを取得する関数
 ///
 /// 既にウィンドウが生成されていることを期待する。
-std::span<const char *const> getExtensions();
+std::span<const char *const> getInstanceExtensions();
 
 /// サーフェスを作成する関数
 ///

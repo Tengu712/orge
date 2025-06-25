@@ -24,7 +24,7 @@ Error createWindow(const char *title, int width, int height) {
 	return Error::None;
 }
 
-std::span<const char *const> getExtensions() {
+std::span<const char *const> getInstanceExtensions() {
 	Uint32 count = 0;
 	const char *const *extensions = SDL_Vulkan_GetInstanceExtensions(&count);
 	if (!extensions || count == 0) {

@@ -16,7 +16,7 @@ std::vector<vk::ImageView> g_imageViews;
 vk::Semaphore g_waitForImageEnabledSemaphore;
 vk::Semaphore g_waitForRenderingSemaphore;
 
-std::span<const char *const> getExtensions() {
+std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
 }
 

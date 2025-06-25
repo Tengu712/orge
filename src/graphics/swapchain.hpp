@@ -10,7 +10,7 @@
 namespace graphics::swapchain {
 
 /// Vulkanデバイスに必要なextensionsを取得する関数
-std::span<const char *const> getExtensions();
+std::span<const char *const> getDeviceExtensions();
 
 Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface);
 
