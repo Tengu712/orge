@@ -12,6 +12,8 @@
 
 namespace graphics::platform {
 
+Error initialize();
+
 #ifdef __APPLE__
 constexpr vk::InstanceCreateFlags getInstanceCreateFlags() {
 	return vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
@@ -53,8 +55,5 @@ constexpr vk::ColorSpaceKHR getRenderTargetColorSpace() {
 	return vk::ColorSpaceKHR::eSrgbNonlinear;
 }
 #endif
-
-Error initialize();
-
 
 } // namespace graphics::platform
