@@ -4,7 +4,6 @@
 #include "swapchain.hpp"
 #include "window.hpp"
 
-#include <array>
 #include <algorithm>
 #include <optional>
 #include <vector>
