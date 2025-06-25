@@ -15,6 +15,8 @@
   - wayland
   - xrandr
   - pkg-config
+- macOS
+  - Xcode
 
 ## Build
 
@@ -26,7 +28,7 @@ cd thirdparty
 # Windows
 setup.bat
 
-# Linux
+# Linux/macOS
 ./setup.sh
 ```
 

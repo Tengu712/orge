@@ -3,11 +3,23 @@
 #include "swapchain.hpp"
 #include "window.hpp"
 
+#include <array>
 #include <algorithm>
 #include <optional>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics {
+
+#ifdef __APPLE__
+constexpr auto INSTANCE_FLAGS = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+constexpr std::array<const char *const, 1> INSTANCE_EXTENSIONS = {"VK_KHR_portability_enumeration"};
+constexpr std::array<const char *const, 1> DEVICE_EXTENSIONS = {"VK_KHR_portability_subset"};
+#else
+constexpr auto INSTANCE_FLAGS = vk::InstanceCreateFlags();
+constexpr std::array<const char *const, 0> INSTANCE_EXTENSIONS = {};
+constexpr std::array<const char *const, 0> DEVICE_EXTENSIONS = {};
+#endif
 
 vk::Instance g_instance;
 vk::PhysicalDevice g_physicalDevice;
@@ -15,13 +27,25 @@ vk::Device g_device;
 vk::Queue g_queue;
 vk::CommandPool g_commandPool;
 
+std::vector<const char *> getInstanceExtensions() {
+	const auto window_extensions = window::getExtensions();
+
+	std::vector<const char *> extensions;
+	extensions.reserve(INSTANCE_EXTENSIONS.size() + window_extensions.size());
+	extensions.insert(extensions.end(), INSTANCE_EXTENSIONS.begin(), INSTANCE_EXTENSIONS.end());
+	extensions.insert(extensions.end(), window_extensions.begin(), window_extensions.end());
+
+	return extensions;
+}
+
 Error createInstance() {
-	const auto extensions = window::getExtensions();
+	const auto extensions = getInstanceExtensions();
 
 	const auto ai = vk::ApplicationInfo()
 		.setPEngineName("orge")
 		.setApiVersion(VK_API_VERSION_1_1);
 	const auto ci = vk::InstanceCreateInfo()
+		.setFlags(INSTANCE_FLAGS)
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions);
 
@@ -57,8 +81,19 @@ std::optional<uint32_t> getQueueFamilyIndex() {
 	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
 
+std::vector<const char *> getDeviceExtensions() {
+	const auto swapchain_extensions = swapchain::getExtensions();
+
+	std::vector<const char *> extensions;
+	extensions.reserve(DEVICE_EXTENSIONS.size() + swapchain_extensions.size());
+	extensions.insert(extensions.end(), DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+	extensions.insert(extensions.end(), swapchain_extensions.begin(), swapchain_extensions.end());
+
+	return extensions;
+}
+
 Error createDevice(uint32_t queueFamilyIndex) {
-	const auto extensions = swapchain::getExtensions();
+	const auto extensions = getDeviceExtensions();
 
 	const auto priority = 1.0f;
 	const auto qci = vk::DeviceQueueCreateInfo()
