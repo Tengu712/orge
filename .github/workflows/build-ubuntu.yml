@@ -35,7 +35,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: build/deps
-        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/**') }}
+        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/setup.sh', '.gitmodules') }}
         restore-keys: |
           ${{ runner.os }}-thirdparty-
 
