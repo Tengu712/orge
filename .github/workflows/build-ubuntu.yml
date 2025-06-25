@@ -1,0 +1,51 @@
+name: Build on Ubuntu
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libx11-dev \
+          libxcb1-dev \
+          libxkbcommon-dev \
+          libwayland-dev \
+          libxrandr-dev \
+          pkg-config
+
+    - name: Cache thirdparty build
+      id: cache-thirdparty
+      uses: actions/cache@v3
+      with:
+        path: build/deps
+        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/**') }}
+        restore-keys: |
+          ${{ runner.os }}-thirdparty-
+
+    - name: Setup thirdparty libraries
+      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
+      run: |
+        cd thirdparty
+        ./setup.sh
+
+    - name: Build orge
+      run: |
+        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
+        cmake --build build

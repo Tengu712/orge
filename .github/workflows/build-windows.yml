@@ -1,0 +1,42 @@
+name: Build on Windows
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Cache thirdparty build
+      id: cache-thirdparty
+      uses: actions/cache@v3
+      with:
+        path: build/deps
+        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/**') }}
+        restore-keys: |
+          ${{ runner.os }}-thirdparty-
+
+    - name: Setup thirdparty libraries
+      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd thirdparty
+        setup.bat
+
+    - name: Build orge
+      shell: cmd
+      run: |
+        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
+        cmake --build build
