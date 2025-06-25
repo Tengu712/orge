@@ -1,10 +1,12 @@
 #include "graphics.hpp"
 
+#include "platform.hpp"
 #include "swapchain.hpp"
 #include "window.hpp"
 
 #include <algorithm>
 #include <optional>
+#include <vector>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics {
@@ -15,13 +17,26 @@ vk::Device g_device;
 vk::Queue g_queue;
 vk::CommandPool g_commandPool;
 
+std::vector<const char *> getInstanceExtensions() {
+	const auto platform_extensions = platform::getInstanceExtensions();
+	const auto window_extensions = window::getInstanceExtensions();
+
+	std::vector<const char *> extensions;
+	extensions.reserve(platform_extensions.size() + window_extensions.size());
+	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
+	extensions.insert(extensions.end(), window_extensions.begin(), window_extensions.end());
+
+	return extensions;
+}
+
 Error createInstance() {
-	const auto extensions = window::getExtensions();
+	const auto extensions = getInstanceExtensions();
 
 	const auto ai = vk::ApplicationInfo()
 		.setPEngineName("orge")
 		.setApiVersion(VK_API_VERSION_1_1);
 	const auto ci = vk::InstanceCreateInfo()
+		.setFlags(platform::getInstanceCreateFlags())
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions);
 
@@ -57,8 +72,20 @@ std::optional<uint32_t> getQueueFamilyIndex() {
 	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
 
+std::vector<const char *> getDeviceExtensions() {
+	const auto platform_extensions = platform::getDeviceExtensions();
+	const auto swapchain_extensions = swapchain::getDeviceExtensions();
+
+	std::vector<const char *> extensions;
+	extensions.reserve(platform_extensions.size() + swapchain_extensions.size());
+	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
+	extensions.insert(extensions.end(), swapchain_extensions.begin(), swapchain_extensions.end());
+
+	return extensions;
+}
+
 Error createDevice(uint32_t queueFamilyIndex) {
-	const auto extensions = swapchain::getExtensions();
+	const auto extensions = getDeviceExtensions();
 
 	const auto priority = 1.0f;
 	const auto qci = vk::DeviceQueueCreateInfo()
@@ -94,6 +121,10 @@ Error createCommandPool(uint32_t queueFamilyIndex) {
 }
 
 Error initialize(const char *title, int width, int height) {
+	// プラットフォームごとの初期化
+	// NOTE: macOSでは予めMoltenVKのICDを指定しなければならないのでここで。
+	CHECK(platform::initialize());
+
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
 	CHECK(window::createWindow(title, width, height));

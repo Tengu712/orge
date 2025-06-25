@@ -1,13 +1,13 @@
 #include "swapchain.hpp"
 
+#include "platform.hpp"
+
 #include <algorithm>
 #include <vector>
 
 namespace graphics::swapchain {
 
 constexpr const char *EXTENSIONS[] = {"VK_KHR_swapchain"};
-constexpr auto RENDER_TARGET_PIXEL_FORMAT = vk::Format::eR8G8B8A8Srgb;
-constexpr auto RENDER_TARGET_COLOR_SPACE = vk::ColorSpaceKHR::eSrgbNonlinear;
 
 vk::SurfaceKHR g_surface;
 vk::SwapchainKHR g_swapchain;
@@ -16,7 +16,7 @@ std::vector<vk::ImageView> g_imageViews;
 vk::Semaphore g_waitForImageEnabledSemaphore;
 vk::Semaphore g_waitForRenderingSemaphore;
 
-std::span<const char *const> getExtensions() {
+std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
 }
 
@@ -25,7 +25,7 @@ Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device
 		// 色空間チェック
 		const auto formats = physicalDevice.getSurfaceFormatsKHR(g_surface);
 		const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
-			return n.format == RENDER_TARGET_PIXEL_FORMAT && n.colorSpace == RENDER_TARGET_COLOR_SPACE;
+			return n.format == platform::getRenderTargetPixelFormat() && n.colorSpace == platform::getRenderTargetColorSpace();
 		});
 		if (!ok) {
 			return Error::InvalidColorSpace;
@@ -42,8 +42,8 @@ Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device
 		const auto ci = vk::SwapchainCreateInfoKHR()
 			.setSurface(g_surface)
 			.setMinImageCount(g_imageCount)
-			.setImageFormat(RENDER_TARGET_PIXEL_FORMAT)
-			.setImageColorSpace(RENDER_TARGET_COLOR_SPACE)
+			.setImageFormat(platform::getRenderTargetPixelFormat())
+			.setImageColorSpace(platform::getRenderTargetColorSpace())
 			.setImageExtent(caps.currentExtent)
 			.setImageArrayLayers(1)
 			.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
@@ -70,7 +70,7 @@ Error createImageViews(const vk::Device &device) {
 			const auto ci = vk::ImageViewCreateInfo()
 				.setImage(images[i])
 				.setViewType(vk::ImageViewType::e2D)
-				.setFormat(RENDER_TARGET_PIXEL_FORMAT)
+				.setFormat(platform::getRenderTargetPixelFormat())
 				.setSubresourceRange(
 					vk::ImageSubresourceRange()
 						.setAspectMask(vk::ImageAspectFlagBits::eColor)

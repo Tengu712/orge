@@ -14,6 +14,7 @@
 
 enum class Error {
 	None = 0,
+	ApplyMoltenVKICD,
 	CreateInstance,
 	CreateWindow,
 	SelectPhysicalDevice,
