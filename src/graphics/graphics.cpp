@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "platform.hpp"
 #include "swapchain.hpp"
 #include "window.hpp"
 
@@ -11,16 +12,6 @@
 
 namespace graphics {
 
-#ifdef __APPLE__
-constexpr auto INSTANCE_FLAGS = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-constexpr std::array<const char *const, 1> INSTANCE_EXTENSIONS = {"VK_KHR_portability_enumeration"};
-constexpr std::array<const char *const, 1> DEVICE_EXTENSIONS = {"VK_KHR_portability_subset"};
-#else
-constexpr auto INSTANCE_FLAGS = vk::InstanceCreateFlags();
-constexpr std::array<const char *const, 0> INSTANCE_EXTENSIONS = {};
-constexpr std::array<const char *const, 0> DEVICE_EXTENSIONS = {};
-#endif
-
 vk::Instance g_instance;
 vk::PhysicalDevice g_physicalDevice;
 vk::Device g_device;
@@ -28,11 +19,12 @@ vk::Queue g_queue;
 vk::CommandPool g_commandPool;
 
 std::vector<const char *> getInstanceExtensions() {
+	const auto platform_extensions = platform::getInstanceExtensions();
 	const auto window_extensions = window::getExtensions();
 
 	std::vector<const char *> extensions;
-	extensions.reserve(INSTANCE_EXTENSIONS.size() + window_extensions.size());
-	extensions.insert(extensions.end(), INSTANCE_EXTENSIONS.begin(), INSTANCE_EXTENSIONS.end());
+	extensions.reserve(platform_extensions.size() + window_extensions.size());
+	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
 	extensions.insert(extensions.end(), window_extensions.begin(), window_extensions.end());
 
 	return extensions;
@@ -45,7 +37,7 @@ Error createInstance() {
 		.setPEngineName("orge")
 		.setApiVersion(VK_API_VERSION_1_1);
 	const auto ci = vk::InstanceCreateInfo()
-		.setFlags(INSTANCE_FLAGS)
+		.setFlags(platform::getInstanceCreateFlags())
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions);
 
@@ -82,11 +74,12 @@ std::optional<uint32_t> getQueueFamilyIndex() {
 }
 
 std::vector<const char *> getDeviceExtensions() {
+	const auto platform_extensions = platform::getDeviceExtensions();
 	const auto swapchain_extensions = swapchain::getExtensions();
 
 	std::vector<const char *> extensions;
-	extensions.reserve(DEVICE_EXTENSIONS.size() + swapchain_extensions.size());
-	extensions.insert(extensions.end(), DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+	extensions.reserve(platform_extensions.size() + swapchain_extensions.size());
+	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
 	extensions.insert(extensions.end(), swapchain_extensions.begin(), swapchain_extensions.end());
 
 	return extensions;
@@ -129,6 +122,10 @@ Error createCommandPool(uint32_t queueFamilyIndex) {
 }
 
 Error initialize(const char *title, int width, int height) {
+	// プラットフォームごとの初期化
+	// NOTE: macOSでは予めMoltenVKのICDを指定しなければならないのでここで。
+	CHECK(platform::initialize());
+
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
 	CHECK(window::createWindow(title, width, height));
