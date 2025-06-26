@@ -10,3 +10,6 @@
 [submodule "thirdparty/MoltenVK"]
 	path = thirdparty/MoltenVK
 	url = https://github.com/KhronosGroup/MoltenVK.git
+[submodule "thirdparty/yaml-cpp"]
+	path = thirdparty/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

@@ -120,7 +120,7 @@ Error createCommandPool(uint32_t queueFamilyIndex) {
 	return Error::None;
 }
 
-Error initialize(const char *title, int width, int height) {
+Error initialize(const std::string &title, int width, int height) {
 	// プラットフォームごとの初期化
 	// NOTE: macOSでは予めMoltenVKのICDを指定しなければならないのでここで。
 	CHECK(platform::initialize());

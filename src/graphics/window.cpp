@@ -7,7 +7,7 @@ namespace graphics::window {
 
 SDL_Window *g_window;
 
-Error createWindow(const char *title, int width, int height) {
+Error createWindow(const std::string &title, int width, int height) {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		return Error::CreateWindow;
 	}
@@ -16,7 +16,7 @@ Error createWindow(const char *title, int width, int height) {
 		return Error::CreateWindow;
 	}
 
-	g_window = SDL_CreateWindow(title, width, height, SDL_WINDOW_VULKAN);
+	g_window = SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_VULKAN);
 	if (!g_window) {
 		return Error::CreateWindow;
 	}

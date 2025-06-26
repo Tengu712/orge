@@ -31,3 +31,13 @@ cmake ^
 cmake ^
 	--install SDL/build ^
 	--prefix ../build/deps/SDL
+
+cmake ^
+	-S yaml-cpp ^
+	-B yaml-cpp/build ^
+	-G Ninja
+cmake ^
+	--build yaml-cpp/build
+cmake ^
+	--install yaml-cpp/build ^
+	--prefix ../build/deps/yaml-cpp

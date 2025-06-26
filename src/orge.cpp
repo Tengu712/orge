@@ -1,5 +1,6 @@
 #include <orge.h>
 
+#include "config.hpp"
 #include "error.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/window.hpp"
@@ -10,9 +11,25 @@ const char *orgeConvertErrorMessage(int from) {
 	return convertErrorMessage(static_cast<Error>(from));
 }
 
-int orgeInitialize(const char *windowTitle, int windowInnerWidth, int windowInnerHeight) {
-	CHECK_(graphics::initialize(windowTitle, windowInnerWidth, windowInnerHeight));
+int initialize(const Config config) {
+	CHECK_(graphics::initialize(config.title, config.width, config.height));
 	return static_cast<int>(Error::None);
+}
+
+int orgeInitialize(const char *const yaml) {
+	const auto config = parseConfig(yaml);
+	if (!config) {
+		return static_cast<int>(Error::InvalidConfig);
+	}
+	return initialize(config.value());
+}
+
+int orgeInitializeWith(const char *const yamlFilePath) {
+	const auto config = parseConfigFromFile(yamlFilePath);
+	if (!config) {
+		return static_cast<int>(Error::InvalidConfig);
+	}
+	return initialize(config.value());
 }
 
 int orgePollEvents() {

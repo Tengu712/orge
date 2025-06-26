@@ -1,8 +1,14 @@
 #include <iostream>
 #include <orge.h>
 
+constexpr const char *CONFIG = "\
+title: simple\n\
+width: 640\n\
+height: 480\n\
+";
+
 int main() {
-	if (const auto e = orgeInitialize("simple", 640, 480); e != 0) {
+	if (const auto e = orgeInitialize(CONFIG); e != 0) {
 		std::cout << orgeConvertErrorMessage(e) << std::endl;
 		return 1;
 	}
