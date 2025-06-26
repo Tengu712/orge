@@ -6,11 +6,12 @@
 
 #include <optional>
 #include <span>
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics::window {
 
-Error createWindow(const char *title, int width, int height);
+Error createWindow(const std::string &title, int width, int height);
 
 /// Vulkanインスタンスに必要なextensionsを取得する関数
 ///

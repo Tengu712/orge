@@ -4,6 +4,7 @@ const char *convertErrorMessage(Error from) {
 	switch (from) {
 		using enum Error;
 		case None: return "";
+		case InvalidConfig: return "invalid config passed to initialize.";
 		case ApplyMoltenVKICD: return "failed to apply lib/MoltenVK_icd.json.";
 		case CreateInstance: return "failed to create a Vulkan instance.";
 		case CreateWindow: return "failed to create a window.";

@@ -6,9 +6,11 @@
 
 #include "../error.hpp"
 
+#include <string>
+
 namespace graphics {
 
-Error initialize(const char *title, int width, int height);
+Error initialize(const std::string &title, int width, int height);
 
 void terminate();
 

@@ -3,14 +3,17 @@
 /// orgeのエラーメッセージを取得する関数
 const char *orgeConvertErrorMessage(int from);
 
-/// orgeを初期化する関数
-///
-/// 次が行われる:
-/// - ウィンドウの生成
+/// orgeを初期化する関数 (yaml文字列指定)
 ///
 /// エラー値を返す。
 /// 0以外であれば失敗を意味する。
-int orgeInitialize(const char *windowTitle, int windowInnerWidth, int windowInnerHeight);
+int orgeInitialize(const char *const yaml);
+
+/// orgeを初期化する関数 (yamlファイル指定)
+///
+/// エラー値を返す。
+/// 0以外であれば失敗を意味する。
+int orgeInitializeWith(const char *const yamlFilePath);
 
 /// orgeのウィンドウイベントをすべて処理する関数
 ///
