@@ -23,5 +23,11 @@ int orgeInitializeWith(const char *const yamlFilePath);
 /// ウィンドウが閉じられたとき、0が返される。
 int orgePollEvents(void);
 
+/// orgeのウィンドウに描画する関数
+///
+/// エラー値を返す。
+/// 以外であれば失敗を意味する。
+int orgeRender();
+
 /// orgeを終了する関数
 void orgeTerminate(void);

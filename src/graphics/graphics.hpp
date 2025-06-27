@@ -4,13 +4,14 @@
 
 #pragma once
 
+#include "../config.hpp"
 #include "../error.hpp"
 
 #include <string>
 
 namespace graphics {
 
-Error initialize(const std::string &title, int width, int height);
+Error initialize(const Config &config);
 
 void terminate();
 

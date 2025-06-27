@@ -26,6 +26,7 @@ add_library(orge STATIC
 	src/error.cpp
 	src/graphics/graphics.cpp
 	src/graphics/platform.cpp
+	src/graphics/rendering.cpp
 	src/graphics/swapchain.cpp
 	src/graphics/window.cpp
 	src/orge.cpp

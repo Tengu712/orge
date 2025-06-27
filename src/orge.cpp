@@ -12,7 +12,7 @@ const char *orgeConvertErrorMessage(int from) {
 }
 
 int initialize(const Config config) {
-	CHECK_(graphics::initialize(config.title, config.width, config.height));
+	CHECK_(graphics::initialize(config));
 	return static_cast<int>(Error::None);
 }
 
@@ -34,6 +34,10 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 
 int orgePollEvents() {
 	return graphics::window::pollEvents();
+}
+
+int orgeRender() {
+	return static_cast<int>(Error::None);
 }
 
 void orgeTerminate() {
