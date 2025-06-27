@@ -8,12 +8,10 @@ height: 480\n\
 attachments:\n\
  - id: main\n\
    format: render-target\n\
-   loadOp: clear\n\
-   storeOp: store\n\
-   initialLayout: undefined\n\
    finalLayout: present-src\n\
 subpasses:\n\
- - colors:\n\
+ - id: main\n\
+   outputs:\n\
     - id: main\n\
       layout: color-attachment\n\
 ";
