@@ -30,6 +30,14 @@ enum class Error {
 	CreateSemaphoresForSwapchain,
 	CreateRenderPass,
 	CreateFramebuffer,
+	CreateDummyFenceForAcquireNextImageIndex,
+	AcquireNextImageIndex,
+	CreateRenderCommandBuffer,
+	ResetRenderCommandBuffer,
+	BeginRenderCommandBuffer,
+	EndRenderCommandBuffer,
+	SubmitRenderCommandBuffer,
+	Presentation,
 };
 
 const char *convertErrorMessage(Error from);

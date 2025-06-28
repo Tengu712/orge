@@ -9,6 +9,7 @@ attachments:\n\
  - id: main\n\
    format: render-target\n\
    final-layout: present-src\n\
+   clear-value: [0.894, 0.619, 0.38, 1.0]\n\
 subpasses:\n\
  - id: main\n\
    outputs:\n\
@@ -24,6 +25,9 @@ int main() {
 
 	int count = 0;
 	while (orgePollEvents()) {
+		if (const auto e = orgeRender(); e != 0) {
+			std::cout << orgeConvertErrorMessage(e) << std::endl;
+		}
 		if (count % 60 == 0) {
 			std::cout << count / 60 << std::endl;
 		}

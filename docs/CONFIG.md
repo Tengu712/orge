@@ -28,6 +28,9 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
     - `depth-stencil-attachment`
     - `transfer-src`
     - `present-src`
+  - `clear-value`: (`float[4]|float`)アタッチメントのクリア値
+    - カラーアタッチメントであれば`float[4]`を、
+    - 深度アタッチメントであれば`float`を指定する
 - `subpasses`: サブパスの配列
   - `id`: (`string`)サブパスのID
   - `inputs`: 入力となるアタッチメントの配列(省略可能)
@@ -41,7 +44,7 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
     - `layout`: (`string`)そのアタッチメントの処理中のレイアウト
       - `general`
       - `color-attachment`
-  - `depth`: 関連付ける深度ステンシルアタッチメント(省略可能)
+  - `depth`: 関連付ける深度アタッチメント(省略可能)
     - `id`: (`string`)入力となるアタッチメントのID
     - `layout`: (`string`)そのアタッチメントの処理中のレイアウト
       - `general`

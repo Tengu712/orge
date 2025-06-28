@@ -13,6 +13,8 @@ namespace graphics {
 
 Error initialize(const Config &config);
 
+Error render();
+
 void terminate();
 
 } // namespace graphics

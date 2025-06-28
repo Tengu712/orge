@@ -11,6 +11,7 @@ struct Attachment {
 	const vk::Format format;
 	const bool discard;
 	const vk::ImageLayout finalLayout;
+	const vk::ClearValue clearValue;
 };
 
 struct Subpass {

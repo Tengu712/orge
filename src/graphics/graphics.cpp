@@ -156,9 +156,13 @@ Error initialize(const Config &config) {
 	CHECK(swapchain::initialize(g_physicalDevice, g_device, surface.value()));
 
 	// 描画処理オブジェクト
-	CHECK(rendering::initialize(config, g_device));
+	CHECK(rendering::initialize(config, g_device, g_commandPool));
 
 	return Error::None;
+}
+
+Error render() {
+	return rendering::render(g_device, g_queue);
 }
 
 void terminate() {

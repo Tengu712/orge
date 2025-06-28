@@ -21,6 +21,23 @@ Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &dev
 /// 初期化後に呼ばれることを期待する。
 std::vector<vk::Framebuffer> createFrameBuffers(const vk::Device &device, const vk::RenderPass &renderPass);
 
+/// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
+///
+/// 初期化後に呼ばれることを期待する。
+Error acquireNextImageIndex(const vk::Device &device, uint32_t &index);
+
+/// スワップチェインイメージのサイズを取得する関数
+///
+/// 初期化後に呼ばれることを期待する。
+vk::Extent2D getImageSize();
+
+/// プレゼンテーションを行う関数
+///
+/// 与えられたセマフォがシグナルされるまで待機する。
+///
+/// 初期化後に呼ばれることを期待する。
+Error presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
+
 void terminate(const vk::Device &device);
 
 } // namespace graphics::swapchain

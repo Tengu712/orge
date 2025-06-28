@@ -13,6 +13,7 @@ Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::strin
 	const auto format = node["format"].as<std::string>();
 	const auto discard = node["discard"].as<bool>(false);
 	const auto finalLayout = node["final-layout"].as<std::string>();
+	const auto clearValue = node["clear-value"];
 	return {
 		// TODO: parse format
 		graphics::platform::getRenderTargetPixelFormat(),
@@ -22,6 +23,11 @@ Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::strin
 		: finalLayout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
 		: finalLayout == "transfer-src" ? vk::ImageLayout::eTransferSrcOptimal
 		: finalLayout == "present-src" ? vk::ImageLayout::ePresentSrcKHR
+		: throw,
+		clearValue.IsSequence() && clearValue.size() == 4
+		? static_cast<vk::ClearValue>(vk::ClearColorValue(clearValue[0].as<float>(), clearValue[1].as<float>(), clearValue[2].as<float>(), clearValue[3].as<float>()))
+		: clearValue.IsScalar()
+		? static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(clearValue.as<float>(), 0))
 		: throw,
 	};
 }
@@ -51,7 +57,7 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 	for (const auto &n : node["outputs"]) {
 		const auto id = n["id"].as<std::string>();
 		const auto layout = n["layout"].as<std::string>();
-		inputs.emplace_back(
+		outputs.emplace_back(
 			attachmentMap.at(id),
 			layout == "general" ? vk::ImageLayout::eGeneral
 			: layout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
