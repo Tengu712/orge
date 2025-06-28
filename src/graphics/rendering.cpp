@@ -1,10 +1,13 @@
 #include "rendering.hpp"
 
+#include "swapchain.hpp"
+
 #include <vector>
 
 namespace graphics::rendering {
 
 vk::RenderPass g_renderPass;
+std::vector<vk::Framebuffer> g_framebuffers;
 
 Error createRenderPass(const Config &config, const vk::Device &device) {
 	std::vector<vk::AttachmentDescription> attachments;
@@ -60,10 +63,22 @@ Error createRenderPass(const Config &config, const vk::Device &device) {
 
 Error initialize(const Config &config, const vk::Device &device) {
 	CHECK(createRenderPass(config, device));
+
+	g_framebuffers = swapchain::createFrameBuffers(device, g_renderPass);
+	if (g_framebuffers.empty()) {
+		return Error::CreateFramebuffer;
+	}
+
 	return Error::None;
 }
 
 void terminate(const vk::Device &device) {
+	if (!g_framebuffers.empty()) {
+		for (auto &framebuffer: g_framebuffers) {
+			device.destroyFramebuffer(framebuffer);
+		}
+		g_framebuffers.clear();
+	}
 	if (g_renderPass) {
 		device.destroyRenderPass(g_renderPass);
 		g_renderPass = nullptr;

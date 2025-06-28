@@ -12,6 +12,7 @@ constexpr const char *EXTENSIONS[] = {"VK_KHR_swapchain"};
 vk::SurfaceKHR g_surface;
 vk::SwapchainKHR g_swapchain;
 uint32_t g_imageCount;
+vk::Extent2D g_imageSize;
 std::vector<vk::ImageView> g_imageViews;
 vk::Semaphore g_waitForImageEnabledSemaphore;
 vk::Semaphore g_waitForRenderingSemaphore;
@@ -20,37 +21,43 @@ std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
 }
 
-Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+Error validateColorSpace(const vk::PhysicalDevice &physicalDevice) {
 	try {
-		// 色空間チェック
 		const auto formats = physicalDevice.getSurfaceFormatsKHR(g_surface);
 		const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
 			return n.format == platform::getRenderTargetPixelFormat() && n.colorSpace == platform::getRenderTargetColorSpace();
 		});
-		if (!ok) {
-			return Error::InvalidColorSpace;
-		}
+		return ok ? Error::None : Error::InvalidColorSpace;
+	} catch (...) {
+		return Error::InvalidColorSpace;
+	}
+}
 
-		// バッファリングのイメージ数取得
+Error getImageCountAndSize(const vk::PhysicalDevice &physicalDevice) {
+	try {
 		const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(g_surface);
 		g_imageCount = caps.minImageCount > 2 ? caps.minImageCount : 2;
-		if (caps.maxImageCount < 2) {
-			return Error::DoubleBufferingUnavailable;
-		}
+		g_imageSize = caps.currentExtent;
+		return caps.maxImageCount >= 2 ? Error::None : Error::DoubleBufferingUnavailable;
+	} catch (...) {
+		return Error::DoubleBufferingUnavailable;
+	}
+}
 
-		// 作成
-		const auto ci = vk::SwapchainCreateInfoKHR()
-			.setSurface(g_surface)
-			.setMinImageCount(g_imageCount)
-			.setImageFormat(platform::getRenderTargetPixelFormat())
-			.setImageColorSpace(platform::getRenderTargetColorSpace())
-			.setImageExtent(caps.currentExtent)
-			.setImageArrayLayers(1)
-			.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
-			.setImageSharingMode(vk::SharingMode::eExclusive)
-			.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
-			.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-			.setClipped(vk::True);
+Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+	const auto ci = vk::SwapchainCreateInfoKHR()
+		.setSurface(g_surface)
+		.setMinImageCount(g_imageCount)
+		.setImageFormat(platform::getRenderTargetPixelFormat())
+		.setImageColorSpace(platform::getRenderTargetColorSpace())
+		.setImageExtent(g_imageSize)
+		.setImageArrayLayers(1)
+		.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
+		.setImageSharingMode(vk::SharingMode::eExclusive)
+		.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
+		.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
+		.setClipped(vk::True);
+	try {
 		g_swapchain = device.createSwapchainKHR(ci);
 	} catch (...) {
 		return Error::CreateSwapchain;
@@ -99,11 +106,33 @@ Error createSemaphores(const vk::Device &device) {
 Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface) {
 	g_surface = surface;
 
+	CHECK(validateColorSpace(physicalDevice));
+	CHECK(getImageCountAndSize(physicalDevice));
 	CHECK(createSwapchain(physicalDevice, device));
 	CHECK(createImageViews(device));
 	CHECK(createSemaphores(device));
 
 	return Error::None;
+}
+
+std::vector<vk::Framebuffer> createFrameBuffers(const vk::Device &device, const vk::RenderPass &renderPass) {
+	std::vector<vk::Framebuffer> framebuffers;
+	framebuffers.reserve(g_imageCount);
+	for (const auto &n: g_imageViews) {
+		const auto ci = vk::FramebufferCreateInfo()
+			.setRenderPass(renderPass)
+			.setAttachments({n})
+			.setWidth(g_imageSize.width)
+			.setHeight(g_imageSize.height)
+			.setLayers(1);
+		try {
+			framebuffers.push_back(device.createFramebuffer(ci));
+		} catch (...) {
+			framebuffers.clear();
+			break;
+		}
+	}
+	return framebuffers;
 }
 
 void terminate(const vk::Device &device) {

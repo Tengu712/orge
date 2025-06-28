@@ -29,6 +29,7 @@ enum class Error {
 	CreateSwapchainImageView,
 	CreateSemaphoresForSwapchain,
 	CreateRenderPass,
+	CreateFramebuffer,
 };
 
 const char *convertErrorMessage(Error from);
