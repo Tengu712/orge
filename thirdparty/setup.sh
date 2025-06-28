@@ -41,11 +41,3 @@ cmake \
 cmake \
 	--install yaml-cpp/build \
 	--prefix ../build/deps/yaml-cpp
-
-if [[ $(uname -s) == "Darwin" ]]; then
-	(
-		cd MoltenVK \
-		&& ./fetchDependencies --macos --v-headers-root $(pwd)/../Vulkan-Headers \
-		&& xcodebuild build -quiet -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration Release
-	)
-fi
