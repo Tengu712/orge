@@ -122,10 +122,6 @@ Error createCommandPool(uint32_t queueFamilyIndex) {
 }
 
 Error initialize(const Config &config) {
-	// プラットフォームごとの初期化
-	// NOTE: macOSでは予めMoltenVKのICDを指定しなければならないのでここで。
-	CHECK(platform::initialize());
-
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
 	CHECK(window::createWindow(config.title, config.width, config.height));

@@ -15,8 +15,6 @@
   - wayland
   - xrandr
   - pkg-config
-- macOS
-  - Xcode
 
 ## Build
 

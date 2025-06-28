@@ -1,7 +1,4 @@
-//! プラットフォーム特有の処理をまとめたモジュール
-//!
-//! 主にVulkanをサポートしていないmacOSの所為で必要なモジュール。
-//! MoltenVKを有効化するために初期化時に色々と行う必要がある。
+//! プラットフォームごとに異なるものをまとめたモジュール
 
 #pragma once
 
@@ -11,8 +8,6 @@
 #include <vulkan/vulkan.hpp>
 
 namespace graphics::platform {
-
-Error initialize();
 
 #ifdef __APPLE__
 constexpr vk::InstanceCreateFlags getInstanceCreateFlags() {
