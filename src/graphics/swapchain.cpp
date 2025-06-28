@@ -113,8 +113,7 @@ Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &dev
 	return Error::None;
 }
 
-std::vector<vk::Framebuffer> createFrameBuffers(const vk::Device &device, const vk::RenderPass &renderPass) {
-	std::vector<vk::Framebuffer> framebuffers;
+Error createFramebuffers(const vk::Device &device, const vk::RenderPass &renderPass, std::vector<vk::Framebuffer> &framebuffers) {
 	framebuffers.reserve(g_imageCount);
 	for (const auto &n: g_imageViews) {
 		const auto ci = vk::FramebufferCreateInfo()
@@ -126,11 +125,10 @@ std::vector<vk::Framebuffer> createFrameBuffers(const vk::Device &device, const 
 		try {
 			framebuffers.push_back(device.createFramebuffer(ci));
 		} catch (...) {
-			framebuffers.clear();
-			break;
+			return Error::CreateFramebuffer;
 		}
 	}
-	return framebuffers;
+	return Error::None;
 }
 
 Error acquireNextImageIndex(const vk::Device &device, uint32_t &index) {

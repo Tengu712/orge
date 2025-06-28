@@ -99,12 +99,7 @@ Error createSemaphore(const vk::Device &device) {
 Error initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
 	getClearValues(config);
 	CHECK(createRenderPass(config, device));
-
-	g_framebuffers = swapchain::createFrameBuffers(device, g_renderPass);
-	if (g_framebuffers.empty()) {
-		return Error::CreateFramebuffer;
-	}
-
+	CHECK(swapchain::createFramebuffers(device, g_renderPass, g_framebuffers));
 	CHECK(createCommandBuffer(device, commandPool));
 	CHECK(createSemaphore(device));
 	return Error::None;
