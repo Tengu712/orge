@@ -19,7 +19,6 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
 - `attachments`: 描画処理で使われるアタッチメントの配列
   - `id`: (`string`)アタッチメントのID
   - `format`: (`string`)アタッチメントのフォーマット
-    - TODO:
     - `render-target`: 描画先のフォーマット
   - `discard`: (`bool`)レンダーパス終了時にアタッチメントの内容を破棄するか(省略可能。標準値は`false`)
   - `final-layout`: (`string`)レンダーパス終了時に変換されるアタッチメントのレイアウト

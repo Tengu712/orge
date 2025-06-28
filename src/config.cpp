@@ -15,8 +15,8 @@ Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::strin
 	const auto finalLayout = node["final-layout"].as<std::string>();
 	const auto clearValue = node["clear-value"];
 	return {
-		// TODO: parse format
-		graphics::platform::getRenderTargetPixelFormat(),
+		format == "render-target" ? graphics::platform::getRenderTargetPixelFormat()
+		: throw,
 		discard,
 		finalLayout == "general" ? vk::ImageLayout::eGeneral
 		: finalLayout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
