@@ -8,7 +8,7 @@ height: 480\n\
 attachments:\n\
  - id: main\n\
    format: render-target\n\
-   finalLayout: present-src\n\
+   final-layout: present-src\n\
 subpasses:\n\
  - id: main\n\
    outputs:\n\
