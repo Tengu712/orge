@@ -122,9 +122,11 @@ Error render(const vk::Device &device, const vk::Queue &queue) {
 		return Error::BeginRenderCommandBuffer;
 	}
 
-	// レンダーパス開始
+	// スワップチェインイメージ番号取得
 	uint32_t index;
 	CHECK(swapchain::acquireNextImageIndex(device, index));
+
+	// レンダーパス開始
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(g_renderPass)
 		.setFramebuffer(g_framebuffers[index])
