@@ -31,7 +31,8 @@ vk::Extent2D getImageSize();
 
 /// プレゼンテーションを行う関数
 ///
-/// 与えられたセマフォがシグナルされるまで待機する。
+/// 与えられたセマフォがシグナルされるまでプレゼンテーションを待機する。
+/// プレゼンテーションが完了するまでスレッドを待機する。
 ///
 /// 初期化後に呼ばれることを期待する。
 Error presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
