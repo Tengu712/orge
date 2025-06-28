@@ -1,6 +1,7 @@
 #include "graphics.hpp"
 
 #include "platform.hpp"
+#include "rendering.hpp"
 #include "swapchain.hpp"
 #include "window.hpp"
 
@@ -120,14 +121,14 @@ Error createCommandPool(uint32_t queueFamilyIndex) {
 	return Error::None;
 }
 
-Error initialize(const std::string &title, int width, int height) {
+Error initialize(const Config &config) {
 	// プラットフォームごとの初期化
 	// NOTE: macOSでは予めMoltenVKのICDを指定しなければならないのでここで。
 	CHECK(platform::initialize());
 
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
-	CHECK(window::createWindow(title, width, height));
+	CHECK(window::createWindow(config.title, config.width, config.height));
 
 	// インスタンス
 	CHECK(createInstance());
@@ -154,13 +155,21 @@ Error initialize(const std::string &title, int width, int height) {
 	}
 	CHECK(swapchain::initialize(g_physicalDevice, g_device, surface.value()));
 
+	// 描画処理オブジェクト
+	CHECK(rendering::initialize(config, g_device, g_commandPool));
+
 	return Error::None;
+}
+
+Error render() {
+	return rendering::render(g_device, g_queue);
 }
 
 void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
 	}
+	rendering::terminate(g_device);
 	swapchain::terminate(g_device);
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);

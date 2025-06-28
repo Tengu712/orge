@@ -20,8 +20,14 @@ int orgeInitializeWith(const char *const yamlFilePath);
 /// 毎フレーム初めに呼ぶこと。
 /// 特に、メインループの条件式に使うと良い。
 ///
-/// ウィンドウが閉じられたとき、0が返される。
+/// 0以外であればウィンドウが閉じられていないことを意味する。
 int orgePollEvents(void);
+
+/// orgeのウィンドウに描画する関数
+///
+/// エラー値を返す。
+/// 0以外であれば失敗を意味する。
+int orgeRender();
 
 /// orgeを終了する関数
 void orgeTerminate(void);
