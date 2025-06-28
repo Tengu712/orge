@@ -31,8 +31,7 @@ int orgePollEvents() {
 }
 
 int orgeRender() {
-	CHECK_(graphics::render());
-	return static_cast<int>(Error::None);
+	return static_cast<int>(graphics::render());
 }
 
 void orgeTerminate() {
