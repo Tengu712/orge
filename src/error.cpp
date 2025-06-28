@@ -18,6 +18,7 @@ const char *convertErrorMessage(Error from) {
 		case CreateSwapchain: return "failed to create a swapchain.";
 		case CreateSwapchainImageView: return "failed to create swapchain image views.";
 		case CreateSemaphoresForSwapchain: return "failed to create smephores for swapchain.";
+		case CreateRenderPass: return "failed to create a render pass.";
 		default: return "undefined error happened.";
 	}
 }

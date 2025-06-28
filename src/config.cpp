@@ -32,47 +32,46 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 		throw;
 	}
 
-	std::vector<SubpassAttachment> inputs;
+	std::vector<vk::AttachmentReference> inputs;
 	if (node["inputs"]) {
 		for (const auto &n : node["inputs"]) {
 			const auto id = n["id"].as<std::string>();
 			const auto layout = n["layout"].as<std::string>();
-			inputs.push_back({
+			inputs.emplace_back(
 				attachmentMap.at(id),
 				layout == "general" ? vk::ImageLayout::eGeneral
 				: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 				: layout == "shader-read-only" ? vk::ImageLayout::eShaderReadOnlyOptimal
-				: throw,
-			});
+				: throw
+			);
 		}
 	}
 
-	std::vector<SubpassAttachment> outputs;
+	std::vector<vk::AttachmentReference> outputs;
 	for (const auto &n : node["outputs"]) {
 		const auto id = n["id"].as<std::string>();
 		const auto layout = n["layout"].as<std::string>();
-		inputs.push_back({
+		inputs.emplace_back(
 			attachmentMap.at(id),
 			layout == "general" ? vk::ImageLayout::eGeneral
 			: layout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
-			: throw,
-		});
+			: throw
+		);
 	}
 
-	const std::optional<SubpassAttachment> depth = !node["depth"]
-		? std::nullopt
-		: [&]() -> std::optional<SubpassAttachment> {
-			const auto &n = node["depth"];
-			const auto id = n["id"].as<std::string>();
-			const auto layout = n["layout"].as<std::string>();
-			return SubpassAttachment {
-				attachmentMap.at(id),
-				layout == "general" ? vk::ImageLayout::eGeneral
-				: layout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
-				: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-				: throw,
-			};
-		}();
+	std::optional<vk::AttachmentReference> depth;
+	if (node["depth"]) {
+		const auto &n = node["depth"];
+		const auto id = n["id"].as<std::string>();
+		const auto layout = n["layout"].as<std::string>();
+		depth.emplace(
+			attachmentMap.at(id),
+			layout == "general" ? vk::ImageLayout::eGeneral
+			: layout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
+			: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
+			: throw
+		);
+	}
 
 	return {
 		inputs,

@@ -13,15 +13,10 @@ struct Attachment {
 	const vk::ImageLayout finalLayout;
 };
 
-struct SubpassAttachment {
-	const uint32_t index;
-	const vk::ImageLayout layout;
-};
-
 struct Subpass {
-	const std::vector<SubpassAttachment> inputs;
-	const std::vector<SubpassAttachment> outputs;
-	const std::optional<SubpassAttachment> depth;
+	const std::vector<vk::AttachmentReference> inputs;
+	const std::vector<vk::AttachmentReference> outputs;
+	const std::optional<vk::AttachmentReference> depth;
 };
 
 struct SubpassDependency {
