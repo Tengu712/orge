@@ -67,36 +67,12 @@ elseif(LINUX)
 	)
 endif()
 
-# Install
+# インストール
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-install(
-	TARGETS orge
-	EXPORT orgeTargets
-)
-install(
-	DIRECTORY include/
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-install(
-	EXPORT orgeTargets
-	NAMESPACE orge::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/orge
-)
-write_basic_package_version_file(orgeConfigVersion.cmake VERSION 1.0.0 COMPATIBILITY AnyNewerVersion)
-configure_file(
-	cmake/orgeConfig.cmake.in
-	orgeConfig.cmake
-	@ONLY
-)
-install(
-	FILES
-		${CMAKE_CURRENT_BINARY_DIR}/orgeConfig.cmake
-		${CMAKE_CURRENT_BINARY_DIR}/orgeConfigVersion.cmake
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/orge
-)
+install(TARGETS orge)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# 動的リンクライブラリコピー
+# 動的リンクライブラリをインストール先にコピー
 # NOTE: macOSにはVulkanローダがインストールされていない上、
 #       動的リンクライブラリはorgeに統合できないので仕方なく頒布時に同梱する必要がある。
 if(APPLE)
