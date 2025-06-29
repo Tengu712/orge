@@ -74,6 +74,14 @@ if(ORGE_SHARED)
 		PRIVATE SDL3::SDL3 yaml-cpp::yaml-cpp
 	)
 
+	# NOTE: MSVCではインポートライブラリなしにdllをリンクできないので。
+	#       全シンボルを自動エクスポートしてインポートライブラリを生成。
+	if(WIN32)
+		set_target_properties(orge PROPERTIES
+			WINDOWS_EXPORT_ALL_SYMBOLS ON
+		)
+	endif()
+
 	# NOTE: orgeがシステム、orgeのあるディレクトリ、orgeを使うアプリのあるディレクトリの順でVulkanローダを探すように。
     # NOTE: Windowsにはrpathの概念がないらしいので追記なし。
 	if(APPLE)
