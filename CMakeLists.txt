@@ -11,10 +11,11 @@ if(MSVC)
 endif()
 
 # ライブラリタイプ設定
-# TODO: 静的リンクライブラリも生成できるようにする
-set(ORGE_STATIC OFF)
-set(ORGE_SHARED ON)
-set(ORGE_LIBRARY_TYPE SHARED)
+option(ORGE_STATIC "Build static library" OFF)
+option(ORGE_SHARED "Build shared library" ON)
+if(NOT ORGE_STATIC AND NOT ORGE_SHARED)
+	message(FATAL_ERROR "Either ORGE_STATIC or ORGE_SHARED must be ON.")
+endif()
 
 # 依存ライブラリ
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/deps/Vulkan-Headers)
@@ -26,50 +27,68 @@ find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 
-# orge
-add_library(orge ${ORGE_LIBRARY_TYPE}
-	src/config.cpp
-	src/error.cpp
-	src/graphics/graphics.cpp
-	src/graphics/rendering.cpp
-	src/graphics/swapchain.cpp
-	src/graphics/window.cpp
-	src/orge.cpp
-)
-add_library(orge::orge ALIAS orge)
-target_include_directories(orge PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:include>
-)
-target_link_libraries(orge
-	PUBLIC
-		$<$<NOT:$<BOOL:${ORGE_STATIC}>>:Vulkan::Loader>
-	PRIVATE
-		Vulkan::Headers
-		$<$<BOOL:${ORGE_STATIC}>:Vulkan::Loader>
-		SDL3::SDL3
-		yaml-cpp::yaml-cpp
-)
-
-# orgeの依存する動的リンクライブラリの探索パス設定
-# NOTE: システム、orgeと同ディレクトリ、実行ファイルと同ディレクトリの順で探す。
-# NOTE: orgeが依存ライブラリを探すための設定なので、
-#       orgeを使うアプリがorgeを探すための設定はユーザが行う必要がある。
-if(APPLE)
-	set_target_properties(orge PROPERTIES
-		INSTALL_RPATH "/usr/local/lib;/opt/homebrew/lib;@loader_path;@executable_path"
-		BUILD_WITH_INSTALL_RPATH TRUE
+# 動的リンクライブラリ
+if(ORGE_SHARED)
+	add_library(orge SHARED
+		src/config.cpp
+		src/error.cpp
+		src/graphics/graphics.cpp
+		src/graphics/rendering.cpp
+		src/graphics/swapchain.cpp
+		src/graphics/window.cpp
+		src/orge.cpp
 	)
-elseif(LINUX)
-	set_target_properties(orge PROPERTIES
-		INSTALL_RPATH "$ORIGIN"
-		BUILD_WITH_INSTALL_RPATH TRUE
+	add_library(orge::orge ALIAS orge)
+	target_include_directories(orge PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
+	)
+	target_link_libraries(orge
+		PUBLIC Vulkan::Loader
+		PRIVATE Vulkan::Headers SDL3::SDL3 yaml-cpp::yaml-cpp
+	)
+	if(APPLE)
+		set_target_properties(orge PROPERTIES
+			INSTALL_RPATH "/usr/local/lib;/opt/homebrew/lib;@loader_path;@executable_path"
+			BUILD_WITH_INSTALL_RPATH TRUE
+		)
+	else()
+		set_target_properties(orge PROPERTIES
+			INSTALL_RPATH "$ORIGIN"
+			BUILD_WITH_INSTALL_RPATH TRUE
+		)
+	endif()
+endif()
+
+# 静的リンクライブラリ
+if(ORGE_STATIC)
+	add_library(orgestatic STATIC
+		src/config.cpp
+		src/error.cpp
+		src/graphics/graphics.cpp
+		src/graphics/rendering.cpp
+		src/graphics/swapchain.cpp
+		src/graphics/window.cpp
+		src/orge.cpp
+	)
+	add_library(orge::orgestatic ALIAS orgestatic)
+	target_include_directories(orgestatic PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>
+	)
+	target_link_libraries(orgestatic
+		PRIVATE Vulkan::Headers Vulkan::Loader SDL3::SDL3 yaml-cpp::yaml-cpp
 	)
 endif()
 
 # インストール
 include(GNUInstallDirs)
-install(TARGETS orge)
+if(ORGE_SHARED)
+	install(TARGETS orge)
+endif()
+if(ORGE_STATIC)
+	install(TARGETS orgestatic)
+endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # 動的リンクライブラリをインストール先にコピー

@@ -1,2 +1,6 @@
 add_executable(simple main.cpp)
-target_link_libraries(simple PRIVATE orge::orge)
+if(TARGET orge::orge)
+	target_link_libraries(simple PRIVATE orge::orge)
+elseif(TARGET orge::orgestatic)
+	target_link_libraries(simple PRIVATE orge::orgestatic)
+endif()
