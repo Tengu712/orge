@@ -1,12 +1,3 @@
 @PACKAGE_INIT@
-
-include(CMakeFindDependencyMacro)
-
-find_dependency(VulkanHeaders)
-find_dependency(VulkanLoader)
-find_dependency(SDL3)
-find_dependency(yaml-cpp)
-
 include("${CMAKE_CURRENT_LIST_DIR}/orgeTargets.cmake")
-
 check_required_components(orge)

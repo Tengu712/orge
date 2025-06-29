@@ -69,12 +69,10 @@ endif()
 
 # Install
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 install(
 	TARGETS orge
 	EXPORT orgeTargets
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(
 	DIRECTORY include/
@@ -82,19 +80,13 @@ install(
 )
 install(
 	EXPORT orgeTargets
-	FILE orgeTargets.cmake
 	NAMESPACE orge::
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/orge
 )
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-	orgeConfigVersion.cmake
-	VERSION 1.0.0
-	COMPATIBILITY AnyNewerVersion
-)
+write_basic_package_version_file(orgeConfigVersion.cmake VERSION 1.0.0 COMPATIBILITY AnyNewerVersion)
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgeConfig.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/orgeConfig.cmake
+	cmake/orgeConfig.cmake.in
+	orgeConfig.cmake
 	@ONLY
 )
 install(
