@@ -86,7 +86,7 @@ endif()
 
 # 静的リンクライブラリ
 if(ORGE_STATIC)
-	# 依存ライブラリを統合したカスタムターゲットを作成
+	# 依存ライブラリを統合したライブラリを作成
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a
 		COMMAND ${CMAKE_COMMAND}
@@ -99,20 +99,16 @@ if(ORGE_STATIC)
 		DEPENDS orge_objects SDL3::SDL3 yaml-cpp::yaml-cpp
 		COMMENT "Creating merged static library"
 	)
+
+	# NOTE: 以降、完全にexamplesのビルドのためだけの処理。
+
+	# カスタムターゲット作成
 	add_custom_target(orgestatic_target ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a)
 
-	# SDL3とyaml-cppの依存関係を取得
-	# NOTE: こうしないと依存ライブラリの依存ライブラリに関するリンクエラーが起こる。
-	get_target_property(SDL3_LINK_LIBS SDL3::SDL3 INTERFACE_LINK_LIBRARIES)
-	get_target_property(YAML_CPP_LINK_LIBS yaml-cpp::yaml-cpp INTERFACE_LINK_LIBRARIES)
-	set(STATIC_DEPS "Vulkan::Loader")
-	if(SDL3_LINK_LIBS)
-		list(APPEND STATIC_DEPS ${SDL3_LINK_LIBS})
-	endif()
-	if(YAML_CPP_LINK_LIBS)
-		list(APPEND STATIC_DEPS ${YAML_CPP_LINK_LIBS})
-	endif()
-	
+	# 依存関係を取得
+	get_target_property(STATIC_DEPS SDL3::SDL3-static INTERFACE_LINK_LIBRARIES)
+	list(APPEND STATIC_DEPS "Vulkan::Loader")
+
 	# カスタムターゲットをorgestaticとしてインポート
 	add_library(orgestatic STATIC IMPORTED GLOBAL)
 	add_library(orge::orgestatic ALIAS orgestatic)
