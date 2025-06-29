@@ -70,6 +70,14 @@ jobs:
       with:
         name: orge-lib
 
+    - run: ls
+    - run: ls /opt
+    - run: ls /opt/orge
+    - run: ls /opt/orge/lib
+    - run: ls /opt/orge/lib/pkgconfig
+    - run: ls examples
+    - run: ls examples/simple
+
     - name: Prepare
       run: |
         mkdir shared
