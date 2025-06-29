@@ -76,9 +76,9 @@ jobs:
     - name: Test build with shared
       working-directory: shared
       run: |
-        cl /IC:\orge\include /std:c++20 C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orge.lib
+        cl /IC:\orge\include /std:c++20 /EHsc /MD C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orge.lib
 
     - name: Test build with static
       working-directory: static
       run: |
-        cl /IC:\orge\include /std:c++20 C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orgestatic.lib
+        cl /IC:\orge\include /std:c++20 /EHsc /MT C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orgestatic.lib
