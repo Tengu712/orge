@@ -76,7 +76,6 @@ jobs:
         mkdir shared
         mkdir static
 
-    - run: dir C:\orge
     - run: |
         $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
         pkg-config orge --cflags --libs
@@ -84,9 +83,13 @@ jobs:
     - name: Test build with shared
       shell: pwsh
       working-directory: shared
-      run: cl C:\orge\main.cpp $(pkg-config orge --cflags --libs --with-path C:\orge\lib\pkgconfig)
+      run: |
+        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
+        cl C:\orge\main.cpp $(pkg-config orge --cflags --libs)
 
     - name: Test build with static
       shell: pwsh
       working-directory: static
-      run: cl C:\orge\main.cpp $(pkg-config orgestatic --cflags --libs --static --with-path C:\orge\lib\pkgconfig)
+      run: |
+        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
+        cl C:\orge\main.cpp $(pkg-config orgestatic --cflags --libs --static)
