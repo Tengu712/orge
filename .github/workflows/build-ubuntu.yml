@@ -83,6 +83,7 @@ jobs:
       run: g++ ../examples/simple/main.cpp $(pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig)
 
     - run: pkg-config orgestatic --cflags --libs --static --with-path /opt/orge/lib/pkgconfig
+    - run: ls -la /opt/orge/lib/libvulkan*
 
     - name: Test build with static
       working-directory: static
