@@ -71,6 +71,9 @@ jobs:
         name: orge-lib
         path: /
 
+    - name: Restore permissions
+      run: chmod +x /opt/orge/lib/libvulkan.so.*
+
     - name: Prepare
       run: |
         mkdir shared
