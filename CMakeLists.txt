@@ -76,7 +76,7 @@ if(ORGE_SHARED)
 
 	# NOTE: MSVCではインポートライブラリなしにdllをリンクできないので。
 	#       全シンボルを自動エクスポートしてインポートライブラリを生成。
-	if(WIN32)
+	if(MSVC)
 		set_target_properties(orge PROPERTIES
 			WINDOWS_EXPORT_ALL_SYMBOLS ON
 		)
