@@ -41,9 +41,8 @@ jobs:
 
     - name: Setup thirdparty libraries
       if: steps.cache-thirdparty.outputs.cache-hit != 'true'
-      run: |
-        cd thirdparty
-        ./setup.sh
+      working-directory: thirdparty
+      run: ./setup.sh
 
     - name: Build orge
       run: |

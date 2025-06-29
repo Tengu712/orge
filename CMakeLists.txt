@@ -92,15 +92,21 @@ endif()
 # 静的ライブラリ
 if(ORGE_STATIC)
 	# 依存ライブラリを統合したライブラリを作成
+	if(MSVC)
+		set(STATIC_LIB_NAME "${CMAKE_CURRENT_BINARY_DIR}/orgestatic.lib")
+		set(MERGE_STATIC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_static_msvc.cmake")
+	else()
+		set(STATIC_LIB_NAME "${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a")
+		set(MERGE_STATIC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_static.cmake")
+	endif()
 	add_custom_command(
-		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a
+		OUTPUT ${STATIC_LIB_NAME}
 		COMMAND ${CMAKE_COMMAND}
 			-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
 			-DORGE_OBJECTS="$<TARGET_OBJECTS:orge_objects>"
 			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3>
 			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
-			-DCMAKE_AR=${CMAKE_AR}
-			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_static.cmake
+			-P ${MERGE_STATIC_SCRIPT}
 		DEPENDS orge_objects SDL3::SDL3 yaml-cpp::yaml-cpp
 		COMMENT "Creating merged static library"
 	)
@@ -108,7 +114,7 @@ if(ORGE_STATIC)
 	# NOTE: 以降、完全にexamplesのビルドのためだけの処理。
 
 	# カスタムターゲット作成
-	add_custom_target(orgestatic_target ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a)
+	add_custom_target(orgestatic_target ALL DEPENDS ${STATIC_LIB_NAME})
 
 	# 依存関係を取得
 	get_target_property(STATIC_DEPS SDL3::SDL3-static INTERFACE_LINK_LIBRARIES)
@@ -118,7 +124,7 @@ if(ORGE_STATIC)
 	add_library(orgestatic STATIC IMPORTED GLOBAL)
 	add_library(orge::orgestatic ALIAS orgestatic)
 	set_target_properties(orgestatic PROPERTIES
-		IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a
+		IMPORTED_LOCATION ${STATIC_LIB_NAME}
 		INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
 		INTERFACE_LINK_LIBRARIES "${STATIC_DEPS}"
 	)
@@ -178,7 +184,7 @@ if(ORGE_SHARED)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orge.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ORGE_STATIC)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	install(FILES ${STATIC_LIB_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
