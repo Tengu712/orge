@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(orge)
+project(orge VERSION 0.1.0)
 
 # =========================================================================== #
 #   General                                                                   #
@@ -26,6 +26,7 @@ list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/deps/Vulkan-Head
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/deps/Vulkan-Loader)
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/deps/SDL)
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/deps/yaml-cpp)
+find_package(PkgConfig REQUIRED)
 find_package(VulkanHeaders CONFIG REQUIRED)
 find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
@@ -56,7 +57,7 @@ target_link_libraries(orge_objects
 		yaml-cpp::yaml-cpp
 )
 
-# 動的リンクライブラリ
+# 共有ライブラリ
 if(ORGE_SHARED)
 	add_library(orge SHARED $<TARGET_OBJECTS:orge_objects>)
 	add_library(orge::orge ALIAS orge)
@@ -84,7 +85,7 @@ if(ORGE_SHARED)
 	endif()
 endif()
 
-# 静的リンクライブラリ
+# 静的ライブラリ
 if(ORGE_STATIC)
 	# 依存ライブラリを統合したライブラリを作成
 	add_custom_command(
@@ -121,6 +122,47 @@ if(ORGE_STATIC)
 endif()
 
 # =========================================================================== #
+#   Package Config                                                            #
+# =========================================================================== #
+
+# 共通設定
+if(MSVC)
+	set(ORGE_PC_CFLAGS "/std:c++20")
+else()
+	set(ORGE_PC_CFLAGS "-std=c++20")
+endif()
+
+# 共有ライブラリ
+if(ORGE_SHARED)
+	if(MSVC)
+		set(ORGE_PC_LIBS "orge.dll")
+	else()
+		set(ORGE_PC_LIBS "-lorge")
+	endif()
+
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
+endif()
+
+# 静的ライブラリ
+if(ORGE_STATIC)
+	if(MSVC)
+		set(ORGE_PC_LIBS "orgestatic.lib vulkan-1.dll")
+	else()
+		set(ORGE_PC_LIBS "-lorgestatic -lvulkan.1")
+	endif()
+
+	pkg_check_modules(SDL3_PC QUIET sdl3)
+	if(SDL3_PC_FOUND)
+		string(REPLACE ";" " " ORGE_PC_LIBS_PRIVATE "${SDL3_PC_STATIC_LDFLAGS_OTHER}")
+	else()
+		message(WARNING "SDL3 pkg-config not found. Static linking dependencies may be incomplete.")
+		set(ORGE_PC_LIBS_PRIVATE "")
+	endif()
+
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)
+endif()
+
+# =========================================================================== #
 #   Install                                                                   #
 # =========================================================================== #
 
@@ -128,9 +170,11 @@ endif()
 include(GNUInstallDirs)
 if(ORGE_SHARED)
 	install(TARGETS orge)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orge.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 if(ORGE_STATIC)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
