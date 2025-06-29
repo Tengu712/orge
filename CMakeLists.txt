@@ -32,6 +32,9 @@ find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 
+# インストールディレクトリ設定
+include(GNUInstallDirs)
+
 # =========================================================================== #
 #   Build                                                                     #
 # =========================================================================== #
@@ -168,7 +171,6 @@ endif()
 # =========================================================================== #
 
 # インストール
-include(GNUInstallDirs)
 if(ORGE_SHARED)
 	install(TARGETS orge)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orge.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
