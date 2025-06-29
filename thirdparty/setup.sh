@@ -37,6 +37,7 @@ cmake \
 	-S yaml-cpp \
 	-B yaml-cpp/build \
 	-G Ninja \
+	-D CMAKE_BUILD_TYPE=Release \
 	-D CMAKE_POSITION_INDEPENDENT_CODE=ON
 cmake \
 	--build yaml-cpp/build
