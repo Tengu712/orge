@@ -70,5 +70,8 @@ jobs:
       with:
         name: orge-lib
 
+    - run: ls -la .
+    - run: ls -la install
+
     - name: Test standalone build
-      run: g++ -std=c++20 -I./install/include ./examples/simple/main.cpp -L./install/build -lorge -o simple
+      run: g++ -std=c++20 -I./install/include ./examples/simple/main.cpp -L./install/lib -lorge -o simple -Wl,rpath,.
