@@ -21,8 +21,16 @@ execute_process(
 	WORKING_DIRECTORY "${LIB_DIR}"
 	RESULT_VARIABLE SYMLINK_RESULT
 )
-
-# 失敗したらインストール全体を失敗
 if(NOT SYMLINK_RESULT EQUAL 0)
 	message(FATAL_ERROR "Failed to create symlink ${SYMLINK_PATH}")
+endif()
+
+# 実行権限を付与
+execute_process(
+	COMMAND chmod +x ${VULKAN_LOADER_NAME}
+	WORKING_DIRECTORY "${LIB_DIR}"
+	RESULT_VARIABLE CHMOD_RESULT
+)
+if(NOT CHMOD_RESULT EQUAL 0)
+	message(WARNING "Failed to set execute permission on ${VULKAN_LOADER_NAME}")
 endif()

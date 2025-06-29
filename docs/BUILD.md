@@ -6,6 +6,7 @@
   - C++コンパイラ
   - CMake
   - Ninja
+  - pkg-config
 - Windows
   - Windows SDK
 - Linux
@@ -14,7 +15,6 @@
   - xkb
   - wayland
   - xrandr
-  - pkg-config
 
 ## Build
 
