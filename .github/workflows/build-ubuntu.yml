@@ -54,8 +54,7 @@ jobs:
       run: cmake --install build --prefix artifacts/install
 
     - name: Copy simple for build test
-      run: |
-        cp examples/simple artifacts
+      run: cp -r examples/simple artifacts
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
