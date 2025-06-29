@@ -54,7 +54,7 @@ jobs:
       run: cmake --install build --prefix install
 
     - name: Upload orge artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: orge-lib
         path: install
@@ -66,7 +66,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Download orge artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: orge-lib
 
