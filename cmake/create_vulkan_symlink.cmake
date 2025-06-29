@@ -5,7 +5,7 @@ if(APPLE)
 	set(SYMLINK_NAME "libvulkan.1.dylib")
 elseif(LINUX)
 	set(VULKAN_LOADER_NAME "libvulkan.so.1.4.313")
-	set(SYMLINK_NAME "libvulkan.so.1")
+	set(SYMLINK_NAME "libvulkan.so")
 endif()
 
 # インストール先を絶対パスで取得
