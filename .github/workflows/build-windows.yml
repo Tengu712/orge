@@ -16,8 +16,14 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: microsoft/setup-vcpkg@v1
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Install dependencies
+      run: vcpkg install pkg-config
 
     - name: Cache thirdparty build
       id: cache-thirdparty
