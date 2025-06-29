@@ -145,7 +145,7 @@ endif()
 
 # 共通設定
 if(MSVC)
-	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20")
+	set(ORGE_PC_CFLAGS "/I\"\${includedir}\" /std:c++20")
 else()
 	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
 endif()
