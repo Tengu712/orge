@@ -7,7 +7,7 @@
 
 Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::string, uint32_t> &attachmentMap) {
 	const auto id = node["id"].as<std::string>();
-	if (!attachmentMap.emplace(id, attachmentMap.size()).second) {
+	if (!attachmentMap.emplace(id, static_cast<uint32_t>(attachmentMap.size())).second) {
 		throw;
 	}
 	const auto format = node["format"].as<std::string>();
