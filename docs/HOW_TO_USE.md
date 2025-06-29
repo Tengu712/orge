@@ -2,13 +2,24 @@
 
 ## Windows
 
+[BUILD.md](./BUILD.md)を参照してビルドおよびインストールすること。
+これにより、次が生成される:
+
+- orge.dll (ORGE_SHARED=ON AND MSVC)
+- orge.lib (ORGE_SHARED=ON AND MSVC)
+- liborge.so (ORGE_SHARED=ON AND NOT MSVC)
+- orgestatic.lib (ORGE_STATIC=ON AND MSVC)
+- liborgestatic.a (ORGE_STATIC=ON AND NOT MSVC)
+- orge.h
+- pkgconfig
+
 ## macOS
 
 [BUILD.md](./BUILD.md)を参照してビルドおよびインストールすること。
 これにより、次が生成される:
 
 - liborge.dylib (ORGE_SHARED=ON)
-- liborgestatic.dylib (ORGE_STATIC=ON)
+- liborgestatic.a (ORGE_STATIC=ON)
 - libvulkan.1.dylib
 - libvulkan.1.4.313.dylib
 - orge.h
@@ -35,3 +46,17 @@ liborgestatic.aを利用する場合、次に注意すること:
 - アプリがlibvulkan.1.dylibを発見できるようにすること
 
 ## Linux
+
+[BUILD.md](./BUILD.md)を参照してビルドおよびインストールすること。
+これにより、次が生成される:
+
+- liborge.so (ORGE_SHARED=ON)
+- liborgestatic.a (ORGE_STATIC=ON)
+- libvulkan.so (ORGE_STATIC=ON)
+- libvulkan.so.1.4.313 (ORGE_STATIC=ON)
+- orge.h
+- pkgconfig
+
+liborge.soを利用する場合、アプリがliborge.soを発見できるようにすること。
+
+liborgestatic.aを利用する場合、libvulkan.soもリンクすること。

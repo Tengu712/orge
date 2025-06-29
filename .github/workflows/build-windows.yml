@@ -62,9 +62,6 @@ jobs:
     steps:
     - uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Install dependencies
-      run: choco install pkgconfiglite
-
     - name: Download orge artifacts
       uses: actions/download-artifact@v4
       with:
@@ -76,30 +73,12 @@ jobs:
         mkdir shared
         mkdir static
 
-    - run: |
-        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
-        pkg-config orge --cflags --libs
-        echo "Directory structure:"
-        tree C:\orge /F
-
     - name: Test build with shared
-      shell: pwsh
       working-directory: shared
       run: |
-        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
-        $cflags = pkg-config orge --cflags
-        $libs = pkg-config orge --libs
-        Write-Host "CFLAGS: $cflags"
-        Write-Host "LIBS: $libs"
-        cl C:\orge\main.cpp $cflags /link $libs
+        cl /IC:\orge\include /std:c++20 C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orge.lib
 
     - name: Test build with static
-      shell: pwsh
       working-directory: static
       run: |
-        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
-        $cflags = pkg-config orgestatic --cflags
-        $libs = pkg-config orgestatic --libs --static
-        Write-Host "CFLAGS: $cflags"
-        Write-Host "LIBS: $libs"
-        cl C:\orge\main.cpp $cflags /link $libs
+        cl /IC:\orge\include /std:c++20 C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orgestatic.lib
