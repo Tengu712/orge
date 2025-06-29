@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(orge)
 
+# =========================================================================== #
+#   General                                                                   #
+# =========================================================================== #
+
 # C++設定
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,32 +31,52 @@ find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 
+# =========================================================================== #
+#   Build                                                                     #
+# =========================================================================== #
+
+# 共通オブジェクトライブラリ
+add_library(orge_objects OBJECT
+	src/config.cpp
+	src/error.cpp
+	src/graphics/graphics.cpp
+	src/graphics/rendering.cpp
+	src/graphics/swapchain.cpp
+	src/graphics/window.cpp
+	src/orge.cpp
+)
+target_include_directories(orge_objects
+	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_link_libraries(orge_objects
+	PRIVATE
+		Vulkan::Headers
+		Vulkan::Loader
+		SDL3::SDL3
+		yaml-cpp::yaml-cpp
+)
+
 # 動的リンクライブラリ
 if(ORGE_SHARED)
-	add_library(orge SHARED
-		src/config.cpp
-		src/error.cpp
-		src/graphics/graphics.cpp
-		src/graphics/rendering.cpp
-		src/graphics/swapchain.cpp
-		src/graphics/window.cpp
-		src/orge.cpp
-	)
+	add_library(orge SHARED $<TARGET_OBJECTS:orge_objects>)
 	add_library(orge::orge ALIAS orge)
-	target_include_directories(orge PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include>
+
+	target_include_directories(orge
+		PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 	)
 	target_link_libraries(orge
 		PUBLIC Vulkan::Loader
-		PRIVATE Vulkan::Headers SDL3::SDL3 yaml-cpp::yaml-cpp
+		PRIVATE SDL3::SDL3 yaml-cpp::yaml-cpp
 	)
+
+	# NOTE: orgeがシステム、orgeのあるディレクトリ、orgeを使うアプリのあるディレクトリの順でVulkanローダを探すように。
+    # NOTE: Windowsにはrpathの概念がないらしいので追記なし。
 	if(APPLE)
 		set_target_properties(orge PROPERTIES
 			INSTALL_RPATH "/usr/local/lib;/opt/homebrew/lib;@loader_path;@executable_path"
 			BUILD_WITH_INSTALL_RPATH TRUE
 		)
-	else()
+	elseif(LINUX)
 		set_target_properties(orge PROPERTIES
 			INSTALL_RPATH "$ORIGIN"
 			BUILD_WITH_INSTALL_RPATH TRUE
@@ -62,24 +86,47 @@ endif()
 
 # 静的リンクライブラリ
 if(ORGE_STATIC)
-	add_library(orgestatic STATIC
-		src/config.cpp
-		src/error.cpp
-		src/graphics/graphics.cpp
-		src/graphics/rendering.cpp
-		src/graphics/swapchain.cpp
-		src/graphics/window.cpp
-		src/orge.cpp
+	# 依存ライブラリを統合したカスタムターゲットを作成
+	add_custom_command(
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a
+		COMMAND ${CMAKE_COMMAND}
+			-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
+			-DORGE_OBJECTS="$<TARGET_OBJECTS:orge_objects>"
+			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3>
+			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
+			-DCMAKE_AR=${CMAKE_AR}
+			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_static.cmake
+		DEPENDS orge_objects SDL3::SDL3 yaml-cpp::yaml-cpp
+		COMMENT "Creating merged static library"
 	)
+	add_custom_target(orgestatic_target ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a)
+
+	# SDL3とyaml-cppの依存関係を取得
+	# NOTE: こうしないと依存ライブラリの依存ライブラリに関するリンクエラーが起こる。
+	get_target_property(SDL3_LINK_LIBS SDL3::SDL3 INTERFACE_LINK_LIBRARIES)
+	get_target_property(YAML_CPP_LINK_LIBS yaml-cpp::yaml-cpp INTERFACE_LINK_LIBRARIES)
+	set(STATIC_DEPS "Vulkan::Loader")
+	if(SDL3_LINK_LIBS)
+		list(APPEND STATIC_DEPS ${SDL3_LINK_LIBS})
+	endif()
+	if(YAML_CPP_LINK_LIBS)
+		list(APPEND STATIC_DEPS ${YAML_CPP_LINK_LIBS})
+	endif()
+	
+	# カスタムターゲットをorgestaticとしてインポート
+	add_library(orgestatic STATIC IMPORTED GLOBAL)
 	add_library(orge::orgestatic ALIAS orgestatic)
-	target_include_directories(orgestatic PUBLIC
-		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include>
+	set_target_properties(orgestatic PROPERTIES
+		IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a
+		INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+		INTERFACE_LINK_LIBRARIES "${STATIC_DEPS}"
 	)
-	target_link_libraries(orgestatic
-		PRIVATE Vulkan::Headers Vulkan::Loader SDL3::SDL3 yaml-cpp::yaml-cpp
-	)
+	add_dependencies(orgestatic orgestatic_target)
 endif()
+
+# =========================================================================== #
+#   Install                                                                   #
+# =========================================================================== #
 
 # インストール
 include(GNUInstallDirs)
@@ -87,13 +134,11 @@ if(ORGE_SHARED)
 	install(TARGETS orge)
 endif()
 if(ORGE_STATIC)
-	install(TARGETS orgestatic)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liborgestatic.a DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# 動的リンクライブラリをインストール先にコピー
-# NOTE: macOSにはVulkanローダがインストールされていない上、
-#       動的リンクライブラリはorgeに統合できないので仕方なく頒布時に同梱する必要がある。
+# Vulkanローダをインストール先にコピー
 if(APPLE)
 	install(FILES $<TARGET_FILE:Vulkan::Loader> TYPE LIB)
 	install(CODE "
@@ -112,5 +157,8 @@ if(APPLE)
 	")
 endif()
 
-# examples
+# =========================================================================== #
+#   Examples                                                                  #
+# =========================================================================== #
+
 add_subdirectory(examples)
