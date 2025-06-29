@@ -76,8 +76,10 @@ jobs:
         mkdir shared
         mkdir static
 
-    - run: pkg-config orge --cflags --libs --with-path C:\orge\lib\pkgconfig
     - run: dir C:\
+    - run: |
+        $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
+        pkg-config orge --cflags --libs
     - run: dir C:\orge
 
     - name: Test build with shared
