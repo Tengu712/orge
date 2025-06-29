@@ -145,17 +145,17 @@ endif()
 
 # 共通設定
 if(MSVC)
-	set(ORGE_PC_CFLAGS "/std:c++20")
+	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20")
 else()
-	set(ORGE_PC_CFLAGS "-std=c++20")
+	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
 endif()
 
 # 共有ライブラリ
 if(ORGE_SHARED)
 	if(MSVC)
-		set(ORGE_PC_LIBS "orge.dll")
+		set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orge.dll")
 	else()
-		set(ORGE_PC_LIBS "-lorge")
+		set(ORGE_PC_LIBS "-L\${libdir} -lorge")
 	endif()
 
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
@@ -164,11 +164,11 @@ endif()
 # 静的ライブラリ
 if(ORGE_STATIC)
 	if(MSVC)
-		set(ORGE_PC_LIBS "orgestatic.lib vulkan-1.dll")
+		set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orgestatic.lib vulkan-1.dll")
 	elseif(APPLE)
-		set(ORGE_PC_LIBS "-lorgestatic -lvulkan.1")
+		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan.1")
 	else()
-		set(ORGE_PC_LIBS "-lorgestatic -lvulkan")
+		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan")
 	endif()
 
 	pkg_check_modules(SDL3_PC QUIET sdl3)

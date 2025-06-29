@@ -6,6 +6,6 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 Name: orgestatic
 Description: Ore ore game engine. (static)
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} @ORGE_PC_LIBS@
+Libs: @ORGE_PC_LIBS@
 Libs.private: @ORGE_PC_LIBS_PRIVATE@
-Cflags: -I${includedir} @ORGE_PC_CFLAGS@
+Cflags: @ORGE_PC_CFLAGS@

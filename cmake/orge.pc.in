@@ -6,5 +6,5 @@ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 Name: orge
 Description: Ore ore game engine. (shared)
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} @ORGE_PC_LIBS@
-Cflags: -I${includedir} @ORGE_PC_CFLAGS@
+Libs: @ORGE_PC_LIBS@
+Cflags: @ORGE_PC_CFLAGS@

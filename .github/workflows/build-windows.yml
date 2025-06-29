@@ -69,18 +69,17 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: orge-lib
-        path: C:\
+        path: C:\orge
 
     - name: Prepare
       run: |
         mkdir shared
         mkdir static
 
-    - run: dir C:\
+    - run: dir C:\orge
     - run: |
         $env:PKG_CONFIG_PATH = "C:\orge\lib\pkgconfig"
         pkg-config orge --cflags --libs
-    - run: dir C:\orge
 
     - name: Test build with shared
       shell: pwsh
