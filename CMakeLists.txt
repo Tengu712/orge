@@ -182,22 +182,11 @@ endif()
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Vulkanローダをインストール先にコピー
-if(APPLE)
+# NOTE: macOSにはVulkanローダが標準搭載されていないので問答無用で。
+#       Linuxではstaticビルド時にシンボル解決のために。
+if(APPLE OR LINUX AND ORGE_STATIC)
 	install(FILES $<TARGET_FILE:Vulkan::Loader> TYPE LIB)
-	install(CODE "
-		set(VULKAN_LOADER_NAME \"libvulkan.1.4.313.dylib\")
-		get_filename_component(LIB_DIR \"\${CMAKE_INSTALL_PREFIX}/lib\" ABSOLUTE)
-		set(SYMLINK_PATH \"\${LIB_DIR}/libvulkan.1.dylib\")
-		message(STATUS \"Creating symlink: \${SYMLINK_PATH} -> \${VULKAN_LOADER_NAME}\")
-		execute_process(
-			COMMAND \${CMAKE_COMMAND} -E create_symlink \${VULKAN_LOADER_NAME} \${SYMLINK_PATH}
-			WORKING_DIRECTORY \"\${LIB_DIR}\"
-			RESULT_VARIABLE SYMLINK_RESULT
-		)
-		if(NOT SYMLINK_RESULT EQUAL 0)
-			message(WARNING \"Failed to create symlink\")
-		endif()
-	")
+	install(SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cmake/create_vulkan_symlink.cmake)
 endif()
 
 # =========================================================================== #
