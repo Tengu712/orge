@@ -71,22 +71,18 @@ jobs:
         name: orge-lib
         path: /
 
-    - run: ls
-    - run: ls /opt
-    - run: ls /opt/orge
-    - run: ls /opt/orge/lib
-    - run: ls /opt/orge/lib/pkgconfig
-    - run: ls examples
-    - run: ls examples/simple
-
     - name: Prepare
       run: |
         mkdir shared
         mkdir static
 
+    - run: pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig
+
     - name: Test build with shared
       working-directory: shared
       run: g++ ../examples/simple/main.cpp $(pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig)
+
+    - run: pkg-config orgestatic --cflags --libs --static --with-path /opt/orge/lib/pkgconfig
 
     - name: Test build with static
       working-directory: static
