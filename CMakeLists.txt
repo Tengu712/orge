@@ -56,6 +56,7 @@ target_link_libraries(orge_objects
 		SDL3::SDL3
 		yaml-cpp::yaml-cpp
 )
+set_target_properties(orge_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # 共有ライブラリ
 if(ORGE_SHARED)

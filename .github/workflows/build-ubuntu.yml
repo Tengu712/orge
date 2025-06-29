@@ -47,7 +47,7 @@ jobs:
 
     - name: Build orge
       run: |
-        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
+        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
         cmake --build build
 
     - name: Install orge
