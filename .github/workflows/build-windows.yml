@@ -62,8 +62,6 @@ jobs:
     steps:
     - uses: ilammy/msvc-dev-cmd@v1
 
-    - uses: seanmiddleditch/gha-setup-ninja@master
-
     - name: Install dependencies
       run: choco install pkgconfiglite
 
