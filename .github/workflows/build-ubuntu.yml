@@ -47,20 +47,19 @@ jobs:
 
     - name: Build orge
       run: |
-        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
+        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
         cmake --build build
 
     - name: Install orge
-      run: cmake --install build --prefix artifacts/install
-
-    - name: Copy simple for build test
-      run: cp -r examples/simple artifacts
+      run: cmake --install build
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
       with:
         name: orge-lib
-        path: artifacts
+        path: |
+          /opt/orge
+          ./examples/simple/main.cpp
 
   test-standalone:
     runs-on: ubuntu-latest
@@ -71,6 +70,15 @@ jobs:
       with:
         name: orge-lib
 
-    - name: Test standalone build
-      working-directory: simple
-      run: g++ -std=c++20 -I../install/include ./main.cpp -L../install/lib -lorge -Wl,-rpath,.
+    - name: Prepare
+      run: |
+        mkdir shared
+        mkdir static
+
+    - name: Test build with shared
+      working-directory: shared
+      run: g++ ./examples/simple/main.cpp $(pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig)
+
+    - name: Test build with static
+      working-directory: static
+      run: g++ ./examples/simple/main.cpp $(pkg-config orgestatic --cflags --libs --static --with-path /opt/orge/lib/pkgconfig)
