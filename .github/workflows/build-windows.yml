@@ -76,9 +76,9 @@ jobs:
         mkdir shared
         mkdir static
 
-   - run: pkg-config orge --cflags --libs --with-path C:\orge\lib\pkgconfig
-   - run: dir C:\
-   - run: dir C:\orge
+    - run: pkg-config orge --cflags --libs --with-path C:\orge\lib\pkgconfig
+    - run: dir C:\
+    - run: dir C:\orge
 
     - name: Test build with shared
       shell: pwsh
