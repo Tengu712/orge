@@ -3,6 +3,8 @@
 add_compile_options(/utf-8)
 
 if(ORGE_SHARED)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 	add_library(orge SHARED
 		src/config.cpp
 		src/error.cpp
@@ -12,7 +14,6 @@ if(ORGE_SHARED)
 		src/graphics/window.cpp
 		src/orge.cpp
 	)
-	target_compile_options(orge PRIVATE /MD)
 	target_include_directories(orge
 		PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 	)
@@ -38,6 +39,8 @@ if(ORGE_SHARED)
 endif()
 
 if(ORGE_STATIC)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 	# 統合前
 	add_library(orgestatic_lite STATIC
 		src/config.cpp
@@ -48,7 +51,6 @@ if(ORGE_STATIC)
 		src/graphics/window.cpp
 		src/orge.cpp
 	)
-	target_compile_options(orgestatic_lite PRIVATE /MT)
 	target_include_directories(orgestatic_lite
 		PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 	)
