@@ -19,7 +19,17 @@ endif()
 # vcpkgのインストールディレクトリ設定
 #
 # NOTE: これがないとなぜか再ビルドが走る。
-set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed)
+# NOTE: Windows では/MT vs /MD 問題でトリプレットを分けているが、
+#       異なるトリプレットを使うと以前のビルドキャッシュが削除されてしまう違うため、インストールディレクトリを分離。
+if(MSVC)
+	if(ORGE_SHARED)
+		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_shared)
+	else()
+		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_static)
+	endif()
+else()
+	set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed)
+endif()
 
 # vcpkgトリプレット設定
 #
