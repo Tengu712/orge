@@ -13,10 +13,13 @@
 - orge.h
 - pkgconfig
 
-次のことに注意すること:
+orge.dll(orge.lib)を使う場合は/MDを指定すること。
 
-- orge.dll(orge.lib)を使う場合は/MDを指定すること
-- orgestatic.libを使う場合は/MTを指定すること
+orgestatic.libを使う場合は次に注意すること:
+
+- /MTを指定すること
+- SDL3が依存するライブラリもリンクすること
+- vulkan-1.libもリンクすること
 
 ## macOS
 
@@ -63,3 +66,16 @@ liborgestatic.aを利用する場合、次に注意すること:
 - pkgconfig
 
 liborgestatic.aを利用する場合、libvulkan.soもリンクすること。
+
+## pkg-configを使うと良いよという話
+
+次のようにして、必要なフラグを自動で指定できる。
+ただし、インストール先ディレクトリのlib/pkgconfigディレクトリに`PKG_CONFIG_PATH`を通す。
+
+```sh
+# 共有ライブラリ利用
+g++ ../examples/simple/main.cpp $(pkg-config orge --cflags --libs)
+
+# 静的ライブラリ利用
+g++ ../examples/simple/main.cpp $(pkg-config orgestatic --cflags --libs --static)
+```

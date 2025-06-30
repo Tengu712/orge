@@ -51,5 +51,5 @@ function(get_deps_from_pc PKG_NAME SPEC OUTPUT)
 
 	# 返戻
 	set(${OUTPUT} "${FORMATTED_LIBS}" PARENT_SCOPE)
-	message(STATUS "get dependencies from ${PKG_NAME}: ${FORMATTED_LIBS}")
+	message(STATUS "Get dependencies from ${PKG_NAME}: ${FORMATTED_LIBS}")
 endfunction()
