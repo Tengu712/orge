@@ -3,18 +3,24 @@
 ## Requirements
 
 - Common
-  - C++コンパイラ
   - CMake
   - Ninja
   - pkg-config
 - Windows
+  - MSVC
   - Windows SDK
 - Linux
+  - C++コンパイラ
+  - ar
   - x11
   - xcb
   - xkb
   - wayland
   - xrandr
+  - ltdl
+- macOS
+  - C++コンパイラ
+  - ar
 
 ## Build & Install
 
@@ -24,23 +30,16 @@
 git clone --recursive https://github.com/Tengu712/orge.git
 ```
 
-依存ライブラリをインストール:
+vcpkgをセットアップ:
 
 ```sh
 # Windows
 .\vcpkg\bootstrap-vcpkg.bat
 # Linux/macOS
 ./vcpkg/bootstrap-vcpkg.sh
-
-# Windows
-.\vcpkg\vcpkg install --triplet custom-x64-windows --overlay-triplets=.\triplets
-# Linux
-./vcpkg/vcpkg install --triplet custom-x64-linux --overlay-triplets=./triplets
-# macOS
-./vcpkg/vcpkg install --triplet custom-arm64-osx --overlay-triplets=./triplets
 ```
 
-次を実行してorgeをビルド及びインストール:
+次を実行してビルド及びインストール:
 
 ```sh
 cmake \
@@ -53,6 +52,11 @@ cmake \
 cmake --build build
 cmake --install build
 ```
+
+ただし、
+
+- どのOSでも`ORGE_SHARED`と`ORGE_STATIC`の両方を`OFF`にできない
+- Windowsでは`ORGE_SHARED`と`ORGE_STATIC`の両方を`ON`にできない
 
 ## Examples
 

@@ -39,7 +39,7 @@ if(ORGE_SHARED)
 endif()
 
 if(ORGE_STATIC)
-	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 	# 統合前
 	add_library(orgestatic_lite STATIC

@@ -42,15 +42,13 @@ jobs:
           vcpkg/vcpkg
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Install packages
+    - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: |
-        ./vcpkg/bootstrap-vcpkg.sh
-        ./vcpkg/vcpkg install --triplet custom-x64-linux --overlay-triplets=./triplets
+      run: ./vcpkg/bootstrap-vcpkg.sh
 
     - name: Build & install orge
       run: |
-        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUID_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
+        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
         cmake --build build
         cmake --install build
 

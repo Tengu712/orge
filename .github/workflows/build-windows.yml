@@ -34,12 +34,9 @@ jobs:
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Install packages
+    - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: |
-        vcpkg\bootstrap-vcpkg.bat
-        vcpkg\vcpkg install --triplet custom-x64-windows-shared --overlay-triplets=.\triplets
-        vcpkg\vcpkg install --triplet custom-x64-windows-static --overlay-triplets=.\triplets
+      run: vcpkg\bootstrap-vcpkg.bat
 
     - name: Build orge (shared)
       run: |
