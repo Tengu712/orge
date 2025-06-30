@@ -24,15 +24,12 @@ endif()
 if(MSVC)
 	if(ORGE_SHARED)
 		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_shared)
-		message(STATUS "Using vcpkg_installed_shared for shared build")
 	else()
 		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_static)
-		message(STATUS "Using vcpkg_installed_static for static build")
 	endif()
 else()
 	set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed)
 endif()
-message(STATUS "VCPKG_INSTALLED_DIR: ${VCPKG_INSTALLED_DIR}")
 
 # vcpkgトリプレット設定
 #
@@ -49,7 +46,6 @@ elseif(APPLE)
 elseif(UNIX)
 	set(VCPKG_TARGET_TRIPLET "custom-x64-linux")
 else()
-	# NOTE: WindowsではMSVCのみサポート。
 	message(FATAL_ERROR "unimplemented")
 endif()
 
@@ -64,11 +60,13 @@ endif()
 # 依存ライブラリ設定
 include(GNUInstallDirs)
 include(${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
-find_package(PkgConfig REQUIRED)
 find_package(VulkanHeaders CONFIG REQUIRED)
 find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+
+# ユーティリティ関数追加
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/get-deps-from-pc.cmake)
 
 # 実行
 if(MSVC)

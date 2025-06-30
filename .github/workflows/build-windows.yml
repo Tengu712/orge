@@ -41,24 +41,24 @@ jobs:
 
     - name: Build & install orge (shared)
       run: |
-        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=C:\orge
+        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
         cmake --build build
         cmake --install build
 
     - name: Build & install orge (static)
       run: |
-        cmake -G Ninja -B build -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=C:\orge
+        cmake -G Ninja -B build -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
         cmake --build build
         cmake --install build
 
     - name: Copy example file
-      run: copy examples\simple\main.cpp C:\orge\
+      run: copy examples\simple\main.cpp D:\orge\
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
       with:
         name: orge-lib
-        path: C:\orge
+        path: D:\orge
 
   test-standalone:
     runs-on: windows-latest
@@ -73,20 +73,20 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: orge-lib
-        path: C:\orge
+        path: D:\orge
 
     - name: Prepare
       run: |
         mkdir shared
         mkdir static
 
-    - run: type C:\orge\lib\pkgconfig\orge.pc
-    - run: type C:\orge\lib\pkgconfig\orgestatic.pc
+    - run: type D:\orge\lib\pkgconfig\orge.pc
+    - run: type D:\orge\lib\pkgconfig\orgestatic.pc
 
     - name: Debug pkg-config output
       shell: pwsh
       env:
-        PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
       run: |
         pkg-config orge --cflags
         pkg-config orge --libs
@@ -95,16 +95,18 @@ jobs:
       working-directory: shared
       shell: pwsh
       env:
-        PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
       run: |
         $cflags = pkg-config orge --cflags
         $libs = pkg-config orge --libs
         echo $cflags
         echo $(pkg-config orge --cflags)
         echo "$(pkg-config orge --cflags)"
-        cl /IC:/orge/include /EHsc /std:c++20 /MD C:\orge\main.cpp /link /LIBPATH:C:/orge/lib orge.lib
+        cl "$(pkg-config orge --cflags)" D:\orge\main.cpp /link "$(pkg-config orge --libs)"
 
     - name: Test build with static
       working-directory: static
-      run: |
-        cl /IC:/orge/include /EHsc /std:c++20 /MT C:\orge\main.cpp /link /LIBPATH:C:/orge/lib orgestatic.lib
+      shell: pwsh
+      env:
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+      run: cl "$(pkg-config orgestatic --cflags)" D:\orge\main.cpp /link "$(pkg-config orgestatic --libs --static)"
