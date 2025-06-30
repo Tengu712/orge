@@ -80,13 +80,27 @@ jobs:
         mkdir shared
         mkdir static
 
+    - name: Debug pkg-config output
+      env:
+        PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
+      run: |
+        pkg-config orge --cflags
+        pkg-config orge --libs
+
     - name: Test build with shared
       working-directory: shared
       shell: pwsh
       env:
         PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
       run: |
-        cl $(pkg-config orge --cflags) C:\orge\main.cpp /link $(pkg-config orge --libs)
+        cl "$(pkg-config orge --cflags)" C:\orge\main.cpp /link "$(pkg-config orge --libs)"
+
+    - name: Debug pkg-config output (static)
+      env:
+        PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
+      run: |
+        pkg-config orgestatic --cflags
+        pkg-config orgestatic --libs --static
 
     - name: Test build with static
       working-directory: static
@@ -94,4 +108,4 @@ jobs:
       env:
         PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
       run: |
-        cl $(pkg-config orge --cflags) C:\orge\main.cpp /link $(pkg-config orge --libs --static)
+        cl "$(pkg-config orgestatic --cflags)" C:\orge\main.cpp /link "$(pkg-config orgestatic --libs --static)"
