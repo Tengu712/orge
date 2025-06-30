@@ -94,7 +94,7 @@ jobs:
       working-directory: shared
       shell: pwsh
       env:
-        PKG_CONFIG_PATH="C:\orge\lib\pkgconfig"
+        PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
       run: |
         $cflags = pkg-config orge --cflags
         $libs = pkg-config orge --libs
