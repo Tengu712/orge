@@ -70,7 +70,7 @@ if(ORGE_STATIC)
 		COMMAND ${CMAKE_COMMAND}
 			-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
 			-DORGE_LIB=$<TARGET_FILE:orgestatic_lite>
-			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3>
+			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3-static>
 			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge-static-msvc.cmake
 		DEPENDS orgestatic_lite SDL3::SDL3 yaml-cpp::yaml-cpp

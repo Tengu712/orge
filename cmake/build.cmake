@@ -60,7 +60,7 @@ if(ORGE_STATIC)
 		COMMAND ${CMAKE_COMMAND}
 			-DBINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
 			-DORGE_OBJECTS="$<TARGET_OBJECTS:orge_objects>"
-			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3>
+			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3-static>
 			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge-static.cmake
 		DEPENDS orge_objects SDL3::SDL3 yaml-cpp::yaml-cpp

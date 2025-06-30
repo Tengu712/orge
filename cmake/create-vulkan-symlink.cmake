@@ -1,10 +1,10 @@
 # Linux/macOS用Vulkanローダのシンボリックリンクを作成するスクリプト
 
 if(APPLE)
-	set(VULKAN_LOADER_NAME "libvulkan.1.4.313.dylib")
+	set(VULKAN_LOADER_NAME "libvulkan.1.4.309.dylib")
 	set(SYMLINK_NAME "libvulkan.1.dylib")
 elseif(LINUX)
-	set(VULKAN_LOADER_NAME "libvulkan.so.1.4.313")
+	set(VULKAN_LOADER_NAME "libvulkan.so.1.4.309")
 	set(SYMLINK_NAME "libvulkan.so")
 endif()
 

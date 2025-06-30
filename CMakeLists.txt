@@ -13,6 +13,11 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
+# vcpkgのインストールディレクトリ設定
+#
+# NOTE: これがないとなぜか再ビルドが走る。
+set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed)
+
 # vcpkgトリプレット設定
 #
 # NOTE: トリプレット指定忘れが悲惨なのでここで強制。

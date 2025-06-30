@@ -44,9 +44,6 @@ jobs:
 
     - name: Install packages
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      env:
-        VCPKG_FORCE_SYSTEM_BINARIES: 1
-        ACLOCAL_PATH: /usr/share/aclocal
       run: |
         ./vcpkg/bootstrap-vcpkg.sh
         ./vcpkg/vcpkg install --triplet custom-x64-linux --overlay-triplets=./triplets
