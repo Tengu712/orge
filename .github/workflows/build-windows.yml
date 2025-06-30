@@ -46,6 +46,7 @@ jobs:
         cmake --install build
 
     - name: Remove build and rename vcpkg_installed_shared
+      shell: cmd
       run: |
         rd /S /Q build
         ren vcpkg_installed_shared _temp
@@ -57,6 +58,7 @@ jobs:
         cmake --install build
 
     - name: Restore vcpkg_installed_shared
+      shell: cmd
       run: ren _temp vcpkg_installed_shared
 
     - name: Copy example file
