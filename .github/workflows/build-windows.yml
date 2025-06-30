@@ -16,27 +16,86 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
+    - uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Cache thirdparty build
-      id: cache-thirdparty
-      uses: actions/cache@v3
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Install dependencies
+      run: choco install pkgconfiglite
+
+    - name: Cache vcpkg packages
+      id: cache-vcpkg
+      uses: actions/cache@v4
       with:
-        path: build/deps
-        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/setup.bat', '.gitmodules') }}
-        restore-keys: |
-          ${{ runner.os }}-thirdparty-
+        path: |
+          vcpkg_installed_shared
+          vcpkg_installed_static
+          vcpkg/buildtrees
+          vcpkg/packages
+          vcpkg/vcpkg.exe
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Setup thirdparty libraries
-      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd thirdparty
-        setup.bat
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: vcpkg\bootstrap-vcpkg.bat
 
-    - name: Build orge
-      shell: cmd
+    - name: Build & install orge (shared)
       run: |
-        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
-        cmake --build build
+        cmake -G Ninja -B build_shared -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
+        cmake --build build_shared
+        cmake --install build_shared
+
+    - name: Build & install orge (static)
+      run: |
+        cmake -G Ninja -B build_static -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
+        cmake --build build_static
+        cmake --install build_static
+
+    - name: Copy example file
+      run: copy examples\simple\main.cpp D:\orge\
+
+    - name: Upload orge artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-lib
+        path: D:\orge
+
+  test-standalone:
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Install dependencies
+      run: choco install pkgconfiglite
+
+    - name: Download orge artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: orge-lib
+        path: D:\orge
+
+    - name: Prepare
+      run: |
+        mkdir shared
+        mkdir static
+
+    - name: Test build with shared
+      working-directory: shared
+      shell: cmd
+      env:
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+      run: |
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
+        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+
+    - name: Test build with static
+      working-directory: static
+      shell: cmd
+      env:
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+      run: |
+        for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
+        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%

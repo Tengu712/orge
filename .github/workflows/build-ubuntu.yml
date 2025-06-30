@@ -28,24 +28,57 @@ jobs:
           libxkbcommon-dev \
           libwayland-dev \
           libxrandr-dev \
+          libltdl-dev \
           pkg-config
 
-    - name: Cache thirdparty build
-      id: cache-thirdparty
-      uses: actions/cache@v3
+    - name: Cache vcpkg packages
+      id: cache-vcpkg
+      uses: actions/cache@v4
       with:
-        path: build/deps
-        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/setup.sh', '.gitmodules') }}
-        restore-keys: |
-          ${{ runner.os }}-thirdparty-
+        path: |
+          vcpkg_installed
+          vcpkg/buildtrees
+          vcpkg/packages
+          vcpkg/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Setup thirdparty libraries
-      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
-      run: |
-        cd thirdparty
-        ./setup.sh
+    - name: Setup vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: ./vcpkg/bootstrap-vcpkg.sh
 
-    - name: Build orge
+    - name: Build & install orge
       run: |
-        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
+        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
         cmake --build build
+        cmake --install build
+
+    - name: Upload orge artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-lib
+        path: |
+          /opt/orge
+          ./examples/simple/main.cpp
+
+  test-standalone:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Download orge artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: orge-lib
+        path: /
+
+    - name: Prepare
+      run: |
+        mkdir shared
+        mkdir static
+
+    - name: Test build with shared
+      working-directory: shared
+      run: g++ ../examples/simple/main.cpp $(pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig)
+
+    - name: Test build with static
+      working-directory: static
+      run: g++ ../examples/simple/main.cpp $(pkg-config orgestatic --cflags --libs --static --with-path /opt/orge/lib/pkgconfig)

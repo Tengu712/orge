@@ -1,0 +1,14 @@
+{
+  "name": "orge",
+  "version": "0.1.0",
+  "description": "Ore ore game engine.",
+  "dependencies": [
+    "vulkan-loader",
+    {
+      "name": "sdl3",
+      "features": ["vulkan"],
+      "default-features": false
+    },
+    "yaml-cpp"
+  ]
+}
