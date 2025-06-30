@@ -58,7 +58,7 @@ if(ORGE_STATIC)
 		PRIVATE
 			Vulkan::Headers
 			Vulkan::Loader
-			SDL3::SDL3
+			SDL3::SDL3-static
 			yaml-cpp::yaml-cpp
 	)
 	# NOTE: examplesのビルドにはorgestatic_liteを用いる。
@@ -87,7 +87,7 @@ if(ORGE_STATIC)
 
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-	install(FILES $<TARGET_FILE:Vulkan::Loader> TYPE LIB)
+	install(FILES $<TARGET_FILE:Vulkan::Loader> DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

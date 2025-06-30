@@ -57,6 +57,11 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
 
+# CMAKE_PREFIX_PATHを修正
+#
+# NOTE: 主にMSVCで勝手に異なるトリプレットの方から依存ライブラリを見つけてこないようにするため。
+set(CMAKE_PREFIX_PATH ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET})
+
 # 依存ライブラリ設定
 include(GNUInstallDirs)
 include(${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
