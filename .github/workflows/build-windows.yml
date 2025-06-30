@@ -93,6 +93,7 @@ jobs:
 
     - name: Test build with shared
       working-directory: shared
+      shell: cmd
       env:
         PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
       run: |

@@ -3,6 +3,12 @@
 find_package(PkgConfig REQUIRED)
 
 function(get_deps_from_pc PKG_NAME OUTPUT)
+	if(MSVC)
+		set(ENV{PKG_CONFIG_PATH} "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/pkgconfig;$ENV{PKG_CONFIG_PATH}")
+	else()
+		set(ENV{PKG_CONFIG_PATH} "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+	endif()
+
 	pkg_check_modules(${PKG_NAME}_PC QUIET ${PKG_NAME})
 
 	if(${PKG_NAME}_PC_FOUND)
