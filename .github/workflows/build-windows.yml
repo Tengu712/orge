@@ -51,15 +51,6 @@ jobs:
         cmake --build build
         cmake --install build
 
-    - name: Debug vcpkg pkg-config structure
-      run: |
-        if exist vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig (
-          dir vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
-        ) else (
-          echo "pkgconfig directory not found"
-        )
-        tree vcpkg_installed_static /F
-
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
 

@@ -52,15 +52,6 @@ jobs:
         cmake --build build
         cmake --install build
 
-    - name: Debug vcpkg pkg-config structure
-      run: |
-        echo "Looking for SDL3.pc files:"
-        find . -name "SDL3.pc" -type f 2>/dev/null || echo "No SDL3.pc found"
-        echo "All .pc files in vcpkg_installed:"
-        find . -name "*.pc" -type f 2>/dev/null | head -10
-        echo "Directory structure of vcpkg_installed:"
-        find . -type d -name pkgconfig 2>/dev/null || echo "No pkgconfig directories found"
-
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
       with:
