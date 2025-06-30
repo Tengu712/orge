@@ -101,23 +101,12 @@ jobs:
         for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
         cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
 
-    - name: Test build with shared
-      working-directory: shared
-      shell: pwsh
-      env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
-      run: |
-        $flags = pkg-config orge --cflags
-        $libs = pkg-config orge --libs
-        echo $flags
-        echo "$flags"
-        echo $(pkg-config orge --cflags)
-        echo "$(pkg-config orge --cflags)"
-        cl "$flags" D:\orge\main.cpp /link "$libs"
-
     - name: Test build with static
       working-directory: static
       shell: pwsh
       env:
         PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
-      run: cl "$(pkg-config orgestatic --cflags)" D:\orge\main.cpp /link "$(pkg-config orgestatic --libs --static)"
+      run: |
+        for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
+        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
