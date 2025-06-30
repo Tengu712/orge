@@ -55,11 +55,11 @@ jobs:
     - name: Debug vcpkg pkg-config structure
       run: |
         echo "Looking for SDL3.pc files:"
-        find vcpkg_installed -name "SDL3.pc" -type f 2>/dev/null || echo "No SDL3.pc found"
+        find . -name "SDL3.pc" -type f 2>/dev/null || echo "No SDL3.pc found"
         echo "All .pc files in vcpkg_installed:"
-        find vcpkg_installed -name "*.pc" -type f 2>/dev/null | head -10
+        find . -name "*.pc" -type f 2>/dev/null | head -10
         echo "Directory structure of vcpkg_installed:"
-        find vcpkg_installed -type d -name pkgconfig 2>/dev/null || echo "No pkgconfig directories found"
+        find . -type d -name pkgconfig 2>/dev/null || echo "No pkgconfig directories found"
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
