@@ -33,7 +33,12 @@ jobs:
           autoconf \
           automake \
           libtool \
-          gettext
+          gettext \
+          curl \
+          zip \
+          unzip \
+          tar \
+          gperf
 
     - name: Cache vcpkg packages
       id: cache-vcpkg
