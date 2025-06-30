@@ -93,16 +93,26 @@ jobs:
 
     - name: Test build with shared
       working-directory: shared
+      env:
+        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+      run: |
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
+        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+
+    - name: Test build with shared
+      working-directory: shared
       shell: pwsh
       env:
         PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
       run: |
-        $cflags = pkg-config orge --cflags
+        $flags = pkg-config orge --cflags
         $libs = pkg-config orge --libs
-        echo $cflags
+        echo $flags
+        echo "$flags"
         echo $(pkg-config orge --cflags)
         echo "$(pkg-config orge --cflags)"
-        cl "$(pkg-config orge --cflags)" D:\orge\main.cpp /link "$(pkg-config orge --libs)"
+        cl "$flags" D:\orge\main.cpp /link "$libs"
 
     - name: Test build with static
       working-directory: static

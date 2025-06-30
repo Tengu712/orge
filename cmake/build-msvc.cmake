@@ -2,7 +2,6 @@
 
 add_compile_options(/utf-8 /EHsc)
 
-set(ORGE_PC_PREFIX "/foo\\bar\\\\baz")
 set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(ORGE_PC_INCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
 
