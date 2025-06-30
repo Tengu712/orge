@@ -65,6 +65,9 @@ jobs:
     steps:
     - uses: ilammy/msvc-dev-cmd@v1
 
+    - name: Install dependencies
+      run: choco install pkgconfiglite
+
     - name: Download orge artifacts
       uses: actions/download-artifact@v4
       with:
