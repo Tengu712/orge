@@ -3,7 +3,7 @@
 # NOTE: こうでもしないと統合できないので。
 
 execute_process(
-	COMMAND lib /OUT:${BINARY_DIR}/orgestatic.lib ${SDL3_LIB} ${YAML_CPP_LIB} ${ORGE_OBJECTS}
+	COMMAND lib /OUT:${BINARY_DIR}/orgestatic.lib ${ORGE_LIB} ${SDL3_LIB} ${YAML_CPP_LIB}
 	RESULT_VARIABLE LIB_RESULT
 )
 
