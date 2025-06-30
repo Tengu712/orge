@@ -35,7 +35,8 @@ cmake ^
 cmake ^
 	-S yaml-cpp ^
 	-B yaml-cpp/build ^
-	-G Ninja
+	-G Ninja ^
+	-D CMAKE_BUILD_TYPE=Release
 cmake ^
 	--build yaml-cpp/build
 cmake ^

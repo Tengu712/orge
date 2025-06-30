@@ -16,8 +16,12 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Install dependencies
+      run: choco install pkgconfiglite
 
     - name: Cache thirdparty build
       id: cache-thirdparty
@@ -31,12 +35,50 @@ jobs:
     - name: Setup thirdparty libraries
       if: steps.cache-thirdparty.outputs.cache-hit != 'true'
       shell: cmd
-      run: |
-        cd thirdparty
-        setup.bat
+      working-directory: thirdparty
+      run: setup.bat
 
     - name: Build orge
       shell: cmd
       run: |
-        cmake -G Ninja -S . -B build -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=ON
+        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=C:\orge
         cmake --build build
+
+    - name: Install orge
+      run: cmake --install build
+
+    - name: Copy example file
+      run: copy examples\simple\main.cpp C:\orge\
+
+    - name: Upload orge artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-lib
+        path: C:\orge
+
+  test-standalone:
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Download orge artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: orge-lib
+        path: C:\orge
+
+    - name: Prepare
+      run: |
+        mkdir shared
+        mkdir static
+
+    - name: Test build with shared
+      working-directory: shared
+      run: |
+        cl /IC:\orge\include /std:c++20 /EHsc /MD C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orge.lib
+
+    - name: Test build with static
+      working-directory: static
+      run: |
+        cl /IC:\orge\include /std:c++20 /EHsc /MT C:\orge\main.cpp /link /LIBPATH:C:\orge\lib orgestatic.lib

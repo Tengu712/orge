@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: orgestatic
+Description: Ore ore game engine. (static)
+Version: @PROJECT_VERSION@
+Libs: @ORGE_PC_LIBS@
+Libs.private: @ORGE_PC_LIBS_PRIVATE@
+Cflags: @ORGE_PC_CFLAGS@
