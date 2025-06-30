@@ -28,19 +28,7 @@ jobs:
           libxkbcommon-dev \
           libwayland-dev \
           libxrandr-dev \
-          pkg-config \
-          autotools-dev \
-          autoconf \
-          automake \
-          libtool \
-          libtool-bin \
-          gettext \
-          curl \
-          zip \
-          unzip \
-          tar \
-          gperf \
-          m4
+          pkg-config
 
     - name: Cache vcpkg packages
       id: cache-vcpkg

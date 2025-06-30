@@ -4,4 +4,5 @@ set(VCPKG_LIBRARY_LINKAGE dynamic)
 
 if(PORT MATCHES "sdl3|yaml-cpp")
     set(VCPKG_LIBRARY_LINKAGE static)
+    set(VCPKG_CRT_LINKAGE static)
 endif()

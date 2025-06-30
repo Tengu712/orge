@@ -6,7 +6,8 @@
     "vulkan-loader",
     {
       "name": "sdl3",
-      "features": ["vulkan"]
+      "features": ["vulkan"],
+      "default-features": false
     },
     "yaml-cpp"
   ]
