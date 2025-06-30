@@ -24,12 +24,15 @@ endif()
 if(MSVC)
 	if(ORGE_SHARED)
 		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_shared)
+		message(STATUS "Using vcpkg_installed_shared for shared build")
 	else()
 		set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed_static)
+		message(STATUS "Using vcpkg_installed_static for static build")
 	endif()
 else()
 	set(VCPKG_INSTALLED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed)
 endif()
+message(STATUS "VCPKG_INSTALLED_DIR: ${VCPKG_INSTALLED_DIR}")
 
 # vcpkgトリプレット設定
 #

@@ -5,6 +5,7 @@ elseif(TARGET orge::orgestatic)
 	target_link_libraries(simple PRIVATE orge::orgestatic)
 	# NOTE: MSVCでは/MTを指定
 	if(MSVC)
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 		set_target_properties(simple PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 	endif()
 endif()

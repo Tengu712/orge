@@ -1,9 +1,8 @@
 # Linux/macOS用ビルドスクリプト
 
-set(ORGE_PC_PATH_SEP "/")
-set(ORGE_PC_PREFIX "${CMAKE_INSTALL_PREFIX}")
-set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
-set(ORGE_PC_INCDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set(ORGE_PC_INCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+message(STATUS "ORGE_PC_LIBDIR=${ORGE_PC_INCDIR}")
 
 add_library(orge_objects OBJECT
 	src/config.cpp
@@ -50,8 +49,8 @@ if(ORGE_SHARED)
 		)
 	endif()
 
-	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
-	set(ORGE_PC_LIBS "-L\${libdir} -lorge")
+	set(ORGE_PC_CFLAGS "-I${ORGE_PC_INCDIR} -std=c++20")
+	set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorge")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
 
 	install(TARGETS orge)
@@ -68,7 +67,7 @@ if(ORGE_STATIC)
 			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3-static>
 			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge-static.cmake
-		DEPENDS orge_objects SDL3::SDL3 yaml-cpp::yaml-cpp
+		DEPENDS orge_objects SDL3::SDL3-static yaml-cpp::yaml-cpp
 		COMMENT "Creating merged static library"
 	)
 
@@ -92,11 +91,11 @@ if(ORGE_STATIC)
 		message(WARNING "SDL3 pkg-config not found. Static linking dependencies may be incomplete.")
 		set(ORGE_PC_LIBS_PRIVATE "")
 	endif()
-	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
+	set(ORGE_PC_CFLAGS "-I${ORGE_PC_INCDIR} -std=c++20")
 	if(APPLE)
-		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan.1")
+		set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorgestatic -lvulkan.1")
 	else()
-		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan")
+		set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorgestatic -lvulkan")
 	endif()
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)
 

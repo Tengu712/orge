@@ -1,8 +1,3 @@
-prefix=@ORGE_PC_PREFIX@
-exec_prefix=${prefix}
-libdir=${exec_prefix}@ORGE_PC_PATH_SEP@@ORGE_PC_LIBDIR@
-includedir=${prefix}@ORGE_PC_PATH_SEP@@ORGE_PC_INCDIR@
-
 Name: orgestatic
 Description: Ore ore game engine. (static)
 Version: @PROJECT_VERSION@

@@ -2,10 +2,9 @@
 
 add_compile_options(/utf-8 /EHsc)
 
-set(ORGE_PC_PATH_SEP "\\")
-string(REPLACE "/" "\\" ORGE_PC_PREFIX "${CMAKE_INSTALL_PREFIX}")
-string(REPLACE "/" "\\" ORGE_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
-string(REPLACE "/" "\\" ORGE_PC_INCDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_PREFIX}\\${CMAKE_INSTALL_LIBDIR}")
+set(ORGE_PC_INCDIR "${CMAKE_INSTALL_PREFIX}\\${CMAKE_INSTALL_INCLUDEDIR}")
+message(STATUS "ORGE_PC_LIBDIR=${ORGE_PC_INCDIR}")
 
 if(ORGE_SHARED)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -35,8 +34,8 @@ if(ORGE_SHARED)
 	#       全シンボルを自動エクスポートしてインポートライブラリを生成。
 	set_target_properties(orge PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MD")
-	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orge.lib")
+	set(ORGE_PC_CFLAGS "/I${ORGE_PC_INCDIR} /std:c++20 /EHsc /MD")
+	set(ORGE_PC_LIBS "/LIBPATH:${ORGE_PC_LIBDIR} orge.lib")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
 
 	install(TARGETS orge)
@@ -78,7 +77,7 @@ if(ORGE_STATIC)
 			-DSDL3_LIB=$<TARGET_FILE:SDL3::SDL3-static>
 			-DYAML_CPP_LIB=$<TARGET_FILE:yaml-cpp::yaml-cpp>
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge-static-msvc.cmake
-		DEPENDS orgestatic_lite SDL3::SDL3 yaml-cpp::yaml-cpp
+		DEPENDS orgestatic_lite SDL3::SDL3-static yaml-cpp::yaml-cpp
 		COMMENT "Creating merged static library"
 	)
 	add_custom_target(orgestatic ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.lib)
@@ -90,8 +89,8 @@ if(ORGE_STATIC)
 		message(WARNING "SDL3 pkg-config not found. Static linking dependencies may be incomplete.")
 		set(ORGE_PC_LIBS_PRIVATE "")
 	endif()
-	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MT")
-	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orgestatic.lib")
+	set(ORGE_PC_CFLAGS "/I${ORGE_PC_INCDIR} /std:c++20 /EHsc /MT")
+	set(ORGE_PC_LIBS "/LIBPATH:${ORGE_PC_LIBDIR} orgestatic.lib")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)
 
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
