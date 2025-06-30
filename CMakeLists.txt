@@ -5,13 +5,18 @@ project(orge VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# vcpkg設定
+# vcpkgのためのmacOSのアーキテクチャ設定
+#
 # NOTE: orgeはmacOSにおいてarmのみ期待する。
 # NOTE: これを設定しないとvcpkgが動かない。
 if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "arm64")
 endif()
+
+# vcpkgトリプレット設定
+#
 # NOTE: トリプレット指定忘れが悲惨なのでここで強制。
+set(VCPKG_OVERLAY_TRIPLETS ${CMAKE_CURRENT_SOURCE_DIR}/triplets)
 if(MSVC)
 	set(VCPKG_TARGET_TRIPLET "custom-x64-windows")
 elseif(APPLE)
