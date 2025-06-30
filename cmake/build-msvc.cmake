@@ -74,6 +74,7 @@ if(ORGE_STATIC)
 		DEPENDS orgestatic_lite SDL3::SDL3 yaml-cpp::yaml-cpp
 		COMMENT "Creating merged static library"
 	)
+	add_custom_target(orgestatic ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.lib)
 
 	pkg_check_modules(SDL3_PC QUIET sdl3)
 	if(SDL3_PC_FOUND)
