@@ -28,7 +28,12 @@ jobs:
           libxkbcommon-dev \
           libwayland-dev \
           libxrandr-dev \
-          pkg-config
+          pkg-config \
+          autotools-dev \
+          autoconf \
+          automake \
+          libtool \
+          gettext
 
     - name: Cache vcpkg packages
       id: cache-vcpkg
