@@ -103,7 +103,7 @@ jobs:
 
     - name: Test build with static
       working-directory: static
-      shell: pwsh
+      shell: cmd
       env:
         PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
       run: |

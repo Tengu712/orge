@@ -1,8 +1,5 @@
 # Linux/macOS用ビルドスクリプト
 
-set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-set(ORGE_PC_INCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-
 add_library(orge_objects OBJECT
 	src/config.cpp
 	src/error.cpp
@@ -48,8 +45,8 @@ if(ORGE_SHARED)
 		)
 	endif()
 
-	set(ORGE_PC_CFLAGS "-I${ORGE_PC_INCDIR} -std=c++20")
-	set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorge")
+	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
+	set(ORGE_PC_LIBS "-L\${libdir} -lorge")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
 
 	install(TARGETS orge)
@@ -85,11 +82,11 @@ if(ORGE_STATIC)
 
 	get_deps_from_pc(SDL3 sdl3 SDL3_DEPS)
 	get_deps_from_pc(yaml-cpp yaml-cpp YAML_CPP_DEPS)
-	set(ORGE_PC_CFLAGS "-I${ORGE_PC_INCDIR} -std=c++20")
+	set(ORGE_PC_CFLAGS "-I\${includedir} -std=c++20")
 	if(APPLE)
-		set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorgestatic -lvulkan.1")
+		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan.1")
 	else()
-		set(ORGE_PC_LIBS "-L${ORGE_PC_LIBDIR} -lorgestatic -lvulkan")
+		set(ORGE_PC_LIBS "-L\${libdir} -lorgestatic -lvulkan")
 	endif()
 	set(ORGE_PC_LIBS_PRIVATE "${SDL3_DEPS} ${YAML_CPP_DEPS}")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)

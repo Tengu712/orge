@@ -2,9 +2,6 @@
 
 add_compile_options(/utf-8 /EHsc)
 
-set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-set(ORGE_PC_INCDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-
 if(ORGE_SHARED)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
@@ -33,8 +30,8 @@ if(ORGE_SHARED)
 	#       全シンボルを自動エクスポートしてインポートライブラリを生成。
 	set_target_properties(orge PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-	set(ORGE_PC_CFLAGS "/I${ORGE_PC_INCDIR} /std:c++20 /EHsc /MD")
-	set(ORGE_PC_LIBS "/LIBPATH:${ORGE_PC_LIBDIR} orge.lib")
+	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MD")
+	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orge.lib")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
 
 	install(TARGETS orge)
@@ -83,8 +80,8 @@ if(ORGE_STATIC)
 
 	get_deps_from_pc(SDL3 sdl3 SDL3_DEPS)
 	get_deps_from_pc(yaml-cpp yaml-cpp YAML_CPP_DEPS)
-	set(ORGE_PC_CFLAGS "/I${ORGE_PC_INCDIR} /std:c++20 /EHsc /MT")
-	set(ORGE_PC_LIBS "/LIBPATH:${ORGE_PC_LIBDIR} orgestatic.lib vulkan-1.lib")
+	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MT")
+	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orgestatic.lib vulkan-1.lib")
 	set(ORGE_PC_LIBS_PRIVATE "${SDL3_DEPS} ${YAML_CPP_DEPS}")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)
 
