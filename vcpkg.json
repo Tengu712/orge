@@ -1,0 +1,13 @@
+{
+  "name": "orge",
+  "version": "0.1.0",
+  "description": "Vulkan and SDL3 game library",
+  "dependencies": [
+    "vulkan-loader",
+    {
+      "name": "sdl3",
+      "features": ["vulkan"]
+    },
+    "yaml-cpp"
+  ]
+}

@@ -16,25 +16,42 @@
   - wayland
   - xrandr
 
-## Build
+## Build & Install
 
-次を実行して依存ライブラリをビルド:
+本リポジトリをクローン:
 
 ```sh
-cd thirdparty
-
-# Windows
-setup.bat
-
-# Linux/macOS
-./setup.sh
+git clone --recursive https://github.com/Tengu712/orge.git
 ```
 
-次を実行してorgeをビルド:
+依存ライブラリをインストール:
 
 ```sh
-cmake -G Ninja -S . -B build
+# Windows
+.\vcpkg\bootstrap-vcpkg.bat
+# Linux/macOS
+./vcpkg/bootstrap-vcpkg.sh
+
+# Windows
+.\vcpkg\vcpkg install --triplet custom-x64-windows --overlay-triplets=.\triplets
+# Linux
+./vcpkg/vcpkg install --triplet custom-x64-linux --overlay-triplets=./triplets
+# macOS
+./vcpkg/vcpkg install --triplet custom-arm64-osx --overlay-triplets=./triplets
+```
+
+次を実行してorgeをビルド及びインストール:
+
+```sh
+cmake \
+	-G Ninja \
+	-B build \
+	-D ORGE_SHARED=(ON|OFF) \
+	-D ORGE_STATIC=(ON|OFF) \
+	-D CMAKE_BUILD_TYPE=(Release|Debug) \
+	-D CMAKE_INSTALL_PREFIX=インストール先ディレクトリパス
 cmake --build build
+cmake --install build
 ```
 
 ## Examples
@@ -42,21 +59,5 @@ cmake --build build
 examples下のサンプルプログラムをビルドするには、orgeのCMake構成時にオプションを与える必要がある。
 オプションは[examples/CMakeLists.txt](../examples/CMakeLists.txt)を参照。
 
-## Install
-
-orgeを特定のディレクトリへインストールするには、次を行う必要がある:
-
-- orgeのCMake構成時に`-DCMAKE_INCLUDE_PREFIX=`によってインストール先ディレクトリを指定する
-- `cmake --install ... --prefix ...`のようにインストール時にインストール先ディレクトリを指定する
-
-ただし、orgeではCMake構成時にpkgconfigの生成を行うため、インストール後にpkg-configを使う場合は必ずCMake構成時にインストール先ディレクトリを指定すること。
-
-orgeをビルドした後、次を実行してインストール:
-
-```sh
-# CMake構成時にインストール先ディレクトリを指定した場合
-cmake --install ビルドディレクトリ
-
-# ここでインストール先ディレクトリを指定する場合
-cmake --install ビルドディレクトリ --prefix インストール先ディレクトリ
-```
+ビルドされたサンプルプログラムはbuild/examplesディレクトリ下に生成される。
+また、インストールされない。

@@ -30,27 +30,32 @@ jobs:
           libxrandr-dev \
           pkg-config
 
-    - name: Cache thirdparty build
-      id: cache-thirdparty
-      uses: actions/cache@v3
+    - name: Cache vcpkg packages
+      id: cache-vcpkg
+      uses: actions/cache@v4
       with:
-        path: build/deps
-        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/setup.sh', '.gitmodules') }}
+        path: |
+          vcpkg_installed
+          vcpkg/buildtrees
+          vcpkg/packages
+          vcpkg/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
         restore-keys: |
-          ${{ runner.os }}-thirdparty-
+          ${{ runner.os }}-vcpkg-
 
-    - name: Setup thirdparty libraries
-      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
-      working-directory: thirdparty
-      run: ./setup.sh
-
-    - name: Build orge
+    - name: Install packages
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
       run: |
-        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
-        cmake --build build
+        ./vcpkg/bootstrap-vcpkg.sh
+        ./vcpkg/vcpkg install --triplet custom-x64-linux --overlay-triplets=./triplets
 
-    - name: Install orge
-      run: cmake --install build
+    - name: Build & install orge
+      run: |
+        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUID_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
+        cmake --build build
+        cmake --install build
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4

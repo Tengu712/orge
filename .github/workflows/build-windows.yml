@@ -20,32 +20,32 @@ jobs:
 
     - uses: seanmiddleditch/gha-setup-ninja@master
 
-    - name: Install dependencies
-      run: choco install pkgconfiglite
-
-    - name: Cache thirdparty build
-      id: cache-thirdparty
-      uses: actions/cache@v3
+    - name: Cache vcpkg packages
+      id: cache-vcpkg
+      uses: actions/cache@v4
       with:
-        path: build/deps
-        key: ${{ runner.os }}-thirdparty-${{ hashFiles('thirdparty/setup.bat', '.gitmodules') }}
+        path: |
+          vcpkg_installed
+          vcpkg/buildtrees
+          vcpkg/packages
+          vcpkg/vcpkg.exe
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
         restore-keys: |
-          ${{ runner.os }}-thirdparty-
+          ${{ runner.os }}-vcpkg-
 
-    - name: Setup thirdparty libraries
-      if: steps.cache-thirdparty.outputs.cache-hit != 'true'
-      shell: cmd
-      working-directory: thirdparty
-      run: setup.bat
-
-    - name: Build orge
-      shell: cmd
+    - name: Install packages
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      env:
+        VCPKG_FORCE_SYSTEM_BINARIES: 1
       run: |
-        cmake -G Ninja -S . -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=C:\orge
-        cmake --build build
+        vcpkg\bootstrap-vcpkg.bat
+        vcpkg\vcpkg install --triplet custom-x64-windows --overlay-triplets=.\triplets
 
-    - name: Install orge
-      run: cmake --install build
+    - name: Build & install orge
+      run: |
+        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=C:\orge
+        cmake --build build
+        cmake --install build
 
     - name: Copy example file
       run: copy examples\simple\main.cpp C:\orge\
