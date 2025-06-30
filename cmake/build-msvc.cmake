@@ -1,6 +1,6 @@
 # MSVC用ビルドスクリプト
 
-add_compile_options(/utf-8)
+add_compile_options(/utf-8 /EHsc)
 
 if(ORGE_SHARED)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -30,7 +30,7 @@ if(ORGE_SHARED)
 	#       全シンボルを自動エクスポートしてインポートライブラリを生成。
 	set_target_properties(orge PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20")
+	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MD")
 	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orge.lib")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orge.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orge.pc @ONLY)
 
@@ -85,7 +85,7 @@ if(ORGE_STATIC)
 		message(WARNING "SDL3 pkg-config not found. Static linking dependencies may be incomplete.")
 		set(ORGE_PC_LIBS_PRIVATE "")
 	endif()
-	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20")
+	set(ORGE_PC_CFLAGS "/I\${includedir} /std:c++20 /EHsc /MT")
 	set(ORGE_PC_LIBS "/LIBPATH:\${libdir} orgestatic.lib")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/orgestatic.pc.in ${CMAKE_CURRENT_BINARY_DIR}/orgestatic.pc @ONLY)
 
