@@ -6,10 +6,10 @@
 これにより、次が生成される:
 
 - orge.dll (ORGE_SHARED=ON)
-- orge.lib (ORGE_SHARED=ON AND MSVC)
-- liborge.a (ORGE_SHARED=ON AND NOT MSVC)
-- orgestatic.lib (ORGE_STATIC=ON AND MSVC)
-- liborgestatic.a (ORGE_STATIC=ON AND NOT MSVC)
+- orge.lib (ORGE_SHARED=ON)
+- orgestatic.lib (ORGE_STATIC=ON)
+- vulkan-1.dll (ORGE_STATIC=ON)
+- vulkan-1.lib (ORGE_STATIC=ON)
 - orge.h
 - pkgconfig
 
@@ -29,7 +29,7 @@ orgestatic.libを使う場合は次に注意すること:
 - liborge.dylib (ORGE_SHARED=ON)
 - liborgestatic.a (ORGE_STATIC=ON)
 - libvulkan.1.dylib
-- libvulkan.1.4.313.dylib
+- libvulkan.1.4.309.dylib
 - orge.h
 - pkgconfig
 
@@ -61,7 +61,7 @@ liborgestatic.aを利用する場合、次に注意すること:
 - liborge.so (ORGE_SHARED=ON)
 - liborgestatic.a (ORGE_STATIC=ON)
 - libvulkan.so (ORGE_STATIC=ON)
-- libvulkan.so.1.4.313 (ORGE_STATIC=ON)
+- libvulkan.so.1.4.309 (ORGE_STATIC=ON)
 - orge.h
 - pkgconfig
 

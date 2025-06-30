@@ -35,6 +35,7 @@ vcpkgをセットアップ:
 ```sh
 # Windows
 .\vcpkg\bootstrap-vcpkg.bat
+
 # Linux/macOS
 ./vcpkg/bootstrap-vcpkg.sh
 ```
