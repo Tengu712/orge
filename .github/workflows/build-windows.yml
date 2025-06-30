@@ -41,25 +41,15 @@ jobs:
 
     - name: Build & install orge (shared)
       run: |
-        cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build
-        cmake --install build
-
-    - name: Remove build and rename vcpkg_installed_shared
-      shell: cmd
-      run: |
-        rd /S /Q build
-        ren vcpkg_installed_shared _temp
+        cmake -G Ninja -B build_shared -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
+        cmake --build build_shared
+        cmake --install build_shared
 
     - name: Build & install orge (static)
       run: |
-        cmake -G Ninja -B build -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build
-        cmake --install build
-
-    - name: Restore vcpkg_installed_shared
-      shell: cmd
-      run: ren _temp vcpkg_installed_shared
+        cmake -G Ninja -B build_static -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
+        cmake --build build_static
+        cmake --install build_static
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
@@ -89,17 +79,6 @@ jobs:
       run: |
         mkdir shared
         mkdir static
-
-    - run: type D:\orge\lib\pkgconfig\orge.pc
-    - run: type D:\orge\lib\pkgconfig\orgestatic.pc
-
-    - name: Debug pkg-config output
-      shell: pwsh
-      env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
-      run: |
-        pkg-config orge --cflags
-        pkg-config orge --libs
 
     - name: Test build with shared
       working-directory: shared
