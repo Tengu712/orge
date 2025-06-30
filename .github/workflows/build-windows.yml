@@ -81,6 +81,7 @@ jobs:
         mkdir static
 
     - run: type C:\orge\lib\pkgconfig\orge.pc
+    - run: type C:\orge\lib\pkgconfig\orgestatic.pc
 
     - name: Debug pkg-config output
       shell: pwsh
