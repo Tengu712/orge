@@ -20,6 +20,9 @@ jobs:
 
     - uses: seanmiddleditch/gha-setup-ninja@master
 
+    - name: Install dependencies
+      run: choco install pkgconfiglite
+
     - name: Cache vcpkg packages
       id: cache-vcpkg
       uses: actions/cache@v4

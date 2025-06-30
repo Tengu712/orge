@@ -33,6 +33,7 @@ jobs:
           autoconf \
           automake \
           libtool \
+          libtool-bin \
           gettext \
           curl \
           zip \
