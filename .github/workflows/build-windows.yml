@@ -93,7 +93,9 @@ jobs:
       env:
         PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
       run: |
-        cl "$(pkg-config orge --cflags)" C:\orge\main.cpp /link "$(pkg-config orge --libs)"
+        $cflags = pkg-config orge --cflags
+        $libs = pkg-config orge --libs
+        cl $cflags C:\orge\main.cpp /link $libs
 
     - name: Debug pkg-config output (static)
       env:
@@ -108,4 +110,6 @@ jobs:
       env:
         PKG_CONFIG_PATH: C:\orge\lib\pkgconfig
       run: |
-        cl "$(pkg-config orgestatic --cflags)" C:\orge\main.cpp /link "$(pkg-config orgestatic --libs --static)"
+        $cflags = pkg-config orgestatic --cflags
+        $libs = pkg-config orgestatic --libs --static
+        cl $cflags C:\orge\main.cpp /link $libs

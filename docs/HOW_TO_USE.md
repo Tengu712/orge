@@ -13,6 +13,11 @@
 - orge.h
 - pkgconfig
 
+次のことに注意すること:
+
+- orge.dll(orge.lib)を使う場合は/MDを指定すること
+- orgestatic.libを使う場合は/MTを指定すること
+
 ## macOS
 
 [BUILD.md](./BUILD.md)を参照してビルドおよびインストールすること。

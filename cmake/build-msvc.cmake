@@ -2,6 +2,11 @@
 
 add_compile_options(/utf-8 /EHsc)
 
+set(ORGE_PC_PATH_SEP "\\")
+string(REPLACE "/" "\\" ORGE_PC_PREFIX "${CMAKE_INSTALL_PREFIX}")
+string(REPLACE "/" "\\" ORGE_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+string(REPLACE "/" "\\" ORGE_PC_INCDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+
 if(ORGE_SHARED)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 

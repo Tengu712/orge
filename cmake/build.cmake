@@ -1,5 +1,10 @@
 # Linux/macOS用ビルドスクリプト
 
+set(ORGE_PC_PATH_SEP "/")
+set(ORGE_PC_PREFIX "${CMAKE_INSTALL_PREFIX}")
+set(ORGE_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+set(ORGE_PC_INCDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+
 add_library(orge_objects OBJECT
 	src/config.cpp
 	src/error.cpp

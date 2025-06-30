@@ -1,7 +1,7 @@
-prefix=@CMAKE_INSTALL_PREFIX@
+prefix=@ORGE_PC_PREFIX@
 exec_prefix=${prefix}
-libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
-includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+libdir=${exec_prefix}@ORGE_PC_PATH_SEP@@ORGE_PC_LIBDIR@
+includedir=${prefix}@ORGE_PC_PATH_SEP@@ORGE_PC_INCDIR@
 
 Name: orge
 Description: Ore ore game engine. (shared)
