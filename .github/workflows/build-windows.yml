@@ -33,8 +33,6 @@ jobs:
           vcpkg/packages
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
-        restore-keys: |
-          ${{ runner.os }}-vcpkg-
 
     - name: Install packages
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'

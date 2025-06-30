@@ -28,6 +28,7 @@ jobs:
           libxkbcommon-dev \
           libwayland-dev \
           libxrandr-dev \
+          libltdl-dev \
           pkg-config
 
     - name: Cache vcpkg packages
@@ -40,8 +41,6 @@ jobs:
           vcpkg/packages
           vcpkg/vcpkg
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
-        restore-keys: |
-          ${{ runner.os }}-vcpkg-
 
     - name: Install packages
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
