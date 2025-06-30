@@ -1,5 +1,7 @@
+prefix=@ORGE_PC_PREFIX@
+
 Name: orge
 Description: Ore ore game engine. (shared)
 Version: @PROJECT_VERSION@
 Libs: @ORGE_PC_LIBS@
-Cflags: @ORGE_PC_CFLAGS@
+Cflags: ${prefix} @ORGE_PC_CFLAGS@

@@ -80,6 +80,8 @@ jobs:
         mkdir shared
         mkdir static
 
+    - run: type C:\orge\lib\pkgconfig\orge.pc
+
     - name: Debug pkg-config output
       shell: pwsh
       env:
@@ -90,7 +92,15 @@ jobs:
 
     - name: Test build with shared
       working-directory: shared
+      shell: pwsh
+      env:
+        PKG_CONFIG_PATH="C:\orge\lib\pkgconfig"
       run: |
+        $cflags = pkg-config orge --cflags
+        $libs = pkg-config orge --libs
+        echo $cflags
+        echo $(pkg-config orge --cflags)
+        echo "$(pkg-config orge --cflags)"
         cl /IC:/orge/include /EHsc /std:c++20 /MD C:\orge\main.cpp /link /LIBPATH:C:/orge/lib orge.lib
 
     - name: Test build with static
