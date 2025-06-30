@@ -1,7 +1,7 @@
 {
   "name": "orge",
   "version": "0.1.0",
-  "description": "Vulkan and SDL3 game library",
+  "description": "Ore ore game engine.",
   "dependencies": [
     "vulkan-loader",
     {
