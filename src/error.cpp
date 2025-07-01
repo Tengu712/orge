@@ -17,10 +17,10 @@ const char *convertErrorMessage(Error from) {
 		case DoubleBufferingUnavailable: return "the surface not support double buffering.";
 		case CreateSwapchain: return "failed to create a swapchain.";
 		case CreateSwapchainImageView: return "failed to create swapchain image views.";
-		case CreateSemaphoresForSwapchain: return "failed to create smephores for swapchain.";
+		case CreateSemaphoresForRendering: return "failed to create smephores for rendering.";
+		case CreateFenceForRendering: return "failed to create a fence for rendering.";
 		case CreateRenderPass: return "failed to create a render pass.";
 		case CreateFramebuffer: return "failed to create a framebuffer.";
-		case CreateDummyFenceForAcquireNextImageIndex: return "failed to create a dummy fence for acquiring next image index.";
 		case AcquireNextImageIndex: return "failed to acquire next the swapchain image index.";
 		case CreateRenderCommandBuffer: return "failed to create a command buffer for rendering.";
 		case ResetRenderCommandBuffer: return "failed to reset a command buffer for rendering.";
@@ -28,6 +28,7 @@ const char *convertErrorMessage(Error from) {
 		case EndRenderCommandBuffer: return "failed to end a command buffer for rendering.";
 		case SubmitRenderCommandBuffer: return "failed to submit a command buffer for rendering.";
 		case Presentation: return "failed to present.";
+		case WaitForRenderingFence: return "failed to wait for the rendering fence.";
 		default: return "undefined error happened.";
 	}
 }

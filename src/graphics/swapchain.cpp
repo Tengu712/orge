@@ -1,6 +1,7 @@
 #include "swapchain.hpp"
 
 #include "platform.hpp"
+#include "window.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -14,9 +15,6 @@ vk::SwapchainKHR g_swapchain;
 uint32_t g_imageCount;
 vk::Extent2D g_imageSize;
 std::vector<vk::ImageView> g_imageViews;
-// ダミーフェンス
-// acquireNextImageKHRを待機する必要はないもののセマフォもフェンスも与えないと怒られるので
-vk::Fence g_dummyFenceForImageAvailable;
 
 std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
@@ -94,22 +92,12 @@ Error createImageViews(const vk::Device &device) {
 	return Error::None;
 }
 
-Error createDummyFence(const vk::Device &device) {
-	try {
-		g_dummyFenceForImageAvailable = device.createFence({});
-	} catch (...) {
-		return Error::CreateDummyFenceForAcquireNextImageIndex;
-	}
-	return Error::None;
-}
-
-Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface) {
-	g_surface = surface;
+Error initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+	CHECK(window::createSurface(instance, g_surface));
 	CHECK(validateColorSpace(physicalDevice));
 	CHECK(getImageCountAndSize(physicalDevice));
 	CHECK(createSwapchain(physicalDevice, device));
 	CHECK(createImageViews(device));
-	CHECK(createDummyFence(device));
 	return Error::None;
 }
 
@@ -131,13 +119,17 @@ Error createFramebuffers(const vk::Device &device, const vk::RenderPass &renderP
 	return Error::None;
 }
 
-Error acquireNextImageIndex(const vk::Device &device, uint32_t &index) {
+Error acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore, uint32_t &index) {
 	try {
-		index = device.acquireNextImageKHR(g_swapchain, UINT64_MAX, nullptr, g_dummyFenceForImageAvailable).value;
+		index = device.acquireNextImageKHR(g_swapchain, UINT64_MAX, semaphore, nullptr).value;
 		return Error::None;
 	} catch (...) {
 		return Error::AcquireNextImageIndex;
 	}
+}
+
+uint32_t getImageCount() {
+	return g_imageCount;
 }
 
 vk::Extent2D getImageSize() {
@@ -157,11 +149,7 @@ Error presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint3
 	}
 }
 
-void terminate(const vk::Device &device) {
-	if (g_dummyFenceForImageAvailable) {
-		device.destroyFence(g_dummyFenceForImageAvailable);
-		g_dummyFenceForImageAvailable = nullptr;
-	}
+void terminate(const vk::Instance &instance, const vk::Device &device) {
 	if (!g_imageViews.empty()) {
 		for (auto& imageView : g_imageViews) {
 			device.destroyImageView(imageView);
@@ -173,6 +161,7 @@ void terminate(const vk::Device &device) {
 		g_swapchain = nullptr;
 	}
 	if (g_surface) {
+		instance.destroySurfaceKHR(g_surface);
 		g_surface = nullptr;
 	}
 }

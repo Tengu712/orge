@@ -19,6 +19,9 @@ target_link_libraries(orge_objects
 		SDL3::SDL3
 		yaml-cpp::yaml-cpp
 )
+if(${ENABLE_VVL})
+	target_compile_definitions(orge_objects PRIVATE ENABLE_VVL)
+endif()
 set_target_properties(orge_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(ORGE_SHARED)

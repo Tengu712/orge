@@ -27,10 +27,10 @@ enum class Error {
 	DoubleBufferingUnavailable,
 	CreateSwapchain,
 	CreateSwapchainImageView,
-	CreateSemaphoresForSwapchain,
+	CreateSemaphoresForRendering,
+	CreateFenceForRendering,
 	CreateRenderPass,
 	CreateFramebuffer,
-	CreateDummyFenceForAcquireNextImageIndex,
 	AcquireNextImageIndex,
 	CreateRenderCommandBuffer,
 	ResetRenderCommandBuffer,
@@ -38,6 +38,7 @@ enum class Error {
 	EndRenderCommandBuffer,
 	SubmitRenderCommandBuffer,
 	Presentation,
+	WaitForRenderingFence,
 };
 
 const char *convertErrorMessage(Error from);

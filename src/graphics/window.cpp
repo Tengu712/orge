@@ -33,12 +33,13 @@ std::span<const char *const> getInstanceExtensions() {
 	return std::span(extensions, count);
 }
 
-std::optional<vk::SurfaceKHR> createSurface(const vk::Instance &instance) {
-	VkSurfaceKHR surface;
-	if (SDL_Vulkan_CreateSurface(g_window, instance, NULL, &surface)) {
-		return surface;
+Error createSurface(const vk::Instance &instance, vk::SurfaceKHR &surface) {
+	VkSurfaceKHR surface_;
+	if (SDL_Vulkan_CreateSurface(g_window, instance, NULL, &surface_)) {
+		surface = surface_;
+		return Error::None;
 	} else {
-		return std::nullopt;
+		return Error::CreateSurface;
 	}
 }
 

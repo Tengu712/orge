@@ -66,3 +66,8 @@ examples下のサンプルプログラムをビルドするには、orgeのCMake
 
 ビルドされたサンプルプログラムはbuild/examplesディレクトリ下に生成される。
 また、インストールされない。
+
+## Enable Vulkan Validation Layer
+
+Vulkan Validation Layerを有効化するためには、orgeのCMake構成時に`-D ENABLE_VVL=ON`を与える。
+ただし、orgeはVulkan Validation Layerを提供しないため、自マシンにインストールしておくこと。

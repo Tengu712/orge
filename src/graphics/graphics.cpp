@@ -30,8 +30,17 @@ std::vector<const char *> getInstanceExtensions() {
 	return extensions;
 }
 
+std::vector<const char *> getInstanceLayers() {
+#ifdef ENABLE_VVL
+	return {"VK_LAYER_KHRONOS_validation"};
+#else
+	return {};
+#endif
+}
+
 Error createInstance() {
 	const auto extensions = getInstanceExtensions();
+	const auto layers = getInstanceLayers();
 
 	const auto ai = vk::ApplicationInfo()
 		.setPEngineName("orge")
@@ -39,7 +48,8 @@ Error createInstance() {
 	const auto ci = vk::InstanceCreateInfo()
 		.setFlags(platform::getInstanceCreateFlags())
 		.setPApplicationInfo(&ai)
-		.setPEnabledExtensionNames(extensions);
+		.setPEnabledExtensionNames(extensions)
+		.setPEnabledLayerNames(layers);
 
 	try {
 		g_instance = vk::createInstance(ci);
@@ -144,12 +154,7 @@ Error initialize(const Config &config) {
 	CHECK(createCommandPool(queueFamilyIndex.value()));
 
 	// スワップチェイン
-	// NOTE: ウィンドウから得たサーフェスはスワップチェイン側で管理してもらう。
-	const auto surface = window::createSurface(g_instance);
-	if (!surface) {
-		return Error::CreateSurface;
-	}
-	CHECK(swapchain::initialize(g_physicalDevice, g_device, surface.value()));
+	CHECK(swapchain::initialize(g_instance, g_physicalDevice, g_device));
 
 	// 描画処理オブジェクト
 	CHECK(rendering::initialize(config, g_device, g_commandPool));
@@ -166,7 +171,7 @@ void terminate() {
 		g_device.waitIdle();
 	}
 	rendering::terminate(g_device);
-	swapchain::terminate(g_device);
+	swapchain::terminate(g_instance, g_device);
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);
 		g_commandPool = nullptr;
@@ -179,6 +184,7 @@ void terminate() {
 		g_instance.destroy();
 		g_instance = nullptr;
 	}
+	window::terminate();
 }
 
 } // namespace graphics

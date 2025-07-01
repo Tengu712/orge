@@ -12,7 +12,7 @@ namespace graphics::swapchain {
 /// Vulkanデバイスに必要なextensionsを取得する関数
 std::span<const char *const> getDeviceExtensions();
 
-Error initialize(const vk::PhysicalDevice &physicalDevice, const vk::Device &device, const vk::SurfaceKHR &surface);
+Error initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
 
 /// フレームバッファを作成する関数
 ///
@@ -21,8 +21,15 @@ Error createFramebuffers(const vk::Device &device, const vk::RenderPass &renderP
 
 /// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
 ///
+/// イメージの取得が完了したら与えられたセマフォをシグナルする。
+///
 /// 初期化後に呼ばれることを期待する。
-Error acquireNextImageIndex(const vk::Device &device, uint32_t &index);
+Error acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore, uint32_t &index);
+
+/// スワップチェインイメージの個数を取得する関数
+///
+/// 初期化後に呼ばれることを期待する。
+uint32_t getImageCount();
 
 /// スワップチェインイメージのサイズを取得する関数
 ///
@@ -37,6 +44,6 @@ vk::Extent2D getImageSize();
 /// 初期化後に呼ばれることを期待する。
 Error presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
 
-void terminate(const vk::Device &device);
+void terminate(const vk::Instance &instance, const vk::Device &device);
 
 } // namespace graphics::swapchain

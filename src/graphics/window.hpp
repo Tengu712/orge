@@ -21,7 +21,7 @@ std::span<const char *const> getInstanceExtensions();
 /// サーフェスを作成する関数
 ///
 /// 既にウィンドウが生成されていることを期待する。
-std::optional<vk::SurfaceKHR> createSurface(const vk::Instance &instance);
+Error createSurface(const vk::Instance &instance, vk::SurfaceKHR &surface);
 
 /// ウィンドウイベントをすべて処理する関数
 ///
