@@ -12,9 +12,15 @@ std::vector<vk::Framebuffer> g_framebuffers;
 // 描画処理コマンド用のコマンドバッファ
 // orgeはプレゼンテーション時に描画完了まで待機するので1個で十分
 vk::CommandBuffer g_commandBuffer;
+// スワップチェインイメージ取得の完了を知るためのセマフォ
+// コマンドバッファ提出を待機させるために使う
+vk::Semaphore g_semaphoreForImageEnabled;
 // コマンドバッファ実行の完了を知るためのセマフォ
 // プレゼンテーション開始を待機させるために使う
-vk::Semaphore g_semaphoreForRenderFinished;
+std::vector<vk::Semaphore> g_semaphoreForRenderFinisheds;
+// フレーム完了を監視するフェンス
+// 次フレーム開始前にGPU処理完了を待機するために使う
+vk::Fence g_frameInFlightFence;
 
 void getClearValues(const Config &config) {
 	for (const auto &n: config.attachments) {
@@ -87,11 +93,24 @@ Error createCommandBuffer(const vk::Device &device, const vk::CommandPool &comma
 	return Error::None;
 }
 
-Error createSemaphore(const vk::Device &device) {
+Error createSemaphores(const vk::Device &device) {
 	try {
-		g_semaphoreForRenderFinished = device.createSemaphore({});
+		g_semaphoreForImageEnabled = device.createSemaphore({});
+		g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
+		for (int i = 0; i < swapchain::getImageCount(); ++i) {
+			g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
+		}
 	} catch (...) {
-		return Error::CreateSemaphoresForSwapchain;
+		return Error::CreateSemaphoresForRendering;
+	}
+	return Error::None;
+}
+
+Error createFence(const vk::Device &device) {
+	try {
+		g_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
+	} catch (...) {
+		return Error::CreateFenceForRendering;
 	}
 	return Error::None;
 }
@@ -101,11 +120,22 @@ Error initialize(const Config &config, const vk::Device &device, const vk::Comma
 	CHECK(createRenderPass(config, device));
 	CHECK(swapchain::createFramebuffers(device, g_renderPass, g_framebuffers));
 	CHECK(createCommandBuffer(device, commandPool));
-	CHECK(createSemaphore(device));
+	CHECK(createSemaphores(device));
+	CHECK(createFence(device));
 	return Error::None;
 }
 
 Error render(const vk::Device &device, const vk::Queue &queue) {
+	// 前のフレームのGPU処理が完全に終了するまで待機
+	try {
+		if (device.waitForFences({g_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+			return Error::WaitForRenderingFence;
+		}
+		device.resetFences({g_frameInFlightFence});
+	} catch (...) {
+		return Error::WaitForRenderingFence;
+	}
+
 	// コマンドバッファリセット
 	try {
 		g_commandBuffer.reset();
@@ -124,7 +154,7 @@ Error render(const vk::Device &device, const vk::Queue &queue) {
 
 	// スワップチェインイメージ番号取得
 	uint32_t index;
-	CHECK(swapchain::acquireNextImageIndex(device, index));
+	CHECK(swapchain::acquireNextImageIndex(device, g_semaphoreForImageEnabled, index));
 
 	// レンダーパス開始
 	const auto rbi = vk::RenderPassBeginInfo()
@@ -145,26 +175,41 @@ Error render(const vk::Device &device, const vk::Queue &queue) {
 	}
 
 	// 提出
-	const auto si = vk::SubmitInfo()
-		.setCommandBuffers({g_commandBuffer})
-		.setSignalSemaphores({g_semaphoreForRenderFinished});
 	try {
-		queue.submit(si, nullptr);
+		const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+		const auto si = vk::SubmitInfo()
+			.setWaitSemaphores({g_semaphoreForImageEnabled})
+			.setWaitDstStageMask({waitStage})
+			.setCommandBuffers({g_commandBuffer})
+			.setSignalSemaphores({g_semaphoreForRenderFinisheds.at(index)});
+		queue.submit(si, g_frameInFlightFence);
 	} catch (...) {
 		return Error::SubmitRenderCommandBuffer;
 	}
 
 	// プレゼンテーション
-	CHECK(swapchain::presentation(queue, g_semaphoreForRenderFinished, index));
+	//
+	// NOTE: ここで画面が切り替わるまで待機される。
+	CHECK(swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(index), index));
 
 	// 終了
 	return Error::None;
 }
 
 void terminate(const vk::Device &device) {
-	if (g_semaphoreForRenderFinished) {
-		device.destroySemaphore(g_semaphoreForRenderFinished);
-		g_semaphoreForRenderFinished = nullptr;
+	if (g_frameInFlightFence) {
+		device.destroyFence(g_frameInFlightFence);
+		g_frameInFlightFence = nullptr;
+	}
+	if (!g_semaphoreForRenderFinisheds.empty()) {
+		for (const auto &semaphore: g_semaphoreForRenderFinisheds) {
+			device.destroySemaphore(semaphore);
+		}
+		g_semaphoreForRenderFinisheds.clear();
+	}
+	if (g_semaphoreForImageEnabled) {
+		device.destroySemaphore(g_semaphoreForImageEnabled);
+		g_semaphoreForImageEnabled = nullptr;
 	}
 	if (g_commandBuffer) {
 		// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。

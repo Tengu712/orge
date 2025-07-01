@@ -24,6 +24,9 @@ if(ORGE_SHARED)
 			SDL3::SDL3
 			yaml-cpp::yaml-cpp
 	)
+	if(${ENABLE_VVL})
+		target_compile_definitions(orge PRIVATE ENABLE_VVL)
+	endif()
 	add_library(orge::orge ALIAS orge)
 
 	# NOTE: MSVCではインポートライブラリなしにdllをリンクできないので。
@@ -61,6 +64,9 @@ if(ORGE_STATIC)
 			SDL3::SDL3-static
 			yaml-cpp::yaml-cpp
 	)
+	if(${ENABLE_VVL})
+		target_compile_definitions(orgestatic_lite PRIVATE ENABLE_VVL)
+	endif()
 	# NOTE: examplesのビルドにはorgestatic_liteを用いる。
 	add_library(orge::orgestatic ALIAS orgestatic_lite)
 

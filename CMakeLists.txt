@@ -16,6 +16,11 @@ if(MSVC AND ORGE_SHARED AND ORGE_STATIC)
 	message(FATAL_ERROR "On Windows, ORGE_SHARED and ORGE_STATIC cannot both be ON due to runtime library conflicts.")
 endif()
 
+# Vulkan Validation Layers設定
+#
+# NOTE: MoltenVKと同様。必要ならローカルに別途インストールしてもらって。
+option(ENABLE_VVL "Enable Vulkan Validation Layer" OFF)
+
 # vcpkgのインストールディレクトリ設定
 #
 # NOTE: これがないとなぜか再ビルドが走る。
