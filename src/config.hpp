@@ -8,30 +8,40 @@
 #include <vulkan/vulkan.hpp>
 
 struct Attachment {
-	const vk::Format format;
-	const bool discard;
-	const vk::ImageLayout finalLayout;
-	const vk::ClearValue clearValue;
+	vk::Format format;
+	bool discard;
+	vk::ImageLayout finalLayout;
+	vk::ClearValue clearValue;
 };
 
 struct Subpass {
-	const std::vector<vk::AttachmentReference> inputs;
-	const std::vector<vk::AttachmentReference> outputs;
-	const std::optional<vk::AttachmentReference> depth;
+	std::vector<vk::AttachmentReference> inputs;
+	std::vector<vk::AttachmentReference> outputs;
+	std::optional<vk::AttachmentReference> depth;
 };
 
 struct SubpassDependency {
-	const uint32_t src;
-	const uint32_t dst;
+	uint32_t src;
+	uint32_t dst;
+};
+
+struct Pipeline {
+	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
+	std::string vertexShader;
+	std::string fragmentShader;
+	std::vector<uint32_t> vertexInputAttributes;
+	bool culling;
+	bool colorBlend;
 };
 
 struct Config {
-	const std::string title;
-	const int width;
-	const int height;
-	const std::vector<Attachment> attachments;
-	const std::vector<Subpass> subpasses;
-	const std::vector<SubpassDependency> subpassDeps;
+	std::string title;
+	int width;
+	int height;
+	std::vector<Attachment> attachments;
+	std::vector<Subpass> subpasses;
+	std::vector<SubpassDependency> subpassDeps;
+	std::vector<Pipeline> pipelines;
 };
 
 std::optional<Config> parseConfig(const char *const yaml);

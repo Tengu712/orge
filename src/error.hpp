@@ -31,6 +31,7 @@ enum class Error {
 	CreateFenceForRendering,
 	CreateRenderPass,
 	CreateFramebuffer,
+	CreateGraphicsPipeline,
 	AcquireNextImageIndex,
 	CreateRenderCommandBuffer,
 	ResetRenderCommandBuffer,

@@ -86,6 +86,55 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 	};
 }
 
+Pipeline parsePipeline(const YAML::Node &node) {
+	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
+	for (const auto &m: node["descSets"]) {
+		std::vector<vk::DescriptorSetLayoutBinding> descs;
+		for (const auto &n: node["descs"]) {
+			const auto type = n["type"].as<std::string>();
+			const auto count = n["count"].as<uint32_t>(1);
+			const auto stages = n["stages"].as<std::string>();
+			descs.emplace_back(
+				descs.size(),
+				type == "sampler" ? vk::DescriptorType::eSampler
+				: type == "combined-image-sampler" ? vk::DescriptorType::eCombinedImageSampler
+				: type == "sampled-image" ? vk::DescriptorType::eSampledImage
+				: type == "storage-image" ? vk::DescriptorType::eStorageImage
+				: type == "uniform-texel-buffer" ? vk::DescriptorType::eUniformTexelBuffer
+				: type == "storage-texel-buffer" ? vk::DescriptorType::eStorageTexelBuffer
+				: type == "uniform-buffer" ? vk::DescriptorType::eUniformBuffer
+				: type == "storage-buffer" ? vk::DescriptorType::eStorageBuffer
+				: type == "uniform-buffer-dynamic" ? vk::DescriptorType::eUniformBufferDynamic
+				: type == "storage-buffer-dynamic" ? vk::DescriptorType::eStorageBufferDynamic
+				: type == "input-attachment" ? vk::DescriptorType::eInputAttachment
+				: throw,
+				count,
+				stages == "vertex" ? vk::ShaderStageFlagBits::eVertex
+				: stages == "fragment" ? vk::ShaderStageFlagBits::eFragment
+				: throw,
+				nullptr
+			);
+		}
+		descSets.push_back(std::move(descs));
+	}
+	const auto vertexShader = node["vertexShader"].as<std::string>();
+	const auto fragmentShader = node["fragmentShader"].as<std::string>();
+	std::vector<uint32_t> vertexInputAttributes;
+	for (const auto &n: node["vertexInputAttributes"]) {
+		vertexInputAttributes.push_back(n.as<uint32_t>());
+	}
+	const auto culling = node["culling"].as<bool>(false);
+	const auto colorBlend = node["colorBlend"].as<bool>(false);
+	return {
+		descSets,
+		vertexShader,
+		fragmentShader,
+		vertexInputAttributes,
+		culling,
+		colorBlend,
+	};
+}
+
 Config parse(const YAML::Node yaml) {
 	const auto title = yaml["title"].as<std::string>();
 	const auto width = yaml["width"].as<int>();
@@ -116,6 +165,11 @@ Config parse(const YAML::Node yaml) {
 		}
 	}
 
+	std::vector<Pipeline> pipelines;
+	for (const auto &n: yaml["pipelines"]) {
+		pipelines.push_back(parsePipeline(n));
+	}
+
 	return {
 		title,
 		width,
@@ -123,6 +177,7 @@ Config parse(const YAML::Node yaml) {
 		attachments,
 		subpasses,
 		subpassDeps,
+		pipelines,
 	};
 }
 
