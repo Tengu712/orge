@@ -89,8 +89,10 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 
 Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &subpassMap) {
 	const auto id = node["id"].as<std::string>();
+
 	const auto vertexShader = node["vertexShader"].as<std::string>();
 	const auto fragmentShader = node["fragmentShader"].as<std::string>();
+
 	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
 	for (const auto &m: node["descSets"]) {
 		std::vector<vk::DescriptorSetLayoutBinding> descs;
@@ -121,6 +123,7 @@ Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::str
 		}
 		descSets.push_back(std::move(descs));
 	}
+
 	std::vector<uint32_t> vertexInputAttributes;
 	for (const auto &n: node["vertexInputAttributes"]) {
 		const auto vertexInputAttribute = n.as<uint32_t>();
@@ -129,12 +132,19 @@ Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::str
 		}
 		vertexInputAttributes.push_back(vertexInputAttribute);
 	}
+	if (vertexInputAttributes.empty()) {
+		throw;
+	}
+
 	const auto culling = node["culling"].as<bool>(false);
+
 	std::vector<bool> colorBlends;
 	for (const auto &n: node["colorBlends"]) {
 		colorBlends.push_back(n.as<bool>());
 	}
+
 	const auto subpass = node["subpass"].as<std::string>();
+
 	return {
 		id,
 		vertexShader,
