@@ -9,6 +9,7 @@ graph TD
     rendering ==> swapchain
     rendering ==> pipeline
     swapchain --> window
+    pipeline -.-> window
 ```
 
 - 太線矢印: 依存

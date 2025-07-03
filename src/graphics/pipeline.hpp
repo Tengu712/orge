@@ -7,8 +7,8 @@
 
 namespace graphics::pipeline {
 
-Error initialize(const vk::Device &device);
+Error initialize(const Config &config_, const vk::Device &device, const vk::RenderPass &renderPass);
 
-void terminate();
+void terminate(const vk::Device &device);
 
 } // namespace graphics::pipeline

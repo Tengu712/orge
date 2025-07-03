@@ -2,6 +2,7 @@
 
 #include "graphics/platform.hpp"
 
+#include <set>
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
 
@@ -86,7 +87,10 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 	};
 }
 
-Pipeline parsePipeline(const YAML::Node &node) {
+Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &subpassMap) {
+	const auto id = node["id"].as<std::string>();
+	const auto vertexShader = node["vertexShader"].as<std::string>();
+	const auto fragmentShader = node["fragmentShader"].as<std::string>();
 	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
 	for (const auto &m: node["descSets"]) {
 		std::vector<vk::DescriptorSetLayoutBinding> descs;
@@ -117,21 +121,29 @@ Pipeline parsePipeline(const YAML::Node &node) {
 		}
 		descSets.push_back(std::move(descs));
 	}
-	const auto vertexShader = node["vertexShader"].as<std::string>();
-	const auto fragmentShader = node["fragmentShader"].as<std::string>();
 	std::vector<uint32_t> vertexInputAttributes;
 	for (const auto &n: node["vertexInputAttributes"]) {
-		vertexInputAttributes.push_back(n.as<uint32_t>());
+		const auto vertexInputAttribute = n.as<uint32_t>();
+		if (vertexInputAttribute < 1 || vertexInputAttribute > 4) {
+			throw;
+		}
+		vertexInputAttributes.push_back(vertexInputAttribute);
 	}
 	const auto culling = node["culling"].as<bool>(false);
-	const auto colorBlend = node["colorBlend"].as<bool>(false);
+	std::vector<bool> colorBlends;
+	for (const auto &n: node["colorBlends"]) {
+		colorBlends.push_back(n.as<bool>());
+	}
+	const auto subpass = node["subpass"].as<std::string>();
 	return {
-		descSets,
+		id,
 		vertexShader,
 		fragmentShader,
+		descSets,
 		vertexInputAttributes,
 		culling,
-		colorBlend,
+		colorBlends,
+		subpassMap.at(subpass)
 	};
 }
 
@@ -142,6 +154,7 @@ Config parse(const YAML::Node yaml) {
 
 	std::unordered_map<std::string, uint32_t> attachmentMap;
 	std::unordered_map<std::string, uint32_t> subpassMap;
+	std::set<std::string> pipelineIDs;
 
 	std::vector<Attachment> attachments;
 	for (const auto &n : yaml["attachments"]) {
@@ -167,7 +180,12 @@ Config parse(const YAML::Node yaml) {
 
 	std::vector<Pipeline> pipelines;
 	for (const auto &n: yaml["pipelines"]) {
-		pipelines.push_back(parsePipeline(n));
+		pipelines.push_back(parsePipeline(n, subpassMap));
+		if (pipelineIDs.contains(pipelines.cend()->id)) {
+			pipelineIDs.insert(pipelines.cend()->id);
+		} else {
+			throw;
+		}
 	}
 
 	return {

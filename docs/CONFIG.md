@@ -53,6 +53,9 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
   - `src`: (`string`)依存関係上前のサブパスのID
   - `dst`: (`string`)依存関係上後のサブパスのID
 - `pipelines`: パイプラインの配列
+  - `id`: パイプラインのID
+  - `vertexShader`: (`string`)バーテックスシェーダのファイル名
+  - `fragmentShader`: (`string`)フラグメントシェーダのファイル名
   - `descSets`: ディスクリプタセットの配列
     - `descs`: ディスクリプタの配列
       - `type`: (`string`)ディスクリプタの種類
@@ -71,8 +74,7 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
       - `stages`: (`string[]`)ディスクリプタが見えるパイプラインステージの配列
         - `vertex`
         - `fragment`
-  - `vertexShader`: (`string`)バーテックスシェーダのファイル名
-  - `fragmentShader`: (`string`)フラグメントシェーダのファイル名
-  - `vertexInputAttributes`: (`uint[]`)各頂点入力属性のサイズの配列
+  - `vertexInputAttributes`: (`uint[]`)各頂点入力属性のサイズの配列(各値は`1`から`4`まで)
   - `culling`: (`bool`)カリングを行う(省略可能。標準値は`false`)
-  - `colorBlend`: (`bool`)カラーブレンドを行うか。(省略可能。標準値は`false`)
+  - `colorBlends`: (`bool[]`)各カラーアタッチメントのカラーブレンドを行うかの配列
+  - `subpass`: (`string`)対応づけるサブパスのID

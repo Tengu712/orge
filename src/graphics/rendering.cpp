@@ -1,5 +1,6 @@
 #include "rendering.hpp"
 
+#include "pipeline.hpp"
 #include "swapchain.hpp"
 
 #include <vector>
@@ -122,6 +123,7 @@ Error initialize(const Config &config, const vk::Device &device, const vk::Comma
 	CHECK(createCommandBuffer(device, commandPool));
 	CHECK(createSemaphores(device));
 	CHECK(createFence(device));
+	CHECK(pipeline::initialize(config, device, g_renderPass));
 	return Error::None;
 }
 
@@ -197,34 +199,38 @@ Error render(const vk::Device &device, const vk::Queue &queue) {
 }
 
 void terminate(const vk::Device &device) {
+	pipeline::terminate(device);
+
 	if (g_frameInFlightFence) {
 		device.destroyFence(g_frameInFlightFence);
 		g_frameInFlightFence = nullptr;
 	}
-	if (!g_semaphoreForRenderFinisheds.empty()) {
-		for (const auto &semaphore: g_semaphoreForRenderFinisheds) {
-			device.destroySemaphore(semaphore);
-		}
-		g_semaphoreForRenderFinisheds.clear();
+
+	for (const auto &semaphore: g_semaphoreForRenderFinisheds) {
+	device.destroySemaphore(semaphore);
 	}
+	g_semaphoreForRenderFinisheds.clear();
+
 	if (g_semaphoreForImageEnabled) {
 		device.destroySemaphore(g_semaphoreForImageEnabled);
 		g_semaphoreForImageEnabled = nullptr;
 	}
+
 	if (g_commandBuffer) {
 		// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。
 		g_commandBuffer = nullptr;
 	}
-	if (!g_framebuffers.empty()) {
-		for (auto &framebuffer: g_framebuffers) {
-			device.destroyFramebuffer(framebuffer);
-		}
-		g_framebuffers.clear();
+
+	for (auto &framebuffer: g_framebuffers) {
+		device.destroyFramebuffer(framebuffer);
 	}
+	g_framebuffers.clear();
+
 	if (g_renderPass) {
 		device.destroyRenderPass(g_renderPass);
 		g_renderPass = nullptr;
 	}
+
 	g_clearValues.clear();
 }
 

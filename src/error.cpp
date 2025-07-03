@@ -21,6 +21,7 @@ const char *convertErrorMessage(Error from) {
 		case CreateFenceForRendering: return "failed to create a fence for rendering.";
 		case CreateRenderPass: return "failed to create a render pass.";
 		case CreateFramebuffer: return "failed to create a framebuffer.";
+		case CreateShaderModule: return "failed to create a shader module.";
 		case CreateGraphicsPipeline: return "failed to create a graphics pipeline.";
 		case AcquireNextImageIndex: return "failed to acquire next the swapchain image index.";
 		case CreateRenderCommandBuffer: return "failed to create a command buffer for rendering.";

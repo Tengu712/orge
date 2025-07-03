@@ -26,12 +26,14 @@ struct SubpassDependency {
 };
 
 struct Pipeline {
-	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
+	std::string id;
 	std::string vertexShader;
 	std::string fragmentShader;
+	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
 	std::vector<uint32_t> vertexInputAttributes;
 	bool culling;
-	bool colorBlend;
+	std::vector<bool> colorBlends;
+	uint32_t subpass;
 };
 
 struct Config {
