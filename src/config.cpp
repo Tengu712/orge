@@ -182,9 +182,9 @@ Config parse(const YAML::Node yaml) {
 	for (const auto &n: yaml["pipelines"]) {
 		pipelines.push_back(parsePipeline(n, subpassMap));
 		if (pipelineIDs.contains(pipelines.cend()->id)) {
-			pipelineIDs.insert(pipelines.cend()->id);
-		} else {
 			throw;
+		} else {
+			pipelineIDs.insert(pipelines.cend()->id);
 		}
 	}
 

@@ -44,6 +44,10 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 }
 
 Error initialize(const Config &config_, const vk::Device &device, const vk::RenderPass &renderPass) {
+	if (config_.pipelines.empty()) {
+		return Error::None;
+	}
+
 	const auto imageSize = swapchain::getImageSize();
 	const auto width = imageSize.width;
 	const auto height = imageSize.height;
