@@ -8,7 +8,10 @@ int main() {
 	}
 
 	while (orgePollEvents()) {
-		if (!orgeRender()) {
+		if (!orgeBeginRender()) {
+			std::cout << orgeGetErrorMessage() << std::endl;
+		}
+		if (!orgeEndRender()) {
 			std::cout << orgeGetErrorMessage() << std::endl;
 		}
 	}

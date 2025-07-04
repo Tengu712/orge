@@ -133,8 +133,12 @@ void initialize(const Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
-void render() {
-	rendering::render(g_device, g_queue);
+void beginRender() {
+	rendering::beginRender(g_device);
+}
+
+void endRender() {
+	rendering::endRender(g_device, g_queue);
 }
 
 void terminate() {

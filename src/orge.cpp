@@ -46,8 +46,12 @@ int orgePollEvents() {
 	return graphics::window::pollEvents();
 }
 
-int orgeRender() {
-	TRY(graphics::render());
+int orgeBeginRender() {
+	TRY(graphics::beginRender());
+}
+
+int orgeEndRender() {
+	TRY(graphics::endRender());
 }
 
 void orgeTerminate() {

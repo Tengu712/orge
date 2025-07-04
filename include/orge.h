@@ -17,8 +17,11 @@ int orgeInitializeWith(const char *const yamlFilePath);
 /// 0以外であればウィンドウが閉じられていないことを意味する。
 int orgePollEvents(void);
 
-/// orgeのウィンドウに描画する関数
-int orgeRender();
+/// orgeの描画を開始する関数
+int orgeBeginRender();
+
+/// orgeの描画を終了する関数
+int orgeEndRender();
 
 /// orgeを終了する関数
 void orgeTerminate(void);

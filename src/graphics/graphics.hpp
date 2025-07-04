@@ -9,7 +9,9 @@ namespace graphics {
 
 void initialize(const Config &config);
 
-void render();
+void beginRender();
+
+void endRender();
 
 void terminate();
 

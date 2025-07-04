@@ -13,7 +13,9 @@ namespace graphics::rendering {
 
 void initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool);
 
-void render(const vk::Device &device, const vk::Queue &queue);
+void beginRender(const vk::Device &device);
+
+void endRender(const vk::Device &device, const vk::Queue &queue);
 
 void terminate(const vk::Device &device);
 
