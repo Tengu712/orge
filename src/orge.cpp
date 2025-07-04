@@ -5,25 +5,41 @@
 #include "graphics/graphics.hpp"
 #include "graphics/window.hpp"
 
-#define CHECK_(n) if (auto e = (n); e != Error::None) return static_cast<int>(e);
+#include <sstream>
+#include <vulkan/vulkan.hpp>
 
-const char *orgeConvertErrorMessage(int from) {
-	return convertErrorMessage(static_cast<Error>(from));
-}
+#define TRY(n)                                    \
+	try {                                         \
+		n;                                        \
+		return 1;                                 \
+	} catch (const char *e) {                     \
+		error::setMessage(std::string(e));        \
+		return 0;                                 \
+	} catch (const std::string &e) {              \
+		error::setMessage(e);                     \
+		return 0;                                 \
+	} catch (const vk::SystemError &e) {          \
+		error::setMessage(std::string(e.what())); \
+		return 0;                                 \
+	} catch (...) {                               \
+		error::setMessage("unbound error.");      \
+		return 0;                                 \
+    }
 
-int initialize(const Config &config) {
-	CHECK_(graphics::initialize(config));
-	return static_cast<int>(Error::None);
+const char *orgeGetErrorMessage() {
+	return error::getMessage();
 }
 
 int orgeInitialize(const char *const yaml) {
-	const auto config = parseConfig(yaml);
-	return config ? initialize(config.value()) : static_cast<int>(Error::InvalidConfig);
+	TRY(
+		graphics::initialize(parseConfig(yaml));
+	)
 }
 
 int orgeInitializeWith(const char *const yamlFilePath) {
-	const auto config = parseConfigFromFile(yamlFilePath);
-	return config ? initialize(config.value()) : static_cast<int>(Error::InvalidConfig);
+	TRY(
+		graphics::initialize(parseConfigFromFile(yamlFilePath));
+	)
 }
 
 int orgePollEvents() {
@@ -31,7 +47,7 @@ int orgePollEvents() {
 }
 
 int orgeRender() {
-	return static_cast<int>(graphics::render());
+	TRY(graphics::render());
 }
 
 void orgeTerminate() {
