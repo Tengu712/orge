@@ -34,7 +34,7 @@ void getImageCountAndSize(const vk::PhysicalDevice &physicalDevice) {
 	const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(g_surface);
 	g_imageCount = caps.minImageCount > 2 ? caps.minImageCount : 2;
 	g_imageSize = caps.currentExtent;
-	if (caps.maxImageCount >= 2) {
+	if (caps.maxImageCount < 2) {
 		throw "the surface not support double buffering.";
 	}
 }

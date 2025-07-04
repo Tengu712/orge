@@ -36,11 +36,7 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 
 	const auto ci = vk::ShaderModuleCreateInfo()
 		.setCode(code);
-	try {
-		return device.createShaderModule(ci);
-	} catch (...) {
-		return nullptr;
-	}
+	return device.createShaderModule(ci);
 }
 
 // NOTE: パイプラインを一気に作成する都合で、forスコープを抜けて参照がぶっ壊れるので。

@@ -4,13 +4,9 @@
 const char *orgeGetErrorMessage();
 
 /// orgeを初期化する関数 (yaml文字列指定)
-///
-/// エラー値を返す。
 int orgeInitialize(const char *const yaml);
 
 /// orgeを初期化する関数 (yamlファイル指定)
-///
-/// エラー値を返す。
 int orgeInitializeWith(const char *const yamlFilePath);
 
 /// orgeのウィンドウイベントをすべて処理する関数
@@ -22,8 +18,6 @@ int orgeInitializeWith(const char *const yamlFilePath);
 int orgePollEvents(void);
 
 /// orgeのウィンドウに描画する関数
-///
-/// エラー値を返す。
 int orgeRender();
 
 /// orgeを終了する関数
