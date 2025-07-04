@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "pipeline.hpp"
 #include "platform.hpp"
 #include "rendering.hpp"
 #include "swapchain.hpp"

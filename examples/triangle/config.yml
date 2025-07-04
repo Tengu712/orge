@@ -1,0 +1,20 @@
+title: triangle
+width: 640
+height: 480
+attachments:
+ - id: RT
+   format: render-target
+   final-layout: present-src
+   clear-value: [0.25, 0.25, 0.25, 1.0]
+subpasses:
+ - id: SP
+   outputs:
+    - id: RT
+      layout: color-attachment
+pipelines:
+  - id: PL
+    vertexShader: shader.vert.spv
+    fragmentShader: shader.frag.spv
+    vertexInputAttributes: [3, 4]
+    colorBlends: [false]
+    subpass: SP

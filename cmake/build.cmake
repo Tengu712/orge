@@ -1,14 +1,7 @@
 # Linux/macOS用ビルドスクリプト
 
-add_library(orge_objects OBJECT
-	src/config.cpp
-	src/error.cpp
-	src/graphics/graphics.cpp
-	src/graphics/rendering.cpp
-	src/graphics/swapchain.cpp
-	src/graphics/window.cpp
-	src/orge.cpp
-)
+file(GLOB_RECURSE ORGE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+add_library(orge_objects OBJECT ${ORGE_SOURCES})
 target_include_directories(orge_objects
 	PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

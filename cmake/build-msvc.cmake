@@ -2,18 +2,12 @@
 
 add_compile_options(/utf-8 /EHsc)
 
+file(GLOB_RECURSE ORGE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
 if(ORGE_SHARED)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-	add_library(orge SHARED
-		src/config.cpp
-		src/error.cpp
-		src/graphics/graphics.cpp
-		src/graphics/rendering.cpp
-		src/graphics/swapchain.cpp
-		src/graphics/window.cpp
-		src/orge.cpp
-	)
+	add_library(orge SHARED ${ORGE_SOURCES})
 	target_include_directories(orge
 		PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 	)
@@ -45,15 +39,7 @@ if(ORGE_STATIC)
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 	# 統合前
-	add_library(orgestatic_lite STATIC
-		src/config.cpp
-		src/error.cpp
-		src/graphics/graphics.cpp
-		src/graphics/rendering.cpp
-		src/graphics/swapchain.cpp
-		src/graphics/window.cpp
-		src/orge.cpp
-	)
+	add_library(orgestatic_lite STATIC ${ORGE_SOURCES})
 	target_include_directories(orgestatic_lite
 		PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 	)
