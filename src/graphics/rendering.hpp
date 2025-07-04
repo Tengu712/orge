@@ -11,9 +11,9 @@
 
 namespace graphics::rendering {
 
-Error initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool);
+void initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool);
 
-Error render(const vk::Device &device, const vk::Queue &queue);
+void render(const vk::Device &device, const vk::Queue &queue);
 
 void terminate(const vk::Device &device);
 

@@ -4,7 +4,7 @@
 
 ```mermaid
 graph TD
-    oroge -.-> graphics
+    orge -.-> graphics
     graphics -.-> rendering
     rendering ==> swapchain
     rendering ==> pipeline

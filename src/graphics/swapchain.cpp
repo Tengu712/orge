@@ -20,30 +20,26 @@ std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
 }
 
-Error validateColorSpace(const vk::PhysicalDevice &physicalDevice) {
-	try {
-		const auto formats = physicalDevice.getSurfaceFormatsKHR(g_surface);
-		const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
-			return n.format == platform::getRenderTargetPixelFormat() && n.colorSpace == platform::getRenderTargetColorSpace();
-		});
-		return ok ? Error::None : Error::InvalidColorSpace;
-	} catch (...) {
-		return Error::InvalidColorSpace;
+void validateColorSpace(const vk::PhysicalDevice &physicalDevice) {
+	const auto formats = physicalDevice.getSurfaceFormatsKHR(g_surface);
+	const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
+		return n.format == platform::getRenderTargetPixelFormat() && n.colorSpace == platform::getRenderTargetColorSpace();
+	});
+	if (!ok) {
+		throw "the surface color space is invalid.";
 	}
 }
 
-Error getImageCountAndSize(const vk::PhysicalDevice &physicalDevice) {
-	try {
-		const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(g_surface);
-		g_imageCount = caps.minImageCount > 2 ? caps.minImageCount : 2;
-		g_imageSize = caps.currentExtent;
-		return caps.maxImageCount >= 2 ? Error::None : Error::DoubleBufferingUnavailable;
-	} catch (...) {
-		return Error::DoubleBufferingUnavailable;
+void getImageCountAndSize(const vk::PhysicalDevice &physicalDevice) {
+	const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(g_surface);
+	g_imageCount = caps.minImageCount > 2 ? caps.minImageCount : 2;
+	g_imageSize = caps.currentExtent;
+	if (caps.maxImageCount < 2) {
+		throw "the surface not support double buffering.";
 	}
 }
 
-Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+void createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
 	const auto ci = vk::SwapchainCreateInfoKHR()
 		.setSurface(g_surface)
 		.setMinImageCount(g_imageCount)
@@ -57,51 +53,41 @@ Error createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device
 		.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
 		.setPresentMode(vk::PresentModeKHR::eFifo)
 		.setClipped(vk::True);
-	try {
-		g_swapchain = device.createSwapchainKHR(ci);
-	} catch (...) {
-		return Error::CreateSwapchain;
+	g_swapchain = device.createSwapchainKHR(ci);
+}
+
+void createImageViews(const vk::Device &device) {
+	const auto images = device.getSwapchainImagesKHR(g_swapchain);
+	if (images.size() < g_imageCount) {
+		throw "the number of swapchain image is too few.";
 	}
-	return Error::None;
-}
 
-Error createImageViews(const vk::Device &device) {
-	try {
-		const auto images = device.getSwapchainImagesKHR(g_swapchain);
-		if (images.size() < g_imageCount) {
-			return Error::CreateSwapchainImageView;
-		}
-
-		g_imageViews.reserve(g_imageCount);
-		for (uint32_t i = 0; i < g_imageCount; ++i) {
-			const auto ci = vk::ImageViewCreateInfo()
-				.setImage(images[i])
-				.setViewType(vk::ImageViewType::e2D)
-				.setFormat(platform::getRenderTargetPixelFormat())
-				.setSubresourceRange(
-					vk::ImageSubresourceRange()
-						.setAspectMask(vk::ImageAspectFlagBits::eColor)
-						.setLevelCount(1)
-						.setLayerCount(1)
-				);
-			g_imageViews.push_back(device.createImageView(ci));
-		}
-	} catch (...) {
-		return Error::CreateSwapchainImageView;
+	g_imageViews.reserve(g_imageCount);
+	for (uint32_t i = 0; i < g_imageCount; ++i) {
+		const auto ci = vk::ImageViewCreateInfo()
+			.setImage(images[i])
+			.setViewType(vk::ImageViewType::e2D)
+			.setFormat(platform::getRenderTargetPixelFormat())
+			.setSubresourceRange(
+				vk::ImageSubresourceRange()
+					.setAspectMask(vk::ImageAspectFlagBits::eColor)
+					.setLevelCount(1)
+					.setLayerCount(1)
+			);
+		g_imageViews.push_back(device.createImageView(ci));
 	}
-	return Error::None;
 }
 
-Error initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
-	CHECK(window::createSurface(instance, g_surface));
-	CHECK(validateColorSpace(physicalDevice));
-	CHECK(getImageCountAndSize(physicalDevice));
-	CHECK(createSwapchain(physicalDevice, device));
-	CHECK(createImageViews(device));
-	return Error::None;
+void initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+	g_surface = window::createSurface(instance);
+	validateColorSpace(physicalDevice);
+	getImageCountAndSize(physicalDevice);
+	createSwapchain(physicalDevice, device);
+	createImageViews(device);
 }
 
-Error createFramebuffers(const vk::Device &device, const vk::RenderPass &renderPass, std::vector<vk::Framebuffer> &framebuffers) {
+std::vector<vk::Framebuffer> createFramebuffers(const vk::Device &device, const vk::RenderPass &renderPass) {
+	std::vector<vk::Framebuffer> framebuffers;
 	framebuffers.reserve(g_imageCount);
 	for (const auto &n: g_imageViews) {
 		const auto ci = vk::FramebufferCreateInfo()
@@ -110,22 +96,14 @@ Error createFramebuffers(const vk::Device &device, const vk::RenderPass &renderP
 			.setWidth(g_imageSize.width)
 			.setHeight(g_imageSize.height)
 			.setLayers(1);
-		try {
-			framebuffers.push_back(device.createFramebuffer(ci));
-		} catch (...) {
-			return Error::CreateFramebuffer;
-		}
+		framebuffers.push_back(device.createFramebuffer(ci));
 	}
-	return Error::None;
+	return std::move(framebuffers);
 }
 
-Error acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore, uint32_t &index) {
-	try {
-		index = device.acquireNextImageKHR(g_swapchain, UINT64_MAX, semaphore, nullptr).value;
-		return Error::None;
-	} catch (...) {
-		return Error::AcquireNextImageIndex;
-	}
+uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore) {
+	// TODO: これ例外投げられる？
+	return device.acquireNextImageKHR(g_swapchain, UINT64_MAX, semaphore, nullptr).value;
 }
 
 uint32_t getImageCount() {
@@ -136,30 +114,27 @@ vk::Extent2D getImageSize() {
 	return g_imageSize;
 }
 
-Error presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index) {
+void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index) {
 	const auto pi = vk::PresentInfoKHR()
 		.setWaitSemaphores({semaphore})
 		.setSwapchains({g_swapchain})
 		.setImageIndices({index});
-	try {
-		const auto result = queue.presentKHR(pi);
-		return result == vk::Result::eSuccess ? Error::None : Error::Presentation;
-	} catch (...) {
-		return Error::Presentation;
+	if (queue.presentKHR(pi) != vk::Result::eSuccess) {
+		throw "failed to present the screen.";
 	}
 }
 
 void terminate(const vk::Instance &instance, const vk::Device &device) {
-	if (!g_imageViews.empty()) {
-		for (auto& imageView : g_imageViews) {
-			device.destroyImageView(imageView);
-		}
-		g_imageViews.clear();
+	for (auto& imageView : g_imageViews) {
+		device.destroyImageView(imageView);
 	}
+	g_imageViews.clear();
+
 	if (g_swapchain) {
 		device.destroySwapchainKHR(g_swapchain);
 		g_swapchain = nullptr;
 	}
+
 	if (g_surface) {
 		instance.destroySurfaceKHR(g_surface);
 		g_surface = nullptr;

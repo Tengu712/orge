@@ -2,14 +2,14 @@
 #include <orge.h>
 
 int main() {
-	if (const auto e = orgeInitializeWith("config.yml"); e != 0) {
-		std::cout << orgeConvertErrorMessage(e) << std::endl;
+	if (!orgeInitializeWith("config.yml")) {
+		std::cout << orgeGetErrorMessage() << std::endl;
 		return 1;
 	}
 
 	while (orgePollEvents()) {
-		if (const auto e = orgeRender(); e != 0) {
-			std::cout << orgeConvertErrorMessage(e) << std::endl;
+		if (!orgeRender()) {
+			std::cout << orgeGetErrorMessage() << std::endl;
 		}
 	}
 

@@ -36,11 +36,7 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 
 	const auto ci = vk::ShaderModuleCreateInfo()
 		.setCode(code);
-	try {
-		return device.createShaderModule(ci);
-	} catch (...) {
-		return nullptr;
-	}
+	return device.createShaderModule(ci);
 }
 
 // NOTE: パイプラインを一気に作成する都合で、forスコープを抜けて参照がぶっ壊れるので。
@@ -72,7 +68,7 @@ struct PipelineCreateTempInfo {
 		vertexShader = createShaderModule(device, config.vertexShader);
 		fragmentShader = createShaderModule(device, config.fragmentShader);
 		if (!vertexShader || !fragmentShader) {
-			throw;
+			throw "failed to create shader modules.";
 		}
 		psscis.emplace_back(
 			vk::PipelineShaderStageCreateFlags(),
@@ -159,9 +155,9 @@ struct PipelineCreateTempInfo {
 	}
 };
 
-Error initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	if (config.pipelines.empty()) {
-		return Error::None;
+		return;
 	}
 
 	// 入力アセンブリ
@@ -185,12 +181,8 @@ Error initialize(const Config &config, const vk::Device &device, const vk::Rende
 	// 一時情報作成
 	std::vector<PipelineCreateTempInfo> cits;
 	for (const auto &n: config.pipelines) {
-		try {
-			g_pipelineMap.emplace(n.id, g_pipelineMap.size());
-			cits.emplace_back(n, device);
-		} catch (...) {
-			return Error::CreateGraphicsPipeline;
-		}
+		g_pipelineMap.emplace(n.id, g_pipelineMap.size());
+		cits.emplace_back(n, device);
 	}
 
 	// 作成情報作成
@@ -210,22 +202,17 @@ Error initialize(const Config &config, const vk::Device &device, const vk::Rende
 				.setSubpass(n.subpass)
 		);
 	}
-	try {
-		g_pipelines = device.createGraphicsPipelines(nullptr, cis).value;
-	} catch (...) {
-		return Error::CreateGraphicsPipeline;
-	}
+	g_pipelines = device.createGraphicsPipelines(nullptr, cis).value;
 
 	// チェック
 	if (g_pipelines.size() != g_pipelineMap.size()) {
-		return Error::CreateGraphicsPipeline;
+		throw "something is wrong with creating graphics pipelines.";
 	}
 
 	// 終了
 	for (auto &n: cits) {
 		n.destroy(device);
 	}
-	return Error::None;
 }
 
 void terminate(const vk::Device &device) {

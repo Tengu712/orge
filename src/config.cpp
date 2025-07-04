@@ -2,6 +2,7 @@
 
 #include "graphics/platform.hpp"
 
+#include <format>
 #include <set>
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
@@ -9,7 +10,7 @@
 Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::string, uint32_t> &attachmentMap) {
 	const auto id = node["id"].as<std::string>();
 	if (!attachmentMap.emplace(id, static_cast<uint32_t>(attachmentMap.size())).second) {
-		throw;
+		throw std::format("config error: attachment id '{}' is duplicated.", id);
 	}
 	const auto format = node["format"].as<std::string>();
 	const auto discard = node["discard"].as<bool>(false);
@@ -17,26 +18,26 @@ Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::strin
 	const auto clearValue = node["clear-value"];
 	return {
 		format == "render-target" ? graphics::platform::getRenderTargetPixelFormat()
-		: throw,
+		: throw std::format("config error: attachment format '{}' is invalid.", format),
 		discard,
 		finalLayout == "general" ? vk::ImageLayout::eGeneral
 		: finalLayout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
 		: finalLayout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
 		: finalLayout == "transfer-src" ? vk::ImageLayout::eTransferSrcOptimal
 		: finalLayout == "present-src" ? vk::ImageLayout::ePresentSrcKHR
-		: throw,
+		: throw std::format("config error: attachment final layout '{}' is invalid.", finalLayout),
 		clearValue.IsSequence() && clearValue.size() == 4
 		? static_cast<vk::ClearValue>(vk::ClearColorValue(clearValue[0].as<float>(), clearValue[1].as<float>(), clearValue[2].as<float>(), clearValue[3].as<float>()))
 		: clearValue.IsScalar()
 		? static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(clearValue.as<float>(), 0))
-		: throw,
+		: throw std::format("config error: attachment clear value format is invalid."),
 	};
 }
 
 Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &attachmentMap, std::unordered_map<std::string, uint32_t> &subpassMap) {
 	const auto id = node["id"].as<std::string>();
 	if (!subpassMap.emplace(id, static_cast<uint32_t>(subpassMap.size())).second) {
-		throw;
+		throw std::format("config error: subpass id '{}' is duplicated.", id);
 	}
 
 	std::vector<vk::AttachmentReference> inputs;
@@ -49,7 +50,7 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 				layout == "general" ? vk::ImageLayout::eGeneral
 				: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 				: layout == "shader-read-only" ? vk::ImageLayout::eShaderReadOnlyOptimal
-				: throw
+				: throw std::format("config error: subpass input layout '{}' is invalid.", layout)
 			);
 		}
 	}
@@ -62,7 +63,7 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 			attachmentMap.at(id),
 			layout == "general" ? vk::ImageLayout::eGeneral
 			: layout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
-			: throw
+			: throw std::format("config error: subpass output layout '{}' is invalid.", layout)
 		);
 	}
 
@@ -76,7 +77,7 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 			layout == "general" ? vk::ImageLayout::eGeneral
 			: layout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
 			: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-			: throw
+			: throw std::format("config error: subpass depth layout '{}' is invalid.", layout)
 		);
 	}
 
@@ -113,11 +114,11 @@ Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::str
 				: type == "uniform-buffer-dynamic" ? vk::DescriptorType::eUniformBufferDynamic
 				: type == "storage-buffer-dynamic" ? vk::DescriptorType::eStorageBufferDynamic
 				: type == "input-attachment" ? vk::DescriptorType::eInputAttachment
-				: throw,
+				: throw std::format("config error: pipeline descriptor type '{}' is invalid.", type),
 				count,
 				stages == "vertex" ? vk::ShaderStageFlagBits::eVertex
 				: stages == "fragment" ? vk::ShaderStageFlagBits::eFragment
-				: throw,
+				: throw std::format("config error: pipeline shader stages '{}' is invalid.", stages),
 				nullptr
 			);
 		}
@@ -128,12 +129,12 @@ Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::str
 	for (const auto &n: node["vertexInputAttributes"]) {
 		const auto vertexInputAttribute = n.as<uint32_t>();
 		if (vertexInputAttribute < 1 || vertexInputAttribute > 4) {
-			throw;
+			throw std::format("config error: pipeline vertex input attribute '{}' is invalid (must be 1-4).", vertexInputAttribute);
 		}
 		vertexInputAttributes.push_back(vertexInputAttribute);
 	}
 	if (vertexInputAttributes.empty()) {
-		throw;
+		throw std::format("config error: pipeline vertex input attributes cannot be empty.");
 	}
 
 	const auto culling = node["culling"].as<bool>(false);
@@ -192,7 +193,7 @@ Config parse(const YAML::Node yaml) {
 	for (const auto &n: yaml["pipelines"]) {
 		pipelines.push_back(parsePipeline(n, subpassMap));
 		if (pipelineIDs.contains(pipelines.cend()->id)) {
-			throw;
+			throw std::format("config error: pipeline id '{}' is duplicated.", pipelines.cend()->id);
 		} else {
 			pipelineIDs.insert(pipelines.cend()->id);
 		}
@@ -209,18 +210,26 @@ Config parse(const YAML::Node yaml) {
 	};
 }
 
-std::optional<Config> parseConfig(const char *const yaml) {
+Config parseConfig(const char *const yaml) {
 	try {
 		return parse(YAML::Load(yaml));
-	} catch (...) {
-		return std::nullopt;
+	} catch (const std::string &e) {
+		throw e;
+	} catch (const YAML::BadConversion) {
+		// TODO: どのキーが定義されていないのか含める。
+		throw "config error: some key is undefined.";
 	}
 }
 
-std::optional<Config> parseConfigFromFile(const char *const yamlFilePath) {
+Config parseConfigFromFile(const char *const yamlFilePath) {
 	try {
 		return parse(YAML::LoadFile(yamlFilePath));
-	} catch (...) {
-		return std::nullopt;
+	} catch (const std::string &e) {
+		throw e;
+	} catch (const YAML::BadConversion &) {
+		// TODO: どのキーが定義されていないのか含める。
+		throw "config error: some key is undefined.";
+	} catch (const YAML::BadFile &) {
+		throw std::format("config error: '{}' not found.", yamlFilePath);
 	}
 }

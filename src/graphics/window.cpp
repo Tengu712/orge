@@ -7,21 +7,17 @@ namespace graphics::window {
 
 SDL_Window *g_window;
 
-Error createWindow(const std::string &title, int width, int height) {
+void initialize(const std::string &title, int width, int height) {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
-		return Error::CreateWindow;
+		throw "failed to prepare for creating a window.";
 	}
-
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
-		return Error::CreateWindow;
+		throw "failed to load Vulkan.";
 	}
-
 	g_window = SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_VULKAN);
 	if (!g_window) {
-		return Error::CreateWindow;
+		throw "failed to create a window.";
 	}
-
-	return Error::None;
 }
 
 std::span<const char *const> getInstanceExtensions() {
@@ -33,13 +29,12 @@ std::span<const char *const> getInstanceExtensions() {
 	return std::span(extensions, count);
 }
 
-Error createSurface(const vk::Instance &instance, vk::SurfaceKHR &surface) {
-	VkSurfaceKHR surface_;
-	if (SDL_Vulkan_CreateSurface(g_window, instance, NULL, &surface_)) {
-		surface = surface_;
-		return Error::None;
+vk::SurfaceKHR createSurface(const vk::Instance &instance) {
+	VkSurfaceKHR surface;
+	if (SDL_Vulkan_CreateSurface(g_window, instance, NULL, &surface)) {
+		return surface;
 	} else {
-		return Error::CreateSurface;
+		throw "failed to create a surface.";
 	}
 }
 

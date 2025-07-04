@@ -2,16 +2,13 @@
 
 #pragma once
 
-#include "../error.hpp"
-
-#include <optional>
 #include <span>
 #include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics::window {
 
-Error createWindow(const std::string &title, int width, int height);
+void initialize(const std::string &title, int width, int height);
 
 /// Vulkanインスタンスに必要なextensionsを取得する関数
 ///
@@ -21,7 +18,7 @@ std::span<const char *const> getInstanceExtensions();
 /// サーフェスを作成する関数
 ///
 /// 既にウィンドウが生成されていることを期待する。
-Error createSurface(const vk::Instance &instance, vk::SurfaceKHR &surface);
+vk::SurfaceKHR createSurface(const vk::Instance &instance);
 
 /// ウィンドウイベントをすべて処理する関数
 ///

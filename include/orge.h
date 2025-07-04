@@ -1,18 +1,12 @@
 #pragma once
 
 /// orgeのエラーメッセージを取得する関数
-const char *orgeConvertErrorMessage(int from);
+const char *orgeGetErrorMessage();
 
 /// orgeを初期化する関数 (yaml文字列指定)
-///
-/// エラー値を返す。
-/// 0以外であれば失敗を意味する。
 int orgeInitialize(const char *const yaml);
 
 /// orgeを初期化する関数 (yamlファイル指定)
-///
-/// エラー値を返す。
-/// 0以外であれば失敗を意味する。
 int orgeInitializeWith(const char *const yamlFilePath);
 
 /// orgeのウィンドウイベントをすべて処理する関数
@@ -24,9 +18,6 @@ int orgeInitializeWith(const char *const yamlFilePath);
 int orgePollEvents(void);
 
 /// orgeのウィンドウに描画する関数
-///
-/// エラー値を返す。
-/// 0以外であれば失敗を意味する。
 int orgeRender();
 
 /// orgeを終了する関数

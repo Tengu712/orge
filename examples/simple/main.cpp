@@ -18,15 +18,15 @@ subpasses:\n\
 ";
 
 int main() {
-	if (const auto e = orgeInitialize(CONFIG); e != 0) {
-		std::cout << orgeConvertErrorMessage(e) << std::endl;
+	if (!orgeInitialize(CONFIG)) {
+		std::cout << orgeGetErrorMessage() << std::endl;
 		return 1;
 	}
 
 	int count = 0;
 	while (orgePollEvents()) {
-		if (const auto e = orgeRender(); e != 0) {
-			std::cout << orgeConvertErrorMessage(e) << std::endl;
+		if (!orgeRender()) {
+			std::cout << orgeGetErrorMessage() << std::endl;
 		}
 		if (count % 60 == 0) {
 			std::cout << count / 60 << std::endl;

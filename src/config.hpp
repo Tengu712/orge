@@ -46,6 +46,6 @@ struct Config {
 	std::vector<Pipeline> pipelines;
 };
 
-std::optional<Config> parseConfig(const char *const yaml);
+Config parseConfig(const char *const yaml);
 
-std::optional<Config> parseConfigFromFile(const char *const yamlFilePath);
+Config parseConfigFromFile(const char *const yamlFilePath);

@@ -7,7 +7,6 @@
 #include "window.hpp"
 
 #include <algorithm>
-#include <optional>
 #include <vector>
 #include <vulkan/vulkan.hpp>
 
@@ -39,7 +38,7 @@ std::vector<const char *> getInstanceLayers() {
 #endif
 }
 
-Error createInstance() {
+void createInstance() {
 	const auto extensions = getInstanceExtensions();
 	const auto layers = getInstanceLayers();
 
@@ -51,35 +50,23 @@ Error createInstance() {
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions)
 		.setPEnabledLayerNames(layers);
-
-	try {
-		g_instance = vk::createInstance(ci);
-	} catch (...) {
-		return Error::CreateInstance;
-	}
-
-	return Error::None;
+	g_instance = vk::createInstance(ci);
 }
 
-Error selectPhysicalDevice() {
-	try {
-		const auto devices = g_instance.enumeratePhysicalDevices();
-		if (devices.empty()) {
-			return Error::SelectPhysicalDevice;
-		}
-		// TODO: 適切なものを選ぶ
-		g_physicalDevice = devices.front();
-	} catch (...) {
-		return Error::SelectPhysicalDevice;
+void selectPhysicalDevice() {
+	const auto devices = g_instance.enumeratePhysicalDevices();
+	if (devices.empty()) {
+		throw "no physical device found.";
 	}
-	return Error::None;
+	// TODO: 適切なものを選ぶ
+	g_physicalDevice = devices.front();
 }
 
-std::optional<uint32_t> getQueueFamilyIndex() {
+uint32_t getQueueFamilyIndex() {
 	const auto props = g_physicalDevice.getQueueFamilyProperties();
 	const auto iter = std::find_if(props.cbegin(), props.cend(), [](const auto &n) { return n.queueFlags & vk::QueueFlagBits::eGraphics; });
 	if (iter == props.cend()) {
-		return std::nullopt;
+		throw "failed to get a queue family index.";
 	}
 	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
@@ -96,7 +83,7 @@ std::vector<const char *> getDeviceExtensions() {
 	return extensions;
 }
 
-Error createDevice(uint32_t queueFamilyIndex) {
+void createDevice(uint32_t queueFamilyIndex) {
 	const auto extensions = getDeviceExtensions();
 
 	const auto priority = 1.0f;
@@ -106,85 +93,73 @@ Error createDevice(uint32_t queueFamilyIndex) {
 	const auto ci = vk::DeviceCreateInfo()
 		.setQueueCreateInfos(qci)
 		.setPEnabledExtensionNames(extensions);
-
-	try {
-		g_device = g_physicalDevice.createDevice(ci);
-	} catch (...) {
-		return Error::CreateDevice;
-	}
-
-	return Error::None;
+	g_device = g_physicalDevice.createDevice(ci);
 }
 
 void getQueue(uint32_t queueFamilyIndex) {
 	g_queue = g_device.getQueue(queueFamilyIndex, 0);
 }
 
-Error createCommandPool(uint32_t queueFamilyIndex) {
+void createCommandPool(uint32_t queueFamilyIndex) {
 	const auto ci = vk::CommandPoolCreateInfo()
 		.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
 		.setQueueFamilyIndex(queueFamilyIndex);
-	try {
-		g_commandPool = g_device.createCommandPool(ci);
-	} catch (...) {
-		return Error::CreateCommandPool;
-	}
-	return Error::None;
+	g_commandPool = g_device.createCommandPool(ci);
 }
 
-Error initialize(const Config &config) {
+void initialize(const Config &config) {
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
-	CHECK(window::createWindow(config.title, config.width, config.height));
+	window::initialize(config.title, config.width, config.height);
 
 	// インスタンス
-	CHECK(createInstance());
+	createInstance();
 
 	// デバイス
-	CHECK(selectPhysicalDevice());
+	selectPhysicalDevice();
 	const auto queueFamilyIndex = getQueueFamilyIndex();
-	if (!queueFamilyIndex) {
-		return Error::GetQueueFamilyIndex;
-	}
-	CHECK(createDevice(queueFamilyIndex.value()));
+	createDevice(queueFamilyIndex);
 
 	// キュー
-	getQueue(queueFamilyIndex.value());
+	getQueue(queueFamilyIndex);
 
 	// コマンドプール
-	CHECK(createCommandPool(queueFamilyIndex.value()));
+	createCommandPool(queueFamilyIndex);
 
 	// スワップチェイン
-	CHECK(swapchain::initialize(g_instance, g_physicalDevice, g_device));
+	swapchain::initialize(g_instance, g_physicalDevice, g_device);
 
 	// 描画処理オブジェクト
-	CHECK(rendering::initialize(config, g_device, g_commandPool));
-
-	return Error::None;
+	rendering::initialize(config, g_device, g_commandPool);
 }
 
-Error render() {
-	return rendering::render(g_device, g_queue);
+void render() {
+	rendering::render(g_device, g_queue);
 }
 
 void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
 	}
+
 	rendering::terminate(g_device);
 	swapchain::terminate(g_instance, g_device);
+
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);
 		g_commandPool = nullptr;
 	}
+
 	if (g_device) {
 		g_device.destroy();
 		g_device = nullptr;
 	}
+
 	if (g_instance) {
 		g_instance.destroy();
 		g_instance = nullptr;
 	}
+
 	window::terminate();
 }
 

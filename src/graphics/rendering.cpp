@@ -29,7 +29,7 @@ void getClearValues(const Config &config) {
 	}
 }
 
-Error createRenderPass(const Config &config, const vk::Device &device) {
+void createRenderPass(const Config &config, const vk::Device &device) {
 	std::vector<vk::AttachmentDescription> attachments;
 	for (const auto &n: config.attachments) {
 		attachments.emplace_back(
@@ -72,91 +72,56 @@ Error createRenderPass(const Config &config, const vk::Device &device) {
 		.setAttachments(attachments)
 		.setSubpasses(subpasses)
 		.setDependencies(subpassDeps);
-	try {
-		g_renderPass = device.createRenderPass(ci);
-	} catch (...) {
-		return Error::CreateRenderPass;
-	}
-
-	return Error::None;
+	g_renderPass = device.createRenderPass(ci);
 }
 
-Error createCommandBuffer(const vk::Device &device, const vk::CommandPool &commandPool) {
+void createCommandBuffer(const vk::Device &device, const vk::CommandPool &commandPool) {
 	const auto ai = vk::CommandBufferAllocateInfo()
 		.setCommandPool(commandPool)
 		.setLevel(vk::CommandBufferLevel::ePrimary)
 		.setCommandBufferCount(1);
-	try {
-		g_commandBuffer = device.allocateCommandBuffers(ai).at(0);
-	} catch (...) {
-		return Error::CreateRenderCommandBuffer;
-	}
-	return Error::None;
+	g_commandBuffer = device.allocateCommandBuffers(ai).at(0);
 }
 
-Error createSemaphores(const vk::Device &device) {
-	try {
-		g_semaphoreForImageEnabled = device.createSemaphore({});
-		g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
-		for (int i = 0; i < swapchain::getImageCount(); ++i) {
-			g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
-		}
-	} catch (...) {
-		return Error::CreateSemaphoresForRendering;
+void createSemaphores(const vk::Device &device) {
+	g_semaphoreForImageEnabled = device.createSemaphore({});
+	g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
+	for (int i = 0; i < swapchain::getImageCount(); ++i) {
+		g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
 	}
-	return Error::None;
 }
 
-Error createFence(const vk::Device &device) {
-	try {
-		g_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
-	} catch (...) {
-		return Error::CreateFenceForRendering;
-	}
-	return Error::None;
+void createFence(const vk::Device &device) {
+	g_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
 }
 
-Error initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
+void initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
 	getClearValues(config);
-	CHECK(createRenderPass(config, device));
-	CHECK(swapchain::createFramebuffers(device, g_renderPass, g_framebuffers));
-	CHECK(createCommandBuffer(device, commandPool));
-	CHECK(createSemaphores(device));
-	CHECK(createFence(device));
-	CHECK(pipeline::initialize(config, device, g_renderPass));
-	return Error::None;
+	createRenderPass(config, device);
+	g_framebuffers = swapchain::createFramebuffers(device, g_renderPass);
+	createCommandBuffer(device, commandPool);
+	createSemaphores(device);
+	createFence(device);
+	pipeline::initialize(config, device, g_renderPass);
 }
 
-Error render(const vk::Device &device, const vk::Queue &queue) {
+void render(const vk::Device &device, const vk::Queue &queue) {
 	// 前のフレームのGPU処理が完全に終了するまで待機
-	try {
-		if (device.waitForFences({g_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
-			return Error::WaitForRenderingFence;
-		}
-		device.resetFences({g_frameInFlightFence});
-	} catch (...) {
-		return Error::WaitForRenderingFence;
+	if (device.waitForFences({g_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+		throw "failed to wait for rendering comletion.";
 	}
+	device.resetFences({g_frameInFlightFence});
 
 	// コマンドバッファリセット
-	try {
-		g_commandBuffer.reset();
-	} catch (...) {
-		return Error::ResetRenderCommandBuffer;
-	}
+	g_commandBuffer.reset();
 
 	// コマンドバッファ開始
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-	try {
-		g_commandBuffer.begin(cbi);
-	} catch (...) {
-		return Error::BeginRenderCommandBuffer;
-	}
+	g_commandBuffer.begin(cbi);
 
 	// スワップチェインイメージ番号取得
-	uint32_t index;
-	CHECK(swapchain::acquireNextImageIndex(device, g_semaphoreForImageEnabled, index));
+	const auto index = swapchain::acquireNextImageIndex(device, g_semaphoreForImageEnabled);
 
 	// レンダーパス開始
 	const auto rbi = vk::RenderPassBeginInfo()
@@ -170,32 +135,21 @@ Error render(const vk::Device &device, const vk::Queue &queue) {
 	g_commandBuffer.endRenderPass();
 
 	// コマンドバッファ終了
-	try {
-		g_commandBuffer.end();
-	} catch (...) {
-		return Error::EndRenderCommandBuffer;
-	}
+	g_commandBuffer.end();
 
 	// 提出
-	try {
-		const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-		const auto si = vk::SubmitInfo()
-			.setWaitSemaphores({g_semaphoreForImageEnabled})
-			.setWaitDstStageMask({waitStage})
-			.setCommandBuffers({g_commandBuffer})
-			.setSignalSemaphores({g_semaphoreForRenderFinisheds.at(index)});
-		queue.submit(si, g_frameInFlightFence);
-	} catch (...) {
-		return Error::SubmitRenderCommandBuffer;
-	}
+	const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	const auto si = vk::SubmitInfo()
+		.setWaitSemaphores({g_semaphoreForImageEnabled})
+		.setWaitDstStageMask({waitStage})
+		.setCommandBuffers({g_commandBuffer})
+		.setSignalSemaphores({g_semaphoreForRenderFinisheds.at(index)});
+	queue.submit(si, g_frameInFlightFence);
 
 	// プレゼンテーション
 	//
 	// NOTE: ここで画面が切り替わるまで待機される。
-	CHECK(swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(index), index));
-
-	// 終了
-	return Error::None;
+	swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(index), index);
 }
 
 void terminate(const vk::Device &device) {
