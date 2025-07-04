@@ -9,6 +9,15 @@ int orgeInitialize(const char *const yaml);
 /// orgeを初期化する関数 (yamlファイル指定)
 int orgeInitializeWith(const char *const yamlFilePath);
 
+/// orgeにメッシュを追加する関数
+int createMesh(
+	const char *id,
+	const unsigned int vertexCount,
+	const float *vertices,
+	const unsigned int indexCount,
+	const float *indices
+);
+
 /// orgeのウィンドウイベントをすべて処理する関数
 ///
 /// 毎フレーム初めに呼ぶこと。

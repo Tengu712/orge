@@ -6,6 +6,7 @@
 graph TD
     orge -.-> graphics
     graphics -.-> rendering
+    graphics -.-> mesh
     rendering ==> swapchain
     rendering ==> pipeline
     swapchain --> window

@@ -42,6 +42,16 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
+int createMesh(
+	const char *id,
+	const unsigned int vertexCount,
+	const float *vertices,
+	const unsigned int indexCount,
+	const float *indices
+) {
+	TRY(graphics::createMesh(id, vertexCount, vertices, indexCount, indices));
+}
+
 int orgePollEvents() {
 	return graphics::window::pollEvents();
 }
