@@ -215,6 +215,13 @@ void initialize(const Config &config, const vk::Device &device, const vk::Render
 	}
 }
 
+void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {
+	for (uint32_t i = 0; i < pipelineCount; ++i) {
+		// TODO: pipelines[i]のエラーを取る。
+		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(g_pipelineMap.at(pipelines[i])));
+	}
+}
+
 void terminate(const vk::Device &device) {
 	for (auto &n: g_pipelines) {
 		device.destroyPipeline(n);

@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "error.hpp"
 #include "graphics/graphics.hpp"
+#include "graphics/rendering.hpp"
 #include "graphics/window.hpp"
 
 #include <sstream>
@@ -42,12 +43,36 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
+int orgeCreateMesh(
+	const char *id,
+	const uint32_t vertexCount,
+	const float *vertices,
+	const uint32_t indexCount,
+	const uint32_t *indices
+) {
+	TRY(graphics::createMesh(id, vertexCount, vertices, indexCount, indices));
+}
+
 int orgePollEvents() {
 	return graphics::window::pollEvents();
 }
 
-int orgeRender() {
-	TRY(graphics::render());
+int orgeBeginRender() {
+	TRY(graphics::beginRender());
+}
+
+int orgeDraw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
+	TRY(graphics::rendering::draw(pipelineCount, pipelines, mesh, instanceCount, instanceOffset));
+}
+
+int orgeEndRender() {
+	TRY(graphics::endRender());
 }
 
 void orgeTerminate() {

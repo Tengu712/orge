@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "mesh.hpp"
 #include "pipeline.hpp"
 #include "platform.hpp"
 #include "rendering.hpp"
@@ -133,8 +134,22 @@ void initialize(const Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
-void render() {
-	rendering::render(g_device, g_queue);
+void createMesh(
+	const char *id,
+	const uint32_t vertexCount,
+	const float *vertices,
+	const uint32_t indexCount,
+	const uint32_t *indices
+) {
+	mesh::createMesh(g_physicalDevice.getMemoryProperties(), g_device, id, vertexCount, vertices, indexCount, indices);
+}
+
+void beginRender() {
+	rendering::beginRender(g_device);
+}
+
+void endRender() {
+	rendering::endRender(g_device, g_queue);
 }
 
 void terminate() {
@@ -142,6 +157,7 @@ void terminate() {
 		g_device.waitIdle();
 	}
 
+	mesh::terminate(g_device);
 	rendering::terminate(g_device);
 	swapchain::terminate(g_instance, g_device);
 

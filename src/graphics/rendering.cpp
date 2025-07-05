@@ -1,5 +1,6 @@
 #include "rendering.hpp"
 
+#include "mesh.hpp"
 #include "pipeline.hpp"
 #include "swapchain.hpp"
 
@@ -22,6 +23,10 @@ std::vector<vk::Semaphore> g_semaphoreForRenderFinisheds;
 // フレーム完了を監視するフェンス
 // 次フレーム開始前にGPU処理完了を待機するために使う
 vk::Fence g_frameInFlightFence;
+// 現在のフレームインデックス
+uint32_t g_index;
+// 現在のインデックスカウント
+uint32_t g_indexCount;
 
 void getClearValues(const Config &config) {
 	for (const auto &n: config.attachments) {
@@ -105,7 +110,7 @@ void initialize(const Config &config, const vk::Device &device, const vk::Comman
 	pipeline::initialize(config, device, g_renderPass);
 }
 
-void render(const vk::Device &device, const vk::Queue &queue) {
+void beginRender(const vk::Device &device) {
 	// 前のフレームのGPU処理が完全に終了するまで待機
 	if (device.waitForFences({g_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
 		throw "failed to wait for rendering comletion.";
@@ -121,16 +126,39 @@ void render(const vk::Device &device, const vk::Queue &queue) {
 	g_commandBuffer.begin(cbi);
 
 	// スワップチェインイメージ番号取得
-	const auto index = swapchain::acquireNextImageIndex(device, g_semaphoreForImageEnabled);
+	g_index = swapchain::acquireNextImageIndex(device, g_semaphoreForImageEnabled);
 
 	// レンダーパス開始
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(g_renderPass)
-		.setFramebuffer(g_framebuffers[index])
+		.setFramebuffer(g_framebuffers[g_index])
 		.setRenderArea(vk::Rect2D({0, 0}, swapchain::getImageSize()))
 		.setClearValues(g_clearValues);
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
+}
 
+void draw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
+	// パイプラインバインド
+	if (pipelines != nullptr) {
+		pipeline::bind(g_commandBuffer, pipelineCount, pipelines);
+	}
+
+	// メッシュバインド
+	if (mesh != nullptr) {
+		g_indexCount = mesh::bind(g_commandBuffer, mesh);
+	}
+
+	// 描画
+	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceCount);
+}
+
+void endRender(const vk::Device &device, const vk::Queue &queue) {
 	// レンダーパス終了
 	g_commandBuffer.endRenderPass();
 
@@ -143,13 +171,13 @@ void render(const vk::Device &device, const vk::Queue &queue) {
 		.setWaitSemaphores({g_semaphoreForImageEnabled})
 		.setWaitDstStageMask({waitStage})
 		.setCommandBuffers({g_commandBuffer})
-		.setSignalSemaphores({g_semaphoreForRenderFinisheds.at(index)});
+		.setSignalSemaphores({g_semaphoreForRenderFinisheds.at(g_index)});
 	queue.submit(si, g_frameInFlightFence);
 
 	// プレゼンテーション
 	//
 	// NOTE: ここで画面が切り替わるまで待機される。
-	swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(index), index);
+	swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(g_index), g_index);
 }
 
 void terminate(const vk::Device &device) {
