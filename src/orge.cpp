@@ -61,7 +61,13 @@ int orgeBeginRender() {
 	TRY(graphics::beginRender());
 }
 
-int orgeDraw(uint32_t pipelineCount, const char *const *pipelines, const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
+int orgeDraw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
 	TRY(graphics::rendering::draw(pipelineCount, pipelines, mesh, instanceCount, instanceOffset));
 }
 

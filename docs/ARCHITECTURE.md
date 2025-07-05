@@ -10,6 +10,7 @@ graph TD
     graphics -.-> mesh
     rendering ==> swapchain
     rendering ==> pipeline
+    rendering ==> mesh
     swapchain --> window
     pipeline --> swapchain
 ```

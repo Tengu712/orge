@@ -25,12 +25,10 @@ int main() {
 
 	int count = 0;
 	while (orgePollEvents()) {
-		if (!orgeBeginRender()) {
+		if (!orgeBeginRender() || !orgeEndRender()) {
 			std::cout << orgeGetErrorMessage() << std::endl;
 		}
-		if (!orgeEndRender()) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+
 		if (count % 60 == 0) {
 			std::cout << count / 60 << std::endl;
 		}

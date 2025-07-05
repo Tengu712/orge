@@ -137,7 +137,13 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
-void draw(uint32_t pipelineCount, const char *const *pipelines, const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
+void draw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
 	// パイプラインバインド
 	if (pipelines != nullptr) {
 		pipeline::bind(g_commandBuffer, pipelineCount, pipelines);
