@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "error.hpp"
 #include "graphics/graphics.hpp"
+#include "graphics/rendering.hpp"
 #include "graphics/window.hpp"
 
 #include <sstream>
@@ -58,6 +59,10 @@ int orgePollEvents() {
 
 int orgeBeginRender() {
 	TRY(graphics::beginRender());
+}
+
+int orgeDraw(uint32_t pipelineCount, const char *const *pipelines) {
+	TRY(graphics::rendering::draw(pipelineCount, pipelines));
 }
 
 int orgeEndRender() {

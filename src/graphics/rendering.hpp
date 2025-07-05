@@ -1,7 +1,3 @@
-//! 描画処理に関するモジュール
-//!
-//! 主にレンダーパスやグラフィックスパイプラインを扱う。
-
 #pragma once
 
 #include "../config.hpp"
@@ -14,6 +10,8 @@ namespace graphics::rendering {
 void initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool);
 
 void beginRender(const vk::Device &device);
+
+void draw(uint32_t pipelineCount, const char *const *pipelines);
 
 void endRender(const vk::Device &device, const vk::Queue &queue);
 

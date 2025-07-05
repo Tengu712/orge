@@ -28,10 +28,11 @@ int main() {
 	}
 
 	while (orgePollEvents()) {
-		if (!orgeBeginRender()) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
-		if (!orgeEndRender()) {
+		const auto result =
+			orgeBeginRender()
+			&& orgeDraw(0, nullptr)
+			&& orgeEndRender();
+		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;
 		}
 	}

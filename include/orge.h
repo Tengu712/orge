@@ -31,6 +31,15 @@ int orgePollEvents(void);
 /// orgeの描画を開始する関数
 int orgeBeginRender();
 
+/// 描画関数
+///
+/// pipelinesはバインドするパイプラインのID列。
+/// 一度バインドされたパイプラインはorgeEndRender()が呼ばれるまでバインドされたままになる。
+///
+/// pipelinesがnullptrである場合、pipelineCountに拘らずすべてのパイプラインがバインドされる。
+/// 競合するパイプラインがある場合、最終的にどれがバインドされるか想定できない。
+int orgeDraw(uint32_t pipelineCount, const char *const *pipelines);
+
 /// orgeの描画を終了する関数
 int orgeEndRender();
 

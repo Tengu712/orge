@@ -134,6 +134,11 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
+void draw(uint32_t pipelineCount, const char *const *pipelines) {
+	// パイプラインバインド
+	pipeline::bindPipelines(g_commandBuffer, pipelineCount, pipelines);
+}
+
 void endRender(const vk::Device &device, const vk::Queue &queue) {
 	// レンダーパス終了
 	g_commandBuffer.endRenderPass();

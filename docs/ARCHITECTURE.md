@@ -5,6 +5,7 @@
 ```mermaid
 graph TD
     orge -.-> graphics
+    orge -.-> rendering
     graphics -.-> rendering
     graphics -.-> mesh
     rendering ==> swapchain
