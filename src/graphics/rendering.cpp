@@ -1,5 +1,6 @@
 #include "rendering.hpp"
 
+#include "mesh.hpp"
 #include "pipeline.hpp"
 #include "swapchain.hpp"
 
@@ -22,8 +23,10 @@ std::vector<vk::Semaphore> g_semaphoreForRenderFinisheds;
 // フレーム完了を監視するフェンス
 // 次フレーム開始前にGPU処理完了を待機するために使う
 vk::Fence g_frameInFlightFence;
-// 現在のフレーム
+// 現在のフレームインデックス
 uint32_t g_index;
+// 現在のインデックスカウント
+uint32_t g_indexCount;
 
 void getClearValues(const Config &config) {
 	for (const auto &n: config.attachments) {
@@ -134,9 +137,19 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
-void draw(uint32_t pipelineCount, const char *const *pipelines) {
+void draw(uint32_t pipelineCount, const char *const *pipelines, const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
 	// パイプラインバインド
-	pipeline::bindPipelines(g_commandBuffer, pipelineCount, pipelines);
+	if (pipelines != nullptr) {
+		pipeline::bind(g_commandBuffer, pipelineCount, pipelines);
+	}
+
+	// メッシュバインド
+	if (mesh != nullptr) {
+		g_indexCount = mesh::bind(g_commandBuffer, mesh);
+	}
+
+	// 描画
+	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceCount);
 }
 
 void endRender(const vk::Device &device, const vk::Queue &queue) {

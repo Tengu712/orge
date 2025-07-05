@@ -35,10 +35,13 @@ int orgeBeginRender();
 ///
 /// pipelinesはバインドするパイプラインのID列。
 /// 一度バインドされたパイプラインはorgeEndRender()が呼ばれるまでバインドされたままになる。
+/// 競合するパイプラインがある場合、最終的にどのパイプラインがバインドされるかわからない。
+/// pipelinesがnullptrである場合、パイプラインはバインドされない。
 ///
-/// pipelinesがnullptrである場合、pipelineCountに拘らずすべてのパイプラインがバインドされる。
-/// 競合するパイプラインがある場合、最終的にどれがバインドされるか想定できない。
-int orgeDraw(uint32_t pipelineCount, const char *const *pipelines);
+/// meshはバインドするメッシュのID。
+/// 一度バインドされたメッシュはorgeEndRender()が呼ばれるまでバインドされたままになる。
+/// meshがnullptrである場合、メッシュはバインドされない。
+int orgeDraw(uint32_t pipelineCount, const char *const *pipelines, const char *mesh, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// orgeの描画を終了する関数
 int orgeEndRender();

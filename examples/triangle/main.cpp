@@ -13,9 +13,8 @@ const std::vector<float> VERTICES{
 	1.0f, -1.0f, 0.0f,
 	0.0f, 0.0f, 1.0f, 1.0f,
 };
-const std::vector<uint32_t> INDICES{
-	0, 1, 2,
-};
+const std::vector<uint32_t> INDICES{0, 1, 2};
+const std::vector<const char *> PIPELINES{"PL"};
 
 int main() {
 	if (!orgeInitializeWith("config.yml")) {
@@ -30,7 +29,7 @@ int main() {
 	while (orgePollEvents()) {
 		const auto result =
 			orgeBeginRender()
-			&& orgeDraw(0, nullptr)
+			&& orgeDraw(PIPELINES.size(), PIPELINES.data(), "triangle", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;

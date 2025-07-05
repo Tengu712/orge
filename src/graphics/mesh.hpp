@@ -15,6 +15,11 @@ void createMesh(
 	const uint32_t *indices
 );
 
+/// メッシュをバインドする関数
+///
+/// バインドされたメッシュのインデックスカウントを返す。
+uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id);
+
 void terminate(const vk::Device &device);
 
 } // namespace graphics::mesh

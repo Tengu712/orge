@@ -73,6 +73,13 @@ void createMesh(
 	});
 }
 
+uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id) {
+	const VkDeviceSize offset = 0;
+	commandBuffer.bindVertexBuffers(0, 1, &g_meshes.at(id).vertexBuffer, &offset);
+	commandBuffer.bindIndexBuffer(g_meshes.at(id).indexBuffer, offset, vk::IndexType::eUint32);
+	return g_meshes.at(id).indicesCount;
+}
+
 void terminate(const vk::Device &device) {
 	for (auto &n: g_meshes) {
 		device.freeMemory(n.second.indexBufferMemory);
