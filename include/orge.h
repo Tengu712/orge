@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 /// orgeのエラーメッセージを取得する関数
 const char *orgeGetErrorMessage();
 
@@ -10,12 +12,12 @@ int orgeInitialize(const char *const yaml);
 int orgeInitializeWith(const char *const yamlFilePath);
 
 /// orgeにメッシュを追加する関数
-int createMesh(
+int orgeCreateMesh(
 	const char *id,
-	const unsigned int vertexCount,
+	const uint32_t vertexCount,
 	const float *vertices,
-	const unsigned int indexCount,
-	const float *indices
+	const uint32_t indexCount,
+	const uint32_t *indices
 );
 
 /// orgeのウィンドウイベントをすべて処理する関数
