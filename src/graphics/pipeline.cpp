@@ -9,6 +9,7 @@
 
 namespace graphics::pipeline {
 
+vk::DescriptorPool g_descPool;
 std::vector<vk::Pipeline> g_pipelines;
 // パイプラインIDとパイプライン配列へのインデックスを対応付けるマップ
 std::unordered_map<std::string, size_t> g_pipelineMap;
@@ -63,7 +64,7 @@ struct PipelineCreateTempInfo {
 
 	PipelineCreateTempInfo() = delete;
 
-	PipelineCreateTempInfo(const Pipeline &config, const vk::Device &device) {
+	PipelineCreateTempInfo(const PipelineConfig &config, const vk::Device &device) {
 		// シェーダステージ
 		vertexShader = createShaderModule(device, config.vertexShader);
 		fragmentShader = createShaderModule(device, config.fragmentShader);
@@ -132,7 +133,7 @@ struct PipelineCreateTempInfo {
 		// ディスクリプタセットレイアウト
 		for (const auto &n: config.descSets) {
 			const auto ci = vk::DescriptorSetLayoutCreateInfo()
-				.setBindings(n);
+				.setBindings(n.bindings);
 			descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
 		}
 
@@ -155,11 +156,7 @@ struct PipelineCreateTempInfo {
 	}
 };
 
-void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
-	if (config.pipelines.empty()) {
-		return;
-	}
-
+void createPipelines(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	// 入力アセンブリ
 	const auto piasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
@@ -213,6 +210,55 @@ void initialize(const Config &config, const vk::Device &device, const vk::Render
 	for (auto &n: cits) {
 		n.destroy(device);
 	}
+}
+
+void createDescriptorPool(const Config &config, const vk::Device &device) {
+	// 集計
+	uint32_t maxSets = 0;
+	std::unordered_map<vk::DescriptorType, uint32_t> bindingMap;
+	for (const auto &m: config.pipelines) {
+		for (const auto &n: m.descSets) {
+			maxSets += n.count;
+
+			std::unordered_map<vk::DescriptorType, uint32_t> map;
+			for (const auto &b: n.bindings) {
+				if (!map.contains(b.descriptorType)) {
+					map.emplace(b.descriptorType, 0);
+				}
+				map[b.descriptorType] += b.descriptorCount;
+			}
+
+			for (const auto &[k, v]: map) {
+				bindingMap[k] += v * n.count;
+			}
+		}
+	}
+
+	// ディスクリプタセットが不要ならディスクリプタプールも不要
+	if (maxSets == 0) {
+		return;
+	}
+
+	// マップからベクタへ
+	std::vector<vk::DescriptorPoolSize> poolSizes;
+	for (const auto &[k, v]: bindingMap) {
+		poolSizes.emplace_back(k, v);
+	}
+
+	// 作成
+	const auto ci = vk::DescriptorPoolCreateInfo()
+		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+		.setMaxSets(maxSets)
+		.setPoolSizes(poolSizes);
+	g_descPool = device.createDescriptorPool(ci);
+}
+
+void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+	if (config.pipelines.empty()) {
+		return;
+	}
+	createDescriptorPool(config, device);
+	createPipelines(config, device, renderPass);
 }
 
 void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {
