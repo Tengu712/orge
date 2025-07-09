@@ -56,7 +56,7 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
   - `id`: パイプラインのID
   - `vertexShader`: (`string`)バーテックスシェーダのファイル名
   - `fragmentShader`: (`string`)フラグメントシェーダのファイル名
-  - `descSets`: ディスクリプタセットの配列
+  - `desc-sets`: ディスクリプタセットの配列
     - `count`: (`uint`)アロケートするこのディスクリプタセットの個数
     - `bindings`: ディスクリプタの配列
       - `type`: (`string`)ディスクリプタの種類

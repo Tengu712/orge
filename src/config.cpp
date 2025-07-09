@@ -95,14 +95,26 @@ PipelineConfig parsePipeline(const YAML::Node &node, const std::unordered_map<st
 	const auto fragmentShader = node["fragmentShader"].as<std::string>();
 
 	std::vector<DescriptorSetConfig> descSets;
-	for (const auto &m: node["descSets"]) {
+	for (const auto &m: node["desc-sets"]) {
 		const auto count = m["count"].as<uint32_t>();
 
 		std::vector<vk::DescriptorSetLayoutBinding> bindings;
 		for (const auto &n: m["bindings"]) {
 			const auto type = n["type"].as<std::string>();
 			const auto count = n["count"].as<uint32_t>(1);
-			const auto stages = n["stages"].as<std::string>();
+
+			vk::ShaderStageFlags stages{};
+			for (const auto &s: n["stages"]) {
+				const auto t = s.as<std::string>();
+				if (t == "vertex") {
+					stages |= vk::ShaderStageFlagBits::eVertex;
+				} else if (t == "fragment") {
+					stages |= vk::ShaderStageFlagBits::eFragment;
+				} else {
+					throw std::format("config error: pipeline shader stages '{}' is invalid.", t);
+				}
+			}
+
 			bindings.emplace_back(
 				bindings.size(),
 				type == "sampler" ? vk::DescriptorType::eSampler
@@ -118,9 +130,7 @@ PipelineConfig parsePipeline(const YAML::Node &node, const std::unordered_map<st
 				: type == "input-attachment" ? vk::DescriptorType::eInputAttachment
 				: throw std::format("config error: pipeline descriptor type '{}' is invalid.", type),
 				count,
-				stages == "vertex" ? vk::ShaderStageFlagBits::eVertex
-				: stages == "fragment" ? vk::ShaderStageFlagBits::eFragment
-				: throw std::format("config error: pipeline shader stages '{}' is invalid.", stages),
+				stages,
 				nullptr
 			);
 		}

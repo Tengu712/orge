@@ -133,6 +133,11 @@ void terminate(const vk::Device &device) {
 		device.destroyPipeline(n.second.pipeline);
 	}
 	g_pipelines.clear();
+
+	if (g_descPool) {
+		device.destroyDescriptorPool(g_descPool);
+		g_descPool = nullptr;
+	}
 }
 
 } // namespace graphics::pipeline
