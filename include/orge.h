@@ -11,6 +11,12 @@ int orgeInitialize(const char *const yaml);
 /// orgeを初期化する関数 (yamlファイル指定)
 int orgeInitializeWith(const char *const yamlFilePath);
 
+/// orgeにバッファを追加する関数
+int orgeCreateBuffer(const char *id, uint64_t size, int isStorage);
+
+/// orgeのバッファを更新する関数
+int orgeUpdateBuffer(const char *id, const void *data);
+
 /// orgeにメッシュを追加する関数
 int orgeCreateMesh(
 	const char *id,

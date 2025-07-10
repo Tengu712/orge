@@ -1,13 +1,14 @@
-//! グラフィックスに関するモジュール
-
 #pragma once
 
 #include "../config.hpp"
-#include "../error.hpp"
 
 namespace graphics {
 
 void initialize(const Config &config);
+
+void createBuffer(const char *id, uint64_t size, int isStorage);
+
+void updateBuffer(const char *id, const void *data);
 
 void createMesh(
 	const char *id,

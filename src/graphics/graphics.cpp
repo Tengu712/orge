@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "buffer.hpp"
 #include "mesh.hpp"
 #include "pipeline.hpp"
 #include "platform.hpp"
@@ -134,6 +135,14 @@ void initialize(const Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
+void createBuffer(const char *id, uint64_t size, int isStorage) {
+	buffer::create(g_device, g_physicalDevice.getMemoryProperties(), id, size, isStorage);
+}
+
+void updateBuffer(const char *id, const void *data) {
+	buffer::update(g_device, id, data);
+}
+
 void createMesh(
 	const char *id,
 	const uint32_t vertexCount,
@@ -157,6 +166,7 @@ void terminate() {
 		g_device.waitIdle();
 	}
 
+	buffer::terminate(g_device);
 	mesh::terminate(g_device);
 	rendering::terminate(g_device);
 	swapchain::terminate(g_instance, g_device);

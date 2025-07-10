@@ -1,0 +1,28 @@
+#pragma once
+
+#include <string>
+#include <vulkan/vulkan.hpp>
+
+namespace graphics::buffer {
+
+struct Buffer {
+	const vk::DeviceSize size;
+	const vk::Buffer buffer;
+	const vk::DeviceMemory memory;
+};
+
+void create(
+	const vk::Device &device,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const char *id,
+	uint64_t size,
+	int isStorage
+);
+
+void update(const vk::Device &device, const char *id, const void *data);
+
+const Buffer &get(const std::string &id);
+
+void terminate(const vk::Device &device);
+
+} // namespace graphics::buffer
