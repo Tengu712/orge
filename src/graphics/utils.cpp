@@ -30,11 +30,7 @@ vk::DeviceMemory allocateMemory(
 	vk::MemoryPropertyFlags mask
 ) {
 	const auto reqs = device.getBufferMemoryRequirements(buffer);
-	const auto type = utils::findMemoryType(
-		memoryProps,
-		reqs.memoryTypeBits,
-		mask
-	);
+	const auto type = utils::findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
 	return device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
 }
 
