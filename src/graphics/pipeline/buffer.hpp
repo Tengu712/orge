@@ -6,6 +6,7 @@
 namespace graphics::pipeline::buffer {
 
 struct Buffer {
+	const bool isStorage;
 	const vk::DeviceSize size;
 	const vk::Buffer buffer;
 	const vk::DeviceMemory memory;

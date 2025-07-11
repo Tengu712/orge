@@ -126,14 +126,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const PipelineConfig &confi
 }
 
 void PipelineCreateDynamicInfo::destroy(const vk::Device &device) {
-	// NOTE: ディスクリプタセットは破棄しなくて良い。
 	descSets.clear();
-
-	device.destroyPipelineLayout(pipelineLayout);
-
-	for (auto &n: descSetLayouts) {
-		device.destroyDescriptorSetLayout(n);
-	}
 	descSetLayouts.clear();
 
 	device.destroyShaderModule(fragmentShader);

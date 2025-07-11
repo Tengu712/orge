@@ -143,6 +143,16 @@ void updateBuffer(const char *id, const void *data) {
 	pipeline::buffer::update(g_device, id, data);
 }
 
+void updateBufferDescriptor(
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	pipeline::updateBufferDescriptor(g_device, bufferId, pipelineId, set, index, binding);
+}
+
 void createMesh(
 	const char *id,
 	const uint32_t vertexCount,

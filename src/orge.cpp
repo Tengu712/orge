@@ -51,6 +51,16 @@ int orgeUpdateBuffer(const char *id, const void *data) {
 	TRY(graphics::updateBuffer(id, data));
 }
 
+int orgeUpdateBufferDescriptor(
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::updateBufferDescriptor(bufferId, pipelineId, set, index, binding));
+}
+
 int orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,
@@ -67,6 +77,14 @@ int orgePollEvents() {
 
 int orgeBeginRender() {
 	TRY(graphics::beginRender());
+}
+
+int orgeBindDescriptorSets(
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+) {
+	TRY(graphics::rendering::bindDescriptorSets(id, count, indices));
 }
 
 int orgeDraw(

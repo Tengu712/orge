@@ -15,9 +15,10 @@ void create(
 	uint64_t size,
 	int isStorage
 ) {
+	const auto storage = static_cast<bool>(isStorage);
 	const auto ci = vk::BufferCreateInfo()
 		.setSize(size)
-		.setUsage(isStorage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
+		.setUsage(storage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(ci);
 	const auto memory = utils::allocateMemory(
@@ -26,7 +27,8 @@ void create(
 		buffer,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
-	g_buffers.emplace(id, Buffer{size, buffer, memory});
+	device.bindBufferMemory(buffer, memory, 0);
+	g_buffers.emplace(id, Buffer{storage, size, buffer, memory});
 }
 
 void update(const vk::Device &device, const char *id, const void *data) {

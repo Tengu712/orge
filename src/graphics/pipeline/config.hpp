@@ -31,17 +31,13 @@ struct PipelineCreateDynamicInfo {
 	std::vector<vk::PipelineColorBlendAttachmentState> pcbass;
 	vk::PipelineColorBlendStateCreateInfo pcbsci;
 
-	// ディスクリプタセットレイアウト
-	std::vector<vk::DescriptorSetLayout> descSetLayouts;
-
-	// パイプラインレイアウト
-	vk::PipelineLayout pipelineLayout;
-
 	// サブパスID
 	uint32_t subpass;
 
-	/* リソース */
+	/* オブジェクト */
 
+	vk::PipelineLayout pipelineLayout;
+	std::vector<vk::DescriptorSetLayout> descSetLayouts;
 	std::vector<std::vector<vk::DescriptorSet>> descSets;
 
 	/* コンストラクタ・デストラクタ */

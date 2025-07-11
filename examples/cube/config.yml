@@ -20,6 +20,6 @@ pipelines:
         bindings:
           - type: uniform-buffer
             stages: [vertex]
-    vertexInputAttributes: [3, 4]
+    vertexInputAttributes: [3]
     colorBlends: [false]
     subpass: SP

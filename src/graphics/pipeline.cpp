@@ -1,5 +1,6 @@
 #include "pipeline.hpp"
 
+#include "pipeline/buffer.hpp"
 #include "pipeline/config.hpp"
 #include "swapchain.hpp"
 
@@ -11,6 +12,8 @@ namespace graphics::pipeline {
 
 struct Pipeline {
 	const vk::Pipeline pipeline;
+	const vk::PipelineLayout pipelineLayout;
+	const std::vector<vk::DescriptorSetLayout> descSetLayouts;
 	const std::vector<std::vector<vk::DescriptorSet>> descSets;
 };
 
@@ -63,7 +66,15 @@ void createPipelines(const Config &config, const vk::Device &device, const vk::R
 
 	// 作成
 	for (size_t i = 0; i < pipelines.size(); ++i) {
-		g_pipelines.emplace(config.pipelines[i].id, Pipeline{pipelines[i], std::move(cdis[i].descSets)});
+		g_pipelines.emplace(
+			config.pipelines[i].id,
+			Pipeline {
+				pipelines[i],
+				cdis[i].pipelineLayout,
+				std::move(cdis[i].descSetLayouts),
+				std::move(cdis[i].descSets),
+			}
+		);
 	}
 
 	// 終了
@@ -128,9 +139,53 @@ void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const 
 	}
 }
 
+void bindDescriptorSets(
+	const vk::CommandBuffer &commandBuffer,
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+) {
+	std::vector<vk::DescriptorSet> sets;
+	for (uint32_t i = 0; i < count; ++i) {
+		sets.push_back(g_pipelines.at(id).descSets.at(i).at(indices[i]));
+	}
+	commandBuffer.bindDescriptorSets(
+		vk::PipelineBindPoint::eGraphics,
+		g_pipelines.at(id).pipelineLayout,
+		0,
+		sets.size(),
+		sets.data(),
+		0,
+		nullptr
+	);
+}
+
+void updateBufferDescriptor(
+	const vk::Device &device,
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	const auto &buffer = buffer::get(bufferId);
+	const auto bi = vk::DescriptorBufferInfo(buffer.buffer, 0, vk::WholeSize);
+	const auto ds = vk::WriteDescriptorSet()
+		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
+		.setDstBinding(binding)
+		.setDescriptorCount(1)
+		.setDescriptorType(buffer.isStorage ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
+		.setBufferInfo(bi);
+	device.updateDescriptorSets(1, &ds, 0, nullptr);
+}
+
 void terminate(const vk::Device &device) {
 	for (auto &n: g_pipelines) {
 		device.destroyPipeline(n.second.pipeline);
+		device.destroyPipelineLayout(n.second.pipelineLayout);
+		for (auto &m: n.second.descSetLayouts) {
+			device.destroyDescriptorSetLayout(m);
+		}
 	}
 	g_pipelines.clear();
 

@@ -137,6 +137,14 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
+void bindDescriptorSets(
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+) {
+	pipeline::bindDescriptorSets(g_commandBuffer, id, count, indices);
+}
+
 void draw(
 	uint32_t pipelineCount,
 	const char *const *pipelines,
