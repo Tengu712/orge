@@ -1,10 +1,10 @@
 #include "buffer.hpp"
 
-#include "utils.hpp"
+#include "../utils.hpp"
 
 #include <unordered_map>
 
-namespace graphics::buffer {
+namespace graphics::pipeline::buffer {
 
 std::unordered_map<std::string, Buffer> g_buffers;
 
@@ -48,4 +48,4 @@ void terminate(const vk::Device &device) {
 	g_buffers.clear();
 }
 
-} // namespace graphics::buffer
+} // namespace graphics::pipeline::buffer

@@ -3,7 +3,7 @@
 #include <string>
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::buffer {
+namespace graphics::pipeline::buffer {
 
 struct Buffer {
 	const vk::DeviceSize size;
@@ -25,4 +25,4 @@ const Buffer &get(const std::string &id);
 
 void terminate(const vk::Device &device);
 
-} // namespace graphics::buffer
+} // namespace graphics::pipeline::buffer

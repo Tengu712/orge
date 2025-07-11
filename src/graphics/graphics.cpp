@@ -1,7 +1,7 @@
 #include "graphics.hpp"
 
-#include "buffer.hpp"
 #include "mesh.hpp"
+#include "pipeline/buffer.hpp"
 #include "pipeline.hpp"
 #include "platform.hpp"
 #include "rendering.hpp"
@@ -136,11 +136,11 @@ void initialize(const Config &config) {
 }
 
 void createBuffer(const char *id, uint64_t size, int isStorage) {
-	buffer::create(g_device, g_physicalDevice.getMemoryProperties(), id, size, isStorage);
+	pipeline::buffer::create(g_device, g_physicalDevice.getMemoryProperties(), id, size, isStorage);
 }
 
 void updateBuffer(const char *id, const void *data) {
-	buffer::update(g_device, id, data);
+	pipeline::buffer::update(g_device, id, data);
 }
 
 void createMesh(
@@ -166,7 +166,7 @@ void terminate() {
 		g_device.waitIdle();
 	}
 
-	buffer::terminate(g_device);
+	pipeline::buffer::terminate(g_device);
 	mesh::terminate(g_device);
 	rendering::terminate(g_device);
 	swapchain::terminate(g_instance, g_device);
