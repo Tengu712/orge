@@ -1,165 +1,26 @@
 #include "pipeline.hpp"
 
+#include "pipeline/buffer.hpp"
+#include "pipeline/config.hpp"
 #include "swapchain.hpp"
 
-#include <fstream>
 #include <ranges>
 #include <string>
 #include <unordered_map>
 
 namespace graphics::pipeline {
 
-std::vector<vk::Pipeline> g_pipelines;
-// パイプラインIDとパイプライン配列へのインデックスを対応付けるマップ
-std::unordered_map<std::string, size_t> g_pipelineMap;
-
-vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
-	std::fstream file(path, std::ios::in | std::ios::binary);
-	if (!file) {
-		return nullptr;
-	}
-
-	file.seekg(0, std::ios::end);
-	const auto size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
-	if (size <= 0 || size % sizeof(uint32_t) != 0) {
-		return nullptr;
-	}
-
-	std::vector<uint32_t> code(size / sizeof(uint32_t));
-	file.read(reinterpret_cast<char *>(code.data()), size);
-
-	if (!file || file.gcount() != size) {
-		return nullptr;
-	}
-
-	const auto ci = vk::ShaderModuleCreateInfo()
-		.setCode(code);
-	return device.createShaderModule(ci);
-}
-
-// NOTE: パイプラインを一気に作成する都合で、forスコープを抜けて参照がぶっ壊れるので。
-struct PipelineCreateTempInfo {
-	// シェーダステージ
-	vk::ShaderModule vertexShader;
-	vk::ShaderModule fragmentShader;
-	std::vector<vk::PipelineShaderStageCreateInfo> psscis;
-	// 頂点入力
-	std::vector<vk::VertexInputAttributeDescription> viads;
-	std::vector<vk::VertexInputBindingDescription> vibds;
-	vk::PipelineVertexInputStateCreateInfo pvisci;
-	// ラスタライゼーション
-	vk::PipelineRasterizationStateCreateInfo prsci;
-	// カラーブレンド
-	std::vector<vk::PipelineColorBlendAttachmentState> pcbass;
-	vk::PipelineColorBlendStateCreateInfo pcbsci;
-	// ディスクリプタセットレイアウト
-	std::vector<vk::DescriptorSetLayout> descSetLayouts;
-	// パイプラインレイアウト
-	vk::PipelineLayout pipelineLayout;
-	// サブパスID
-	uint32_t subpass;
-
-	PipelineCreateTempInfo() = delete;
-
-	PipelineCreateTempInfo(const Pipeline &config, const vk::Device &device) {
-		// シェーダステージ
-		vertexShader = createShaderModule(device, config.vertexShader);
-		fragmentShader = createShaderModule(device, config.fragmentShader);
-		if (!vertexShader || !fragmentShader) {
-			throw "failed to create shader modules.";
-		}
-		psscis.emplace_back(
-			vk::PipelineShaderStageCreateFlags(),
-			vk::ShaderStageFlagBits::eVertex,
-			vertexShader,
-			"main"
-		);
-		psscis.emplace_back(
-			vk::PipelineShaderStageCreateFlags(),
-			vk::ShaderStageFlagBits::eFragment,
-			fragmentShader,
-			"main"
-		);
-
-		// 頂点入力
-		uint32_t sum = 0;
-		for (uint32_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
-			const auto &n = config.vertexInputAttributes.at(i);
-			viads.emplace_back(
-				i,
-				0,
-				n == 1 ? vk::Format::eR32Sfloat
-				: n == 2 ? vk::Format::eR32G32Sfloat
-				: n == 3 ? vk::Format::eR32G32B32Sfloat
-				: vk::Format::eR32G32B32A32Sfloat,
-				sizeof(float) * sum
-			);
-			sum += n;
-		}
-		vibds.emplace_back(0, sizeof(float) * sum, vk::VertexInputRate::eVertex);
-		pvisci = vk::PipelineVertexInputStateCreateInfo()
-			.setVertexBindingDescriptions(vibds)
-			.setVertexAttributeDescriptions(viads);
-
-		// ラスタライゼーション
-		prsci = vk::PipelineRasterizationStateCreateInfo()
-			.setPolygonMode(vk::PolygonMode::eFill)
-			.setCullMode(config.culling ? vk::CullModeFlagBits::eBack : vk::CullModeFlagBits::eNone)
-			.setFrontFace(vk::FrontFace::eCounterClockwise)
-			.setLineWidth(1.0f);
-
-		// カラーブレンド
-		for (const auto &n: config.colorBlends) {
-			pcbass.emplace_back(
-				n ? vk::True : vk::False,
-				vk::BlendFactor::eSrcAlpha,
-				vk::BlendFactor::eOneMinusSrcAlpha,
-				vk::BlendOp::eAdd,
-				vk::BlendFactor::eSrcAlpha,
-				vk::BlendFactor::eOneMinusSrcAlpha,
-				vk::BlendOp::eAdd,
-				vk::ColorComponentFlagBits::eR
-				| vk::ColorComponentFlagBits::eG
-				| vk::ColorComponentFlagBits::eB
-				| vk::ColorComponentFlagBits::eA
-			);
-		}
-		pcbsci = vk::PipelineColorBlendStateCreateInfo()
-			.setAttachments(pcbass);
-
-		// ディスクリプタセットレイアウト
-		for (const auto &n: config.descSets) {
-			const auto ci = vk::DescriptorSetLayoutCreateInfo()
-				.setBindings(n);
-			descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
-		}
-
-		// パイプラインレイアウト
-		const auto plci = vk::PipelineLayoutCreateInfo()
-			.setSetLayouts(descSetLayouts);
-		pipelineLayout = device.createPipelineLayout(plci);
-
-		// サブパスID
-		subpass = config.subpass;
-	}
-
-	void destroy(const vk::Device &device) {
-		device.destroyPipelineLayout(pipelineLayout);
-		for (auto &n: descSetLayouts) {
-			device.destroyDescriptorSetLayout(n);
-		}
-		device.destroyShaderModule(fragmentShader);
-		device.destroyShaderModule(vertexShader);
-	}
+struct Pipeline {
+	const vk::Pipeline pipeline;
+	const vk::PipelineLayout pipelineLayout;
+	const std::vector<vk::DescriptorSetLayout> descSetLayouts;
+	const std::vector<std::vector<vk::DescriptorSet>> descSets;
 };
 
-void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
-	if (config.pipelines.empty()) {
-		return;
-	}
+vk::DescriptorPool g_descPool;
+std::unordered_map<std::string, Pipeline> g_pipelines;
 
+void createPipelines(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	// 入力アセンブリ
 	const auto piasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
@@ -179,15 +40,14 @@ void initialize(const Config &config, const vk::Device &device, const vk::Render
 		.setRasterizationSamples(vk::SampleCountFlagBits::e1);
 
 	// 一時情報作成
-	std::vector<PipelineCreateTempInfo> cits;
+	std::vector<PipelineCreateDynamicInfo> cdis;
 	for (const auto &n: config.pipelines) {
-		g_pipelineMap.emplace(n.id, g_pipelineMap.size());
-		cits.emplace_back(n, device);
+		cdis.emplace_back(n, device, g_descPool);
 	}
 
-	// 作成情報作成
+	// パイプライン作成
 	std::vector<vk::GraphicsPipelineCreateInfo> cis;
-	for (const auto &n: cits) {
+	for (const auto &n: cdis) {
 		cis.push_back(
 			vk::GraphicsPipelineCreateInfo()
 				.setStages(n.psscis)
@@ -202,33 +62,137 @@ void initialize(const Config &config, const vk::Device &device, const vk::Render
 				.setSubpass(n.subpass)
 		);
 	}
-	g_pipelines = device.createGraphicsPipelines(nullptr, cis).value;
+	const auto pipelines = device.createGraphicsPipelines(nullptr, cis).value;
 
-	// チェック
-	if (g_pipelines.size() != g_pipelineMap.size()) {
-		throw "something is wrong with creating graphics pipelines.";
+	// 作成
+	for (size_t i = 0; i < pipelines.size(); ++i) {
+		g_pipelines.emplace(
+			config.pipelines[i].id,
+			Pipeline {
+				pipelines[i],
+				cdis[i].pipelineLayout,
+				std::move(cdis[i].descSetLayouts),
+				std::move(cdis[i].descSets),
+			}
+		);
 	}
 
 	// 終了
-	for (auto &n: cits) {
+	for (auto &n: cdis) {
 		n.destroy(device);
 	}
+}
+
+void createDescriptorPool(const Config &config, const vk::Device &device) {
+	// 集計
+	uint32_t maxSets = 0;
+	std::unordered_map<vk::DescriptorType, uint32_t> bindingMap;
+	for (const auto &m: config.pipelines) {
+		for (const auto &n: m.descSets) {
+			maxSets += n.count;
+
+			std::unordered_map<vk::DescriptorType, uint32_t> map;
+			for (const auto &b: n.bindings) {
+				if (!map.contains(b.descriptorType)) {
+					map.emplace(b.descriptorType, 0);
+				}
+				map[b.descriptorType] += b.descriptorCount;
+			}
+
+			for (const auto &[k, v]: map) {
+				bindingMap[k] += v * n.count;
+			}
+		}
+	}
+
+	// ディスクリプタセットが不要ならディスクリプタプールも不要
+	if (maxSets == 0) {
+		return;
+	}
+
+	// マップからベクタへ
+	std::vector<vk::DescriptorPoolSize> poolSizes;
+	for (const auto &[k, v]: bindingMap) {
+		poolSizes.emplace_back(k, v);
+	}
+
+	// 作成
+	const auto ci = vk::DescriptorPoolCreateInfo()
+		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+		.setMaxSets(maxSets)
+		.setPoolSizes(poolSizes);
+	g_descPool = device.createDescriptorPool(ci);
+}
+
+void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+	if (config.pipelines.empty()) {
+		return;
+	}
+	createDescriptorPool(config, device);
+	createPipelines(config, device, renderPass);
 }
 
 void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {
 	for (uint32_t i = 0; i < pipelineCount; ++i) {
 		// TODO: pipelines[i]のエラーを取る。
-		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(g_pipelineMap.at(pipelines[i])));
+		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(pipelines[i]).pipeline);
 	}
+}
+
+void bindDescriptorSets(
+	const vk::CommandBuffer &commandBuffer,
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+) {
+	std::vector<vk::DescriptorSet> sets;
+	for (uint32_t i = 0; i < count; ++i) {
+		sets.push_back(g_pipelines.at(id).descSets.at(i).at(indices[i]));
+	}
+	commandBuffer.bindDescriptorSets(
+		vk::PipelineBindPoint::eGraphics,
+		g_pipelines.at(id).pipelineLayout,
+		0,
+		sets.size(),
+		sets.data(),
+		0,
+		nullptr
+	);
+}
+
+void updateBufferDescriptor(
+	const vk::Device &device,
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	const auto &buffer = buffer::get(bufferId);
+	const auto bi = vk::DescriptorBufferInfo(buffer.buffer, 0, vk::WholeSize);
+	const auto ds = vk::WriteDescriptorSet()
+		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
+		.setDstBinding(binding)
+		.setDescriptorCount(1)
+		.setDescriptorType(buffer.isStorage ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
+		.setBufferInfo(bi);
+	device.updateDescriptorSets(1, &ds, 0, nullptr);
 }
 
 void terminate(const vk::Device &device) {
 	for (auto &n: g_pipelines) {
-		device.destroyPipeline(n);
+		device.destroyPipeline(n.second.pipeline);
+		device.destroyPipelineLayout(n.second.pipelineLayout);
+		for (auto &m: n.second.descSetLayouts) {
+			device.destroyDescriptorSetLayout(m);
+		}
 	}
 	g_pipelines.clear();
 
-	g_pipelineMap.clear();
+	if (g_descPool) {
+		device.destroyDescriptorPool(g_descPool);
+		g_descPool = nullptr;
+	}
 }
 
 } // namespace graphics::pipeline

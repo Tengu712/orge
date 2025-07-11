@@ -11,6 +11,12 @@ void initialize(const Config &config, const vk::Device &device, const vk::Comman
 
 void beginRender(const vk::Device &device);
 
+void bindDescriptorSets(
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+);
+
 void draw(
 	uint32_t pipelineCount,
 	const char *const *pipelines,

@@ -17,6 +17,22 @@ void initialize(const Config &config, const vk::Device &device, const vk::Render
 /// 初期化された後に呼ばれることを期待する。
 void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines);
 
+void bindDescriptorSets(
+	const vk::CommandBuffer &commandBuffer,
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+);
+
+void updateBufferDescriptor(
+	const vk::Device &device,
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
 void terminate(const vk::Device &device);
 
 } // namespace graphics::pipeline

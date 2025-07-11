@@ -88,21 +88,35 @@ Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::strin
 	};
 }
 
-Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &subpassMap) {
+PipelineConfig parsePipeline(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &subpassMap) {
 	const auto id = node["id"].as<std::string>();
 
 	const auto vertexShader = node["vertexShader"].as<std::string>();
 	const auto fragmentShader = node["fragmentShader"].as<std::string>();
 
-	std::vector<std::vector<vk::DescriptorSetLayoutBinding>> descSets;
-	for (const auto &m: node["descSets"]) {
-		std::vector<vk::DescriptorSetLayoutBinding> descs;
-		for (const auto &n: node["descs"]) {
+	std::vector<DescriptorSetConfig> descSets;
+	for (const auto &m: node["desc-sets"]) {
+		const auto count = m["count"].as<uint32_t>();
+
+		std::vector<vk::DescriptorSetLayoutBinding> bindings;
+		for (const auto &n: m["bindings"]) {
 			const auto type = n["type"].as<std::string>();
 			const auto count = n["count"].as<uint32_t>(1);
-			const auto stages = n["stages"].as<std::string>();
-			descs.emplace_back(
-				descs.size(),
+
+			vk::ShaderStageFlags stages{};
+			for (const auto &s: n["stages"]) {
+				const auto t = s.as<std::string>();
+				if (t == "vertex") {
+					stages |= vk::ShaderStageFlagBits::eVertex;
+				} else if (t == "fragment") {
+					stages |= vk::ShaderStageFlagBits::eFragment;
+				} else {
+					throw std::format("config error: pipeline shader stages '{}' is invalid.", t);
+				}
+			}
+
+			bindings.emplace_back(
+				bindings.size(),
 				type == "sampler" ? vk::DescriptorType::eSampler
 				: type == "combined-image-sampler" ? vk::DescriptorType::eCombinedImageSampler
 				: type == "sampled-image" ? vk::DescriptorType::eSampledImage
@@ -116,13 +130,12 @@ Pipeline parsePipeline(const YAML::Node &node, const std::unordered_map<std::str
 				: type == "input-attachment" ? vk::DescriptorType::eInputAttachment
 				: throw std::format("config error: pipeline descriptor type '{}' is invalid.", type),
 				count,
-				stages == "vertex" ? vk::ShaderStageFlagBits::eVertex
-				: stages == "fragment" ? vk::ShaderStageFlagBits::eFragment
-				: throw std::format("config error: pipeline shader stages '{}' is invalid.", stages),
+				stages,
 				nullptr
 			);
 		}
-		descSets.push_back(std::move(descs));
+
+		descSets.push_back(DescriptorSetConfig {count, std::move(bindings)});
 	}
 
 	std::vector<uint32_t> vertexInputAttributes;
@@ -189,7 +202,7 @@ Config parse(const YAML::Node yaml) {
 		}
 	}
 
-	std::vector<Pipeline> pipelines;
+	std::vector<PipelineConfig> pipelines;
 	for (const auto &n: yaml["pipelines"]) {
 		pipelines.push_back(parsePipeline(n, subpassMap));
 		if (pipelineIDs.contains(pipelines.cend()->id)) {

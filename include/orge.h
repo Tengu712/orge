@@ -11,6 +11,27 @@ int orgeInitialize(const char *const yaml);
 /// orgeを初期化する関数 (yamlファイル指定)
 int orgeInitializeWith(const char *const yamlFilePath);
 
+/// orgeにバッファを追加する関数
+int orgeCreateBuffer(const char *id, uint64_t size, int isStorage);
+
+/// orgeのバッファを更新する関数
+int orgeUpdateBuffer(const char *id, const void *data);
+
+/// orgeのバッファディスクリプタを更新する関数
+///
+/// - bufferId: バッファID
+/// - pipelineId: パイプラインID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+int orgeUpdateBufferDescriptor(
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
 /// orgeにメッシュを追加する関数
 int orgeCreateMesh(
 	const char *id,
@@ -47,6 +68,12 @@ int orgeDraw(
 	const char *mesh,
 	uint32_t instanceCount,
 	uint32_t instanceOffset
+);
+
+int orgeBindDescriptorSets(
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
 );
 
 /// orgeの描画を終了する関数
