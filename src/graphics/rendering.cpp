@@ -212,14 +212,6 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
-void bindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
-	pipeline::bindDescriptorSets(g_commandBuffer, id, count, indices);
-}
-
 void draw(
 	uint32_t pipelineCount,
 	const char *const *pipelines,
@@ -300,3 +292,11 @@ void terminate(const vk::Device &device) {
 }
 
 } // namespace graphics::rendering
+
+int orgeBindDescriptorSets(
+	const char *id,
+	uint32_t count,
+	uint32_t const *indices
+) {
+	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, count, indices));
+}

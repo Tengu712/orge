@@ -25,14 +25,6 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
-int orgeBindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
-	TRY(graphics::rendering::bindDescriptorSets(id, count, indices));
-}
-
 int orgeDraw(
 	uint32_t pipelineCount,
 	const char *const *pipelines,
