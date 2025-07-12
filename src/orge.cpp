@@ -25,16 +25,6 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
-int orgeDraw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-) {
-	TRY(graphics::rendering::draw(pipelineCount, pipelines, mesh, instanceCount, instanceOffset));
-}
-
 void orgeTerminate() {
 	graphics::terminate();
 }

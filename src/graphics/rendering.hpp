@@ -11,14 +11,6 @@ void initialize(const config::Config &config, const vk::Device &device, const vk
 
 void beginRender(const vk::Device &device);
 
-void draw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-);
-
 void endRender(const vk::Queue &queue);
 
 void terminate(const vk::Device &device);

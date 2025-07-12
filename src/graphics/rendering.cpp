@@ -212,27 +212,6 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
-void draw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-) {
-	// パイプラインバインド
-	if (pipelines != nullptr) {
-		pipeline::bind(g_commandBuffer, pipelineCount, pipelines);
-	}
-
-	// メッシュバインド
-	if (mesh != nullptr) {
-		g_indexCount = mesh::bind(g_commandBuffer, mesh);
-	}
-
-	// 描画
-	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
-}
-
 void endRender(const vk::Queue &queue) {
 	// レンダーパス終了
 	g_commandBuffer.endRenderPass();
@@ -299,4 +278,26 @@ int orgeBindDescriptorSets(
 	uint32_t const *indices
 ) {
 	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, count, indices));
+}
+
+int orgeDraw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
+	TRY(
+		using namespace graphics;
+
+		if (pipelines != nullptr) {
+			pipeline::bind(rendering::g_commandBuffer, pipelineCount, pipelines);
+		}
+
+		if (mesh != nullptr) {
+			rendering::g_indexCount = mesh::bind(rendering::g_commandBuffer, mesh);
+		}
+
+		rendering::g_commandBuffer.drawIndexed(rendering::g_indexCount, instanceCount, 0, 0, instanceOffset);
+	)
 }
