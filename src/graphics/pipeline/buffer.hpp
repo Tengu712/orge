@@ -13,8 +13,8 @@ struct Buffer {
 };
 
 void create(
-	const vk::Device &device,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
 	const char *id,
 	uint64_t size,
 	int isStorage

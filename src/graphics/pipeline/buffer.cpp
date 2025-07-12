@@ -9,8 +9,8 @@ namespace graphics::pipeline::buffer {
 std::unordered_map<std::string, Buffer> g_buffers;
 
 void create(
-	const vk::Device &device,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
 	const char *id,
 	uint64_t size,
 	int isStorage

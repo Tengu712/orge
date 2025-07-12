@@ -168,8 +168,8 @@ void terminate() {
 
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	TRY(graphics::pipeline::buffer::create(
-		graphics::g_device,
 		graphics::g_physicalDevice.getMemoryProperties(),
+		graphics::g_device,
 		id,
 		size,
 		isStorage
