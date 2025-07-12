@@ -2,10 +2,10 @@
 #include <orge.h>
 #include <vector>
 
-#define TRY(n)                                           \
-	if (!(n)) {                                          \
+#define TRY(n) \
+	if (!(n)) { \
 		std::cout << orgeGetErrorMessage() << std::endl; \
-		return 1;                                        \
+		return 1; \
 	}
 
 const std::vector<float> VERTICES{
