@@ -136,16 +136,6 @@ void initialize(const config::Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
-void updateBufferDescriptor(
-	const char *bufferId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding
-) {
-	pipeline::updateBufferDescriptor(g_device, bufferId, pipelineId, set, index, binding);
-}
-
 void createMesh(
 	const char *id,
 	const uint32_t vertexCount,
@@ -198,6 +188,16 @@ int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 
 int orgeUpdateBuffer(const char *id, const void *data) {
 	TRY(graphics::pipeline::buffer::update(graphics::g_device, id, data));
+}
+
+int orgeUpdateBufferDescriptor(
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::pipeline::updateBufferDescriptor(graphics::g_device, bufferId, pipelineId, set, index, binding));
 }
 
 int orgeBeginRender() {

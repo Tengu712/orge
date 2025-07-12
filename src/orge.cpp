@@ -25,16 +25,6 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
-int orgeUpdateBufferDescriptor(
-	const char *bufferId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding
-) {
-	TRY(graphics::updateBufferDescriptor(bufferId, pipelineId, set, index, binding));
-}
-
 int orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,
