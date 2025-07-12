@@ -70,7 +70,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 		);
 		sum += n;
 	}
-	vibds.emplace_back(0, sizeof(float) * sum, vk::VertexInputRate::eVertex);
+	vibds.emplace_back(0, static_cast<uint32_t>(sizeof(float) * sum), vk::VertexInputRate::eVertex);
 	pvisci = vk::PipelineVertexInputStateCreateInfo()
 		.setVertexBindingDescriptions(vibds)
 		.setVertexAttributeDescriptions(viads);
