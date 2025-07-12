@@ -60,13 +60,13 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 	for (size_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
 		const auto &n = config.vertexInputAttributes.at(i);
 		viads.emplace_back(
-			i,
+			static_cast<uint32_t>(i),
 			0,
 			n == 1 ? vk::Format::eR32Sfloat
 			: n == 2 ? vk::Format::eR32G32Sfloat
 			: n == 3 ? vk::Format::eR32G32B32Sfloat
 			: vk::Format::eR32G32B32A32Sfloat,
-			sizeof(float) * sum
+			static_cast<uint32_t>(sizeof(float)) * sum
 		);
 		sum += n;
 	}
