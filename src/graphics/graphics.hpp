@@ -26,8 +26,6 @@ void createMesh(
 	const uint32_t *indices
 );
 
-void endRender();
-
 void terminate();
 
 } // namespace graphics

@@ -164,10 +164,6 @@ void createMesh(
 	mesh::createMesh(g_physicalDevice.getMemoryProperties(), g_device, id, vertexCount, vertices, indexCount, indices);
 }
 
-void endRender() {
-	rendering::endRender(g_queue);
-}
-
 void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
@@ -200,4 +196,8 @@ void terminate() {
 
 int orgeBeginRender() {
 	TRY(graphics::rendering::beginRender(graphics::g_device));
+}
+
+int orgeEndRender() {
+	TRY(graphics::rendering::endRender(graphics::g_queue));
 }

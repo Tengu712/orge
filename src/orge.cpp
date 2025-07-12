@@ -75,10 +75,6 @@ int orgeDraw(
 	TRY(graphics::rendering::draw(pipelineCount, pipelines, mesh, instanceCount, instanceOffset));
 }
 
-int orgeEndRender() {
-	TRY(graphics::endRender());
-}
-
 void orgeTerminate() {
 	graphics::terminate();
 }
