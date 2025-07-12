@@ -37,7 +37,7 @@ void update(const vk::Device &device, const char *id, const void *data) {
 	device.unmapMemory(buffer.memory);
 }
 
-const Buffer &get(const std::string &id) {
+const Buffer &get(const char *id) {
 	return g_buffers.at(id);
 }
 
