@@ -238,7 +238,7 @@ void draw(
 	}
 
 	// 描画
-	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceCount);
+	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
 }
 
 void endRender(const vk::Device &device, const vk::Queue &queue) {
