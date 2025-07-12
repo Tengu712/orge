@@ -165,7 +165,7 @@ void createCommandBuffer(const vk::Device &device, const vk::CommandPool &comman
 void createSemaphores(const vk::Device &device) {
 	g_semaphoreForImageEnabled = device.createSemaphore({});
 	g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
-	for (int i = 0; i < swapchain::getImageCount(); ++i) {
+	for (uint32_t i = 0; i < swapchain::getImageCount(); ++i) {
 		g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
 	}
 }
@@ -241,7 +241,7 @@ void draw(
 	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
 }
 
-void endRender(const vk::Device &device, const vk::Queue &queue) {
+void endRender(const vk::Queue &queue) {
 	// レンダーパス終了
 	g_commandBuffer.endRenderPass();
 

@@ -168,7 +168,7 @@ void beginRender() {
 }
 
 void endRender() {
-	rendering::endRender(g_device, g_queue);
+	rendering::endRender(g_queue);
 }
 
 void terminate() {

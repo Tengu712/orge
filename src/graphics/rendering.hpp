@@ -25,7 +25,7 @@ void draw(
 	uint32_t instanceOffset
 );
 
-void endRender(const vk::Device &device, const vk::Queue &queue);
+void endRender(const vk::Queue &queue);
 
 void terminate(const vk::Device &device);
 
