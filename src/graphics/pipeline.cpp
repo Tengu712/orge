@@ -23,12 +23,12 @@ std::unordered_map<std::string, Pipeline> g_pipelines;
 void createDescriptorPool(const config::Config &config, const vk::Device &device) {
 	// 集計
 	uint32_t maxSets = 0;
-	std::unordered_map<std::string, uint32_t> sizesMap;
+	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
 	for (const auto &n: config.pipelines) {
 		for (const auto &m: n.descSets) {
 			maxSets += m.count;
 
-			std::unordered_map<std::string, uint32_t> map;
+			std::unordered_map<config::DescriptorType, uint32_t> map;
 			for (const auto &b: m.bindings) {
 				if (!map.contains(b.type)) {
 					map.emplace(b.type, 0);
@@ -51,13 +51,13 @@ void createDescriptorPool(const config::Config &config, const vk::Device &device
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	for (const auto &[k, v]: sizesMap) {
 		poolSizes.emplace_back(
-			k == "combined-image-sampler"
+			k == config::DescriptorType::CombinedImageSampler
 				? vk::DescriptorType::eCombinedImageSampler
-				: k == "uniform-buffer"
+				: k == config::DescriptorType::UniformBuffer
 				? vk::DescriptorType::eUniformBuffer
-				: k == "storage-buffer"
+				: k == config::DescriptorType::StorageBuffer
 				? vk::DescriptorType::eStorageBuffer
-				: k == "input-attachment"
+				: k == config::DescriptorType::InputAttachment
 				? vk::DescriptorType::eInputAttachment
 				: throw,
 			v

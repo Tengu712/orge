@@ -8,11 +8,39 @@
 
 namespace config {
 
+enum class Format: uint8_t {
+	RenderTarget,
+};
+
+enum class FinalLayout: uint8_t {
+	ColorAttachment,
+	DepthStencilAttachment,
+	PresentSrc,
+};
+
+enum class InputLayout: uint8_t {
+	DepthStencilReadOnly,
+	ShaderReadOnly,
+};
+
+enum class DescriptorType: uint8_t {
+	CombinedImageSampler,
+	UniformBuffer,
+	StorageBuffer,
+	InputAttachment,
+};
+
+enum class ShaderStages: uint8_t {
+	Vertex,
+	Fragment,
+	VertexAndFragment
+};
+
 struct AttachmentConfig {
 	std::string id;
-	std::string format;
+	Format format;
 	bool discard;
-	std::string finalLayout;
+	FinalLayout finalLayout;
 	std::optional<std::array<float, 4>> colorClearValue;
 	std::optional<float> depthClearValue;
 
@@ -21,7 +49,7 @@ struct AttachmentConfig {
 
 struct SubpassInputConfig {
 	std::string id;
-	std::string layout;
+	InputLayout layout;
 
 	SubpassInputConfig(const YAML::Node &node);
 };
@@ -44,9 +72,9 @@ struct SubpassConfig {
 };
 
 struct DescriptorBindingConfig {
-	std::string type;
+	DescriptorType type;
 	uint32_t count;
-	std::string stages;
+	ShaderStages stages;
 
 	DescriptorBindingConfig(const YAML::Node &node);
 };

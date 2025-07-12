@@ -12,7 +12,6 @@ void validateKeys(const YAML::Node &n, const std::set<std::string> &rs, const st
 			throw std::format("config error: unexpected key '{}' found.", k);
 		}
 	}
-
 	for (const auto &k: rs) {
 		if (!n[k]) {
 			throw std::format("config error: '{}' not found.", k);
@@ -71,30 +70,71 @@ std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
 	return get<std::vector<std::string>>(n, k, "string[]");
 }
 
+Format parseFormat(const std::string& s) {
+	return s == "render-target"
+		? Format::RenderTarget
+		: throw std::format("config error: format '{}' is invalid.", s);
+}
+
+FinalLayout parseFinalLayout(const std::string& s) {
+	return s == "color-attachment"
+		? FinalLayout::ColorAttachment
+		: s == "depth-stencil-attachment"
+		? FinalLayout::DepthStencilAttachment
+		: s == "present-src"
+		? FinalLayout::PresentSrc
+		: throw std::format("config error: final-layout '{}' is invalid.", s);
+}
+
+InputLayout parseInputLayout(const std::string& s) {
+	return s == "depth-stencil-read-only"
+		? InputLayout::DepthStencilReadOnly
+		: s == "shader-read-only"
+		? InputLayout::ShaderReadOnly
+		: throw std::format("config error: layout '{}' is invalid.", s);
+}
+
+DescriptorType parseDescriptorType(const std::string& s) {
+	return s == "combined-image-sampler"
+		? DescriptorType::CombinedImageSampler
+		: s == "uniform-buffer"
+		? DescriptorType::UniformBuffer
+		: s == "storage-buffer"
+		? DescriptorType::StorageBuffer
+		: s == "input-attachment"
+		? DescriptorType::InputAttachment
+		: throw std::format("config error: type '{}' is invalid.", s);
+}
+
+ShaderStages parseShaderStages(const std::string& s) {
+	return s == "vertex"
+		? ShaderStages::Vertex
+		: s == "fragment"
+		? ShaderStages::Fragment
+		: s == "vertex-and-fragment"
+		? ShaderStages::VertexAndFragment
+		: throw std::format("config error: stages '{}' is invalid.", s);
+}
+
 AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
 	validateKeys(node, {"id", "format", "final-layout", "clear-value"}, {"discard"});
 
 	id = s(node, "id");
-	format = s(node, "format");
+	format = parseFormat(s(node, "format"));
 	discard = b(node, "discard", false);
-	finalLayout = s(node, "final-layout");
+	finalLayout = parseFinalLayout(s(node, "final-layout"));
 	if (node["clear-value"].IsSequence()) {
 		colorClearValue = get<std::array<float, 4>>(node, "clear-value", "float[4]");
 	} else {
 		depthClearValue = f(node, "clear-value");
 	}
-
-	validateValue(format, {"render-target"}, "format");
-	validateValue(finalLayout, {"color-attachment", "depth-stencil-attachment", "present-src"}, "final layout");
 }
 
 SubpassInputConfig::SubpassInputConfig(const YAML::Node &node) {
 	validateKeys(node, {"id", "layout"}, {});
 
 	id = s(node, "id");
-	layout = s(node, "layout");
-
-	validateValue(layout, {"depth-stencil-read-only", "shader-read-only"}, "layout");
+	layout = parseInputLayout(s(node, "layout"));
 }
 
 SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node) {
@@ -126,16 +166,9 @@ SubpassConfig::SubpassConfig(const YAML::Node &node) {
 DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
 	validateKeys(node, {"type", "stages"}, {"count"});
 
-	type = s(node, "type");
+	type = parseDescriptorType(s(node, "type"));
 	count = u(node, "count", 1);
-	stages = s(node, "stages");
-
-	validateValue(
-		type,
-		{"combined-image-sampler", "uniform-buffer", "storage-buffer", "input-attachment"},
-		"descriptor binding type"
-	);
-	validateValue(stages, {"vertex", "fragment", "vertex-and-fragment"}, "descriptor binding visible stages");
+	stages = parseShaderStages(s(node, "stages"));
 }
 
 DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {

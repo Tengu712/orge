@@ -107,21 +107,21 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 		for (const auto &m: n.bindings) {
 			bindings.emplace_back(
 				bindings.size(),
-				m.type == "combined-image-sampler"
+				m.type == config::DescriptorType::CombinedImageSampler
 					? vk::DescriptorType::eCombinedImageSampler
-					: m.type == "uniform-buffer"
+					: m.type == config::DescriptorType::UniformBuffer
 					? vk::DescriptorType::eUniformBuffer
-					: m.type == "storage-buffer"
+					: m.type == config::DescriptorType::StorageBuffer
 					? vk::DescriptorType::eStorageBuffer
-					: m.type == "input-attachment"
+					: m.type == config::DescriptorType::InputAttachment
 					? vk::DescriptorType::eInputAttachment
 					: throw,
 				m.count,
-				m.stages == "vertex"
+				m.stages == config::ShaderStages::Vertex
 					? vk::ShaderStageFlagBits::eVertex
-					: m.stages == "fragment"
+					: m.stages == config::ShaderStages::Fragment
 					? vk::ShaderStageFlagBits::eFragment
-					: m.stages == "vertex-and-fragment"
+					: m.stages == config::ShaderStages::VertexAndFragment
 					? vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
 					: throw,
 				nullptr

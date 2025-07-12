@@ -54,7 +54,7 @@ void createRenderPass(
 
 		attachments.emplace_back(
 			vk::AttachmentDescriptionFlags(),
-			n.format == "render-target"
+			n.format == config::Format::RenderTarget
 				? platform::getRenderTargetPixelFormat()
 				: throw,
 			vk::SampleCountFlagBits::e1,
@@ -65,11 +65,11 @@ void createRenderPass(
 			vk::AttachmentLoadOp::eDontCare,
 			vk::AttachmentStoreOp::eDontCare,
 			vk::ImageLayout::eUndefined,
-			n.finalLayout == "color-attachment"
+			n.finalLayout == config::FinalLayout::ColorAttachment
 				? vk::ImageLayout::eColorAttachmentOptimal
-				: n.finalLayout == "depth-stencil-attachment"
+				: n.finalLayout == config::FinalLayout::DepthStencilAttachment
 				? vk::ImageLayout::eDepthStencilAttachmentOptimal
-				: n.finalLayout == "present-src"
+				: n.finalLayout == config::FinalLayout::PresentSrc
 				? vk::ImageLayout::ePresentSrcKHR
 				: throw
 		);
@@ -93,9 +93,9 @@ void createRenderPass(
 			}
 			inputs.emplace_back(
 				attachmentMap.at(m.id),
-				m.layout == "depth-stencil-read-only"
+				m.layout == config::InputLayout::DepthStencilReadOnly
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-					: m.layout == "shader-read-only"
+					: m.layout == config::InputLayout::ShaderReadOnly
 					? vk::ImageLayout::eShaderReadOnlyOptimal
 					: throw
 			);
