@@ -7,17 +7,17 @@
 namespace graphics::mesh {
 
 struct Mesh {
-	const uint32_t indicesCount;
-	const vk::Buffer vertexBuffer;
-	const vk::Buffer indexBuffer;
-	const vk::DeviceMemory vertexBufferMemory;
-	const vk::DeviceMemory indexBufferMemory;
+	const uint32_t iCount;
+	const vk::Buffer vb;
+	const vk::Buffer ib;
+	const vk::DeviceMemory vbMemory;
+	const vk::DeviceMemory ibMemory;
 };
 
 std::unordered_map<std::string, Mesh> g_meshes;
 
 void createMesh(
-	const vk::PhysicalDeviceMemoryProperties &physicalDeviceMemoryProps,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const char *id,
 	const uint32_t vertexCount,
@@ -25,67 +25,63 @@ void createMesh(
 	const uint32_t indexCount,
 	const uint32_t *indices
 ) {
-	const auto vertexBuffer = device.createBuffer(
+	const auto vbSize = sizeof(float) * vertexCount;
+	const auto ibSize = sizeof(uint32_t) * indexCount;
+
+	const auto vb = device.createBuffer(
 		vk::BufferCreateInfo()
-			.setSize(sizeof(float) * vertexCount)
+			.setSize(vbSize)
 			.setUsage(vk::BufferUsageFlagBits::eVertexBuffer)
 	);
-	const auto indexBuffer = device.createBuffer(
+	const auto ib = device.createBuffer(
 		vk::BufferCreateInfo()
-			.setSize(sizeof(float) * indexCount)
+			.setSize(ibSize)
 			.setUsage(vk::BufferUsageFlagBits::eIndexBuffer)
 	);
 
-	const auto vbMemoryReqs = device.getBufferMemoryRequirements(vertexBuffer);
-	const auto ibMemoryReqs = device.getBufferMemoryRequirements(indexBuffer);
-
-	const auto vbMemoryType = utils::findMemoryType(
-		physicalDeviceMemoryProps,
-		vbMemoryReqs.memoryTypeBits,
+	const auto vbMemory = utils::allocateMemory(
+		memoryProps,
+		device,
+		vb,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
-	const auto ibMemoryType = utils::findMemoryType(
-		physicalDeviceMemoryProps,
-		ibMemoryReqs.memoryTypeBits,
+	const auto ibMemory = utils::allocateMemory(
+		memoryProps,
+		device,
+		ib,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
 
-	const auto vertexBufferMemory = device.allocateMemory(vk::MemoryAllocateInfo(vbMemoryReqs.size, vbMemoryType));
-	const auto indexBufferMemory  = device.allocateMemory(vk::MemoryAllocateInfo(ibMemoryReqs.size, ibMemoryType));
+	const auto vbData = static_cast<uint8_t *>(device.mapMemory(vbMemory, 0, vbSize));
+	memcpy(vbData, vertices, vbSize);
+	device.unmapMemory(vbMemory);
 
-	const auto vbData = static_cast<uint8_t *>(device.mapMemory(vertexBufferMemory, 0, vbMemoryReqs.size));
-	memcpy(vbData, vertices, sizeof(float) * vertexCount);
-	device.unmapMemory(vertexBufferMemory);
-
-	const auto ibData = static_cast<uint8_t *>(device.mapMemory(indexBufferMemory, 0, ibMemoryReqs.size));
-	memcpy(ibData, indices, sizeof(float) * indexCount);
-	device.unmapMemory(indexBufferMemory);
-
-	device.bindBufferMemory(vertexBuffer, vertexBufferMemory, 0);
-	device.bindBufferMemory(indexBuffer,  indexBufferMemory,  0);
+	const auto ibData = static_cast<uint8_t *>(device.mapMemory(ibMemory, 0, ibSize));
+	memcpy(ibData, indices, ibSize);
+	device.unmapMemory(ibMemory);
 
 	g_meshes.emplace(id, Mesh {
 		static_cast<uint32_t>(indexCount),
-		vertexBuffer,
-		indexBuffer,
-		vertexBufferMemory,
-		indexBufferMemory
+		vb,
+		ib,
+		vbMemory,
+		ibMemory,
 	});
 }
 
 uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id) {
 	const VkDeviceSize offset = 0;
-	commandBuffer.bindVertexBuffers(0, 1, &g_meshes.at(id).vertexBuffer, &offset);
-	commandBuffer.bindIndexBuffer(g_meshes.at(id).indexBuffer, offset, vk::IndexType::eUint32);
-	return g_meshes.at(id).indicesCount;
+	commandBuffer.bindVertexBuffers(0, 1, &g_meshes.at(id).vb, &offset);
+	commandBuffer.bindIndexBuffer(g_meshes.at(id).ib, offset, vk::IndexType::eUint32);
+	return g_meshes.at(id).iCount;
 }
 
 void terminate(const vk::Device &device) {
 	for (auto &n: g_meshes) {
-		device.freeMemory(n.second.indexBufferMemory);
-		device.freeMemory(n.second.vertexBufferMemory);
-		device.destroyBuffer(n.second.indexBuffer);
-		device.destroyBuffer(n.second.vertexBuffer);
+		device.freeMemory(n.second.ibMemory);
+		device.freeMemory(n.second.vbMemory);
+		device.destroyBuffer(n.second.ib);
+		device.destroyBuffer(n.second.vb);
 	}
 	g_meshes.clear();
 }

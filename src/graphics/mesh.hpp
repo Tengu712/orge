@@ -6,7 +6,7 @@
 namespace graphics::mesh {
 
 void createMesh(
-	const vk::PhysicalDeviceMemoryProperties &physicalDeviceMemoryProps,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const char *id,
 	const uint32_t vertexCount,

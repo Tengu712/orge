@@ -22,12 +22,11 @@ void create(
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(ci);
 	const auto memory = utils::allocateMemory(
-		device,
 		memoryProps,
+		device,
 		buffer,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
-	device.bindBufferMemory(buffer, memory, 0);
 	g_buffers.emplace(id, Buffer{storage, size, buffer, memory});
 }
 
