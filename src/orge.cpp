@@ -25,14 +25,6 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
-int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
-	TRY(graphics::createBuffer(id, size, isStorage));
-}
-
-int orgeUpdateBuffer(const char *id, const void *data) {
-	TRY(graphics::updateBuffer(id, data));
-}
-
 int orgeUpdateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,

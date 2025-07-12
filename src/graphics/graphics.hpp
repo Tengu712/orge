@@ -6,10 +6,6 @@ namespace graphics {
 
 void initialize(const config::Config &config);
 
-void createBuffer(const char *id, uint64_t size, int isStorage);
-
-void updateBuffer(const char *id, const void *data);
-
 void updateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,

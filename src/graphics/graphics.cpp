@@ -136,14 +136,6 @@ void initialize(const config::Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
-void createBuffer(const char *id, uint64_t size, int isStorage) {
-	pipeline::buffer::create(g_device, g_physicalDevice.getMemoryProperties(), id, size, isStorage);
-}
-
-void updateBuffer(const char *id, const void *data) {
-	pipeline::buffer::update(g_device, id, data);
-}
-
 void updateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,
@@ -193,6 +185,20 @@ void terminate() {
 }
 
 } // namespace graphics
+
+int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
+	TRY(graphics::pipeline::buffer::create(
+		graphics::g_device,
+		graphics::g_physicalDevice.getMemoryProperties(),
+		id,
+		size,
+		isStorage
+	));
+}
+
+int orgeUpdateBuffer(const char *id, const void *data) {
+	TRY(graphics::pipeline::buffer::update(graphics::g_device, id, data));
+}
 
 int orgeBeginRender() {
 	TRY(graphics::rendering::beginRender(graphics::g_device));
