@@ -1,248 +1,240 @@
 #include "config.hpp"
 
-#include "graphics/platform.hpp"
-
 #include <format>
 #include <set>
-#include <unordered_map>
-#include <yaml-cpp/yaml.h>
 
-Attachment parseAttachment(const YAML::Node &node, std::unordered_map<std::string, uint32_t> &attachmentMap) {
-	const auto id = node["id"].as<std::string>();
-	if (!attachmentMap.emplace(id, static_cast<uint32_t>(attachmentMap.size())).second) {
-		throw std::format("config error: attachment id '{}' is duplicated.", id);
+namespace config {
+
+void validateKeys(const YAML::Node &n, const std::set<std::string> &rs, const std::set<std::string> &os) {
+	for (const auto &p: n) {
+		const auto k = p.first.as<std::string>();
+		if (!rs.contains(k) && !os.contains(k)) {
+			throw std::format("config error: unexpected key '{}' found.", k);
+		}
 	}
-	const auto format = node["format"].as<std::string>();
-	const auto discard = node["discard"].as<bool>(false);
-	const auto finalLayout = node["final-layout"].as<std::string>();
-	const auto clearValue = node["clear-value"];
-	return {
-		format == "render-target" ? graphics::platform::getRenderTargetPixelFormat()
-		: throw std::format("config error: attachment format '{}' is invalid.", format),
-		discard,
-		finalLayout == "general" ? vk::ImageLayout::eGeneral
-		: finalLayout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
-		: finalLayout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
-		: finalLayout == "transfer-src" ? vk::ImageLayout::eTransferSrcOptimal
-		: finalLayout == "present-src" ? vk::ImageLayout::ePresentSrcKHR
-		: throw std::format("config error: attachment final layout '{}' is invalid.", finalLayout),
-		clearValue.IsSequence() && clearValue.size() == 4
-		? static_cast<vk::ClearValue>(vk::ClearColorValue(clearValue[0].as<float>(), clearValue[1].as<float>(), clearValue[2].as<float>(), clearValue[3].as<float>()))
-		: clearValue.IsScalar()
-		? static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(clearValue.as<float>(), 0))
-		: throw std::format("config error: attachment clear value format is invalid."),
-	};
+	for (const auto &k: rs) {
+		if (!n[k]) {
+			throw std::format("config error: '{}' not found.", k);
+		}
+	}
 }
 
-Subpass parseSubpass(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &attachmentMap, std::unordered_map<std::string, uint32_t> &subpassMap) {
-	const auto id = node["id"].as<std::string>();
-	if (!subpassMap.emplace(id, static_cast<uint32_t>(subpassMap.size())).second) {
-		throw std::format("config error: subpass id '{}' is duplicated.", id);
+template<typename T>
+void validateValue(const T &v, const std::set<T> &cs, const std::string &s) {
+	if (!cs.contains(v)) {
+		throw std::format("config error: {} '{}' is invalid.", s, v);
 	}
-
-	std::vector<vk::AttachmentReference> inputs;
-	if (node["inputs"]) {
-		for (const auto &n : node["inputs"]) {
-			const auto id = n["id"].as<std::string>();
-			const auto layout = n["layout"].as<std::string>();
-			inputs.emplace_back(
-				attachmentMap.at(id),
-				layout == "general" ? vk::ImageLayout::eGeneral
-				: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-				: layout == "shader-read-only" ? vk::ImageLayout::eShaderReadOnlyOptimal
-				: throw std::format("config error: subpass input layout '{}' is invalid.", layout)
-			);
-		}
-	}
-
-	std::vector<vk::AttachmentReference> outputs;
-	for (const auto &n : node["outputs"]) {
-		const auto id = n["id"].as<std::string>();
-		const auto layout = n["layout"].as<std::string>();
-		outputs.emplace_back(
-			attachmentMap.at(id),
-			layout == "general" ? vk::ImageLayout::eGeneral
-			: layout == "color-attachment" ? vk::ImageLayout::eColorAttachmentOptimal
-			: throw std::format("config error: subpass output layout '{}' is invalid.", layout)
-		);
-	}
-
-	std::optional<vk::AttachmentReference> depth;
-	if (node["depth"]) {
-		const auto &n = node["depth"];
-		const auto id = n["id"].as<std::string>();
-		const auto layout = n["layout"].as<std::string>();
-		depth.emplace(
-			attachmentMap.at(id),
-			layout == "general" ? vk::ImageLayout::eGeneral
-			: layout == "depth-stencil-attachment" ? vk::ImageLayout::eDepthStencilAttachmentOptimal
-			: layout == "depth-stencil-read-only" ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-			: throw std::format("config error: subpass depth layout '{}' is invalid.", layout)
-		);
-	}
-
-	return {
-		inputs,
-		outputs,
-		depth,
-	};
 }
 
-PipelineConfig parsePipeline(const YAML::Node &node, const std::unordered_map<std::string, uint32_t> &subpassMap) {
-	const auto id = node["id"].as<std::string>();
-
-	const auto vertexShader = node["vertexShader"].as<std::string>();
-	const auto fragmentShader = node["fragmentShader"].as<std::string>();
-
-	std::vector<DescriptorSetConfig> descSets;
-	for (const auto &m: node["desc-sets"]) {
-		const auto count = m["count"].as<uint32_t>();
-
-		std::vector<vk::DescriptorSetLayoutBinding> bindings;
-		for (const auto &n: m["bindings"]) {
-			const auto type = n["type"].as<std::string>();
-			const auto count = n["count"].as<uint32_t>(1);
-
-			vk::ShaderStageFlags stages{};
-			for (const auto &s: n["stages"]) {
-				const auto t = s.as<std::string>();
-				if (t == "vertex") {
-					stages |= vk::ShaderStageFlagBits::eVertex;
-				} else if (t == "fragment") {
-					stages |= vk::ShaderStageFlagBits::eFragment;
-				} else {
-					throw std::format("config error: pipeline shader stages '{}' is invalid.", t);
-				}
-			}
-
-			bindings.emplace_back(
-				bindings.size(),
-				type == "sampler" ? vk::DescriptorType::eSampler
-				: type == "combined-image-sampler" ? vk::DescriptorType::eCombinedImageSampler
-				: type == "sampled-image" ? vk::DescriptorType::eSampledImage
-				: type == "storage-image" ? vk::DescriptorType::eStorageImage
-				: type == "uniform-texel-buffer" ? vk::DescriptorType::eUniformTexelBuffer
-				: type == "storage-texel-buffer" ? vk::DescriptorType::eStorageTexelBuffer
-				: type == "uniform-buffer" ? vk::DescriptorType::eUniformBuffer
-				: type == "storage-buffer" ? vk::DescriptorType::eStorageBuffer
-				: type == "uniform-buffer-dynamic" ? vk::DescriptorType::eUniformBufferDynamic
-				: type == "storage-buffer-dynamic" ? vk::DescriptorType::eStorageBufferDynamic
-				: type == "input-attachment" ? vk::DescriptorType::eInputAttachment
-				: throw std::format("config error: pipeline descriptor type '{}' is invalid.", type),
-				count,
-				stages,
-				nullptr
-			);
-		}
-
-		descSets.push_back(DescriptorSetConfig {count, std::move(bindings)});
-	}
-
-	std::vector<uint32_t> vertexInputAttributes;
-	for (const auto &n: node["vertexInputAttributes"]) {
-		const auto vertexInputAttribute = n.as<uint32_t>();
-		if (vertexInputAttribute < 1 || vertexInputAttribute > 4) {
-			throw std::format("config error: pipeline vertex input attribute '{}' is invalid (must be 1-4).", vertexInputAttribute);
-		}
-		vertexInputAttributes.push_back(vertexInputAttribute);
-	}
-	if (vertexInputAttributes.empty()) {
-		throw std::format("config error: pipeline vertex input attributes cannot be empty.");
-	}
-
-	const auto culling = node["culling"].as<bool>(false);
-
-	std::vector<bool> colorBlends;
-	for (const auto &n: node["colorBlends"]) {
-		colorBlends.push_back(n.as<bool>());
-	}
-
-	const auto subpass = node["subpass"].as<std::string>();
-
-	return {
-		id,
-		vertexShader,
-		fragmentShader,
-		descSets,
-		vertexInputAttributes,
-		culling,
-		colorBlends,
-		subpassMap.at(subpass)
-	};
-}
-
-Config parse(const YAML::Node yaml) {
-	const auto title = yaml["title"].as<std::string>();
-	const auto width = yaml["width"].as<int>();
-	const auto height = yaml["height"].as<int>();
-
-	std::unordered_map<std::string, uint32_t> attachmentMap;
-	std::unordered_map<std::string, uint32_t> subpassMap;
-	std::set<std::string> pipelineIDs;
-
-	std::vector<Attachment> attachments;
-	for (const auto &n : yaml["attachments"]) {
-		attachments.push_back(parseAttachment(n, attachmentMap));
-	}
-
-	std::vector<Subpass> subpasses;
-	for (const auto &n : yaml["subpasses"]) {
-		subpasses.push_back(parseSubpass(n, attachmentMap, subpassMap));
-	}
-
-	std::vector<SubpassDependency> subpassDeps;
-	if (yaml["subpass-deps"]) {
-		for (const auto &n : yaml["subpass-deps"]) {
-			const auto src = n["src"].as<std::string>();
-			const auto dst = n["dst"].as<std::string>();
-			subpassDeps.push_back({
-				subpassMap.at(src),
-				subpassMap.at(dst),
-			});
-		}
-	}
-
-	std::vector<PipelineConfig> pipelines;
-	for (const auto &n: yaml["pipelines"]) {
-		pipelines.push_back(parsePipeline(n, subpassMap));
-		if (pipelineIDs.contains(pipelines.cend()->id)) {
-			throw std::format("config error: pipeline id '{}' is duplicated.", pipelines.cend()->id);
+template<typename T>
+T get(const YAML::Node &n, const std::string &k, const std::string &t, std::optional<T> d = std::nullopt) {
+	if (!n[k]) {
+		if (d) {
+			return d.value();
 		} else {
-			pipelineIDs.insert(pipelines.cend()->id);
+			throw std::format("config error: '{}' not found.", k);
 		}
 	}
-
-	return {
-		title,
-		width,
-		height,
-		attachments,
-		subpasses,
-		subpassDeps,
-		pipelines,
-	};
-}
-
-Config parseConfig(const char *const yaml) {
 	try {
-		return parse(YAML::Load(yaml));
-	} catch (const std::string &e) {
-		throw e;
-	} catch (const YAML::BadConversion) {
-		// TODO: どのキーが定義されていないのか含める。
-		throw "config error: some key is undefined.";
+		return n[k].as<T>();
+	} catch (...) {
+		throw std::format("config error: '{}' is not a {}.", k, t);
 	}
 }
 
-Config parseConfigFromFile(const char *const yamlFilePath) {
+bool b(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+	return get<bool>(n, k, "bool", d);
+}
+
+float f(const YAML::Node &n, const std::string &k) {
+	return get<float>(n, k, "float");
+}
+
+uint32_t u(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+	return get<uint32_t>(n, k, "unsigned int", d);
+}
+
+std::string s(const YAML::Node &n, const std::string &k) {
+	return get<std::string>(n, k, "string");
+}
+
+std::vector<bool> bs(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<bool>>(n, k, "bool[]");
+}
+
+std::vector<uint32_t> us(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<uint32_t>>(n, k, "unsigned int[]");
+}
+
+std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<std::string>>(n, k, "string[]");
+}
+
+Format parseFormat(const std::string& s) {
+	return s == "render-target"
+		? Format::RenderTarget
+		: throw std::format("config error: format '{}' is invalid.", s);
+}
+
+FinalLayout parseFinalLayout(const std::string& s) {
+	return s == "color-attachment"
+		? FinalLayout::ColorAttachment
+		: s == "depth-stencil-attachment"
+		? FinalLayout::DepthStencilAttachment
+		: s == "present-src"
+		? FinalLayout::PresentSrc
+		: throw std::format("config error: final-layout '{}' is invalid.", s);
+}
+
+InputLayout parseInputLayout(const std::string& s) {
+	return s == "depth-stencil-read-only"
+		? InputLayout::DepthStencilReadOnly
+		: s == "shader-read-only"
+		? InputLayout::ShaderReadOnly
+		: throw std::format("config error: layout '{}' is invalid.", s);
+}
+
+DescriptorType parseDescriptorType(const std::string& s) {
+	return s == "combined-image-sampler"
+		? DescriptorType::CombinedImageSampler
+		: s == "uniform-buffer"
+		? DescriptorType::UniformBuffer
+		: s == "storage-buffer"
+		? DescriptorType::StorageBuffer
+		: s == "input-attachment"
+		? DescriptorType::InputAttachment
+		: throw std::format("config error: type '{}' is invalid.", s);
+}
+
+ShaderStages parseShaderStages(const std::string& s) {
+	return s == "vertex"
+		? ShaderStages::Vertex
+		: s == "fragment"
+		? ShaderStages::Fragment
+		: s == "vertex-and-fragment"
+		? ShaderStages::VertexAndFragment
+		: throw std::format("config error: stages '{}' is invalid.", s);
+}
+
+AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "format", "final-layout", "clear-value"}, {"discard"});
+
+	id = s(node, "id");
+	format = parseFormat(s(node, "format"));
+	discard = b(node, "discard", false);
+	finalLayout = parseFinalLayout(s(node, "final-layout"));
+	if (node["clear-value"].IsSequence()) {
+		colorClearValue = get<std::array<float, 4>>(node, "clear-value", "float[4]");
+	} else {
+		depthClearValue = f(node, "clear-value");
+	}
+}
+
+SubpassInputConfig::SubpassInputConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "layout"}, {});
+
+	id = s(node, "id");
+	layout = parseInputLayout(s(node, "layout"));
+}
+
+SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "read-only"}, {});
+
+	id = s(node, "id");
+	readOnly = b(node, "read-only");
+}
+
+SubpassConfig::SubpassConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "outputs"}, {"inputs", "depth", "depends"});
+
+	id = s(node, "id");
+	outputs = ss(node, "outputs");
+
+	for (const auto &n: node["inputs"]) {
+		inputs.emplace_back(n);
+	}
+
+	if (node["depth"]) {
+		depth = SubpassDepthConfig(node["depth"]);
+	}
+
+	if (node["depends"]) {
+		depends = ss(node, "depends");
+	}
+}
+
+DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
+	validateKeys(node, {"type", "stages"}, {"count"});
+
+	type = parseDescriptorType(s(node, "type"));
+	count = u(node, "count", 1);
+	stages = parseShaderStages(s(node, "stages"));
+}
+
+DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {
+	validateKeys(node, {"count", "bindings"}, {});
+
+	count = u(node, "count");
+
+	for (const auto &n: node["bindings"]) {
+		bindings.emplace_back(n);
+	}
+}
+
+PipelineConfig::PipelineConfig(const YAML::Node &node) {
+	validateKeys(
+		node,
+		{"id", "vertex-shader", "fragment-shader", "vertex-input-attributes", "color-blends", "subpass"},
+		{"desc-sets", "culling"}
+	);
+
+	id = s(node, "id");
+	vertexShader = s(node, "vertex-shader");
+	fragmentShader = s(node, "fragment-shader");
+	vertexInputAttributes = us(node, "vertex-input-attributes");
+	culling = b(node, "culling", false);
+	colorBlends = bs(node, "color-blends");
+	subpass = s(node, "subpass");
+
+	for (const auto &descSetNode: node["desc-sets"]) {
+		descSets.emplace_back(descSetNode);
+	}
+
+	for (const auto &n: vertexInputAttributes) {
+		validateValue(n, {1, 2, 3, 4}, "vertex input attribute");
+	}
+}
+
+Config::Config(const YAML::Node &node) {
+	validateKeys(node, {"title", "width", "height", "attachments", "subpasses"}, {"pipelines"});
+
+	title = s(node, "title");
+	width = u(node, "width");
+	height = u(node, "height");
+
+	for (const auto &n: node["attachments"]) {
+		attachments.emplace_back(n);
+	}
+
+	for (const auto &n: node["subpasses"]) {
+		subpasses.emplace_back(n);
+	}
+
+	for (const auto &n: node["pipelines"]) {
+		pipelines.emplace_back(n);
+	}
+}
+
+Config parse(const char *yaml) {
+	return Config(YAML::Load(yaml));
+}
+
+Config parseFromFile(const char *yamlFilePath) {
 	try {
-		return parse(YAML::LoadFile(yamlFilePath));
-	} catch (const std::string &e) {
-		throw e;
-	} catch (const YAML::BadConversion &) {
-		// TODO: どのキーが定義されていないのか含める。
-		throw "config error: some key is undefined.";
+		return Config(YAML::LoadFile(yamlFilePath));
 	} catch (const YAML::BadFile &) {
-		throw std::format("config error: '{}' not found.", yamlFilePath);
+		throw std::format("config error: config file '{}' not found.", yamlFilePath);
 	}
 }
+
+} // namespace config

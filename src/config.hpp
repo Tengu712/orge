@@ -1,33 +1,89 @@
-//! orge初期化用のyamlをパースするモジュール
-
 #pragma once
 
+#include <array>
 #include <optional>
 #include <string>
 #include <vector>
-#include <vulkan/vulkan.hpp>
+#include <yaml-cpp/yaml.h>
 
-struct Attachment {
-	vk::Format format;
+namespace config {
+
+enum class Format: uint8_t {
+	RenderTarget,
+};
+
+enum class FinalLayout: uint8_t {
+	ColorAttachment,
+	DepthStencilAttachment,
+	PresentSrc,
+};
+
+enum class InputLayout: uint8_t {
+	DepthStencilReadOnly,
+	ShaderReadOnly,
+};
+
+enum class DescriptorType: uint8_t {
+	CombinedImageSampler,
+	UniformBuffer,
+	StorageBuffer,
+	InputAttachment,
+};
+
+enum class ShaderStages: uint8_t {
+	Vertex,
+	Fragment,
+	VertexAndFragment
+};
+
+struct AttachmentConfig {
+	std::string id;
+	Format format;
 	bool discard;
-	vk::ImageLayout finalLayout;
-	vk::ClearValue clearValue;
+	FinalLayout finalLayout;
+	std::optional<std::array<float, 4>> colorClearValue;
+	std::optional<float> depthClearValue;
+
+	AttachmentConfig(const YAML::Node &node);
 };
 
-struct Subpass {
-	std::vector<vk::AttachmentReference> inputs;
-	std::vector<vk::AttachmentReference> outputs;
-	std::optional<vk::AttachmentReference> depth;
+struct SubpassInputConfig {
+	std::string id;
+	InputLayout layout;
+
+	SubpassInputConfig(const YAML::Node &node);
 };
 
-struct SubpassDependency {
-	uint32_t src;
-	uint32_t dst;
+struct SubpassDepthConfig {
+	std::string id;
+	bool readOnly;
+
+	SubpassDepthConfig(const YAML::Node &node);
+};
+
+struct SubpassConfig {
+	std::string id;
+	std::vector<SubpassInputConfig> inputs;
+	std::vector<std::string> outputs;
+	std::optional<SubpassDepthConfig> depth;
+	std::vector<std::string> depends;
+
+	SubpassConfig(const YAML::Node &node);
+};
+
+struct DescriptorBindingConfig {
+	DescriptorType type;
+	uint32_t count;
+	ShaderStages stages;
+
+	DescriptorBindingConfig(const YAML::Node &node);
 };
 
 struct DescriptorSetConfig {
 	uint32_t count;
-	std::vector<vk::DescriptorSetLayoutBinding> bindings;
+	std::vector<DescriptorBindingConfig> bindings;
+
+	DescriptorSetConfig(const YAML::Node &node);
 };
 
 struct PipelineConfig {
@@ -38,19 +94,24 @@ struct PipelineConfig {
 	std::vector<uint32_t> vertexInputAttributes;
 	bool culling;
 	std::vector<bool> colorBlends;
-	uint32_t subpass;
+	std::string subpass;
+
+	PipelineConfig(const YAML::Node &node);
 };
 
 struct Config {
 	std::string title;
-	int width;
-	int height;
-	std::vector<Attachment> attachments;
-	std::vector<Subpass> subpasses;
-	std::vector<SubpassDependency> subpassDeps;
+	uint32_t width;
+	uint32_t height;
+	std::vector<AttachmentConfig> attachments;
+	std::vector<SubpassConfig> subpasses;
 	std::vector<PipelineConfig> pipelines;
+
+	Config(const YAML::Node &node);
 };
 
-Config parseConfig(const char *const yaml);
+Config parse(const char *yaml);
 
-Config parseConfigFromFile(const char *const yamlFilePath);
+Config parseFromFile(const char *yamlFilePath);
+
+} // namespace config

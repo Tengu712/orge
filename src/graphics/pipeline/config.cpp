@@ -30,7 +30,12 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 	return device.createShaderModule(ci);
 }
 
-PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const PipelineConfig &config, const vk::Device &device, const vk::DescriptorPool &descPool) {
+PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
+	const config::PipelineConfig &config,
+	const std::unordered_map<std::string, uint32_t> &subpassMap,
+	const vk::Device &device,
+	const vk::DescriptorPool &descPool
+) {
 	// シェーダステージ
 	vertexShader = createShaderModule(device, config.vertexShader);
 	fragmentShader = createShaderModule(device, config.fragmentShader);
@@ -98,8 +103,32 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const PipelineConfig &confi
 
 	// ディスクリプタセットレイアウト
 	for (const auto &n: config.descSets) {
+		std::vector<vk::DescriptorSetLayoutBinding> bindings;
+		for (const auto &m: n.bindings) {
+			bindings.emplace_back(
+				bindings.size(),
+				m.type == config::DescriptorType::CombinedImageSampler
+					? vk::DescriptorType::eCombinedImageSampler
+					: m.type == config::DescriptorType::UniformBuffer
+					? vk::DescriptorType::eUniformBuffer
+					: m.type == config::DescriptorType::StorageBuffer
+					? vk::DescriptorType::eStorageBuffer
+					: m.type == config::DescriptorType::InputAttachment
+					? vk::DescriptorType::eInputAttachment
+					: throw,
+				m.count,
+				m.stages == config::ShaderStages::Vertex
+					? vk::ShaderStageFlagBits::eVertex
+					: m.stages == config::ShaderStages::Fragment
+					? vk::ShaderStageFlagBits::eFragment
+					: m.stages == config::ShaderStages::VertexAndFragment
+					? vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+					: throw,
+				nullptr
+			);
+		}
 		const auto ci = vk::DescriptorSetLayoutCreateInfo()
-			.setBindings(n.bindings);
+			.setBindings(bindings);
 		descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
 	}
 
@@ -109,7 +138,10 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const PipelineConfig &confi
 	pipelineLayout = device.createPipelineLayout(plci);
 
 	// サブパスID
-	subpass = config.subpass;
+	if (!subpassMap.contains(config.subpass)) {
+		throw std::format("subpass '{}' is not defined.", config.subpass);
+	}
+	subpass = subpassMap.at(config.subpass);
 
 	// ディスクリプタセット確保
 	descSets.reserve(config.descSets.size());

@@ -22,6 +22,9 @@
 	} catch (const vk::SystemError &e) {          \
 		error::setMessage(std::string(e.what())); \
 		return 0;                                 \
+	} catch (const std::exception &e) {           \
+		error::setMessage(e.what());              \
+		return 0;                                 \
 	} catch (...) {                               \
 		error::setMessage("unbound error.");      \
 		return 0;                                 \
@@ -33,13 +36,13 @@ const char *orgeGetErrorMessage() {
 
 int orgeInitialize(const char *const yaml) {
 	TRY(
-		graphics::initialize(parseConfig(yaml));
+		graphics::initialize(config::parse(yaml));
 	)
 }
 
 int orgeInitializeWith(const char *const yamlFilePath) {
 	TRY(
-		graphics::initialize(parseConfigFromFile(yamlFilePath));
+		graphics::initialize(config::parseFromFile(yamlFilePath));
 	)
 }
 

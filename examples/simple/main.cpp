@@ -6,15 +6,13 @@ title: simple\n\
 width: 640\n\
 height: 480\n\
 attachments:\n\
- - id: main-att\n\
+ - id: RT\n\
    format: render-target\n\
    final-layout: present-src\n\
    clear-value: [0.894, 0.619, 0.38, 1.0]\n\
 subpasses:\n\
- - id: main-sp\n\
-   outputs:\n\
-    - id: main-att\n\
-      layout: color-attachment\n\
+ - id: SP\n\
+   outputs: [RT]\n\
 ";
 
 int main() {

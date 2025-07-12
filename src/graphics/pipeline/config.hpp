@@ -43,7 +43,12 @@ struct PipelineCreateDynamicInfo {
 	/* コンストラクタ・デストラクタ */
 
 	PipelineCreateDynamicInfo() = delete;
-	PipelineCreateDynamicInfo(const PipelineConfig &config, const vk::Device &device, const vk::DescriptorPool &descPool);
+	PipelineCreateDynamicInfo(
+		const config::PipelineConfig &config,
+		const std::unordered_map<std::string, uint32_t> &subpassMap,
+		const vk::Device &device,
+		const vk::DescriptorPool &descPool
+	);
 
 	// 一時オブジェクトを破棄する
 	void destroy(const vk::Device &device);

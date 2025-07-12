@@ -20,7 +20,64 @@ struct Pipeline {
 vk::DescriptorPool g_descPool;
 std::unordered_map<std::string, Pipeline> g_pipelines;
 
-void createPipelines(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+void createDescriptorPool(const config::Config &config, const vk::Device &device) {
+	// 集計
+	uint32_t maxSets = 0;
+	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
+	for (const auto &n: config.pipelines) {
+		for (const auto &m: n.descSets) {
+			maxSets += m.count;
+
+			std::unordered_map<config::DescriptorType, uint32_t> map;
+			for (const auto &b: m.bindings) {
+				if (!map.contains(b.type)) {
+					map.emplace(b.type, 0);
+				}
+				map[b.type] += b.count;
+			}
+
+			for (const auto &[k, v]: map) {
+				sizesMap[k] += v * m.count;
+			}
+		}
+	}
+
+	// ディスクリプタセットが不要ならディスクリプタプールも不要
+	if (maxSets == 0) {
+		return;
+	}
+
+	// マップからベクタへ
+	std::vector<vk::DescriptorPoolSize> poolSizes;
+	for (const auto &[k, v]: sizesMap) {
+		poolSizes.emplace_back(
+			k == config::DescriptorType::CombinedImageSampler
+				? vk::DescriptorType::eCombinedImageSampler
+				: k == config::DescriptorType::UniformBuffer
+				? vk::DescriptorType::eUniformBuffer
+				: k == config::DescriptorType::StorageBuffer
+				? vk::DescriptorType::eStorageBuffer
+				: k == config::DescriptorType::InputAttachment
+				? vk::DescriptorType::eInputAttachment
+				: throw,
+			v
+		);
+	}
+
+	// 作成
+	const auto ci = vk::DescriptorPoolCreateInfo()
+		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+		.setMaxSets(maxSets)
+		.setPoolSizes(poolSizes);
+	g_descPool = device.createDescriptorPool(ci);
+}
+
+void createPipelines(
+	const config::Config &config,
+	const std::unordered_map<std::string, uint32_t> &subpassMap,
+	const vk::Device &device,
+	const vk::RenderPass &renderPass
+) {
 	// 入力アセンブリ
 	const auto piasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
@@ -42,7 +99,7 @@ void createPipelines(const Config &config, const vk::Device &device, const vk::R
 	// 一時情報作成
 	std::vector<PipelineCreateDynamicInfo> cdis;
 	for (const auto &n: config.pipelines) {
-		cdis.emplace_back(n, device, g_descPool);
+		cdis.emplace_back(n, subpassMap, device, g_descPool);
 	}
 
 	// パイプライン作成
@@ -83,53 +140,17 @@ void createPipelines(const Config &config, const vk::Device &device, const vk::R
 	}
 }
 
-void createDescriptorPool(const Config &config, const vk::Device &device) {
-	// 集計
-	uint32_t maxSets = 0;
-	std::unordered_map<vk::DescriptorType, uint32_t> bindingMap;
-	for (const auto &m: config.pipelines) {
-		for (const auto &n: m.descSets) {
-			maxSets += n.count;
-
-			std::unordered_map<vk::DescriptorType, uint32_t> map;
-			for (const auto &b: n.bindings) {
-				if (!map.contains(b.descriptorType)) {
-					map.emplace(b.descriptorType, 0);
-				}
-				map[b.descriptorType] += b.descriptorCount;
-			}
-
-			for (const auto &[k, v]: map) {
-				bindingMap[k] += v * n.count;
-			}
-		}
-	}
-
-	// ディスクリプタセットが不要ならディスクリプタプールも不要
-	if (maxSets == 0) {
-		return;
-	}
-
-	// マップからベクタへ
-	std::vector<vk::DescriptorPoolSize> poolSizes;
-	for (const auto &[k, v]: bindingMap) {
-		poolSizes.emplace_back(k, v);
-	}
-
-	// 作成
-	const auto ci = vk::DescriptorPoolCreateInfo()
-		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-		.setMaxSets(maxSets)
-		.setPoolSizes(poolSizes);
-	g_descPool = device.createDescriptorPool(ci);
-}
-
-void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+void initialize(
+	const config::Config &config,
+	const std::unordered_map<std::string, uint32_t> &subpassMap,
+	const vk::Device &device,
+	const vk::RenderPass &renderPass
+) {
 	if (config.pipelines.empty()) {
 		return;
 	}
 	createDescriptorPool(config, device);
-	createPipelines(config, device, renderPass);
+	createPipelines(config, subpassMap, device, renderPass);
 }
 
 void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {

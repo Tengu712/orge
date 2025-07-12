@@ -8,13 +8,11 @@ attachments:
    clear-value: [0.25, 0.25, 0.25, 1.0]
 subpasses:
  - id: SP
-   outputs:
-    - id: RT
-      layout: color-attachment
+   outputs: [RT]
 pipelines:
   - id: PL
-    vertexShader: shader.vert.spv
-    fragmentShader: shader.frag.spv
-    vertexInputAttributes: [3, 4]
-    colorBlends: [false]
+    vertex-shader: shader.vert.spv
+    fragment-shader: shader.frag.spv
+    vertex-input-attributes: [3, 4]
+    color-blends: [false]
     subpass: SP
