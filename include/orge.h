@@ -6,7 +6,7 @@
 //     Error                                                                                                          //
 // ================================================================================================================== //
 
-/// orgeのエラーメッセージを取得する関数
+/// orgeの直近のエラーメッセージを取得する関数
 const char *orgeGetErrorMessage();
 
 // ================================================================================================================== //
@@ -41,10 +41,12 @@ int orgePollEvents(void);
 /// orgeにバッファを追加する関数
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage);
 
-/// orgeのバッファを更新する関数
+/// バッファを更新する関数
+///
+/// dataはバッファ作成時に指定したサイズ分データを持つこと。
 int orgeUpdateBuffer(const char *id, const void *data);
 
-/// orgeのバッファディスクリプタを更新する関数
+/// バッファディスクリプタを更新する関数
 ///
 /// - bufferId: バッファID
 /// - pipelineId: パイプラインID
@@ -60,6 +62,12 @@ int orgeUpdateBufferDescriptor(
 );
 
 /// orgeにメッシュを追加する関数
+///
+/// - id: メッシュID
+/// - vertexCount: verticesの要素数
+/// - vertices: 頂点データ
+/// - indexCount: indicesの要素数
+/// - indices: インデックスデータ
 int orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,
@@ -74,6 +82,17 @@ int orgeCreateMesh(
 
 /// orgeの描画を開始する関数
 int orgeBeginRender();
+
+/// ディスクリプタセットをバインドする関数
+///
+/// - id: パイプラインID
+/// - indices: 各セットにおいて何個目のセットを使うか
+///
+/// indicesはディスクリプタセットの個数分データを持つこと。
+///
+/// 例えば、set = 0とset = 1があり、それぞれ2個と3個確保されている場合、
+/// indicesの要素数は2、indicesの各要素は0-1と0-2を取る。
+int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
 
 /// 描画関数
 ///
@@ -91,12 +110,6 @@ int orgeDraw(
 	const char *mesh,
 	uint32_t instanceCount,
 	uint32_t instanceOffset
-);
-
-int orgeBindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
 );
 
 /// orgeの描画を終了する関数

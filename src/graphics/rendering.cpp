@@ -272,12 +272,8 @@ void terminate(const vk::Device &device) {
 
 } // namespace graphics::rendering
 
-int orgeBindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
-	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, count, indices));
+int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
+	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
 }
 
 int orgeDraw(

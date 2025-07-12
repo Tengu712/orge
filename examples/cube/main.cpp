@@ -24,6 +24,7 @@ const std::vector<float> CAMERA{
 	0.0f, 0.0f, 0.5f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f,
 };
+const std::vector<uint32_t> SET_INDICES{0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -33,10 +34,9 @@ int main() {
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
 
 	while (orgePollEvents()) {
-		const std::vector<uint32_t> setIndices{0};
 		const auto result =
 			orgeBeginRender()
-			&& orgeBindDescriptorSets("PL", setIndices.size(), setIndices.data())
+			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
 			&& orgeDraw(PIPELINES.size(), PIPELINES.data(), "cube", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
