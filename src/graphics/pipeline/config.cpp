@@ -57,7 +57,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 
 	// 頂点入力
 	uint32_t sum = 0;
-	for (uint32_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
+	for (size_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
 		const auto &n = config.vertexInputAttributes.at(i);
 		viads.emplace_back(
 			i,
