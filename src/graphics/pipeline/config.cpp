@@ -106,7 +106,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 		std::vector<vk::DescriptorSetLayoutBinding> bindings;
 		for (const auto &m: n.bindings) {
 			bindings.emplace_back(
-				bindings.size(),
+				static_cast<uint32_t>(bindings.size()),
 				m.type == config::DescriptorType::CombinedImageSampler
 					? vk::DescriptorType::eCombinedImageSampler
 					: m.type == config::DescriptorType::UniformBuffer

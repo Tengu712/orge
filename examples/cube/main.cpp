@@ -28,8 +28,14 @@ const std::vector<uint32_t> SET_INDICES{0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
-	TRY(orgeCreateMesh("cube", VERTICES.size(), VERTICES.data(), INDICES.size(), INDICES.data()));
-	TRY(orgeCreateBuffer("camera", sizeof(float) * CAMERA.size(), 0));
+	TRY(orgeCreateMesh(
+		"cube",
+		static_cast<uint32_t>(VERTICES.size()),
+		VERTICES.data(),
+		static_cast<uint32_t>(INDICES.size()),
+		INDICES.data())
+	);
+	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(float) * CAMERA.size()), 0));
 	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
 
@@ -37,7 +43,7 @@ int main() {
 		const auto result =
 			orgeBeginRender()
 			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
-			&& orgeDraw(PIPELINES.size(), PIPELINES.data(), "cube", 1, 0)
+			&& orgeDraw(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data(), "cube", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;

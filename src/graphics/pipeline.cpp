@@ -164,7 +164,7 @@ void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, 
 	const auto &pipeline = g_pipelines.at(id);
 
 	std::vector<vk::DescriptorSet> sets;
-	for (uint32_t i = 0; i < pipeline.descSets.size(); ++i) {
+	for (size_t i = 0; i < pipeline.descSets.size(); ++i) {
 		sets.push_back(pipeline.descSets.at(i).at(indices[i]));
 	}
 
@@ -172,7 +172,7 @@ void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, 
 		vk::PipelineBindPoint::eGraphics,
 		pipeline.pipelineLayout,
 		0,
-		sets.size(),
+		static_cast<uint32_t>(sets.size()),
 		sets.data(),
 		0,
 		nullptr

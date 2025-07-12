@@ -58,7 +58,7 @@ void createSwapchain(const vk::Device &device) {
 
 void createImageViews(const vk::Device &device) {
 	const auto images = device.getSwapchainImagesKHR(g_swapchain);
-	if (images.size() < g_imageCount) {
+	if (images.size() < static_cast<size_t>(g_imageCount)) {
 		throw "the number of swapchain image is too few.";
 	}
 
