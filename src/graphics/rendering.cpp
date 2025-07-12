@@ -2,6 +2,7 @@
 
 #include "mesh.hpp"
 #include "pipeline.hpp"
+#include "platform.hpp"
 #include "swapchain.hpp"
 
 #include <vector>
@@ -28,16 +29,128 @@ uint32_t g_index;
 // 現在のインデックスカウント
 uint32_t g_indexCount;
 
-void createRenderPass(const config::Config &config, const vk::Device &device) {
-	std::vector<vk::SubpassDescription> subpasses;
-	for (const auto &n: config.subpasses) {
-		subpasses.push_back(n.get());
+void getClearValues(const config::Config &config) {
+	for (const auto &n: config.attachments) {
+		if (n.colorClearValue) {
+			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearColorValue(n.colorClearValue.value())));
+		} else {
+			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(n.depthClearValue.value(), 0)));
+		}
+	}
+}
+
+void createRenderPass(
+	const config::Config &config,
+	const vk::Device &device,
+	std::unordered_map<std::string, uint32_t> &subpassMap
+) {
+	// アタッチメント
+	std::unordered_map<std::string, uint32_t> attachmentMap;
+	std::vector<vk::AttachmentDescription> attachments;
+	for (const auto &n: config.attachments) {
+		if (!attachmentMap.emplace(n.id, static_cast<uint32_t>(attachmentMap.size())).second) {
+			throw std::format("attachment id '{}' is duplicated.", n.id);
+		}
+
+		attachments.emplace_back(
+			vk::AttachmentDescriptionFlags(),
+			n.format == "render-target"
+				? platform::getRenderTargetPixelFormat()
+				: throw,
+			vk::SampleCountFlagBits::e1,
+			vk::AttachmentLoadOp::eClear,
+			n.discard
+				? vk::AttachmentStoreOp::eNone
+				: vk::AttachmentStoreOp::eStore,
+			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::ImageLayout::eUndefined,
+			n.finalLayout == "color-attachment"
+				? vk::ImageLayout::eColorAttachmentOptimal
+				: n.finalLayout == "depth-stencil-attachment"
+				? vk::ImageLayout::eDepthStencilAttachmentOptimal
+				: n.finalLayout == "present-src"
+				? vk::ImageLayout::ePresentSrcKHR
+				: throw
+		);
 	}
 
+	// サブパス & サブパス依存
+	std::vector<std::vector<vk::AttachmentReference>> inputss;
+	std::vector<std::vector<vk::AttachmentReference>> outputss;
+	std::vector<vk::AttachmentReference> depths;
+	std::vector<vk::SubpassDescription> subpasses;
+	std::vector<vk::SubpassDependency> dependencies;
+	for (const auto &n: config.subpasses) {
+		if (!subpassMap.emplace(n.id, static_cast<uint32_t>(subpassMap.size())).second) {
+			throw std::format("subpass id '{}' is duplicated.", n.id);
+		}
+
+		std::vector<vk::AttachmentReference> inputs;
+		for (const auto &m: n.inputs) {
+			if (!attachmentMap.contains(m.id)) {
+				throw std::format("attachment '{}' is not defined.", m.id);
+			}
+			inputs.emplace_back(
+				attachmentMap.at(m.id),
+				m.layout == "depth-stencil-read-only"
+					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
+					: m.layout == "shader-read-only"
+					? vk::ImageLayout::eShaderReadOnlyOptimal
+					: throw
+			);
+		}
+		inputss.push_back(std::move(inputs));
+
+		std::vector<vk::AttachmentReference> outputs;
+		for (const auto &m: n.outputs) {
+			if (!attachmentMap.contains(m)) {
+				throw std::format("attachment '{}' is not defined.", m);
+			}
+			outputs.emplace_back(attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
+		}
+		outputss.push_back(std::move(outputs));
+
+		if (n.depth) {
+			if (!attachmentMap.contains(n.depth->id)) {
+				throw std::format("attachment '{}' is not defined.", n.depth->id);
+			}
+			depths.emplace_back(
+				attachmentMap.at(n.depth->id),
+				n.depth->readOnly
+					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
+					: vk::ImageLayout::eDepthStencilAttachmentOptimal
+			);
+		}
+
+		subpasses.emplace_back(
+			vk::SubpassDescription()
+				.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+				.setInputAttachments(inputss.back())
+				.setColorAttachments(outputss.back())
+				.setPDepthStencilAttachment(n.depth ? &depths.back() : nullptr)
+		);
+
+		for (const auto &m: n.depends) {
+			if (!subpassMap.contains(m)) {
+				throw std::format("subpass '{}' is not defined.", m);
+			}
+			dependencies.emplace_back(
+				subpassMap.at(m),
+				subpassMap.at(n.id),
+				vk::PipelineStageFlagBits::eAllCommands,
+				vk::PipelineStageFlagBits::eAllCommands,
+				vk::AccessFlagBits::eMemoryWrite,
+				vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
+			);
+		}
+	}
+
+	// 作成
 	const auto ci = vk::RenderPassCreateInfo()
-		.setAttachments(config.attachments)
+		.setAttachments(attachments)
 		.setSubpasses(subpasses)
-		.setDependencies(config.dependencies);
+		.setDependencies(dependencies);
 	g_renderPass = device.createRenderPass(ci);
 }
 
@@ -62,13 +175,14 @@ void createFence(const vk::Device &device) {
 }
 
 void initialize(const config::Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
-	g_clearValues = std::move(config.clearValues);
-	createRenderPass(config, device);
+	getClearValues(config);
+	std::unordered_map<std::string, uint32_t> subpassMap;
+	createRenderPass(config, device, subpassMap);
 	g_framebuffers = swapchain::createFramebuffers(device, g_renderPass);
 	createCommandBuffer(device, commandPool);
 	createSemaphores(device);
 	createFence(device);
-	pipeline::initialize(config, device, g_renderPass);
+	pipeline::initialize(config, subpassMap, device, g_renderPass);
 }
 
 void beginRender(const vk::Device &device) {

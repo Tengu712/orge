@@ -17,8 +17,7 @@ pipelines:
       - count: 1
         bindings:
           - type: uniform-buffer
-            stages:
-              - vertex
+            stages: vertex
     vertex-input-attributes: [3]
     color-blends: [false]
     subpass: SP

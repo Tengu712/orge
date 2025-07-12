@@ -73,13 +73,10 @@ subpasses: []
         id: string
         read-only: bool
 
-# ========== Dependency Definition ============= #
-
-# サブパスの依存関係を表すサブパスIDの配列
-# 省略可能
-dependencies: []
-  - src: string
-    dst: string
+    # 依存するサブパスIDの配列
+    # 既に定義されているサブパスのIDであること
+    # 省略可能
+    depends: []
 
 # ========== Pipeline Definition =============== #
 

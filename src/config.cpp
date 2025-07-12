@@ -1,49 +1,206 @@
 #include "config.hpp"
 
-#include "graphics/platform.hpp"
-#include "config/attachment.hpp"
-#include "config/dependency.hpp"
-#include "config/utils.hpp"
-
 #include <format>
+#include <set>
 
 namespace config {
 
-Config parse(const YAML::Node yaml) {
-	const auto title = s(yaml, "title");
-	const auto width = u(yaml, "width");
-	const auto height = u(yaml, "height");
+void validateKeys(const YAML::Node &n, const std::set<std::string> &rs, const std::set<std::string> &os) {
+	for (const auto &p: n) {
+		const auto k = p.first.as<std::string>();
+		if (!rs.contains(k) && !os.contains(k)) {
+			throw std::format("config error: unexpected key '{}' found.", k);
+		}
+	}
 
-	std::unordered_map<std::string, uint32_t> attachmentMap;
-	std::unordered_map<std::string, uint32_t> subpassMap;
-
-	const auto attachments = parseAttachments(yaml, attachmentMap);
-	const auto clearValues = parseClearValues(yaml);
-	const auto subpasses = parseSubpasses(yaml, attachmentMap, subpassMap);
-	const auto dependencies = parseDependencies(yaml, subpassMap);
-	const auto pipelines = parsePipelines(yaml, subpassMap);
-
-	return {
-		title,
-		width,
-		height,
-		attachments,
-		clearValues,
-		subpasses,
-		dependencies,
-		pipelines,
-	};
+	for (const auto &k: rs) {
+		if (!n[k]) {
+			throw std::format("config error: '{}' not found.", k);
+		}
+	}
 }
 
-Config parse(const char *const yaml) {
-	return parse(YAML::Load(yaml));
+template<typename T>
+void validateValue(const T &v, const std::set<T> &cs, const std::string &s) {
+	if (!cs.contains(v)) {
+		throw std::format("config error: {} '{}' is invalid.", s, v);
+	}
 }
 
-Config parseFromFile(const char *const yamlFilePath) {
+template<typename T>
+T get(const YAML::Node &n, const std::string &k, const std::string &t, std::optional<T> d = std::nullopt) {
+	if (!n[k]) {
+		if (d) {
+			return d.value();
+		} else {
+			throw std::format("config error: '{}' not found.", k);
+		}
+	}
 	try {
-		return parse(YAML::LoadFile(yamlFilePath));
+		return n[k].as<T>();
+	} catch (...) {
+		throw std::format("config error: '{}' is not a {}.", k, t);
+	}
+}
+
+bool b(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+	return get<bool>(n, k, "bool", d);
+}
+
+float f(const YAML::Node &n, const std::string &k) {
+	return get<float>(n, k, "float");
+}
+
+uint32_t u(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+	return get<uint32_t>(n, k, "unsigned int", d);
+}
+
+std::string s(const YAML::Node &n, const std::string &k) {
+	return get<std::string>(n, k, "string");
+}
+
+std::vector<bool> bs(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<bool>>(n, k, "bool[]");
+}
+
+std::vector<uint32_t> us(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<uint32_t>>(n, k, "unsigned int[]");
+}
+
+std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
+	return get<std::vector<std::string>>(n, k, "string[]");
+}
+
+AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "format", "final-layout", "clear-value"}, {"discard"});
+
+	id = s(node, "id");
+	format = s(node, "format");
+	discard = b(node, "discard", false);
+	finalLayout = s(node, "final-layout");
+	if (node["clear-value"].IsSequence()) {
+		colorClearValue = get<std::array<float, 4>>(node, "clear-value", "float[4]");
+	} else {
+		depthClearValue = f(node, "clear-value");
+	}
+
+	validateValue(format, {"render-target"}, "format");
+	validateValue(finalLayout, {"color-attachment", "depth-stencil-attachment", "present-src"}, "final layout");
+}
+
+SubpassInputConfig::SubpassInputConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "layout"}, {});
+
+	id = s(node, "id");
+	layout = s(node, "layout");
+
+	validateValue(layout, {"depth-stencil-read-only", "shader-read-only"}, "layout");
+}
+
+SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "read-only"}, {});
+
+	id = s(node, "id");
+	readOnly = b(node, "read-only");
+}
+
+SubpassConfig::SubpassConfig(const YAML::Node &node) {
+	validateKeys(node, {"id", "outputs"}, {"inputs", "depth", "depends"});
+
+	id = s(node, "id");
+	outputs = ss(node, "outputs");
+
+	for (const auto &n: node["inputs"]) {
+		inputs.emplace_back(n);
+	}
+
+	if (node["depth"]) {
+		depth = SubpassDepthConfig(node["depth"]);
+	}
+
+	if (node["depends"]) {
+		depends = ss(node, "depends");
+	}
+}
+
+DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
+	validateKeys(node, {"type", "stages"}, {"count"});
+
+	type = s(node, "type");
+	count = u(node, "count", 1);
+	stages = s(node, "stages");
+
+	validateValue(
+		type,
+		{"combined-image-sampler", "uniform-buffer", "storage-buffer", "input-attachment"},
+		"descriptor binding type"
+	);
+	validateValue(stages, {"vertex", "fragment", "vertex-and-fragment"}, "descriptor binding visible stages");
+}
+
+DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {
+	validateKeys(node, {"count", "bindings"}, {});
+
+	count = u(node, "count");
+
+	for (const auto &n: node["bindings"]) {
+		bindings.emplace_back(n);
+	}
+}
+
+PipelineConfig::PipelineConfig(const YAML::Node &node) {
+	validateKeys(
+		node,
+		{"id", "vertex-shader", "fragment-shader", "vertex-input-attributes", "color-blends", "subpass"},
+		{"desc-sets", "culling"}
+	);
+
+	id = s(node, "id");
+	vertexShader = s(node, "vertex-shader");
+	fragmentShader = s(node, "fragment-shader");
+	vertexInputAttributes = us(node, "vertex-input-attributes");
+	culling = b(node, "culling", false);
+	colorBlends = bs(node, "color-blends");
+	subpass = s(node, "subpass");
+
+	for (const auto &descSetNode: node["desc-sets"]) {
+		descSets.emplace_back(descSetNode);
+	}
+
+	for (const auto &n: vertexInputAttributes) {
+		validateValue(n, {1, 2, 3, 4}, "vertex input attribute");
+	}
+}
+
+Config::Config(const YAML::Node &node) {
+	validateKeys(node, {"title", "width", "height", "attachments", "subpasses"}, {"pipelines"});
+
+	title = s(node, "title");
+	width = u(node, "width");
+	height = u(node, "height");
+
+	for (const auto &n: node["attachments"]) {
+		attachments.emplace_back(n);
+	}
+
+	for (const auto &n: node["subpasses"]) {
+		subpasses.emplace_back(n);
+	}
+
+	for (const auto &n: node["pipelines"]) {
+		pipelines.emplace_back(n);
+	}
+}
+
+Config parse(const char *yaml) {
+	return Config(YAML::Load(yaml));
+}
+
+Config parseFromFile(const char *yamlFilePath) {
+	try {
+		return Config(YAML::LoadFile(yamlFilePath));
 	} catch (const YAML::BadFile &) {
-		throw std::format("config error: '{}' not found.", yamlFilePath);
+		throw std::format("config error: config file '{}' not found.", yamlFilePath);
 	}
 }
 

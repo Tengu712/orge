@@ -30,7 +30,12 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 	return device.createShaderModule(ci);
 }
 
-PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const config::PipelineConfig &config, const vk::Device &device, const vk::DescriptorPool &descPool) {
+PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
+	const config::PipelineConfig &config,
+	const std::unordered_map<std::string, uint32_t> &subpassMap,
+	const vk::Device &device,
+	const vk::DescriptorPool &descPool
+) {
 	// シェーダステージ
 	vertexShader = createShaderModule(device, config.vertexShader);
 	fragmentShader = createShaderModule(device, config.fragmentShader);
@@ -98,8 +103,32 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const config::PipelineConfi
 
 	// ディスクリプタセットレイアウト
 	for (const auto &n: config.descSets) {
+		std::vector<vk::DescriptorSetLayoutBinding> bindings;
+		for (const auto &m: n.bindings) {
+			bindings.emplace_back(
+				bindings.size(),
+				m.type == "combined-image-sampler"
+					? vk::DescriptorType::eCombinedImageSampler
+					: m.type == "uniform-buffer"
+					? vk::DescriptorType::eUniformBuffer
+					: m.type == "storage-buffer"
+					? vk::DescriptorType::eStorageBuffer
+					: m.type == "input-attachment"
+					? vk::DescriptorType::eInputAttachment
+					: throw,
+				m.count,
+				m.stages == "vertex"
+					? vk::ShaderStageFlagBits::eVertex
+					: m.stages == "fragment"
+					? vk::ShaderStageFlagBits::eFragment
+					: m.stages == "vertex-and-fragment"
+					? vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+					: throw,
+				nullptr
+			);
+		}
 		const auto ci = vk::DescriptorSetLayoutCreateInfo()
-			.setBindings(n.bindings);
+			.setBindings(bindings);
 		descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
 	}
 
@@ -109,7 +138,10 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const config::PipelineConfi
 	pipelineLayout = device.createPipelineLayout(plci);
 
 	// サブパスID
-	subpass = config.subpass;
+	if (!subpassMap.contains(config.subpass)) {
+		throw std::format("subpass '{}' is not defined.", config.subpass);
+	}
+	subpass = subpassMap.at(config.subpass);
 
 	// ディスクリプタセット確保
 	descSets.reserve(config.descSets.size());

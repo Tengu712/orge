@@ -1,13 +1,17 @@
 #pragma once
 
 #include "../config.hpp"
-#include "../error.hpp"
 
 #include <vulkan/vulkan.hpp>
 
 namespace graphics::pipeline {
 
-void initialize(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass);
+void initialize(
+	const config::Config &config,
+	const std::unordered_map<std::string, uint32_t> &subpassMap,
+	const vk::Device &device,
+	const vk::RenderPass &renderPass
+);
 
 /// パイプラインをバインドする関数
 ///
