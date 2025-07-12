@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "../error.hpp"
 #include "mesh.hpp"
 #include "pipeline/buffer.hpp"
 #include "pipeline.hpp"
@@ -163,10 +164,6 @@ void createMesh(
 	mesh::createMesh(g_physicalDevice.getMemoryProperties(), g_device, id, vertexCount, vertices, indexCount, indices);
 }
 
-void beginRender() {
-	rendering::beginRender(g_device);
-}
-
 void endRender() {
 	rendering::endRender(g_queue);
 }
@@ -200,3 +197,7 @@ void terminate() {
 }
 
 } // namespace graphics
+
+int orgeBeginRender() {
+	TRY(graphics::rendering::beginRender(graphics::g_device));
+}
