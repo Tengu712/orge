@@ -38,16 +38,6 @@ vk::SurfaceKHR createSurface(const vk::Instance &instance) {
 	}
 }
 
-bool pollEvents() {
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_EVENT_QUIT) {
-			return false;
-		}
-	}
-	return true;
-}
-
 void terminate() {
 	if (g_window) {
 		SDL_DestroyWindow(g_window);
@@ -56,3 +46,13 @@ void terminate() {
 }
 
 } // namespace graphics::window
+
+int orgePollEvents() {
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_EVENT_QUIT) {
+			return 0;
+		}
+	}
+	return 1;
+}

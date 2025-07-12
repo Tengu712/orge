@@ -25,10 +25,6 @@ int orgeInitializeWith(const char *const yamlFilePath) {
 	)
 }
 
-int orgePollEvents() {
-	return graphics::window::pollEvents();
-}
-
 int orgeBindDescriptorSets(
 	const char *id,
 	uint32_t count,
