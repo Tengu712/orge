@@ -57,20 +57,20 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 
 	// 頂点入力
 	uint32_t sum = 0;
-	for (uint32_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
+	for (size_t i = 0; i < config.vertexInputAttributes.size(); ++i) {
 		const auto &n = config.vertexInputAttributes.at(i);
 		viads.emplace_back(
-			i,
+			static_cast<uint32_t>(i),
 			0,
 			n == 1 ? vk::Format::eR32Sfloat
 			: n == 2 ? vk::Format::eR32G32Sfloat
 			: n == 3 ? vk::Format::eR32G32B32Sfloat
 			: vk::Format::eR32G32B32A32Sfloat,
-			sizeof(float) * sum
+			static_cast<uint32_t>(sizeof(float)) * sum
 		);
 		sum += n;
 	}
-	vibds.emplace_back(0, sizeof(float) * sum, vk::VertexInputRate::eVertex);
+	vibds.emplace_back(0, static_cast<uint32_t>(sizeof(float) * sum), vk::VertexInputRate::eVertex);
 	pvisci = vk::PipelineVertexInputStateCreateInfo()
 		.setVertexBindingDescriptions(vibds)
 		.setVertexAttributeDescriptions(viads);
@@ -106,7 +106,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 		std::vector<vk::DescriptorSetLayoutBinding> bindings;
 		for (const auto &m: n.bindings) {
 			bindings.emplace_back(
-				bindings.size(),
+				static_cast<uint32_t>(bindings.size()),
 				m.type == config::DescriptorType::CombinedImageSampler
 					? vk::DescriptorType::eCombinedImageSampler
 					: m.type == config::DescriptorType::UniformBuffer

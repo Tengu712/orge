@@ -9,8 +9,8 @@ namespace graphics::pipeline::buffer {
 std::unordered_map<std::string, Buffer> g_buffers;
 
 void create(
-	const vk::Device &device,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
 	const char *id,
 	uint64_t size,
 	int isStorage
@@ -22,12 +22,11 @@ void create(
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(ci);
 	const auto memory = utils::allocateMemory(
-		device,
 		memoryProps,
+		device,
 		buffer,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
-	device.bindBufferMemory(buffer, memory, 0);
 	g_buffers.emplace(id, Buffer{storage, size, buffer, memory});
 }
 
@@ -38,7 +37,7 @@ void update(const vk::Device &device, const char *id, const void *data) {
 	device.unmapMemory(buffer.memory);
 }
 
-const Buffer &get(const std::string &id) {
+const Buffer &get(const char *id) {
 	return g_buffers.at(id);
 }
 

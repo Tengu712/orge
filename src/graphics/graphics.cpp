@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "../error.hpp"
 #include "mesh.hpp"
 #include "pipeline/buffer.hpp"
 #include "pipeline.hpp"
@@ -135,42 +136,6 @@ void initialize(const config::Config &config) {
 	rendering::initialize(config, g_device, g_commandPool);
 }
 
-void createBuffer(const char *id, uint64_t size, int isStorage) {
-	pipeline::buffer::create(g_device, g_physicalDevice.getMemoryProperties(), id, size, isStorage);
-}
-
-void updateBuffer(const char *id, const void *data) {
-	pipeline::buffer::update(g_device, id, data);
-}
-
-void updateBufferDescriptor(
-	const char *bufferId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding
-) {
-	pipeline::updateBufferDescriptor(g_device, bufferId, pipelineId, set, index, binding);
-}
-
-void createMesh(
-	const char *id,
-	const uint32_t vertexCount,
-	const float *vertices,
-	const uint32_t indexCount,
-	const uint32_t *indices
-) {
-	mesh::createMesh(g_physicalDevice.getMemoryProperties(), g_device, id, vertexCount, vertices, indexCount, indices);
-}
-
-void beginRender() {
-	rendering::beginRender(g_device);
-}
-
-void endRender() {
-	rendering::endRender(g_device, g_queue);
-}
-
 void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
@@ -200,3 +165,53 @@ void terminate() {
 }
 
 } // namespace graphics
+
+int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
+	TRY(graphics::pipeline::buffer::create(
+		graphics::g_physicalDevice.getMemoryProperties(),
+		graphics::g_device,
+		id,
+		size,
+		isStorage
+	));
+}
+
+int orgeUpdateBuffer(const char *id, const void *data) {
+	TRY(graphics::pipeline::buffer::update(graphics::g_device, id, data));
+}
+
+int orgeUpdateBufferDescriptor(
+	const char *bufferId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::pipeline::updateBufferDescriptor(graphics::g_device, bufferId, pipelineId, set, index, binding));
+}
+
+int orgeCreateMesh(
+	const char *id,
+	const uint32_t vertexCount,
+	const float *vertices,
+	const uint32_t indexCount,
+	const uint32_t *indices
+) {
+	TRY(graphics::mesh::createMesh(
+		graphics::g_physicalDevice.getMemoryProperties(),
+		graphics::g_device,
+		id,
+		vertexCount,
+		vertices,
+		indexCount,
+		indices
+	));
+}
+
+int orgeBeginRender() {
+	TRY(graphics::rendering::beginRender(graphics::g_device));
+}
+
+int orgeEndRender() {
+	TRY(graphics::rendering::endRender(graphics::g_queue));
+}

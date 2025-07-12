@@ -3,105 +3,21 @@
 #include "config.hpp"
 #include "error.hpp"
 #include "graphics/graphics.hpp"
-#include "graphics/rendering.hpp"
-#include "graphics/window.hpp"
-
-#include <sstream>
-#include <vulkan/vulkan.hpp>
-
-#define TRY(n)                                    \
-	try {                                         \
-		n;                                        \
-		return 1;                                 \
-	} catch (const char *e) {                     \
-		error::setMessage(std::string(e));        \
-		return 0;                                 \
-	} catch (const std::string &e) {              \
-		error::setMessage(e);                     \
-		return 0;                                 \
-	} catch (const vk::SystemError &e) {          \
-		error::setMessage(std::string(e.what())); \
-		return 0;                                 \
-	} catch (const std::exception &e) {           \
-		error::setMessage(e.what());              \
-		return 0;                                 \
-	} catch (...) {                               \
-		error::setMessage("unbound error.");      \
-		return 0;                                 \
-    }
 
 const char *orgeGetErrorMessage() {
 	return error::getMessage();
 }
 
-int orgeInitialize(const char *const yaml) {
+int orgeInitialize(const char *yaml) {
 	TRY(
 		graphics::initialize(config::parse(yaml));
 	)
 }
 
-int orgeInitializeWith(const char *const yamlFilePath) {
+int orgeInitializeWith(const char *yamlFilePath) {
 	TRY(
 		graphics::initialize(config::parseFromFile(yamlFilePath));
 	)
-}
-
-int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
-	TRY(graphics::createBuffer(id, size, isStorage));
-}
-
-int orgeUpdateBuffer(const char *id, const void *data) {
-	TRY(graphics::updateBuffer(id, data));
-}
-
-int orgeUpdateBufferDescriptor(
-	const char *bufferId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding
-) {
-	TRY(graphics::updateBufferDescriptor(bufferId, pipelineId, set, index, binding));
-}
-
-int orgeCreateMesh(
-	const char *id,
-	const uint32_t vertexCount,
-	const float *vertices,
-	const uint32_t indexCount,
-	const uint32_t *indices
-) {
-	TRY(graphics::createMesh(id, vertexCount, vertices, indexCount, indices));
-}
-
-int orgePollEvents() {
-	return graphics::window::pollEvents();
-}
-
-int orgeBeginRender() {
-	TRY(graphics::beginRender());
-}
-
-int orgeBindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
-	TRY(graphics::rendering::bindDescriptorSets(id, count, indices));
-}
-
-int orgeDraw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-) {
-	TRY(graphics::rendering::draw(pipelineCount, pipelines, mesh, instanceCount, instanceOffset));
-}
-
-int orgeEndRender() {
-	TRY(graphics::endRender());
 }
 
 void orgeTerminate() {

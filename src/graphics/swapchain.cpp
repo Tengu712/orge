@@ -39,7 +39,7 @@ void getImageCountAndSize(const vk::PhysicalDevice &physicalDevice) {
 	}
 }
 
-void createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+void createSwapchain(const vk::Device &device) {
 	const auto ci = vk::SwapchainCreateInfoKHR()
 		.setSurface(g_surface)
 		.setMinImageCount(g_imageCount)
@@ -58,7 +58,7 @@ void createSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device 
 
 void createImageViews(const vk::Device &device) {
 	const auto images = device.getSwapchainImagesKHR(g_swapchain);
-	if (images.size() < g_imageCount) {
+	if (images.size() < static_cast<size_t>(g_imageCount)) {
 		throw "the number of swapchain image is too few.";
 	}
 
@@ -82,7 +82,7 @@ void initialize(const vk::Instance &instance, const vk::PhysicalDevice &physical
 	g_surface = window::createSurface(instance);
 	validateColorSpace(physicalDevice);
 	getImageCountAndSize(physicalDevice);
-	createSwapchain(physicalDevice, device);
+	createSwapchain(device);
 	createImageViews(device);
 }
 
@@ -98,7 +98,7 @@ std::vector<vk::Framebuffer> createFramebuffers(const vk::Device &device, const 
 			.setLayers(1);
 		framebuffers.push_back(device.createFramebuffer(ci));
 	}
-	return std::move(framebuffers);
+	return framebuffers;
 }
 
 uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore) {

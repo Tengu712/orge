@@ -165,7 +165,7 @@ void createCommandBuffer(const vk::Device &device, const vk::CommandPool &comman
 void createSemaphores(const vk::Device &device) {
 	g_semaphoreForImageEnabled = device.createSemaphore({});
 	g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
-	for (int i = 0; i < swapchain::getImageCount(); ++i) {
+	for (uint32_t i = 0; i < swapchain::getImageCount(); ++i) {
 		g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
 	}
 }
@@ -212,36 +212,7 @@ void beginRender(const vk::Device &device) {
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
-void bindDescriptorSets(
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
-	pipeline::bindDescriptorSets(g_commandBuffer, id, count, indices);
-}
-
-void draw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-) {
-	// パイプラインバインド
-	if (pipelines != nullptr) {
-		pipeline::bind(g_commandBuffer, pipelineCount, pipelines);
-	}
-
-	// メッシュバインド
-	if (mesh != nullptr) {
-		g_indexCount = mesh::bind(g_commandBuffer, mesh);
-	}
-
-	// 描画
-	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceCount);
-}
-
-void endRender(const vk::Device &device, const vk::Queue &queue) {
+void endRender(const vk::Queue &queue) {
 	// レンダーパス終了
 	g_commandBuffer.endRenderPass();
 
@@ -300,3 +271,29 @@ void terminate(const vk::Device &device) {
 }
 
 } // namespace graphics::rendering
+
+int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
+	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
+}
+
+int orgeDraw(
+	uint32_t pipelineCount,
+	const char *const *pipelines,
+	const char *mesh,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
+	TRY(
+		using namespace graphics;
+
+		if (pipelines != nullptr) {
+			pipeline::bind(rendering::g_commandBuffer, pipelineCount, pipelines);
+		}
+
+		if (mesh != nullptr) {
+			rendering::g_indexCount = mesh::bind(rendering::g_commandBuffer, mesh);
+		}
+
+		rendering::g_commandBuffer.drawIndexed(rendering::g_indexCount, instanceCount, 0, 0, instanceOffset);
+	)
+}

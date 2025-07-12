@@ -160,21 +160,19 @@ void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const 
 	}
 }
 
-void bindDescriptorSets(
-	const vk::CommandBuffer &commandBuffer,
-	const char *id,
-	uint32_t count,
-	uint32_t const *indices
-) {
+void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices) {
+	const auto &pipeline = g_pipelines.at(id);
+
 	std::vector<vk::DescriptorSet> sets;
-	for (uint32_t i = 0; i < count; ++i) {
-		sets.push_back(g_pipelines.at(id).descSets.at(i).at(indices[i]));
+	for (size_t i = 0; i < pipeline.descSets.size(); ++i) {
+		sets.push_back(pipeline.descSets.at(i).at(indices[i]));
 	}
+
 	commandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics,
-		g_pipelines.at(id).pipelineLayout,
+		pipeline.pipelineLayout,
 		0,
-		sets.size(),
+		static_cast<uint32_t>(sets.size()),
 		sets.data(),
 		0,
 		nullptr
