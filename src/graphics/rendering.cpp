@@ -28,55 +28,16 @@ uint32_t g_index;
 // 現在のインデックスカウント
 uint32_t g_indexCount;
 
-void getClearValues(const Config &config) {
-	for (const auto &n: config.attachments) {
-		g_clearValues.push_back(n.clearValue);
-	}
-}
-
-void createRenderPass(const Config &config, const vk::Device &device) {
-	std::vector<vk::AttachmentDescription> attachments;
-	for (const auto &n: config.attachments) {
-		attachments.emplace_back(
-			vk::AttachmentDescriptionFlags(),
-			n.format,
-			vk::SampleCountFlagBits::e1,
-			vk::AttachmentLoadOp::eClear,
-			n.discard ? vk::AttachmentStoreOp::eNone : vk::AttachmentStoreOp::eStore,
-			vk::AttachmentLoadOp::eDontCare,
-			vk::AttachmentStoreOp::eDontCare,
-			vk::ImageLayout::eUndefined,
-			n.finalLayout
-		);
-	}
-
+void createRenderPass(const config::Config &config, const vk::Device &device) {
 	std::vector<vk::SubpassDescription> subpasses;
 	for (const auto &n: config.subpasses) {
-		subpasses.emplace_back(
-			vk::SubpassDescription()
-				.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-				.setInputAttachments(n.inputs)
-				.setColorAttachments(n.outputs)
-				.setPDepthStencilAttachment(n.depth ? &(*n.depth) : nullptr)
-		);
-	}
-
-	std::vector<vk::SubpassDependency> subpassDeps;
-	for (const auto &n: config.subpassDeps) {
-		subpassDeps.emplace_back(
-			n.src,
-			n.dst,
-			vk::PipelineStageFlagBits::eAllCommands,
-			vk::PipelineStageFlagBits::eAllCommands,
-			vk::AccessFlagBits::eMemoryWrite,
-			vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
-		);
+		subpasses.push_back(n.get());
 	}
 
 	const auto ci = vk::RenderPassCreateInfo()
-		.setAttachments(attachments)
+		.setAttachments(config.attachments)
 		.setSubpasses(subpasses)
-		.setDependencies(subpassDeps);
+		.setDependencies(config.dependencies);
 	g_renderPass = device.createRenderPass(ci);
 }
 
@@ -100,8 +61,8 @@ void createFence(const vk::Device &device) {
 	g_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
 }
 
-void initialize(const Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
-	getClearValues(config);
+void initialize(const config::Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
+	g_clearValues = std::move(config.clearValues);
 	createRenderPass(config, device);
 	g_framebuffers = swapchain::createFramebuffers(device, g_renderPass);
 	createCommandBuffer(device, commandPool);

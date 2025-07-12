@@ -4,7 +4,7 @@
 
 namespace graphics {
 
-void initialize(const Config &config);
+void initialize(const config::Config &config);
 
 void createBuffer(const char *id, uint64_t size, int isStorage);
 

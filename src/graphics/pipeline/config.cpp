@@ -30,7 +30,7 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 	return device.createShaderModule(ci);
 }
 
-PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const PipelineConfig &config, const vk::Device &device, const vk::DescriptorPool &descPool) {
+PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(const config::PipelineConfig &config, const vk::Device &device, const vk::DescriptorPool &descPool) {
 	// シェーダステージ
 	vertexShader = createShaderModule(device, config.vertexShader);
 	fragmentShader = createShaderModule(device, config.fragmentShader);

@@ -7,7 +7,7 @@
 
 namespace graphics::pipeline {
 
-void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass);
+void initialize(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass);
 
 /// パイプラインをバインドする関数
 ///

@@ -20,7 +20,7 @@ struct Pipeline {
 vk::DescriptorPool g_descPool;
 std::unordered_map<std::string, Pipeline> g_pipelines;
 
-void createPipelines(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+void createPipelines(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	// 入力アセンブリ
 	const auto piasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
@@ -83,7 +83,7 @@ void createPipelines(const Config &config, const vk::Device &device, const vk::R
 	}
 }
 
-void createDescriptorPool(const Config &config, const vk::Device &device) {
+void createDescriptorPool(const config::Config &config, const vk::Device &device) {
 	// 集計
 	uint32_t maxSets = 0;
 	std::unordered_map<vk::DescriptorType, uint32_t> bindingMap;
@@ -124,7 +124,7 @@ void createDescriptorPool(const Config &config, const vk::Device &device) {
 	g_descPool = device.createDescriptorPool(ci);
 }
 
-void initialize(const Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+void initialize(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	if (config.pipelines.empty()) {
 		return;
 	}

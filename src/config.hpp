@@ -1,56 +1,23 @@
-//! orge初期化用のyamlをパースするモジュール
-
 #pragma once
 
-#include <optional>
-#include <string>
-#include <vector>
-#include <vulkan/vulkan.hpp>
+#include "config/pipeline.hpp"
+#include "config/subpass.hpp"
 
-struct Attachment {
-	vk::Format format;
-	bool discard;
-	vk::ImageLayout finalLayout;
-	vk::ClearValue clearValue;
-};
-
-struct Subpass {
-	std::vector<vk::AttachmentReference> inputs;
-	std::vector<vk::AttachmentReference> outputs;
-	std::optional<vk::AttachmentReference> depth;
-};
-
-struct SubpassDependency {
-	uint32_t src;
-	uint32_t dst;
-};
-
-struct DescriptorSetConfig {
-	uint32_t count;
-	std::vector<vk::DescriptorSetLayoutBinding> bindings;
-};
-
-struct PipelineConfig {
-	std::string id;
-	std::string vertexShader;
-	std::string fragmentShader;
-	std::vector<DescriptorSetConfig> descSets;
-	std::vector<uint32_t> vertexInputAttributes;
-	bool culling;
-	std::vector<bool> colorBlends;
-	uint32_t subpass;
-};
+namespace config {
 
 struct Config {
 	std::string title;
-	int width;
-	int height;
-	std::vector<Attachment> attachments;
-	std::vector<Subpass> subpasses;
-	std::vector<SubpassDependency> subpassDeps;
+	uint32_t width;
+	uint32_t height;
+	std::vector<vk::AttachmentDescription> attachments;
+	std::vector<vk::ClearValue> clearValues;
+	std::vector<SubpassConfig> subpasses;
+	std::vector<vk::SubpassDependency> dependencies;
 	std::vector<PipelineConfig> pipelines;
 };
 
-Config parseConfig(const char *const yaml);
+Config parse(const char *const yaml);
 
-Config parseConfigFromFile(const char *const yamlFilePath);
+Config parseFromFile(const char *const yamlFilePath);
+
+} // namespace config

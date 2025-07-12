@@ -109,7 +109,7 @@ void createCommandPool(uint32_t queueFamilyIndex) {
 	g_commandPool = g_device.createCommandPool(ci);
 }
 
-void initialize(const Config &config) {
+void initialize(const config::Config &config) {
 	// ウィンドウ作成
 	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
 	window::initialize(config.title, config.width, config.height);

@@ -2,24 +2,23 @@ title: cube
 width: 640
 height: 480
 attachments:
- - id: RT
-   format: render-target
-   final-layout: present-src
-   clear-value: [0.25, 0.25, 0.25, 1.0]
+  - id: RT
+    format: render-target
+    final-layout: present-src
+    clear-value: [0.25, 0.25, 0.25, 1.0]
 subpasses:
- - id: SP
-   outputs:
-    - id: RT
-      layout: color-attachment
+  - id: SP
+    outputs: [RT]
 pipelines:
   - id: PL
-    vertexShader: shader.vert.spv
-    fragmentShader: shader.frag.spv
+    vertex-shader: shader.vert.spv
+    fragment-shader: shader.frag.spv
     desc-sets:
       - count: 1
         bindings:
           - type: uniform-buffer
-            stages: [vertex]
-    vertexInputAttributes: [3]
-    colorBlends: [false]
+            stages:
+              - vertex
+    vertex-input-attributes: [3]
+    color-blends: [false]
     subpass: SP
