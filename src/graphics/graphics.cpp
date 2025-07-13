@@ -196,13 +196,16 @@ int orgeUpdateBufferDescriptor(
 	TRY(graphics::pipeline::updateBufferDescriptor(graphics::g_device, bufferId, pipelineId, set, index, binding));
 }
 
-int orgeCreateImageFromFile(const char *id, const char *path) {
+int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat) {
 	TRY(graphics::pipeline::image::createFromFile(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		graphics::g_queue,
 		id,
-		path
+		path,
+		linearMagFilter,
+		linearMinFilter,
+		repeat
 	));
 }
 

@@ -5,9 +5,10 @@
 namespace graphics::pipeline::image {
 
 struct Image {
-	vk::Image image;
-	vk::ImageView view;
-	vk::DeviceMemory memory;
+	const vk::Image image;
+	const vk::ImageView view;
+	const vk::DeviceMemory memory;
+	const vk::Sampler &sampler;
 };
 
 void terminate(const vk::Device &device);
@@ -19,7 +20,10 @@ void createFromFile(
 	const vk::Device &device,
 	const vk::Queue &queue,
 	const char *id,
-	const char *path
+	const char *path,
+	int linearMagFilter,
+	int linearMinFilter,
+	int repeat
 );
 
 } // namespace graphics::pipeline::image

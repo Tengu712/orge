@@ -13,8 +13,14 @@ namespace graphics::pipeline::image {
 vk::CommandBuffer g_commandBuffer;
 vk::Fence g_fence;
 std::unordered_map<std::string, Image> g_images;
+std::unordered_map<uint8_t, vk::Sampler> g_samplers;
 
 void terminate(const vk::Device &device) {
+	for (auto &n: g_samplers) {
+		device.destroySampler(n.second);
+	}
+	g_samplers.clear();
+
 	for (auto &n: g_images) {
 		device.freeMemory(n.second.memory);
 		device.destroyImageView(n.second.view);
@@ -41,6 +47,30 @@ void initialize(const vk::Device &device, const vk::CommandPool &commandPool) {
 	g_fence = device.createFence({});
 }
 
+inline uint8_t makeSamplerKey(int linearMagFilter, int linearMinFilter, int repeat) {
+    return static_cast<bool>(linearMagFilter)
+		| (static_cast<bool>(linearMinFilter) << 1)
+		| (static_cast<bool>(repeat) << 2);
+}
+
+const vk::Sampler &createSampler(const vk::Device &device, int linearMagFilter, int linearMinFilter, int repeat) {
+	const auto key = makeSamplerKey(linearMagFilter, linearMinFilter, repeat);
+
+	if (!g_samplers.contains(key)) {
+		const auto ci = vk::SamplerCreateInfo()
+			.setMagFilter(linearMagFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
+			.setMinFilter(linearMinFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
+			.setMipmapMode(vk::SamplerMipmapMode::eLinear)
+			.setAddressModeU(repeat ? vk::SamplerAddressMode::eRepeat : vk::SamplerAddressMode::eClampToEdge)
+			.setAddressModeV(repeat ? vk::SamplerAddressMode::eRepeat : vk::SamplerAddressMode::eClampToEdge)
+			.setMaxLod(vk::LodClampNone);
+		const auto sampler = device.createSampler(ci);
+		g_samplers.emplace(key, sampler);
+	}
+
+	return g_samplers.at(key);
+}
+
 void create(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
@@ -48,7 +78,10 @@ void create(
 	const char *id,
 	uint32_t width,
 	uint32_t height,
-	const unsigned char *pixels
+	const unsigned char *pixels,
+	int linearMagFilter,
+	int linearMinFilter,
+	int repeat
 ) {
 	const auto extent = vk::Extent3D(width, height, 1);
 
@@ -177,8 +210,11 @@ void create(
 	device.freeMemory(bufferMemory);
 	device.destroyBuffer(buffer);
 
+	// サンプラ作成
+	const auto &sampler = createSampler(device, linearMagFilter, linearMinFilter, repeat);
+
 	// 終了
-	g_images.emplace(id, Image{image, view, memory});
+	g_images.emplace(id, Image{image, view, memory, sampler});
 }
 
 void createFromFile(
@@ -186,7 +222,10 @@ void createFromFile(
 	const vk::Device &device,
 	const vk::Queue &queue,
 	const char *id,
-	const char *path
+	const char *path,
+	int linearMagFilter,
+	int linearMinFilter,
+	int repeat
 ) {
 	using stbi_ptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
 
@@ -204,7 +243,7 @@ void createFromFile(
 		throw std::format("'{}' is not RGBA.", path);
 	}
 
-	create(memoryProps, device, queue, id, width, height, pixels.get());
+	create(memoryProps, device, queue, id, width, height, pixels.get(), linearMagFilter, linearMinFilter, repeat);
 }
 
 } // namespace graphics::pipeline::image
