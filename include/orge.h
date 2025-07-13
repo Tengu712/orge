@@ -61,6 +61,9 @@ int orgeUpdateBufferDescriptor(
 	uint32_t binding
 );
 
+/// orgeにイメージを追加する関数 (pngファイル指定)
+int orgeCreateImageFromFile(const char *id, const char *path);
+
 /// orgeにメッシュを追加する関数
 ///
 /// - id: メッシュID

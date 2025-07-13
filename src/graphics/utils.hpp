@@ -38,4 +38,17 @@ inline vk::DeviceMemory allocateMemory(
 	return memory;
 }
 
+inline vk::DeviceMemory allocateImageMemory(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Image &image,
+	vk::MemoryPropertyFlags mask
+) {
+	const auto reqs = device.getImageMemoryRequirements(image);
+	const auto type = utils::findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
+	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
+	device.bindImageMemory(image, memory, 0);
+	return memory;
+}
+
 } // namespace graphics::utils
