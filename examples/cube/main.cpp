@@ -38,6 +38,7 @@ int main() {
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(float) * CAMERA.size()), 0));
 	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
+	TRY(orgeCreateImageFromFile("image", "image.png"));
 
 	while (orgePollEvents()) {
 		const auto result =

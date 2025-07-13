@@ -21,4 +21,7 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_CURRENT_SOURCE_DIR}/shader.frag.spv
 		$<TARGET_FILE_DIR:cube>
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_CURRENT_SOURCE_DIR}/image.png
+		$<TARGET_FILE_DIR:cube>
 )

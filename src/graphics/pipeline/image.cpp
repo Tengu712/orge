@@ -154,8 +154,8 @@ void create(
 		subresRange
 	);
 	g_commandBuffer.pipelineBarrier(
-		vk::PipelineStageFlagBits::eAllCommands,
 		vk::PipelineStageFlagBits::eTransfer,
+		vk::PipelineStageFlagBits::eFragmentShader,
 		vk::DependencyFlags(),
 		{},
 		{},
