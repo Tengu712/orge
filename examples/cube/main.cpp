@@ -30,7 +30,7 @@ const std::vector<float> CAMERA{
 	0.0f, 0.0f, 0.5f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f,
 };
-const std::vector<uint32_t> SET_INDICES{0};
+const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
