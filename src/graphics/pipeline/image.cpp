@@ -48,9 +48,9 @@ void initialize(const vk::Device &device, const vk::CommandPool &commandPool) {
 }
 
 inline uint8_t makeSamplerKey(int linearMagFilter, int linearMinFilter, int repeat) {
-    return static_cast<bool>(linearMagFilter)
-		| (static_cast<bool>(linearMinFilter) << 1)
-		| (static_cast<bool>(repeat) << 2);
+	return static_cast<uint8_t>(static_cast<bool>(linearMagFilter))
+		| (static_cast<uint8_t>(static_cast<bool>(linearMinFilter)) << 1)
+		| (static_cast<uint8_t>(static_cast<bool>(repeat)) << 2);
 }
 
 const vk::Sampler &createSampler(const vk::Device &device, int linearMagFilter, int linearMinFilter, int repeat) {
