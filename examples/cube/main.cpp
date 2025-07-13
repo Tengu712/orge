@@ -11,12 +11,18 @@
 const std::vector<float> VERTICES{
 	// 左下
 	-1.0f, 1.0f, 0.0f,
-	// 上
-	0.0f, -1.0f, 0.0f,
+	0.0f, 1.0f,
+	// 左上
+	-1.0f, -1.0f, 0.0f,
+	0.0f, 0.0f,
+	// 右上
+	1.0f, -1.0f, 0.0f,
+	1.0f, 0.0f,
 	// 右下
 	1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f,
 };
-const std::vector<uint32_t> INDICES{0, 1, 2};
+const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 const std::vector<const char *> PIPELINES{"PL"};
 const std::vector<float> CAMERA{
 	0.5f, 0.0f, 0.0f, 0.0f,
@@ -24,7 +30,7 @@ const std::vector<float> CAMERA{
 	0.0f, 0.0f, 0.5f, 0.0f,
 	0.0f, 0.0f, 0.0f, 1.0f,
 };
-const std::vector<uint32_t> SET_INDICES{0};
+const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -38,6 +44,8 @@ int main() {
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(float) * CAMERA.size()), 0));
 	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
+	TRY(orgeCreateImageFromFile("image", "image.png", 0, 0, 0));
+	TRY(orgeUpdateImageDescriptor("image", "PL", 1, 0, 0));
 
 	while (orgePollEvents()) {
 		const auto result =

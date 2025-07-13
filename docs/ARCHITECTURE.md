@@ -11,4 +11,5 @@ graph TD
     rendering ==> mesh
     swapchain --> window
     pipeline --> buffer
+    pipeline --> image
 ```

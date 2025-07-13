@@ -9,6 +9,7 @@
       "features": ["vulkan"],
       "default-features": false
     },
-    "yaml-cpp"
+    "yaml-cpp",
+    "stb"
   ]
 }

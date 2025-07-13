@@ -3,6 +3,7 @@
 #include "../error.hpp"
 #include "mesh.hpp"
 #include "pipeline/buffer.hpp"
+#include "pipeline/image.hpp"
 #include "pipeline.hpp"
 #include "platform.hpp"
 #include "rendering.hpp"
@@ -134,6 +135,10 @@ void initialize(const config::Config &config) {
 
 	// 描画処理オブジェクト
 	rendering::initialize(config, g_device, g_commandPool);
+
+	// イメージ
+	// NOTE: ステージングバッファを経由してアップロードする都合。
+	pipeline::image::initialize(g_device, g_commandPool);
 }
 
 void terminate() {
@@ -141,6 +146,7 @@ void terminate() {
 		g_device.waitIdle();
 	}
 
+	pipeline::image::terminate(g_device);
 	pipeline::buffer::terminate(g_device);
 	mesh::terminate(g_device);
 	rendering::terminate(g_device);
@@ -188,6 +194,29 @@ int orgeUpdateBufferDescriptor(
 	uint32_t binding
 ) {
 	TRY(graphics::pipeline::updateBufferDescriptor(graphics::g_device, bufferId, pipelineId, set, index, binding));
+}
+
+int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat) {
+	TRY(graphics::pipeline::image::createFromFile(
+		graphics::g_physicalDevice.getMemoryProperties(),
+		graphics::g_device,
+		graphics::g_queue,
+		id,
+		path,
+		linearMagFilter,
+		linearMinFilter,
+		repeat
+	));
+}
+
+int orgeUpdateImageDescriptor(
+	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::pipeline::updateImageDescriptor(graphics::g_device, imageId, pipelineId, set, index, binding));
 }
 
 int orgeCreateMesh(

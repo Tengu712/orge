@@ -76,6 +76,7 @@ find_package(VulkanHeaders CONFIG REQUIRED)
 find_package(VulkanLoader CONFIG REQUIRED)
 find_package(SDL3 CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
+find_path(STB_INCLUDE_DIRS "stb_image.h")
 
 # ユーティリティ関数追加
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/get-deps-from-pc.cmake)
