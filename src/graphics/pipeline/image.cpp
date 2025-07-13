@@ -246,4 +246,8 @@ void createFromFile(
 	create(memoryProps, device, queue, id, width, height, pixels.get(), linearMagFilter, linearMinFilter, repeat);
 }
 
+const Image &get(const char *id) {
+	return g_images.at(id);
+}
+
 } // namespace graphics::pipeline::image

@@ -76,6 +76,21 @@ int orgeUpdateBufferDescriptor(
 ///     - 0なら0あるいは1の境界値を参照
 int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat);
 
+/// イメージディスクリプタを更新する関数
+///
+/// - imageId: イメージID
+/// - pipelineId: パイプラインID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+int orgeUpdateImageDescriptor(
+	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
 /// orgeにメッシュを追加する関数
 ///
 /// - id: メッシュID

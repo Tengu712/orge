@@ -30,6 +30,15 @@ void updateBufferDescriptor(
 	uint32_t binding
 );
 
+void updateImageDescriptor(
+	const vk::Device &device,
+	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
 void terminate(const vk::Device &device);
 
 } // namespace graphics::pipeline

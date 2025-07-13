@@ -209,6 +209,16 @@ int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilte
 	));
 }
 
+int orgeUpdateImageDescriptor(
+	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::pipeline::updateImageDescriptor(graphics::g_device, imageId, pipelineId, set, index, binding));
+}
+
 int orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,

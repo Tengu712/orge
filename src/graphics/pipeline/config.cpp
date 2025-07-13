@@ -148,7 +148,7 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 	for (size_t i = 0; i < config.descSets.size(); ++i) {
 		std::vector<vk::DescriptorSetLayout> layouts;
 		for (size_t j = 0; j < config.descSets[i].count; ++j) {
-			layouts.push_back(descSetLayouts[j]);
+			layouts.push_back(descSetLayouts[i]);
 		}
 		const auto ai = vk::DescriptorSetAllocateInfo()
 			.setDescriptorPool(descPool)

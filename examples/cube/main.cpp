@@ -45,6 +45,7 @@ int main() {
 	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
 	TRY(orgeCreateImageFromFile("image", "image.png", 0, 0, 0));
+	TRY(orgeUpdateImageDescriptor("image", "PL", 1, 0, 0));
 
 	while (orgePollEvents()) {
 		const auto result =

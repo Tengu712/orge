@@ -2,6 +2,7 @@
 
 #include "pipeline/buffer.hpp"
 #include "pipeline/config.hpp"
+#include "pipeline/image.hpp"
 #include "swapchain.hpp"
 
 #include <ranges>
@@ -195,6 +196,25 @@ void updateBufferDescriptor(
 		.setDescriptorCount(1)
 		.setDescriptorType(buffer.isStorage ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
 		.setBufferInfo(bi);
+	device.updateDescriptorSets(1, &ds, 0, nullptr);
+}
+
+void updateImageDescriptor(
+	const vk::Device &device,
+	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	const auto &image = image::get(imageId);
+	const auto ii = vk::DescriptorImageInfo(image.sampler, image.view, vk::ImageLayout::eShaderReadOnlyOptimal);
+	const auto ds = vk::WriteDescriptorSet()
+		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
+		.setDstBinding(binding)
+		.setDescriptorCount(1)
+		.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+		.setImageInfo(ii);
 	device.updateDescriptorSets(1, &ds, 0, nullptr);
 }
 

@@ -26,4 +26,6 @@ void createFromFile(
 	int repeat
 );
 
+const Image &get(const char *id);
+
 } // namespace graphics::pipeline::image
