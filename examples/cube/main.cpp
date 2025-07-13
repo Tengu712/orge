@@ -11,12 +11,16 @@
 const std::vector<float> VERTICES{
 	// 左下
 	-1.0f, 1.0f, 0.0f,
+	0.0f, 1.0f,
 	// 左上
 	-1.0f, -1.0f, 0.0f,
+	0.0f, 0.0f,
 	// 右上
 	1.0f, -1.0f, 0.0f,
+	1.0f, 0.0f,
 	// 右下
 	1.0f, 1.0f, 0.0f,
+	1.0f, 1.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 const std::vector<const char *> PIPELINES{"PL"};
