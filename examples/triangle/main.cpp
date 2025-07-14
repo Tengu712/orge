@@ -35,7 +35,8 @@ int main() {
 	while (orgePollEvents()) {
 		const auto result =
 			orgeBeginRender()
-			&& orgeDraw(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data(), "triangle", 1, 0)
+			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
+			&& orgeDraw("triangle", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;

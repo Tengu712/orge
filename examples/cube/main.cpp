@@ -50,8 +50,9 @@ int main() {
 	while (orgePollEvents()) {
 		const auto result =
 			orgeBeginRender()
+			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
 			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
-			&& orgeDraw(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data(), "cube", 1, 0)
+			&& orgeDraw("cube", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;
