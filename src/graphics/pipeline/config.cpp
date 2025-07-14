@@ -82,6 +82,13 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 		.setFrontFace(vk::FrontFace::eCounterClockwise)
 		.setLineWidth(1.0f);
 
+	// デプスステンシル
+	pdssci = vk::PipelineDepthStencilStateCreateInfo()
+		.setDepthTestEnable(config.depthTest)
+		.setDepthWriteEnable(config.depthTest)
+		.setDepthCompareOp(vk::CompareOp::eLess)
+		.setMaxDepthBounds(1.0f);
+
 	// カラーブレンド
 	for (const auto &n: config.colorBlends) {
 		pcbass.emplace_back(

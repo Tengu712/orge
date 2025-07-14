@@ -10,6 +10,7 @@ namespace config {
 
 enum class Format: uint8_t {
 	RenderTarget,
+	DepthBuffer,
 };
 
 enum class FinalLayout: uint8_t {
@@ -93,6 +94,7 @@ struct PipelineConfig {
 	std::vector<DescriptorSetConfig> descSets;
 	std::vector<uint32_t> vertexInputAttributes;
 	bool culling;
+	bool depthTest;
 	std::vector<bool> colorBlends;
 	std::string subpass;
 

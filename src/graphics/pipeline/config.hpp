@@ -27,6 +27,9 @@ struct PipelineCreateDynamicInfo {
 	// ラスタライゼーション
 	vk::PipelineRasterizationStateCreateInfo prsci;
 
+	// デプスステンシル
+	vk::PipelineDepthStencilStateCreateInfo pdssci;
+
 	// カラーブレンド
 	std::vector<vk::PipelineColorBlendAttachmentState> pcbass;
 	vk::PipelineColorBlendStateCreateInfo pcbsci;

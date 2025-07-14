@@ -73,6 +73,8 @@ std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
 Format parseFormat(const std::string& s) {
 	return s == "render-target"
 		? Format::RenderTarget
+		: s == "depth-buffer"
+		? Format::DepthBuffer
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 
@@ -185,7 +187,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node) {
 	validateKeys(
 		node,
 		{"id", "vertex-shader", "fragment-shader", "vertex-input-attributes", "color-blends", "subpass"},
-		{"desc-sets", "culling"}
+		{"desc-sets", "culling", "depth-test"}
 	);
 
 	id = s(node, "id");
@@ -193,6 +195,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node) {
 	fragmentShader = s(node, "fragment-shader");
 	vertexInputAttributes = us(node, "vertex-input-attributes");
 	culling = b(node, "culling", false);
+	depthTest = b(node, "depth-test", false);
 	colorBlends = bs(node, "color-blends");
 	subpass = s(node, "subpass");
 

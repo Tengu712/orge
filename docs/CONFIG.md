@@ -31,6 +31,7 @@ attachments: []
     # アタッチメントのフォーマット
     # 取りうる値は以下:
     #   - render-target
+    #   - depth-buffer
     format: string
 
     # レンダーパス終了時にアタッチメントの内容を破棄するか
@@ -122,6 +123,10 @@ pipelines: []
     # カリングを行うか
     # 省略された場合、falseとみなされる
     culling: bool
+
+    # 深度テストを行うか
+    # 省略された場合、falseとみなされる
+    depth-test: bool
 
     # 各カラーアタッチメントのカラーブレンドを行うかの配列
     color-blends: bool[]

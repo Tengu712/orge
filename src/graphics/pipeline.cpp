@@ -114,6 +114,7 @@ void createPipelines(
 				.setPViewportState(&pvsci)
 				.setPRasterizationState(&n.prsci)
 				.setPMultisampleState(&pmsci)
+				.setPDepthStencilState(&n.pdssci)
 				.setPColorBlendState(&n.pcbsci)
 				.setLayout(n.pipelineLayout)
 				.setRenderPass(renderPass)
