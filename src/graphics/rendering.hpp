@@ -7,7 +7,12 @@
 
 namespace graphics::rendering {
 
-void initialize(const config::Config &config, const vk::Device &device, const vk::CommandPool &commandPool);
+void initialize(
+	const config::Config &config,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::CommandPool &commandPool
+);
 
 void beginRender(const vk::Device &device);
 

@@ -1,17 +1,14 @@
 #include "rendering.hpp"
 
+#include "framebuffer.hpp"
 #include "mesh.hpp"
 #include "pipeline.hpp"
 #include "platform.hpp"
 #include "swapchain.hpp"
 
-#include <vector>
-
 namespace graphics::rendering {
 
-std::vector<vk::ClearValue> g_clearValues;
 vk::RenderPass g_renderPass;
-std::vector<vk::Framebuffer> g_framebuffers;
 // 描画処理コマンド用のコマンドバッファ
 // orgeはプレゼンテーション時に描画完了まで待機するので1個で十分
 vk::CommandBuffer g_commandBuffer;
@@ -29,13 +26,33 @@ uint32_t g_index;
 // 現在のインデックスカウント
 uint32_t g_indexCount;
 
-void getClearValues(const config::Config &config) {
-	for (const auto &n: config.attachments) {
-		if (n.colorClearValue) {
-			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearColorValue(n.colorClearValue.value())));
-		} else {
-			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(n.depthClearValue.value(), 0)));
-		}
+void terminate(const vk::Device &device) {
+	pipeline::terminate(device);
+	framebuffer::terminate(device);
+
+	if (g_frameInFlightFence) {
+		device.destroyFence(g_frameInFlightFence);
+		g_frameInFlightFence = nullptr;
+	}
+
+	for (const auto &semaphore: g_semaphoreForRenderFinisheds) {
+		device.destroySemaphore(semaphore);
+	}
+	g_semaphoreForRenderFinisheds.clear();
+
+	if (g_semaphoreForImageEnabled) {
+		device.destroySemaphore(g_semaphoreForImageEnabled);
+		g_semaphoreForImageEnabled = nullptr;
+	}
+
+	if (g_commandBuffer) {
+		// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。
+		g_commandBuffer = nullptr;
+	}
+
+	if (g_renderPass) {
+		device.destroyRenderPass(g_renderPass);
+		g_renderPass = nullptr;
 	}
 }
 
@@ -163,9 +180,10 @@ void createCommandBuffer(const vk::Device &device, const vk::CommandPool &comman
 }
 
 void createSemaphores(const vk::Device &device) {
+	const auto imageCount = swapchain::getImages().size();
 	g_semaphoreForImageEnabled = device.createSemaphore({});
-	g_semaphoreForRenderFinisheds.reserve(swapchain::getImageCount());
-	for (uint32_t i = 0; i < swapchain::getImageCount(); ++i) {
+	g_semaphoreForRenderFinisheds.reserve(imageCount);
+	for (uint32_t i = 0; i < imageCount; ++i) {
 		g_semaphoreForRenderFinisheds.push_back(device.createSemaphore({}));
 	}
 }
@@ -174,14 +192,18 @@ void createFence(const vk::Device &device) {
 	g_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
 }
 
-void initialize(const config::Config &config, const vk::Device &device, const vk::CommandPool &commandPool) {
-	getClearValues(config);
+void initialize(
+	const config::Config &config,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::CommandPool &commandPool
+) {
 	std::unordered_map<std::string, uint32_t> subpassMap;
 	createRenderPass(config, device, subpassMap);
-	g_framebuffers = swapchain::createFramebuffers(device, g_renderPass);
 	createCommandBuffer(device, commandPool);
 	createSemaphores(device);
 	createFence(device);
+	framebuffer::initialize(config, memoryProps, device, g_renderPass, swapchain::getImageSize(), swapchain::getImages());
 	pipeline::initialize(config, subpassMap, device, g_renderPass);
 }
 
@@ -206,9 +228,9 @@ void beginRender(const vk::Device &device) {
 	// レンダーパス開始
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(g_renderPass)
-		.setFramebuffer(g_framebuffers[g_index])
+		.setFramebuffer(framebuffer::getFramebuffer(g_index))
 		.setRenderArea(vk::Rect2D({0, 0}, swapchain::getImageSize()))
-		.setClearValues(g_clearValues);
+		.setClearValues(framebuffer::getClearValues());
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
@@ -232,42 +254,6 @@ void endRender(const vk::Queue &queue) {
 	//
 	// NOTE: ここで画面が切り替わるまで待機される。
 	swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(g_index), g_index);
-}
-
-void terminate(const vk::Device &device) {
-	pipeline::terminate(device);
-
-	if (g_frameInFlightFence) {
-		device.destroyFence(g_frameInFlightFence);
-		g_frameInFlightFence = nullptr;
-	}
-
-	for (const auto &semaphore: g_semaphoreForRenderFinisheds) {
-	device.destroySemaphore(semaphore);
-	}
-	g_semaphoreForRenderFinisheds.clear();
-
-	if (g_semaphoreForImageEnabled) {
-		device.destroySemaphore(g_semaphoreForImageEnabled);
-		g_semaphoreForImageEnabled = nullptr;
-	}
-
-	if (g_commandBuffer) {
-		// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。
-		g_commandBuffer = nullptr;
-	}
-
-	for (auto &framebuffer: g_framebuffers) {
-		device.destroyFramebuffer(framebuffer);
-	}
-	g_framebuffers.clear();
-
-	if (g_renderPass) {
-		device.destroyRenderPass(g_renderPass);
-		g_renderPass = nullptr;
-	}
-
-	g_clearValues.clear();
 }
 
 } // namespace graphics::rendering

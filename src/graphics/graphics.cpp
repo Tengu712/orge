@@ -134,7 +134,7 @@ void initialize(const config::Config &config) {
 	swapchain::initialize(g_instance, g_physicalDevice, g_device);
 
 	// 描画処理オブジェクト
-	rendering::initialize(config, g_device, g_commandPool);
+	rendering::initialize(config, g_physicalDevice.getMemoryProperties(), g_device, g_commandPool);
 
 	// イメージ
 	// NOTE: ステージングバッファを経由してアップロードする都合。
