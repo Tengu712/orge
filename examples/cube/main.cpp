@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 #include <orge.h>
 #include <vector>
@@ -25,12 +26,12 @@ const std::vector<float> VERTICES{
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 const std::vector<const char *> PIPELINES{"PL"};
 const std::vector<float> CAMERA{
-	0.5f, 0.0f, 0.0f, 0.0f,
-	0.0f, 0.5f, 0.0f, 0.0f,
-	0.0f, 0.0f, 0.5f, 0.0f,
-	0.0f, 0.0f, 0.0f, 1.0f,
+	2.0f/640.0f, 0.0f,        0.0f,        0.0f,
+	0.0f,        2.0f/480.0f, 0.0f,        0.0f,
+	0.0f,        0.0f,        2.0f/100.0f, 0.0f,
+	0.0f,        0.0f,        0.0f,        1.0f,
 };
-const std::vector<uint32_t> SET_INDICES{0, 0};
+const std::vector<uint32_t> SET_INDICES{0, 0, 0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -44,12 +45,22 @@ int main() {
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(float) * CAMERA.size()), 0));
 	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
+	TRY(orgeCreateBuffer("transform", static_cast<uint32_t>(sizeof(float) * 16), 0));
+	TRY(orgeUpdateBufferDescriptor("transform", "PL", 1, 0, 0));
 	TRY(orgeCreateImageFromFile("image", "image.png", 0, 0, 0));
-	TRY(orgeUpdateImageDescriptor("image", "PL", 1, 0, 0));
+	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0));
+
+	std::array<float, 16> transform{
+		100.0f,   0.0f,  0.0f, 0.0f,
+		  0.0f, 100.0f,  0.0f, 0.0f,
+		  0.0f,   0.0f,  1.0f, 0.0f,
+		100.0f, 100.0f, 25.0f, 1.0f,
+	};
 
 	while (orgePollEvents()) {
 		const auto result =
-			orgeBeginRender()
+			orgeUpdateBuffer("transform", transform.data())
+			&& orgeBeginRender()
 			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
 			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
 			&& orgeDraw("cube", 1, 0)

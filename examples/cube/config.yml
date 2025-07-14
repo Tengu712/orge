@@ -20,6 +20,10 @@ pipelines:
             stages: vertex
       - count: 1
         bindings:
+          - type: uniform-buffer
+            stages: vertex
+      - count: 1
+        bindings:
           - type: combined-image-sampler
             stages: fragment
     vertex-input-attributes: [3, 2]
