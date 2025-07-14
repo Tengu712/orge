@@ -73,6 +73,8 @@ std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
 Format parseFormat(const std::string& s) {
 	return s == "render-target"
 		? Format::RenderTarget
+		: s == "depth-buffer"
+		? Format::DepthBuffer
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 

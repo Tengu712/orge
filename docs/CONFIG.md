@@ -31,6 +31,7 @@ attachments: []
     # アタッチメントのフォーマット
     # 取りうる値は以下:
     #   - render-target
+    #   - depth-buffer
     format: string
 
     # レンダーパス終了時にアタッチメントの内容を破棄するか

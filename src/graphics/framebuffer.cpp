@@ -39,16 +39,22 @@ void terminate(const vk::Device &device) {
 vk::Format convertFormat(const config::Format &format) {
 	return format == config::Format::RenderTarget
 		? platform::getRenderTargetPixelFormat()
+		: format == config::Format::DepthBuffer
+		? vk::Format::eD32Sfloat
 		: throw;
 }
 
-vk::ImageUsageFlags convertUsage(const config::Format &) {
-	throw;
+vk::ImageUsageFlags convertUsage(const config::Format &format) {
+	return format == config::Format::DepthBuffer
+		? vk::ImageUsageFlagBits::eDepthStencilAttachment
+		: throw;
 }
 
 vk::ImageAspectFlags convertAspect(const config::Format &format) {
 	return format == config::Format::RenderTarget
 		? vk::ImageAspectFlagBits::eColor
+		: format == config::Format::DepthBuffer
+		? vk::ImageAspectFlagBits::eDepth
 		: throw;
 }
 
@@ -84,7 +90,7 @@ Attachment createAttachment(
 			memoryProps,
 			device,
 			image,
-			vk::MemoryPropertyFlagBits::eHostCoherent
+			vk::MemoryPropertyFlagBits::eDeviceLocal
 		);
 	}
 

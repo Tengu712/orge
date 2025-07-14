@@ -73,6 +73,8 @@ void createRenderPass(
 			vk::AttachmentDescriptionFlags(),
 			n.format == config::Format::RenderTarget
 				? platform::getRenderTargetPixelFormat()
+				: n.format == config::Format::DepthBuffer
+				? vk::Format::eD32Sfloat
 				: throw,
 			vk::SampleCountFlagBits::e1,
 			vk::AttachmentLoadOp::eClear,

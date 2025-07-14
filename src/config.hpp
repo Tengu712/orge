@@ -10,6 +10,7 @@ namespace config {
 
 enum class Format: uint8_t {
 	RenderTarget,
+	DepthBuffer,
 };
 
 enum class FinalLayout: uint8_t {
