@@ -22,6 +22,8 @@ void terminate(const vk::Instance &instance, const vk::Device &device) {
 		instance.destroySurfaceKHR(g_surface);
 		g_surface = nullptr;
 	}
+
+	g_images.clear();
 }
 
 std::span<const char *const> getDeviceExtensions() {
