@@ -111,7 +111,14 @@ int orgeCreateMesh(
 // ================================================================================================================== //
 
 /// orgeの描画を開始する関数
-int orgeBeginRender();
+int orgeBeginRender(void);
+
+/// パイプラインをバインドする関数
+///
+/// 競合するパイプラインがある場合、
+/// - 後からバインドされるパイプラインがバインドされる。
+/// - ただし、同じAPIコールで指定された場合、最終的にどのパイプラインがバインドされるかわからない。
+int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines);
 
 /// ディスクリプタセットをバインドする関数
 ///
@@ -126,21 +133,9 @@ int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
 
 /// 描画関数
 ///
-/// pipelinesはバインドするパイプラインのID列。
-/// 一度バインドされたパイプラインはorgeEndRender()が呼ばれるまでバインドされたままになる。
-/// 競合するパイプラインがある場合、最終的にどのパイプラインがバインドされるかわからない。
-/// pipelinesがnullptrである場合、パイプラインはバインドされない。
-///
 /// meshはバインドするメッシュのID。
-/// 一度バインドされたメッシュはorgeEndRender()が呼ばれるまでバインドされたままになる。
-/// meshがnullptrである場合、メッシュはバインドされない。
-int orgeDraw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-);
+/// meshがnullptrである場合、メッシュはバインドされず、同じ描画内で直近にバインドされたメッシュが使われる。
+int orgeDraw(const char *mesh, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// orgeの描画を終了する関数
-int orgeEndRender();
+int orgeEndRender(void);

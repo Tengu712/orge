@@ -272,23 +272,17 @@ void terminate(const vk::Device &device) {
 
 } // namespace graphics::rendering
 
+int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines) {
+	TRY(graphics::pipeline::bind(graphics::rendering::g_commandBuffer, pipelineCount, pipelines));
+}
+
 int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
 	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
 }
 
-int orgeDraw(
-	uint32_t pipelineCount,
-	const char *const *pipelines,
-	const char *mesh,
-	uint32_t instanceCount,
-	uint32_t instanceOffset
-) {
+int orgeDraw(const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
 	TRY(
 		using namespace graphics;
-
-		if (pipelines != nullptr) {
-			pipeline::bind(rendering::g_commandBuffer, pipelineCount, pipelines);
-		}
 
 		if (mesh != nullptr) {
 			rendering::g_indexCount = mesh::bind(rendering::g_commandBuffer, mesh);
