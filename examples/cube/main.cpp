@@ -26,10 +26,10 @@ const std::vector<float> VERTICES{
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 const std::vector<const char *> PIPELINES{"PL"};
 const std::array<float, 16> CAMERA{
-	2.0f/640.0f, 0.0f,        0.0f,         0.0f,
-	0.0f,        2.0f/480.0f, 0.0f,         0.0f,
-	0.0f,        0.0f,        2.0f/1000.0f, 0.0f,
-	0.0f,        0.0f,        0.0f,         1.0f,
+	1.0f,    0.0f,   0.0f, 0.0f,
+	0.0f, 1.3333f,   0.0f, 0.0f,
+	0.0f,    0.0f,  1.04f, 1.0f,
+	0.0f,    0.0f, -20.4f, 0.0f,
 };
 const std::array<float, 16> SCL{
 	100.0f,   0.0f, 0.0f, 0.0f,
