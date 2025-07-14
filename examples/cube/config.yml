@@ -13,6 +13,9 @@ attachments:
 subpasses:
   - id: SP
     outputs: [RT]
+    depth:
+      id: DB
+      read-only: false
 pipelines:
   - id: PL
     vertex-shader: shader.vert.spv
@@ -35,5 +38,6 @@ pipelines:
           - type: combined-image-sampler
             stages: fragment
     vertex-input-attributes: [3, 2]
+    depth-test: true
     color-blends: [false]
     subpass: SP

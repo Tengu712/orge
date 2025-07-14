@@ -124,6 +124,10 @@ pipelines: []
     # 省略された場合、falseとみなされる
     culling: bool
 
+    # 深度テストを行うか
+    # 省略された場合、falseとみなされる
+    depth-test: bool
+
     # 各カラーアタッチメントのカラーブレンドを行うかの配列
     color-blends: bool[]
 
