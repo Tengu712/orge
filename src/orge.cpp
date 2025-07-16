@@ -6,7 +6,7 @@
 #include "graphics/window.hpp"
 #include "input/input.hpp"
 
-const char *orgeGetErrorMessage() {
+const char *orgeGetErrorMessage(void) {
 	return error::getMessage();
 }
 
