@@ -22,7 +22,7 @@ int main() {
 	}
 
 	int count = 0;
-	while (orgePollEvents()) {
+	while (orgeUpdate()) {
 		if (!orgeBeginRender() || !orgeEndRender()) {
 			std::cout << orgeGetErrorMessage() << std::endl;
 		}

@@ -32,7 +32,7 @@ int main() {
 		INDICES.data())
 	);
 
-	while (orgePollEvents()) {
+	while (orgeUpdate()) {
 		const auto result =
 			orgeBeginRender()
 			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
