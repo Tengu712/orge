@@ -6,12 +6,14 @@
 
 namespace graphics::window {
 
+void terminate();
+
 void initialize(const std::string &title, int width, int height);
 
 std::span<const char *const> getInstanceExtensions();
 
 vk::SurfaceKHR createSurface(const vk::Instance &instance);
 
-void terminate();
+int pollEvents();
 
 } // namespace graphics::window

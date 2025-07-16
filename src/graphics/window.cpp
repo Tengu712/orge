@@ -7,6 +7,13 @@ namespace graphics::window {
 
 SDL_Window *g_window;
 
+void terminate() {
+	if (g_window) {
+		SDL_DestroyWindow(g_window);
+		g_window = nullptr;
+	}
+}
+
 void initialize(const std::string &title, int width, int height) {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		throw "failed to prepare for creating a window.";
@@ -38,16 +45,7 @@ vk::SurfaceKHR createSurface(const vk::Instance &instance) {
 	}
 }
 
-void terminate() {
-	if (g_window) {
-		SDL_DestroyWindow(g_window);
-		g_window = nullptr;
-	}
-}
-
-} // namespace graphics::window
-
-int orgePollEvents() {
+int pollEvents() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT) {
@@ -56,3 +54,5 @@ int orgePollEvents() {
 	}
 	return 1;
 }
+
+} // namespace graphics::window

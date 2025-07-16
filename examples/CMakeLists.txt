@@ -14,3 +14,8 @@ option(BUILD_EXAMPLE_CUBE "examples/cubeをビルドする" OFF)
 if(BUILD_EXAMPLES OR BUILD_EXAMPLE_CUBE)
 	add_subdirectory(cube)
 endif()
+
+option(BUILD_EXAMPLE_INPUT "examples/inputをビルドする" OFF)
+if(BUILD_EXAMPLES OR BUILD_EXAMPLE_INPUT)
+	add_subdirectory(input)
+endif()

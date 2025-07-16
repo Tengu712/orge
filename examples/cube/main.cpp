@@ -109,7 +109,7 @@ int main() {
 	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0));
 
 	float ang = 0.0f;
-	while (orgePollEvents()) {
+	while (orgeUpdate()) {
 		ang += 0.01f;
 		const auto rot = rotY(ang);
 

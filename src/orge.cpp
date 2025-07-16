@@ -3,8 +3,10 @@
 #include "config.hpp"
 #include "error.hpp"
 #include "graphics/graphics.hpp"
+#include "graphics/window.hpp"
+#include "input/input.hpp"
 
-const char *orgeGetErrorMessage() {
+const char *orgeGetErrorMessage(void) {
 	return error::getMessage();
 }
 
@@ -20,6 +22,12 @@ int orgeInitializeWith(const char *yamlFilePath) {
 	)
 }
 
-void orgeTerminate() {
+void orgeTerminate(void) {
 	graphics::terminate();
+}
+
+int orgeUpdate(void) {
+	const auto result = graphics::window::pollEvents();
+	input::update();
+	return result;
 }
