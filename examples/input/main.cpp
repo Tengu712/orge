@@ -41,6 +41,17 @@ int main() {
 
 	uint32_t state = 0;
 	while (orgeUpdate()) {
+		if (orgeGetKeyState(ORGE_SCANCODE_RETURN) == 1) {
+			std::cout << "return key pressed" << std::endl;
+			state = (state + 1) % 3;
+		}
+		if (orgeGetKeyState(ORGE_SCANCODE_RETURN) > 0) {
+			std::cout << "return key down" << std::endl;
+		}
+		if (orgeGetKeyState(ORGE_SCANCODE_RETURN) == -1) {
+			std::cout << "return key released" << std::endl;
+		}
+
 		const std::vector<uint32_t> sets{state};
 		const auto result =
 			orgeBeginRender()
