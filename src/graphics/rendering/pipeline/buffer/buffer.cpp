@@ -2,6 +2,8 @@
 
 #include "../../../utils.hpp"
 
+#include <unordered_map>
+
 namespace graphics::rendering::pipeline::buffer {
 
 std::unordered_map<std::string, Buffer> g_buffers;

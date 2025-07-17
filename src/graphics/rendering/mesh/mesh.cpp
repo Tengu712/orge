@@ -2,6 +2,8 @@
 
 #include "../../utils.hpp"
 
+#include <unordered_map>
+
 namespace graphics::rendering::mesh {
 
 struct Mesh {
