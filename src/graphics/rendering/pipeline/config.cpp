@@ -124,11 +124,11 @@ PipelineCreateDynamicInfo::PipelineCreateDynamicInfo(
 					? vk::DescriptorType::eInputAttachment
 					: throw,
 				m.count,
-				m.stages == config::ShaderStages::Vertex
+				m.stage == config::ShaderStages::Vertex
 					? vk::ShaderStageFlagBits::eVertex
-					: m.stages == config::ShaderStages::Fragment
+					: m.stage == config::ShaderStages::Fragment
 					? vk::ShaderStageFlagBits::eFragment
-					: m.stages == config::ShaderStages::VertexAndFragment
+					: m.stage == config::ShaderStages::VertexAndFragment
 					? vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
 					: throw,
 				nullptr
