@@ -31,8 +31,6 @@ pipelines:
             stages: vertex
           - type: uniform-buffer
             stages: vertex
-          - type: uniform-buffer
-            stages: vertex
       - count: 1
         bindings:
           - type: combined-image-sampler
