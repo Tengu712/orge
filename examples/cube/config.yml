@@ -24,17 +24,17 @@ pipelines:
       - count: 1
         bindings:
           - type: uniform-buffer
-            stages: vertex
+            stage: vertex
       - count: 1
         bindings:
           - type: uniform-buffer
-            stages: vertex
+            stage: vertex
           - type: uniform-buffer
-            stages: vertex
+            stage: vertex
       - count: 1
         bindings:
           - type: combined-image-sampler
-            stages: fragment
+            stage: fragment
     vertex-input-attributes: [3, 2]
     depth-test: true
     color-blends: [false]

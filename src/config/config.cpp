@@ -166,11 +166,11 @@ SubpassConfig::SubpassConfig(const YAML::Node &node) {
 }
 
 DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
-	validateKeys(node, {"type", "stages"}, {"count"});
+	validateKeys(node, {"type", "stage"}, {"count"});
 
 	type = parseDescriptorType(s(node, "type"));
 	count = u(node, "count", 1);
-	stages = parseShaderStages(s(node, "stages"));
+	stage = parseShaderStages(s(node, "stage"));
 }
 
 DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {

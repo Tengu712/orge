@@ -75,7 +75,7 @@ struct SubpassConfig {
 struct DescriptorBindingConfig {
 	DescriptorType type;
 	uint32_t count;
-	ShaderStages stages;
+	ShaderStages stage;
 
 	DescriptorBindingConfig(const YAML::Node &node);
 };

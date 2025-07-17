@@ -114,7 +114,7 @@ pipelines: []
             #   - vertex
             #   - fragment
             #   - vertex-and-fragment
-            stages: string
+            stage: string
 
     # 各頂点入力属性のサイズの配列
     # 各値は1から4まで
