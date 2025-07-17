@@ -1,17 +1,9 @@
 #include "graphics.hpp"
 
-#include "../error.hpp"
-#include "mesh.hpp"
-#include "pipeline/buffer.hpp"
-#include "pipeline/image.hpp"
-#include "pipeline.hpp"
 #include "platform.hpp"
-#include "rendering.hpp"
-#include "swapchain.hpp"
-#include "window.hpp"
+#include "rendering/swapchain/swapchain.hpp"
+#include "rendering/rendering.hpp"
 
-#include <algorithm>
-#include <vector>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics {
@@ -22,14 +14,37 @@ vk::Device g_device;
 vk::Queue g_queue;
 vk::CommandPool g_commandPool;
 
+void terminate() {
+	if (g_device) {
+		g_device.waitIdle();
+	}
+
+	rendering::terminate(g_instance, g_device);
+
+	if (g_device && g_commandPool) {
+		g_device.destroyCommandPool(g_commandPool);
+		g_commandPool = nullptr;
+	}
+
+	if (g_device) {
+		g_device.destroy();
+		g_device = nullptr;
+	}
+
+	if (g_instance) {
+		g_instance.destroy();
+		g_instance = nullptr;
+	}
+}
+
 std::vector<const char *> getInstanceExtensions() {
-	const auto platform_extensions = platform::getInstanceExtensions();
-	const auto window_extensions = window::getInstanceExtensions();
+	const auto platformExtensions = platformInstanceExtensions();
+	const auto windowExtensions = rendering::swapchain::getInstanceExtensions();
 
 	std::vector<const char *> extensions;
-	extensions.reserve(platform_extensions.size() + window_extensions.size());
-	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
-	extensions.insert(extensions.end(), window_extensions.begin(), window_extensions.end());
+	extensions.reserve(platformExtensions.size() + windowExtensions.size());
+	extensions.insert(extensions.end(), platformExtensions.begin(), platformExtensions.end());
+	extensions.insert(extensions.end(), windowExtensions.begin(), windowExtensions.end());
 
 	return extensions;
 }
@@ -50,7 +65,7 @@ void createInstance() {
 		.setPEngineName("orge")
 		.setApiVersion(VK_API_VERSION_1_1);
 	const auto ci = vk::InstanceCreateInfo()
-		.setFlags(platform::getInstanceCreateFlags())
+		.setFlags(platformInstanceCreateFlags())
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions)
 		.setPEnabledLayerNames(layers);
@@ -76,13 +91,13 @@ uint32_t getQueueFamilyIndex() {
 }
 
 std::vector<const char *> getDeviceExtensions() {
-	const auto platform_extensions = platform::getDeviceExtensions();
-	const auto swapchain_extensions = swapchain::getDeviceExtensions();
+	const auto platformExtensions = platformDeviceExtensions();
+	const auto swapchainExtensions = rendering::swapchain::getDeviceExtensions();
 
 	std::vector<const char *> extensions;
-	extensions.reserve(platform_extensions.size() + swapchain_extensions.size());
-	extensions.insert(extensions.end(), platform_extensions.begin(), platform_extensions.end());
-	extensions.insert(extensions.end(), swapchain_extensions.begin(), swapchain_extensions.end());
+	extensions.reserve(platformExtensions.size() + swapchainExtensions.size());
+	extensions.insert(extensions.end(), platformExtensions.begin(), platformExtensions.end());
+	extensions.insert(extensions.end(), swapchainExtensions.begin(), swapchainExtensions.end());
 
 	return extensions;
 }
@@ -112,68 +127,29 @@ void createCommandPool(uint32_t queueFamilyIndex) {
 }
 
 void initialize(const config::Config &config) {
-	// ウィンドウ作成
-	// NOTE: 予めSDLにVulkanを使うことを伝えなければならないのでここで。
-	window::initialize(config.title, config.width, config.height);
-
-	// インスタンス
 	createInstance();
 
-	// デバイス
 	selectPhysicalDevice();
 	const auto queueFamilyIndex = getQueueFamilyIndex();
 	createDevice(queueFamilyIndex);
 
-	// キュー
 	getQueue(queueFamilyIndex);
 
-	// コマンドプール
 	createCommandPool(queueFamilyIndex);
 
-	// スワップチェイン
-	swapchain::initialize(g_instance, g_physicalDevice, g_device);
-
-	// 描画処理オブジェクト
-	rendering::initialize(config, g_physicalDevice.getMemoryProperties(), g_device, g_commandPool);
-
-	// イメージ
-	// NOTE: ステージングバッファを経由してアップロードする都合。
-	pipeline::image::initialize(g_device, g_commandPool);
-}
-
-void terminate() {
-	if (g_device) {
-		g_device.waitIdle();
-	}
-
-	pipeline::image::terminate(g_device);
-	pipeline::buffer::terminate(g_device);
-	mesh::terminate(g_device);
-	rendering::terminate(g_device);
-	swapchain::terminate(g_instance, g_device);
-
-	if (g_device && g_commandPool) {
-		g_device.destroyCommandPool(g_commandPool);
-		g_commandPool = nullptr;
-	}
-
-	if (g_device) {
-		g_device.destroy();
-		g_device = nullptr;
-	}
-
-	if (g_instance) {
-		g_instance.destroy();
-		g_instance = nullptr;
-	}
-
-	window::terminate();
+	rendering::initialize(config, g_instance, g_physicalDevice, g_device, g_commandPool);
 }
 
 } // namespace graphics
 
+#include "../error/error.hpp"
+#include "rendering/mesh/mesh.hpp"
+#include "rendering/pipeline/buffer/buffer.hpp"
+#include "rendering/pipeline/image/image.hpp"
+#include "rendering/pipeline/pipeline.hpp"
+
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
-	TRY(graphics::pipeline::buffer::create(
+	TRY(graphics::rendering::pipeline::buffer::create(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		id,
@@ -183,7 +159,7 @@ int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 }
 
 int orgeUpdateBuffer(const char *id, const void *data) {
-	TRY(graphics::pipeline::buffer::update(graphics::g_device, id, data));
+	TRY(graphics::rendering::pipeline::buffer::update(graphics::g_device, id, data));
 }
 
 int orgeUpdateBufferDescriptor(
@@ -193,11 +169,18 @@ int orgeUpdateBufferDescriptor(
 	uint32_t index,
 	uint32_t binding
 ) {
-	TRY(graphics::pipeline::updateBufferDescriptor(graphics::g_device, bufferId, pipelineId, set, index, binding));
+	TRY(graphics::rendering::pipeline::updateBufferDescriptor(
+		graphics::g_device,
+		bufferId,
+		pipelineId,
+		set,
+		index,
+		binding
+	));
 }
 
 int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat) {
-	TRY(graphics::pipeline::image::createFromFile(
+	TRY(graphics::rendering::pipeline::image::createFromFile(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		graphics::g_queue,
@@ -216,7 +199,14 @@ int orgeUpdateImageDescriptor(
 	uint32_t index,
 	uint32_t binding
 ) {
-	TRY(graphics::pipeline::updateImageDescriptor(graphics::g_device, imageId, pipelineId, set, index, binding));
+	TRY(graphics::rendering::pipeline::updateImageDescriptor(
+		graphics::g_device,
+		imageId,
+		pipelineId,
+		set,
+		index,
+		binding
+	));
 }
 
 int orgeCreateMesh(
@@ -226,7 +216,7 @@ int orgeCreateMesh(
 	const uint32_t indexCount,
 	const uint32_t *indices
 ) {
-	TRY(graphics::mesh::createMesh(
+	TRY(graphics::rendering::mesh::createMesh(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		id,

@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::utils {
+namespace graphics {
 
 inline uint32_t findMemoryType(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
@@ -25,14 +25,14 @@ inline uint32_t findMemoryType(
 	return result;
 }
 
-inline vk::DeviceMemory allocateMemory(
+inline vk::DeviceMemory allocateBufferMemory(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Buffer &buffer,
 	vk::MemoryPropertyFlags mask
 ) {
 	const auto reqs = device.getBufferMemoryRequirements(buffer);
-	const auto type = utils::findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
+	const auto type = findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
 	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
 	device.bindBufferMemory(buffer, memory, 0);
 	return memory;
@@ -45,10 +45,17 @@ inline vk::DeviceMemory allocateImageMemory(
 	vk::MemoryPropertyFlags mask
 ) {
 	const auto reqs = device.getImageMemoryRequirements(image);
-	const auto type = utils::findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
+	const auto type = findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
 	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
 	device.bindImageMemory(image, memory, 0);
 	return memory;
 }
 
-} // namespace graphics::utils
+template<typename T>
+inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &dst, const T *src, size_t size) {
+	const auto p = static_cast<T *>(device.mapMemory(dst, 0, size));
+	memcpy(p, src, size);
+	device.unmapMemory(dst);
+}
+
+} // namespace graphics

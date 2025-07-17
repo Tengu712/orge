@@ -1,14 +1,12 @@
 #include "image.hpp"
 
-#include "../utils.hpp"
+#include "../../../utils.hpp"
 
 #include <format>
-#include <memory>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include <unordered_map>
 
-namespace graphics::pipeline::image {
+namespace graphics::rendering::pipeline::image {
 
 vk::CommandBuffer g_commandBuffer;
 vk::Fence g_fence;
@@ -99,7 +97,7 @@ void create(
 	const auto image = device.createImage(ci);
 
 	// メモリ確保
-	const auto memory = utils::allocateImageMemory(
+	const auto memory = allocateImageMemory(
 		memoryProps,
 		device,
 		image,
@@ -130,7 +128,7 @@ void create(
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = utils::allocateMemory(
+	const auto bufferMemory = allocateBufferMemory(
 		memoryProps,
 		device,
 		buffer,
@@ -138,9 +136,7 @@ void create(
 	);
 
 	// ステージングバッファへアップロード
-	const auto p = device.mapMemory(bufferMemory, 0, bufferSize);
-	memcpy(p, pixels, bufferSize);
-	device.unmapMemory(bufferMemory);
+	copyDataToMemory(device, bufferMemory, pixels, bufferSize);
 
 	// アップロード準備
 	device.resetFences({g_fence});
@@ -250,4 +246,4 @@ const Image &get(const char *id) {
 	return g_images.at(id);
 }
 
-} // namespace graphics::pipeline::image
+} // namespace graphics::rendering::pipeline::image

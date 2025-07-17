@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::pipeline::image {
+namespace graphics::rendering::pipeline::image {
 
 struct Image {
 	const vk::Image image;
@@ -28,4 +28,4 @@ void createFromFile(
 
 const Image &get(const char *id);
 
-} // namespace graphics::pipeline::image
+} // namespace graphics::rendering::pipeline::image

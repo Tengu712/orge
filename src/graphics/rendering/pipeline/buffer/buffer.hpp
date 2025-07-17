@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::pipeline::buffer {
+namespace graphics::rendering::pipeline::buffer {
+
+void terminate(const vk::Device &device);
 
 struct Buffer {
 	const bool isStorage;
@@ -24,6 +25,4 @@ void update(const vk::Device &device, const char *id, const void *data);
 
 const Buffer &get(const char *id);
 
-void terminate(const vk::Device &device);
-
-} // namespace graphics::pipeline::buffer
+} // namespace graphics::rendering::pipeline::buffer

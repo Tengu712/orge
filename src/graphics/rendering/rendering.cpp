@@ -1,10 +1,10 @@
 #include "rendering.hpp"
 
-#include "framebuffer.hpp"
-#include "mesh.hpp"
-#include "pipeline.hpp"
-#include "platform.hpp"
-#include "swapchain.hpp"
+#include "../platform.hpp"
+#include "framebuffer/framebuffer.hpp"
+#include "mesh/mesh.hpp"
+#include "pipeline/pipeline.hpp"
+#include "swapchain/swapchain.hpp"
 
 namespace graphics::rendering {
 
@@ -26,7 +26,9 @@ uint32_t g_index;
 // 現在のインデックスカウント
 uint32_t g_indexCount;
 
-void terminate(const vk::Device &device) {
+void terminate(const vk::Instance &instance, const vk::Device &device) {
+	mesh::terminate(device);
+
 	pipeline::terminate(device);
 	framebuffer::terminate(device);
 
@@ -54,6 +56,8 @@ void terminate(const vk::Device &device) {
 		device.destroyRenderPass(g_renderPass);
 		g_renderPass = nullptr;
 	}
+
+	swapchain::terminate(instance, device);
 }
 
 void createRenderPass(
@@ -72,7 +76,7 @@ void createRenderPass(
 		attachments.emplace_back(
 			vk::AttachmentDescriptionFlags(),
 			n.format == config::Format::RenderTarget
-				? platform::getRenderTargetPixelFormat()
+				? platformRenderTargetPixelFormat()
 				: n.format == config::Format::DepthBuffer
 				? vk::Format::eD32Sfloat
 				: throw,
@@ -196,17 +200,28 @@ void createFence(const vk::Device &device) {
 
 void initialize(
 	const config::Config &config,
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) {
+	swapchain::initialize(config, instance, physicalDevice, device);
+
 	std::unordered_map<std::string, uint32_t> subpassMap;
 	createRenderPass(config, device, subpassMap);
 	createCommandBuffer(device, commandPool);
 	createSemaphores(device);
 	createFence(device);
-	framebuffer::initialize(config, memoryProps, device, g_renderPass, swapchain::getImageSize(), swapchain::getImages());
-	pipeline::initialize(config, subpassMap, device, g_renderPass);
+
+	framebuffer::initialize(
+		config,
+		physicalDevice.getMemoryProperties(),
+		device,
+		g_renderPass,
+		swapchain::getImageSize(),
+		swapchain::getImages()
+	);
+	pipeline::initialize(config, subpassMap, device, commandPool, g_renderPass);
 }
 
 void beginRender(const vk::Device &device) {
@@ -260,22 +275,24 @@ void endRender(const vk::Queue &queue) {
 
 } // namespace graphics::rendering
 
+#include "../../error/error.hpp"
+
 int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines) {
-	TRY(graphics::pipeline::bind(graphics::rendering::g_commandBuffer, pipelineCount, pipelines));
+	TRY(graphics::rendering::pipeline::bind(graphics::rendering::g_commandBuffer, pipelineCount, pipelines));
 }
 
 int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
-	TRY(graphics::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
+	TRY(graphics::rendering::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
 }
 
 int orgeDraw(const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
 	TRY(
-		using namespace graphics;
+		using namespace graphics::rendering;
 
 		if (mesh != nullptr) {
-			rendering::g_indexCount = mesh::bind(rendering::g_commandBuffer, mesh);
+			g_indexCount = mesh::bind(g_commandBuffer, mesh);
 		}
 
-		rendering::g_commandBuffer.drawIndexed(rendering::g_indexCount, instanceCount, 0, 0, instanceOffset);
+		g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
 	)
 }

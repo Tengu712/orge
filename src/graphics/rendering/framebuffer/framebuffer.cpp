@@ -1,10 +1,9 @@
 #include "framebuffer.hpp"
 
-#include "../config.hpp"
-#include "platform.hpp"
-#include "utils.hpp"
+#include "../../platform.hpp"
+#include "../../utils.hpp"
 
-namespace graphics::framebuffer {
+namespace graphics::rendering::framebuffer {
 
 struct Attachment {
 	const bool isRenderTarget;
@@ -38,7 +37,7 @@ void terminate(const vk::Device &device) {
 
 vk::Format convertFormat(const config::Format &format) {
 	return format == config::Format::RenderTarget
-		? platform::getRenderTargetPixelFormat()
+		? platformRenderTargetPixelFormat()
 		: format == config::Format::DepthBuffer
 		? vk::Format::eD32Sfloat
 		: throw;
@@ -86,7 +85,7 @@ Attachment createAttachment(
 	// メモリ確保
 	vk::DeviceMemory memory = nullptr;
 	if (!isRenderTarget) {
-		memory = utils::allocateImageMemory(
+		memory = allocateImageMemory(
 			memoryProps,
 			device,
 			image,
@@ -173,4 +172,4 @@ const vk::Framebuffer &getFramebuffer(uint32_t index) {
 	return g_framebuffers.at(index);
 }
 
-} // namespace graphics::framebuffer
+} // namespace graphics::rendering::framebuffer

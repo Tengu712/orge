@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../config.hpp"
+#include "../config/config.hpp"
 
 namespace graphics {
 
-void initialize(const config::Config &config);
-
 void terminate();
+
+void initialize(const config::Config &config);
 
 } // namespace graphics

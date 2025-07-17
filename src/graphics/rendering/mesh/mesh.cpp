@@ -1,10 +1,8 @@
 #include "mesh.hpp"
 
-#include "utils.hpp"
+#include "../../utils.hpp"
 
-#include <unordered_map>
-
-namespace graphics::mesh {
+namespace graphics::rendering::mesh {
 
 struct Mesh {
 	const uint32_t iCount;
@@ -15,6 +13,16 @@ struct Mesh {
 };
 
 std::unordered_map<std::string, Mesh> g_meshes;
+
+void terminate(const vk::Device &device) {
+	for (auto &n: g_meshes) {
+		device.freeMemory(n.second.ibMemory);
+		device.freeMemory(n.second.vbMemory);
+		device.destroyBuffer(n.second.ib);
+		device.destroyBuffer(n.second.vb);
+	}
+	g_meshes.clear();
+}
 
 void createMesh(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
@@ -39,26 +47,21 @@ void createMesh(
 			.setUsage(vk::BufferUsageFlagBits::eIndexBuffer)
 	);
 
-	const auto vbMemory = utils::allocateMemory(
+	const auto vbMemory = allocateBufferMemory(
 		memoryProps,
 		device,
 		vb,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
-	const auto ibMemory = utils::allocateMemory(
+	const auto ibMemory = allocateBufferMemory(
 		memoryProps,
 		device,
 		ib,
 		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 	);
 
-	const auto vbData = static_cast<uint8_t *>(device.mapMemory(vbMemory, 0, vbSize));
-	memcpy(vbData, vertices, vbSize);
-	device.unmapMemory(vbMemory);
-
-	const auto ibData = static_cast<uint8_t *>(device.mapMemory(ibMemory, 0, ibSize));
-	memcpy(ibData, indices, ibSize);
-	device.unmapMemory(ibMemory);
+	copyDataToMemory(device, vbMemory, vertices, vbSize);
+	copyDataToMemory(device, ibMemory, indices,  ibSize);
 
 	g_meshes.emplace(id, Mesh {
 		static_cast<uint32_t>(indexCount),
@@ -76,14 +79,4 @@ uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id) {
 	return g_meshes.at(id).iCount;
 }
 
-void terminate(const vk::Device &device) {
-	for (auto &n: g_meshes) {
-		device.freeMemory(n.second.ibMemory);
-		device.freeMemory(n.second.vbMemory);
-		device.destroyBuffer(n.second.ib);
-		device.destroyBuffer(n.second.vb);
-	}
-	g_meshes.clear();
-}
-
-} // namespace graphics::mesh
+} // namespace graphics::rendering::mesh

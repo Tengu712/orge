@@ -1,15 +1,17 @@
 #pragma once
 
-#include "../config.hpp"
-#include "../error.hpp"
+#include "../../config/config.hpp"
 
 #include <vulkan/vulkan.hpp>
 
 namespace graphics::rendering {
 
+void terminate(const vk::Instance &instance, const vk::Device &device);
+
 void initialize(
 	const config::Config &config,
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 );
@@ -17,7 +19,5 @@ void initialize(
 void beginRender(const vk::Device &device);
 
 void endRender(const vk::Queue &queue);
-
-void terminate(const vk::Device &device);
 
 } // namespace graphics::rendering
