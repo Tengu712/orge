@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../config.hpp"
+#include "../../../config/config.hpp"
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::pipeline {
+namespace graphics::rendering::pipeline {
 
 // パイプライン作成における流動的な情報
 //
@@ -57,4 +57,4 @@ struct PipelineCreateDynamicInfo {
 	void destroy(const vk::Device &device);
 };
 
-} // namespace graphics::pipeline
+} // namespace graphics::rendering::pipeline

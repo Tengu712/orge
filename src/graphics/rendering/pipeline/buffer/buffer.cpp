@@ -1,12 +1,20 @@
 #include "buffer.hpp"
 
-#include "../utils.hpp"
+#include "../../../utils.hpp"
 
 #include <unordered_map>
 
-namespace graphics::pipeline::buffer {
+namespace graphics::rendering::pipeline::buffer {
 
 std::unordered_map<std::string, Buffer> g_buffers;
+
+void terminate(const vk::Device &device) {
+	for (const auto &n: g_buffers) {
+		device.freeMemory(n.second.memory);
+		device.destroyBuffer(n.second.buffer);
+	}
+	g_buffers.clear();
+}
 
 void create(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
@@ -21,7 +29,7 @@ void create(
 		.setUsage(storage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(ci);
-	const auto memory = utils::allocateMemory(
+	const auto memory = allocateBufferMemory(
 		memoryProps,
 		device,
 		buffer,
@@ -32,21 +40,11 @@ void create(
 
 void update(const vk::Device &device, const char *id, const void *data) {
 	const auto &buffer = g_buffers.at(id);
-	const auto p = device.mapMemory(buffer.memory, 0, buffer.size);
-	memcpy(p, data, buffer.size);
-	device.unmapMemory(buffer.memory);
+	copyDataToMemory(device, buffer.memory, data, buffer.size);
 }
 
 const Buffer &get(const char *id) {
 	return g_buffers.at(id);
 }
 
-void terminate(const vk::Device &device) {
-	for (const auto &n: g_buffers) {
-		device.freeMemory(n.second.memory);
-		device.destroyBuffer(n.second.buffer);
-	}
-	g_buffers.clear();
-}
-
-} // namespace graphics::pipeline::buffer
+} // namespace graphics::rendering::pipeline::buffer

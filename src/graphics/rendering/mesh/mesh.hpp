@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::mesh {
+namespace graphics::rendering::mesh {
+
+void terminate(const vk::Device &device);
 
 void createMesh(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
@@ -20,6 +21,4 @@ void createMesh(
 /// バインドされたメッシュのインデックスカウントを返す。
 uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id);
 
-void terminate(const vk::Device &device);
-
-} // namespace graphics::mesh
+} // namespace graphics::rendering::mesh

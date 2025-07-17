@@ -4,9 +4,10 @@
 
 - `UPPER_SNAKE_CASE`
   - マクロ名
+  - 列挙子名 (`enum`)
 - `UpperCamelCase`
   - 型名
-  - 列挙子名
+  - 列挙子名 (`enum class`)
 - `lowerCamelCase`
   - 変数名
   - 関数名
@@ -14,6 +15,10 @@
 ## Tabs for Indentation
 
 インデントにはタブ文字を用いる。
+
+## 120 Column
+
+1行最大120文字。
 
 ## auto
 
@@ -39,7 +44,11 @@
 
 ## pragma once
 
-include guardの代わりに`#pragma once`を書く。
+Include guardの代わりに`#pragma once`を書く。
+
+## Namespace Base Directory
+
+名前空間に即してディレクトリ構成を行う。
 
 ## Concise Code
 

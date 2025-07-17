@@ -1,14 +1,23 @@
 #pragma once
 
+#include "../../../config/config.hpp"
+
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::swapchain {
+namespace graphics::rendering::swapchain {
 
 void terminate(const vk::Instance &instance, const vk::Device &device);
 
+std::span<const char *const> getInstanceExtensions();
+
 std::span<const char *const> getDeviceExtensions();
 
-void initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
+void initialize(
+	const config::Config &config,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+);
 
 const std::vector<vk::Image> &getImages();
 
@@ -25,4 +34,4 @@ uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &se
 /// プレゼンテーションが完了するまでスレッドを待機する。
 void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
 
-} // namespace graphics::swapchain
+} // namespace graphics::rendering::swapchain

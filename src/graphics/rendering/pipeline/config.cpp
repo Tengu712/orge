@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-namespace graphics::pipeline {
+namespace graphics::rendering::pipeline {
 
 vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
 	std::fstream file(path, std::ios::in | std::ios::binary);
@@ -172,4 +172,4 @@ void PipelineCreateDynamicInfo::destroy(const vk::Device &device) {
 	device.destroyShaderModule(vertexShader);
 }
 
-} // namespace graphics::pipeline
+} // namespace graphics::rendering::pipeline

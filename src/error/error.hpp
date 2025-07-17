@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <vulkan/vulkan.hpp>
 
 #define TRY(n) \
@@ -27,7 +26,5 @@
 namespace error {
 
 void setMessage(const std::string &e);
-
-const char *getMessage();
 
 } // namespace error

@@ -1,15 +1,13 @@
 #include "pipeline.hpp"
 
-#include "pipeline/buffer.hpp"
-#include "pipeline/config.hpp"
-#include "pipeline/image.hpp"
-#include "swapchain.hpp"
+// TODO: ちょっと気持ち悪い。
+#include "../swapchain/swapchain.hpp"
+// TODO: 統合する。
+#include "config.hpp"
+#include "buffer/buffer.hpp"
+#include "image/image.hpp"
 
-#include <ranges>
-#include <string>
-#include <unordered_map>
-
-namespace graphics::pipeline {
+namespace graphics::rendering::pipeline {
 
 struct Pipeline {
 	const vk::Pipeline pipeline;
@@ -20,6 +18,25 @@ struct Pipeline {
 
 vk::DescriptorPool g_descPool;
 std::unordered_map<std::string, Pipeline> g_pipelines;
+
+void terminate(const vk::Device &device) {
+	image::terminate(device);
+	buffer::terminate(device);
+
+	for (auto &n: g_pipelines) {
+		device.destroyPipeline(n.second.pipeline);
+		device.destroyPipelineLayout(n.second.pipelineLayout);
+		for (auto &m: n.second.descSetLayouts) {
+			device.destroyDescriptorSetLayout(m);
+		}
+	}
+	g_pipelines.clear();
+
+	if (g_descPool) {
+		device.destroyDescriptorPool(g_descPool);
+		g_descPool = nullptr;
+	}
+}
 
 void createDescriptorPool(const config::Config &config, const vk::Device &device) {
 	// 集計
@@ -146,6 +163,7 @@ void initialize(
 	const config::Config &config,
 	const std::unordered_map<std::string, uint32_t> &subpassMap,
 	const vk::Device &device,
+	const vk::CommandPool &commandPool,
 	const vk::RenderPass &renderPass
 ) {
 	if (config.pipelines.empty()) {
@@ -153,6 +171,8 @@ void initialize(
 	}
 	createDescriptorPool(config, device);
 	createPipelines(config, subpassMap, device, renderPass);
+
+	image::initialize(device, commandPool);
 }
 
 void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {
@@ -219,20 +239,4 @@ void updateImageDescriptor(
 	device.updateDescriptorSets(1, &ds, 0, nullptr);
 }
 
-void terminate(const vk::Device &device) {
-	for (auto &n: g_pipelines) {
-		device.destroyPipeline(n.second.pipeline);
-		device.destroyPipelineLayout(n.second.pipelineLayout);
-		for (auto &m: n.second.descSetLayouts) {
-			device.destroyDescriptorSetLayout(m);
-		}
-	}
-	g_pipelines.clear();
-
-	if (g_descPool) {
-		device.destroyDescriptorPool(g_descPool);
-		g_descPool = nullptr;
-	}
-}
-
-} // namespace graphics::pipeline
+} // namespace graphics::rendering::pipeline

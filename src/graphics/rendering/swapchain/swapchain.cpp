@@ -1,12 +1,13 @@
 #include "swapchain.hpp"
 
-#include "platform.hpp"
-#include "window.hpp"
+#include "../../platform.hpp"
 
-namespace graphics::swapchain {
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 
-constexpr const char *EXTENSIONS[] = {"VK_KHR_swapchain"};
+namespace graphics::rendering::swapchain {
 
+SDL_Window *g_window;
 vk::SurfaceKHR g_surface;
 vk::Extent2D g_imageSize;
 vk::SwapchainKHR g_swapchain;
@@ -24,20 +25,51 @@ void terminate(const vk::Instance &instance, const vk::Device &device) {
 	}
 
 	g_images.clear();
+
+	if (g_window) {
+		SDL_DestroyWindow(g_window);
+		g_window = nullptr;
+	}
+}
+
+std::span<const char *const> getInstanceExtensions() {
+	Uint32 count = 0;
+	const char *const *extensions = SDL_Vulkan_GetInstanceExtensions(&count);
+	if (!extensions || count == 0) {
+		return {};
+	}
+	return std::span(extensions, count);
 }
 
 std::span<const char *const> getDeviceExtensions() {
+	static constexpr const char *EXTENSIONS[] = {"VK_KHR_swapchain"};
 	return std::span(EXTENSIONS);
 }
 
-void initialize(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+void initialize(
+	const config::Config &config,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	// ウィンドウ作成
+	g_window = SDL_CreateWindow(config.title.c_str(), config.width, config.height, SDL_WINDOW_VULKAN);
+	if (!g_window) {
+		throw "failed to create a window.";
+	}
+
 	// サーフェス作成
-	g_surface = window::createSurface(instance);
+	VkSurfaceKHR surface;
+	if (SDL_Vulkan_CreateSurface(g_window, instance, NULL, &surface)) {
+		g_surface = static_cast<vk::SurfaceKHR>(surface);
+	} else {
+		throw "failed to create a surface.";
+	}
 
 	// フォーマットが正しいか確認
 	const auto formats = physicalDevice.getSurfaceFormatsKHR(g_surface);
 	const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
-		return n.format == platform::getRenderTargetPixelFormat() && n.colorSpace == platform::getRenderTargetColorSpace();
+		return n.format == platformRenderTargetPixelFormat() && n.colorSpace == platformRenderTargetColorSpace();
 	});
 	if (!ok) {
 		throw "the surface color space is invalid.";
@@ -57,8 +89,8 @@ void initialize(const vk::Instance &instance, const vk::PhysicalDevice &physical
 	const auto ci = vk::SwapchainCreateInfoKHR()
 		.setSurface(g_surface)
 		.setMinImageCount(imageCount)
-		.setImageFormat(platform::getRenderTargetPixelFormat())
-		.setImageColorSpace(platform::getRenderTargetColorSpace())
+		.setImageFormat(platformRenderTargetPixelFormat())
+		.setImageColorSpace(platformRenderTargetColorSpace())
 		.setImageExtent(g_imageSize)
 		.setImageArrayLayers(1)
 		.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
@@ -100,4 +132,4 @@ void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32
 	}
 }
 
-} // namespace graphics::swapchain
+} // namespace graphics::rendering::swapchain

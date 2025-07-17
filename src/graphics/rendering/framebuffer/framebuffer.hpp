@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../config.hpp"
+#include "../../../config/config.hpp"
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::framebuffer {
+namespace graphics::rendering::framebuffer {
 
 void terminate(const vk::Device &device);
 
@@ -21,4 +21,4 @@ const std::vector<vk::ClearValue> &getClearValues();
 
 const vk::Framebuffer &getFramebuffer(uint32_t index);
 
-} // namespace graphics::framebuffer
+} // namespace graphics::rendering::framebuffer
