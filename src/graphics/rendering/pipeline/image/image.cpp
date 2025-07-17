@@ -3,6 +3,8 @@
 #include "../../../utils.hpp"
 
 #include <format>
+#include <memory>
+#include <unordered_map>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
