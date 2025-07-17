@@ -51,23 +51,29 @@ const std::vector<uint32_t> INDICES{
 	20, 21, 22, 20, 22, 23,
 };
 const std::vector<const char *> PIPELINES{"PL"};
-const std::array<float, 16> CAMERA{
-	1.0f,    0.0f,   0.0f, 0.0f,
-	0.0f, 1.3333f,   0.0f, 0.0f,
-	0.0f,    0.0f,  1.04f, 1.0f,
-	0.0f,    0.0f, -20.4f, 0.0f,
+struct Camera {
+	float proj[16];
+	float view[16];
+};
+const Camera CAMERA{
+	{
+		1.0f,     0.0f,    0.0f, 0.0f,
+		0.0f,  0.7071f, 0.7071f, 0.0f,
+		0.0f, -0.7071f, 0.7071f, 0.0f,
+		0.0f,     0.0f, 212.13f, 1.0f,
+	},
+	{
+		1.0f,    0.0f,   0.0f, 0.0f,
+		0.0f, 1.3333f,   0.0f, 0.0f,
+		0.0f,    0.0f,  1.04f, 1.0f,
+		0.0f,    0.0f, -20.4f, 0.0f,
+	},
 };
 const std::array<float, 16> SCL{
 	100.0f,   0.0f,   0.0f, 0.0f,
 	  0.0f, 100.0f,   0.0f, 0.0f,
 	  0.0f,   0.0f, 100.0f, 0.0f,
 	  0.0f,   0.0f,   0.0f, 1.0f,
-};
-const std::array<float, 16> TRS{
-	1.0f, 0.0f,   0.0f, 0.0f,
-	0.0f, 1.0f,   0.0f, 0.0f,
-	0.0f, 0.0f,   1.0f, 0.0f,
-	0.0f, 0.0f, 250.0f, 1.0f,
 };
 const std::vector<uint32_t> SET_INDICES{0, 0, 0};
 
@@ -92,18 +98,15 @@ int main() {
 		INDICES.data())
 	);
 
-	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(float) * CAMERA.size()), 0));
-	TRY(orgeUpdateBuffer("camera", CAMERA.data()));
+	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
+	TRY(orgeUpdateBuffer("camera", &CAMERA));
 	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
 
 	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0));
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
-	TRY(orgeCreateBuffer("trs", static_cast<uint32_t>(sizeof(float) * TRS.size()), 0));
 	TRY(orgeUpdateBuffer("scl", SCL.data()));
-	TRY(orgeUpdateBuffer("trs", TRS.data()));
 	TRY(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0));
 	TRY(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1));
-	TRY(orgeUpdateBufferDescriptor("trs", "PL", 1, 0, 2));
 
 	TRY(orgeCreateImageFromFile("image", "image.png", 0, 0, 0));
 	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0));
