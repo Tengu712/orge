@@ -60,19 +60,10 @@ void terminate(const vk::Instance &instance, const vk::Device &device) {
 	swapchain::terminate(instance, device);
 }
 
-void createRenderPass(
-	const config::Config &config,
-	const vk::Device &device,
-	std::unordered_map<std::string, uint32_t> &subpassMap
-) {
+void createRenderPass(const config::Config &config, const vk::Device &device) {
 	// アタッチメント
-	std::unordered_map<std::string, uint32_t> attachmentMap;
 	std::vector<vk::AttachmentDescription> attachments;
 	for (const auto &n: config.attachments) {
-		if (!attachmentMap.emplace(n.id, static_cast<uint32_t>(attachmentMap.size())).second) {
-			throw std::format("attachment id '{}' is duplicated.", n.id);
-		}
-
 		attachments.emplace_back(
 			vk::AttachmentDescriptionFlags(),
 			n.format == config::Format::RenderTarget
@@ -105,17 +96,10 @@ void createRenderPass(
 	std::vector<vk::SubpassDescription> subpasses;
 	std::vector<vk::SubpassDependency> dependencies;
 	for (const auto &n: config.subpasses) {
-		if (!subpassMap.emplace(n.id, static_cast<uint32_t>(subpassMap.size())).second) {
-			throw std::format("subpass id '{}' is duplicated.", n.id);
-		}
-
 		std::vector<vk::AttachmentReference> inputs;
 		for (const auto &m: n.inputs) {
-			if (!attachmentMap.contains(m.id)) {
-				throw std::format("attachment '{}' is not defined.", m.id);
-			}
 			inputs.emplace_back(
-				attachmentMap.at(m.id),
+				config.attachmentMap.at(m.id),
 				m.layout == config::InputLayout::DepthStencilReadOnly
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 					: m.layout == config::InputLayout::ShaderReadOnly
@@ -127,19 +111,13 @@ void createRenderPass(
 
 		std::vector<vk::AttachmentReference> outputs;
 		for (const auto &m: n.outputs) {
-			if (!attachmentMap.contains(m)) {
-				throw std::format("attachment '{}' is not defined.", m);
-			}
-			outputs.emplace_back(attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
+			outputs.emplace_back(config.attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
 		}
 		outputss.push_back(std::move(outputs));
 
 		if (n.depth) {
-			if (!attachmentMap.contains(n.depth->id)) {
-				throw std::format("attachment '{}' is not defined.", n.depth->id);
-			}
 			depths.emplace_back(
-				attachmentMap.at(n.depth->id),
+				config.attachmentMap.at(n.depth->id),
 				n.depth->readOnly
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 					: vk::ImageLayout::eDepthStencilAttachmentOptimal
@@ -155,12 +133,9 @@ void createRenderPass(
 		);
 
 		for (const auto &m: n.depends) {
-			if (!subpassMap.contains(m)) {
-				throw std::format("subpass '{}' is not defined.", m);
-			}
 			dependencies.emplace_back(
-				subpassMap.at(m),
-				subpassMap.at(n.id),
+				config.subpassMap.at(m),
+				config.subpassMap.at(n.id),
 				vk::PipelineStageFlagBits::eAllCommands,
 				vk::PipelineStageFlagBits::eAllCommands,
 				vk::AccessFlagBits::eMemoryWrite,
@@ -207,8 +182,7 @@ void initialize(
 ) {
 	swapchain::initialize(config, instance, physicalDevice, device);
 
-	std::unordered_map<std::string, uint32_t> subpassMap;
-	createRenderPass(config, device, subpassMap);
+	createRenderPass(config, device);
 	createCommandBuffer(device, commandPool);
 	createSemaphores(device);
 	createFence(device);
@@ -221,7 +195,7 @@ void initialize(
 		swapchain::getImageSize(),
 		swapchain::getImages()
 	);
-	pipeline::initialize(config, subpassMap, device, commandPool, g_renderPass);
+	pipeline::initialize(config, device, commandPool, g_renderPass);
 }
 
 void beginRender(const vk::Device &device) {

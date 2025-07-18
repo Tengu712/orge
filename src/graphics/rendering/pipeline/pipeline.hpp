@@ -10,7 +10,6 @@ void terminate(const vk::Device &device);
 
 void initialize(
 	const config::Config &config,
-	const std::unordered_map<std::string, uint32_t> &subpassMap,
 	const vk::Device &device,
 	const vk::CommandPool &commandPool,
 	const vk::RenderPass &renderPass
