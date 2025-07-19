@@ -244,6 +244,17 @@ void createFromFile(
 	create(memoryProps, device, queue, id, width, height, pixels.get(), linearMagFilter, linearMinFilter, repeat);
 }
 
+void destroy(const vk::Device &device, const char *id) {
+	if (!g_images.contains(id)) {
+		return;
+	}
+	auto &n = g_images.at(id);
+	device.freeMemory(n.memory);
+	device.destroyImageView(n.view);
+	device.destroyImage(n.image);
+	g_images.erase(id);
+}
+
 const Image &get(const char *id) {
 	return g_images.at(id);
 }

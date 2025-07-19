@@ -158,6 +158,10 @@ int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	));
 }
 
+void orgeDestroyBuffer(const char *id) {
+	graphics::rendering::pipeline::buffer::destroy(graphics::g_device, id);
+}
+
 int orgeUpdateBuffer(const char *id, const void *data) {
 	TRY(graphics::rendering::pipeline::buffer::update(graphics::g_device, id, data));
 }
@@ -190,6 +194,10 @@ int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilte
 		linearMinFilter,
 		repeat
 	));
+}
+
+void orgeDestroyImage(const char *id) {
+	graphics::rendering::pipeline::image::destroy(graphics::g_device, id);
 }
 
 int orgeUpdateImageDescriptor(
@@ -225,6 +233,10 @@ int orgeCreateMesh(
 		indexCount,
 		indices
 	));
+}
+
+void orgeDestroyMesh(const char *id) {
+	graphics::rendering::mesh::destroy(graphics::g_device, id);
 }
 
 int orgeBeginRender() {

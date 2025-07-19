@@ -26,6 +26,8 @@ void createFromFile(
 	int repeat
 );
 
+void destroy(const vk::Device &device, const char *id);
+
 const Image &get(const char *id);
 
 } // namespace graphics::rendering::pipeline::image

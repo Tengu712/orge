@@ -74,6 +74,18 @@ void createMesh(
 	});
 }
 
+void destroy(const vk::Device &device, const char *id) {
+	if (!g_meshes.contains(id)) {
+		return;
+	}
+	auto &n = g_meshes.at(id);
+	device.freeMemory(n.ibMemory);
+	device.freeMemory(n.vbMemory);
+	device.destroyBuffer(n.ib);
+	device.destroyBuffer(n.vb);
+	g_meshes.erase(id);
+}
+
 uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id) {
 	const VkDeviceSize offset = 0;
 	commandBuffer.bindVertexBuffers(0, 1, &g_meshes.at(id).vb, &offset);

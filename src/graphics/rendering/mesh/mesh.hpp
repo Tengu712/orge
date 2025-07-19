@@ -16,6 +16,8 @@ void createMesh(
 	const uint32_t *indices
 );
 
+void destroy(const vk::Device &device, const char *id);
+
 /// メッシュをバインドする関数
 ///
 /// バインドされたメッシュのインデックスカウントを返す。
