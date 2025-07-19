@@ -99,8 +99,10 @@ InputLayout parseInputLayout(const std::string& s) {
 }
 
 DescriptorType parseDescriptorType(const std::string& s) {
-	return s == "combined-image-sampler"
-		? DescriptorType::CombinedImageSampler
+	return s == "image"
+		? DescriptorType::Image
+		: s == "sampler"
+		? DescriptorType::Sampler
 		: s == "uniform-buffer"
 		? DescriptorType::UniformBuffer
 		: s == "storage-buffer"

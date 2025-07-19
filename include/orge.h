@@ -67,16 +67,7 @@ int orgeUpdateBufferDescriptor(
 ///
 /// - id: イメージID
 /// - path: pngファイルパス
-/// - linearMagFilter: 拡大時のフィルタリング設定
-///     - 0以外なら線形補間
-///     - 0なら最も近いテクセルを参照
-/// - linearMinFilter: 縮小時のフィルタリング設定
-///     - 0以外なら線形補間
-///     - 0なら最も近いテクセルを参照
-/// - repeat: [0-1]の範囲外のUV座標における設定
-///     - 0以外ならテクスチャを繰り返して参照
-///     - 0なら0あるいは1の境界値を参照
-int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat);
+int orgeCreateImageFromFile(const char *id, const char *path);
 
 /// イメージを破棄する関数
 void orgeDestroyImage(const char *id);
@@ -90,6 +81,38 @@ void orgeDestroyImage(const char *id);
 /// - binding: バインディング番号
 int orgeUpdateImageDescriptor(
 	const char *imageId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
+/// orgeにサンプラを追加する関数
+///
+/// - id: サンプラID
+/// - linearMagFilter: 拡大時のフィルタリング設定
+///     - 0以外なら線形補間
+///     - 0なら最も近いテクセルを参照
+/// - linearMinFilter: 縮小時のフィルタリング設定
+///     - 0以外なら線形補間
+///     - 0なら最も近いテクセルを参照
+/// - repeat: [0-1]の範囲外のUV座標における設定
+///     - 0以外ならテクスチャを繰り返して参照
+///     - 0なら0あるいは1の境界値を参照
+int orgeCreateSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat);
+
+/// サンプラを破棄する関数
+void orgeDestroySampler(const char *id);
+
+/// サンプラディスクリプタを更新する関数
+///
+/// - samplerId: サンプラID
+/// - pipelineId: パイプラインID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+int orgeUpdateSamplerDescriptor(
+	const char *samplerId,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,

@@ -147,6 +147,7 @@ void initialize(const config::Config &config) {
 #include "rendering/pipeline/buffer/buffer.hpp"
 #include "rendering/pipeline/image/image.hpp"
 #include "rendering/pipeline/pipeline.hpp"
+#include "rendering/pipeline/sampler/sampler.hpp"
 
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	TRY(graphics::rendering::pipeline::buffer::create(
@@ -183,16 +184,13 @@ int orgeUpdateBufferDescriptor(
 	));
 }
 
-int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat) {
+int orgeCreateImageFromFile(const char *id, const char *path) {
 	TRY(graphics::rendering::pipeline::image::createFromFile(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		graphics::g_queue,
 		id,
-		path,
-		linearMagFilter,
-		linearMinFilter,
-		repeat
+		path
 	));
 }
 
@@ -210,6 +208,37 @@ int orgeUpdateImageDescriptor(
 	TRY(graphics::rendering::pipeline::updateImageDescriptor(
 		graphics::g_device,
 		imageId,
+		pipelineId,
+		set,
+		index,
+		binding
+	));
+}
+
+int orgeCreateSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
+	TRY(graphics::rendering::pipeline::sampler::create(
+		graphics::g_device,
+		id,
+		linearMagFilter,
+		linearMinFilter,
+		repeat
+	));
+}
+
+void orgeDestroySampler(const char *id) {
+	graphics::rendering::pipeline::sampler::destroy(graphics::g_device, id);
+}
+
+int orgeUpdateSamplerDescriptor(
+	const char *samplerId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	TRY(graphics::rendering::pipeline::updateSamplerDescriptor(
+		graphics::g_device,
+		samplerId,
 		pipelineId,
 		set,
 		index,

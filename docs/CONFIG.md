@@ -100,7 +100,8 @@ pipelines: []
         bindings: []
             # ディスクリプタの種類
             # 取りうる値は以下:
-            #   - combined-image-sampler
+            #   - image
+            #   - sampler
             #   - uniform-buffer
             #   - storage-buffer
             #   - input-attachment

@@ -37,4 +37,13 @@ void updateImageDescriptor(
 	uint32_t binding
 );
 
+void updateSamplerDescriptor(
+	const vk::Device &device,
+	const char *samplerId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+);
+
 } // namespace graphics::rendering::pipeline

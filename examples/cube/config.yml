@@ -33,7 +33,9 @@ pipelines:
             stage: vertex
       - count: 1
         bindings:
-          - type: combined-image-sampler
+          - type: image
+            stage: fragment
+          - type: sampler
             stage: fragment
     vertex-input-attributes: [3, 2]
     depth-test: true
