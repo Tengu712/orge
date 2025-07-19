@@ -26,7 +26,8 @@ enum class InputLayout: uint8_t {
 };
 
 enum class DescriptorType: uint8_t {
-	CombinedImageSampler,
+	Image,
+	Sampler,
 	UniformBuffer,
 	StorageBuffer,
 	InputAttachment,

@@ -4,6 +4,7 @@
 #include "../swapchain/swapchain.hpp"
 #include "buffer/buffer.hpp"
 #include "image/image.hpp"
+#include "sampler/sampler.hpp"
 
 #include <fstream>
 
@@ -54,6 +55,7 @@ vk::DescriptorPool g_descPool;
 std::unordered_map<std::string, Pipeline> g_pipelines;
 
 void terminate(const vk::Device &device) {
+	sampler::terminate(device);
 	image::terminate(device);
 	buffer::terminate(device);
 
@@ -103,8 +105,10 @@ void createDescriptorPool(const config::Config &config, const vk::Device &device
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	for (const auto &[k, v]: sizesMap) {
 		poolSizes.emplace_back(
-			k == config::DescriptorType::CombinedImageSampler
-				? vk::DescriptorType::eCombinedImageSampler
+			k == config::DescriptorType::Image
+				? vk::DescriptorType::eSampledImage
+				: k == config::DescriptorType::Sampler
+				? vk::DescriptorType::eSampler
 				: k == config::DescriptorType::UniformBuffer
 				? vk::DescriptorType::eUniformBuffer
 				: k == config::DescriptorType::StorageBuffer
@@ -256,8 +260,10 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 			for (const auto &o: m.bindings) {
 				bindings.emplace_back(
 					static_cast<uint32_t>(bindings.size()),
-					o.type == config::DescriptorType::CombinedImageSampler
-						? vk::DescriptorType::eCombinedImageSampler
+					o.type == config::DescriptorType::Image
+						? vk::DescriptorType::eSampledImage
+						: o.type == config::DescriptorType::Sampler
+						? vk::DescriptorType::eSampler
 						: o.type == config::DescriptorType::UniformBuffer
 						? vk::DescriptorType::eUniformBuffer
 						: o.type == config::DescriptorType::StorageBuffer
@@ -410,12 +416,31 @@ void updateImageDescriptor(
 	uint32_t binding
 ) {
 	const auto &image = image::get(imageId);
-	const auto ii = vk::DescriptorImageInfo(image.sampler, image.view, vk::ImageLayout::eShaderReadOnlyOptimal);
+	const auto ii = vk::DescriptorImageInfo(nullptr, image.view, vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
 		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
 		.setDstBinding(binding)
 		.setDescriptorCount(1)
-		.setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+		.setDescriptorType(vk::DescriptorType::eSampledImage)
+		.setImageInfo(ii);
+	device.updateDescriptorSets(1, &ds, 0, nullptr);
+}
+
+void updateSamplerDescriptor(
+	const vk::Device &device,
+	const char *samplerId,
+	const char *pipelineId,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding
+) {
+	const auto &sampler = sampler::get(samplerId);
+	const auto ii = vk::DescriptorImageInfo(sampler, nullptr, vk::ImageLayout::eShaderReadOnlyOptimal);
+	const auto ds = vk::WriteDescriptorSet()
+		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
+		.setDstBinding(binding)
+		.setDescriptorCount(1)
+		.setDescriptorType(vk::DescriptorType::eSampler)
 		.setImageInfo(ii);
 	device.updateDescriptorSets(1, &ds, 0, nullptr);
 }
