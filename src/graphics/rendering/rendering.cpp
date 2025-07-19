@@ -257,28 +257,30 @@ void endRender(const vk::Queue &queue) {
 	swapchain::presentation(queue, g_semaphoreForRenderFinisheds.at(g_index), g_index);
 }
 
+void draw(
+	const vk::Device &device,
+	const char *pipelineId,
+	const char *meshId,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+) {
+	if (pipelineId != nullptr && pipelineId != g_pipelineId) {
+		pipeline::bind(device, g_commandBuffer, g_index, pipelineId);
+		g_pipelineId = pipelineId;
+	}
+	if (meshId != nullptr && meshId != g_meshId) {
+		g_indexCount = mesh::bind(g_commandBuffer, meshId);
+		g_meshId = meshId;
+	}
+	g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
+}
+
 } // namespace graphics::rendering
 
 #include "../../error/error.hpp"
 
 int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
 	TRY(graphics::rendering::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
-}
-
-int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
-	TRY(
-		using namespace graphics::rendering;
-
-		if (pipelineId != nullptr && pipelineId != g_pipelineId) {
-			pipeline::bind(g_commandBuffer, pipelineId);
-			g_pipelineId = pipelineId;
-		}
-		if (meshId != nullptr && meshId != g_meshId) {
-			g_indexCount = mesh::bind(g_commandBuffer, meshId);
-			g_meshId = meshId;
-		}
-		g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
-	)
 }
 
 void orgeNextSubpass() {

@@ -44,6 +44,7 @@ const std::vector<float> SQUARE_VERTICES{
 const std::vector<uint32_t> SQUARE_INDICES{0, 1, 2, 0, 2, 3};
 
 const std::vector<uint32_t> PATTERN_PL_SET_INDICES{0};
+const std::vector<uint32_t> INTEGRATION_PL_SET_INDICES{0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -67,19 +68,18 @@ int main() {
 	TRY(orgeUpdateBufferDescriptor("time", "pattern-pl", 0, 0, 0));
 
 	float time = 0.0f;
-	while (orgeUpdate()) {
 		time += 0.025f;
-		TRY_CONTINUE(orgeUpdateBuffer("time", &time));
+		TRY(orgeUpdateBuffer("time", &time));
 
-		TRY_CONTINUE(orgeBeginRender());
-		TRY_CONTINUE(orgeDraw("mesh-pl", "triangle", 1, 0));
+		TRY(orgeBeginRender());
+		TRY(orgeDraw("mesh-pl", "triangle", 1, 0));
 		orgeNextSubpass();
-		TRY_CONTINUE(orgeBindDescriptorSets("pattern-pl", PATTERN_PL_SET_INDICES.data()));
-		TRY_CONTINUE(orgeDraw("pattern-pl", "square", 1, 0));
+		TRY(orgeBindDescriptorSets("pattern-pl", PATTERN_PL_SET_INDICES.data()));
+		TRY(orgeDraw("pattern-pl", "square", 1, 0));
 		orgeNextSubpass();
-		TRY_CONTINUE(orgeDraw("integration-pl", "square", 1, 0));
-		TRY_CONTINUE(orgeEndRender());
-	}
+		TRY(orgeBindDescriptorSets("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
+		TRY(orgeDraw("integration-pl", "square", 1, 0));
+		TRY(orgeEndRender());
 
 	orgeTerminate();
 	return 0;

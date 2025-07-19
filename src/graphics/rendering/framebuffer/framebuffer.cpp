@@ -5,13 +5,6 @@
 
 namespace graphics::rendering::framebuffer {
 
-struct Attachment {
-	const bool isRenderTarget;
-	const vk::Image image;
-	const vk::ImageView view;
-	const vk::DeviceMemory memory;
-};
-
 std::vector<std::vector<Attachment>> g_attachments;
 std::vector<vk::ClearValue> g_clearValues;
 std::vector<vk::Framebuffer> g_framebuffers;
@@ -178,6 +171,10 @@ const std::vector<vk::ClearValue> &getClearValues() {
 
 const vk::Framebuffer &getFramebuffer(uint32_t index) {
 	return g_framebuffers.at(index);
+}
+
+const Attachment &getAttachment(uint32_t swapchainImageIndex, uint32_t attachmentIndex) {
+	return g_attachments.at(swapchainImageIndex).at(attachmentIndex);
 }
 
 } // namespace graphics::rendering::framebuffer

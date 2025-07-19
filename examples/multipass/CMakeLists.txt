@@ -22,15 +22,12 @@ add_custom_command(
 		${CMAKE_CURRENT_SOURCE_DIR}/mesh.frag.spv
 		$<TARGET_FILE_DIR:multipass>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/pattern.vert.spv
-		$<TARGET_FILE_DIR:multipass>
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${CMAKE_CURRENT_SOURCE_DIR}/pattern.frag.spv
 		$<TARGET_FILE_DIR:multipass>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/integration.vert.spv
+		${CMAKE_CURRENT_SOURCE_DIR}/integration.frag.spv
 		$<TARGET_FILE_DIR:multipass>
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${CMAKE_CURRENT_SOURCE_DIR}/integration.frag.spv
+		${CMAKE_CURRENT_SOURCE_DIR}/screen.vert.spv
 		$<TARGET_FILE_DIR:multipass>
 )

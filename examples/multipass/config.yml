@@ -35,7 +35,7 @@ pipelines:
     color-blends: [false]
     subpass: mesh-sp
   - id: pattern-pl
-    vertex-shader: pattern.vert.spv
+    vertex-shader: screen.vert.spv
     fragment-shader: pattern.frag.spv
     desc-sets:
       - count: 1
@@ -46,15 +46,17 @@ pipelines:
     color-blends: [false]
     subpass: pattern-sp
   - id: integration-pl
-    vertex-shader: integration.vert.spv
+    vertex-shader: screen.vert.spv
     fragment-shader: integration.frag.spv
     desc-sets:
       - count: 1
         bindings:
           - type: input-attachment
             stage: fragment
+            attachment: mesh-rt
           - type: input-attachment
             stage: fragment
+            attachment: pattern-rt
     vertex-input-attributes: [3, 2]
     color-blends: [false]
     subpass: integration-sp

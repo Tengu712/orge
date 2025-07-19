@@ -2,12 +2,20 @@
 
 // TODO: ちょっと気持ち悪い。
 #include "../swapchain/swapchain.hpp"
+// TODO: ちょっと気持ち悪い。
+#include "../framebuffer/framebuffer.hpp"
 #include "buffer/buffer.hpp"
 #include "image/image.hpp"
 
 #include <fstream>
 
 namespace graphics::rendering::pipeline {
+
+struct InputAttachment {
+	const uint32_t id;
+	const uint32_t set;
+	const uint32_t binding;
+};
 
 struct PipelineCreateTemporaryInfos {
 	// シェーダステージ
@@ -41,6 +49,9 @@ struct PipelineCreateTemporaryInfos {
 
 	// ディスクリプタセット
 	std::vector<std::vector<vk::DescriptorSet>> descSets;
+
+	// インプットアタッチメント
+	std::vector<InputAttachment> inputs;
 };
 
 struct Pipeline {
@@ -48,6 +59,7 @@ struct Pipeline {
 	const vk::PipelineLayout pipelineLayout;
 	const std::vector<vk::DescriptorSetLayout> descSetLayouts;
 	const std::vector<std::vector<vk::DescriptorSet>> descSets;
+	const std::vector<InputAttachment> inputs;
 };
 
 vk::DescriptorPool g_descPool;
@@ -304,6 +316,19 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 			cti.descSets.push_back(device.allocateDescriptorSets(ai));
 		}
 
+		// インプットアタッチメント
+		for (size_t i = 0; i < n.descSets.size(); ++i) {
+			for (size_t j = 0; j < n.descSets[i].bindings.size(); ++j) {
+				if (n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment) {
+					cti.inputs.push_back(InputAttachment {
+						config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
+						static_cast<uint32_t>(i),
+						static_cast<uint32_t>(j),
+					});
+				}
+			}
+		}
+
 		// 作成情報
 		cis.push_back(
 			vk::GraphicsPipelineCreateInfo()
@@ -333,6 +358,7 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 				ctis[i].pipelineLayout,
 				std::move(ctis[i].descSetLayouts),
 				std::move(ctis[i].descSets),
+				std::move(ctis[i].inputs),
 			}
 		);
 	}
@@ -359,8 +385,32 @@ void initialize(
 	image::initialize(device, commandPool);
 }
 
-void bind(const vk::CommandBuffer &commandBuffer, const char *pipeline) {
-	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(pipeline).pipeline);
+void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint32_t index, const char *id) {
+	const auto &pipeline = g_pipelines.at(id);
+
+	// パイプラインをバインド
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline);
+
+	// すべてのインプットアタッチメントを更新
+	// NOTE: アタッチメントはスワップチェーンイメージの枚数分作られるため、
+	//       レンダーパスコマンドごとに更新しなければならない。
+	for (const auto &n: pipeline.inputs) {
+		const auto &attachment = framebuffer::getAttachment(index, n.id);
+		const auto ii = vk::DescriptorImageInfo(nullptr, attachment.view, vk::ImageLayout::eShaderReadOnlyOptimal);
+		const auto &descSets = pipeline.descSets.at(n.set);
+		std::vector<vk::WriteDescriptorSet> wdss;
+		for (size_t i = 0; i < descSets.size(); ++i) {
+			wdss.push_back(
+				vk::WriteDescriptorSet()
+					.setDstSet(descSets.at(i))
+					.setDstBinding(n.binding)
+					.setDescriptorCount(1)
+					.setDescriptorType(vk::DescriptorType::eSampledImage)
+					.setImageInfo(ii)
+			);
+		}
+		device.updateDescriptorSets(static_cast<uint32_t>(descSets.size()), wdss.data(), 0, nullptr);
+	}
 }
 
 void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices) {

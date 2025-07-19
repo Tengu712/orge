@@ -20,4 +20,12 @@ void beginRender(const vk::Device &device);
 
 void endRender(const vk::Queue &queue);
 
+void draw(
+	const vk::Device &device,
+	const char *pipelineId,
+	const char *meshId,
+	uint32_t instanceCount,
+	uint32_t instanceOffset
+);
+
 } // namespace graphics::rendering

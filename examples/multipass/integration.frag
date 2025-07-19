@@ -11,5 +11,5 @@ void main() {
 // vec2 distort = texture(distortTexture, fragTexCoord).rg;
 // vec2 distortedUV = fragTexCoord + distort;
 // outColor = texture(sceneTexture, distortedUV);
-	outColor = vec4(1.0);
+	outColor = subpassLoad(siMesh);
 }

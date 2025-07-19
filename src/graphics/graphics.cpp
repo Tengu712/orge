@@ -243,6 +243,10 @@ int orgeBeginRender() {
 	TRY(graphics::rendering::beginRender(graphics::g_device));
 }
 
+int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
+	TRY(graphics::rendering::draw(graphics::g_device, pipelineId, meshId, instanceCount, instanceOffset));
+}
+
 int orgeEndRender() {
 	TRY(graphics::rendering::endRender(graphics::g_queue));
 }
