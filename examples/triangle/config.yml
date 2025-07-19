@@ -2,13 +2,13 @@ title: triangle
 width: 640
 height: 480
 attachments:
- - id: RT
-   format: render-target
-   final-layout: present-src
-   clear-value: [0.25, 0.25, 0.25, 1.0]
+  - id: RT
+    format: render-target
+    final-layout: present-src
+    clear-value: [0.25, 0.25, 0.25, 1.0]
 subpasses:
- - id: SP
-   outputs: [RT]
+  - id: SP
+    outputs: [RT]
 pipelines:
   - id: PL
     vertex-shader: shader.vert.spv

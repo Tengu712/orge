@@ -50,7 +50,6 @@ const std::vector<uint32_t> INDICES{
 	16, 17, 18, 16, 18, 19,
 	20, 21, 22, 20, 22, 23,
 };
-const std::vector<const char *> PIPELINES{"PL"};
 struct Camera {
 	float proj[16];
 	float view[16];
@@ -119,7 +118,7 @@ int main() {
 		const auto result =
 			orgeUpdateBuffer("rot", rot.data())
 			&& orgeBeginRender()
-			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
+			&& orgeBindPipeline("PL")
 			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
 			&& orgeDraw("cube", 1, 0)
 			&& orgeEndRender();

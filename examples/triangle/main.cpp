@@ -20,7 +20,6 @@ const std::vector<float> VERTICES{
 	0.0f, 0.0f, 1.0f, 1.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2};
-const std::vector<const char *> PIPELINES{"PL"};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -35,7 +34,7 @@ int main() {
 	while (orgeUpdate()) {
 		const auto result =
 			orgeBeginRender()
-			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
+			&& orgeBindPipeline("PL")
 			&& orgeDraw("triangle", 1, 0)
 			&& orgeEndRender();
 		if (!result) {

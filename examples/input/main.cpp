@@ -14,7 +14,6 @@ const std::vector<float> VERTICES{
 	1.0f, 1.0f, 0.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2};
-const std::vector<const char *> PIPELINES{"PL"};
 const std::vector<float> RED  {1.0f, 0.0f, 0.0f, 1.0f};
 const std::vector<float> GREEN{0.0f, 1.0f, 0.0f, 1.0f};
 const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
@@ -56,7 +55,7 @@ int main() {
 		const std::vector<uint32_t> sets{state};
 		const auto result =
 			orgeBeginRender()
-			&& orgeBindPipelines(static_cast<uint32_t>(PIPELINES.size()), PIPELINES.data())
+			&& orgeBindPipeline("PL")
 			&& orgeBindDescriptorSets("PL", sets.data())
 			&& orgeDraw("triangle", 1, 0)
 			&& orgeEndRender();

@@ -122,11 +122,7 @@ void orgeDestroyMesh(const char *id);
 int orgeBeginRender(void);
 
 /// パイプラインをバインドする関数
-///
-/// 競合するパイプラインがある場合、
-/// - 後からバインドされるパイプラインがバインドされる。
-/// - ただし、同じAPIコールで指定された場合、最終的にどのパイプラインがバインドされるかわからない。
-int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines);
+int orgeBindPipeline(const char *pipeline);
 
 /// ディスクリプタセットをバインドする関数
 ///

@@ -251,8 +251,8 @@ void endRender(const vk::Queue &queue) {
 
 #include "../../error/error.hpp"
 
-int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines) {
-	TRY(graphics::rendering::pipeline::bind(graphics::rendering::g_commandBuffer, pipelineCount, pipelines));
+int orgeBindPipeline(const char *pipeline) {
+	TRY(graphics::rendering::pipeline::bind(graphics::rendering::g_commandBuffer, pipeline));
 }
 
 int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
