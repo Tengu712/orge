@@ -12,6 +12,7 @@ namespace config {
 enum class Format: uint8_t {
 	RenderTarget,
 	DepthBuffer,
+	ShareColorAttachment,
 };
 
 enum class FinalLayout: uint8_t {

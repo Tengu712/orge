@@ -74,6 +74,8 @@ void createRenderPass(const config::Config &config, const vk::Device &device) {
 				? platformRenderTargetPixelFormat()
 				: n.format == config::Format::DepthBuffer
 				? vk::Format::eD32Sfloat
+				: n.format == config::Format::ShareColorAttachment
+				? platformRenderTargetPixelFormat()
 				: throw,
 			vk::SampleCountFlagBits::e1,
 			vk::AttachmentLoadOp::eClear,
@@ -277,4 +279,8 @@ int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount,
 		}
 		g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
 	)
+}
+
+void orgeNextSubpass() {
+	graphics::rendering::g_commandBuffer.nextSubpass(vk::SubpassContents::eInline);
 }

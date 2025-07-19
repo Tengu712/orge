@@ -75,6 +75,8 @@ Format parseFormat(const std::string& s) {
 		? Format::RenderTarget
 		: s == "depth-buffer"
 		? Format::DepthBuffer
+		: s == "share-color-attachment"
+		? Format::ShareColorAttachment
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 

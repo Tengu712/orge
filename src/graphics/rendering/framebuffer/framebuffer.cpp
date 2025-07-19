@@ -40,12 +40,18 @@ vk::Format convertFormat(const config::Format &format) {
 		? platformRenderTargetPixelFormat()
 		: format == config::Format::DepthBuffer
 		? vk::Format::eD32Sfloat
+		: format == config::Format::ShareColorAttachment
+		? platformRenderTargetPixelFormat()
 		: throw;
 }
 
 vk::ImageUsageFlags convertUsage(const config::Format &format) {
 	return format == config::Format::DepthBuffer
 		? vk::ImageUsageFlagBits::eDepthStencilAttachment
+		: format == config::Format::ShareColorAttachment
+		? vk::ImageUsageFlagBits::eColorAttachment
+			| vk::ImageUsageFlagBits::eInputAttachment
+			| vk::ImageUsageFlagBits::eSampled
 		: throw;
 }
 
@@ -54,6 +60,8 @@ vk::ImageAspectFlags convertAspect(const config::Format &format) {
 		? vk::ImageAspectFlagBits::eColor
 		: format == config::Format::DepthBuffer
 		? vk::ImageAspectFlagBits::eDepth
+		: format == config::Format::ShareColorAttachment
+		? vk::ImageAspectFlagBits::eColor
 		: throw;
 }
 

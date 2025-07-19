@@ -1,0 +1,60 @@
+title: multipass
+width: 640
+height: 480
+attachments:
+  - id: mesh-rt
+    format: share-color-attachment
+    final-layout: color-attachment
+    clear-value: [0.0, 0.0, 0.0, 1.0]
+  - id: pattern-rt
+    format: share-color-attachment
+    final-layout: color-attachment
+    clear-value: [0.0, 0.0, 0.0, 1.0]
+  - id: RT
+    format: render-target
+    final-layout: present-src
+    clear-value: [0.0, 0.0, 0.0, 1.0]
+subpasses:
+  - id: mesh-sp
+    outputs: [mesh-rt]
+  - id: pattern-sp
+    outputs: [pattern-rt]
+  - id: integration-sp
+    inputs:
+      - id: mesh-rt
+        layout: shader-read-only
+      - id: pattern-rt
+        layout: shader-read-only
+    outputs: [RT]
+    depends: [mesh-sp, pattern-sp]
+pipelines:
+  - id: mesh-pl
+    vertex-shader: mesh.vert.spv
+    fragment-shader: mesh.frag.spv
+    vertex-input-attributes: [3, 4]
+    color-blends: [false]
+    subpass: mesh-sp
+  - id: pattern-pl
+    vertex-shader: pattern.vert.spv
+    fragment-shader: pattern.frag.spv
+    desc-sets:
+      - count: 1
+        bindings:
+          - type: uniform-buffer
+            stage: fragment
+    vertex-input-attributes: [3, 2]
+    color-blends: [false]
+    subpass: pattern-sp
+  - id: integration-pl
+    vertex-shader: integration.vert.spv
+    fragment-shader: integration.frag.spv
+    desc-sets:
+      - count: 1
+        bindings:
+          - type: input-attachment
+            stage: fragment
+          - type: input-attachment
+            stage: fragment
+    vertex-input-attributes: [3, 2]
+    color-blends: [false]
+    subpass: integration-sp

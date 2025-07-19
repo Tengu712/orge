@@ -141,6 +141,9 @@ int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
 /// meshIdがnullptrであったり、既にバインドされているメッシュのIDである場合、バインドはスキップされる。
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
 
+/// 次のサブパスへ移るための関数
+void orgeNextSubpass();
+
 /// orgeの描画を終了する関数
 int orgeEndRender(void);
 

@@ -32,6 +32,7 @@ attachments: []
     # 取りうる値は以下:
     #   - render-target
     #   - depth-buffer
+    #   - share-color-attachment
     format: string
 
     # レンダーパス終了時にアタッチメントの内容を破棄するか
