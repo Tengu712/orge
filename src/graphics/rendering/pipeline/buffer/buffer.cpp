@@ -38,6 +38,16 @@ void create(
 	g_buffers.emplace(id, Buffer{storage, size, buffer, memory});
 }
 
+void destroy(const vk::Device &device, const char *id) {
+	if (!g_buffers.contains(id)) {
+		return;
+	}
+	auto &n = g_buffers.at(id);
+	device.freeMemory(n.memory);
+	device.destroyBuffer(n.buffer);
+	g_buffers.erase(id);
+}
+
 void update(const vk::Device &device, const char *id, const void *data) {
 	const auto &buffer = g_buffers.at(id);
 	copyDataToMemory(device, buffer.memory, data, buffer.size);

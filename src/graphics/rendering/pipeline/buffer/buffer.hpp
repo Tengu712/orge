@@ -21,6 +21,8 @@ void create(
 	int isStorage
 );
 
+void destroy(const vk::Device &device, const char *id);
+
 void update(const vk::Device &device, const char *id, const void *data);
 
 const Buffer &get(const char *id);

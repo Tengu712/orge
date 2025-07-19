@@ -40,6 +40,9 @@ int orgeUpdate(void);
 /// - isStorage: ストレージバッファか (falseの場合ユニフォームバッファとみなされる)
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage);
 
+/// バッファを破棄する関数
+void orgeDestroyBuffer(const char *id);
+
 /// バッファを更新する関数
 ///
 /// dataはバッファ作成時に指定したサイズ分データを持つこと。
@@ -75,6 +78,9 @@ int orgeUpdateBufferDescriptor(
 ///     - 0なら0あるいは1の境界値を参照
 int orgeCreateImageFromFile(const char *id, const char *path, int linearMagFilter, int linearMinFilter, int repeat);
 
+/// イメージを破棄する関数
+void orgeDestroyImage(const char *id);
+
 /// イメージディスクリプタを更新する関数
 ///
 /// - imageId: イメージID
@@ -104,6 +110,9 @@ int orgeCreateMesh(
 	const uint32_t indexCount,
 	const uint32_t *indices
 );
+
+/// メッシュを破棄する関数
+void orgeDestroyMesh(const char *id);
 
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
