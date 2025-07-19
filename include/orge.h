@@ -121,9 +121,6 @@ void orgeDestroyMesh(const char *id);
 /// orgeの描画を開始する関数
 int orgeBeginRender(void);
 
-/// パイプラインをバインドする関数
-int orgeBindPipeline(const char *pipeline);
-
 /// ディスクリプタセットをバインドする関数
 ///
 /// - id: パイプラインID
@@ -137,9 +134,12 @@ int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
 
 /// 描画関数
 ///
-/// meshはバインドするメッシュのID。
-/// meshがnullptrである場合、メッシュはバインドされず、同じ描画内で直近にバインドされたメッシュが使われる。
-int orgeDraw(const char *mesh, uint32_t instanceCount, uint32_t instanceOffset);
+/// pipelineIdはバインドするパイプラインのID。
+/// pipelineIdがnullptrであったり、既にバインドされているパイプラインのIDである場合、バインドはスキップされる。
+///
+/// meshIdはバインドするメッシュのID。
+/// meshIdがnullptrであったり、既にバインドされているメッシュのIDである場合、バインドはスキップされる。
+int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// orgeの描画を終了する関数
 int orgeEndRender(void);

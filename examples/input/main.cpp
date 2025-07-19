@@ -55,9 +55,8 @@ int main() {
 		const std::vector<uint32_t> sets{state};
 		const auto result =
 			orgeBeginRender()
-			&& orgeBindPipeline("PL")
 			&& orgeBindDescriptorSets("PL", sets.data())
-			&& orgeDraw("triangle", 1, 0)
+			&& orgeDraw("PL", "triangle", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;

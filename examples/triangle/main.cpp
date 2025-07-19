@@ -34,8 +34,7 @@ int main() {
 	while (orgeUpdate()) {
 		const auto result =
 			orgeBeginRender()
-			&& orgeBindPipeline("PL")
-			&& orgeDraw("triangle", 1, 0)
+			&& orgeDraw("PL", "triangle", 1, 0)
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;

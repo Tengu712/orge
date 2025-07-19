@@ -118,9 +118,8 @@ int main() {
 		const auto result =
 			orgeUpdateBuffer("rot", rot.data())
 			&& orgeBeginRender()
-			&& orgeBindPipeline("PL")
 			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
-			&& orgeDraw("cube", 1, 0)
+			&& orgeDraw("PL", "cube", 1, 0)
 			&& orgeEndRender();
 
 		if (!result) {
