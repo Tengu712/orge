@@ -25,6 +25,10 @@ vk::Fence g_frameInFlightFence;
 uint32_t g_index;
 // 現在のインデックスカウント
 uint32_t g_indexCount;
+// 現在のパイプライン
+std::string g_pipelineId;
+// 現在のメッシュ
+std::string g_meshId;
 
 void terminate(const vk::Instance &instance, const vk::Device &device) {
 	mesh::terminate(device);
@@ -205,6 +209,10 @@ void beginRender(const vk::Device &device) {
 	}
 	device.resetFences({g_frameInFlightFence});
 
+	// パイプラインとメッシュのバインド状態をリセット
+	g_pipelineId.clear();
+	g_meshId.clear();
+
 	// コマンドバッファリセット
 	g_commandBuffer.reset();
 
@@ -251,22 +259,22 @@ void endRender(const vk::Queue &queue) {
 
 #include "../../error/error.hpp"
 
-int orgeBindPipelines(uint32_t pipelineCount, const char *const *pipelines) {
-	TRY(graphics::rendering::pipeline::bind(graphics::rendering::g_commandBuffer, pipelineCount, pipelines));
-}
-
 int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
 	TRY(graphics::rendering::pipeline::bindDescriptorSets(graphics::rendering::g_commandBuffer, id, indices));
 }
 
-int orgeDraw(const char *mesh, uint32_t instanceCount, uint32_t instanceOffset) {
+int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
 	TRY(
 		using namespace graphics::rendering;
 
-		if (mesh != nullptr) {
-			g_indexCount = mesh::bind(g_commandBuffer, mesh);
+		if (pipelineId != nullptr && pipelineId != g_pipelineId) {
+			pipeline::bind(g_commandBuffer, pipelineId);
+			g_pipelineId = pipelineId;
 		}
-
+		if (meshId != nullptr && meshId != g_meshId) {
+			g_indexCount = mesh::bind(g_commandBuffer, meshId);
+			g_meshId = meshId;
+		}
 		g_commandBuffer.drawIndexed(g_indexCount, instanceCount, 0, 0, instanceOffset);
 	)
 }

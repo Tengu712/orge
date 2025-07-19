@@ -359,11 +359,8 @@ void initialize(
 	image::initialize(device, commandPool);
 }
 
-void bind(const vk::CommandBuffer &commandBuffer, uint32_t pipelineCount, const char *const *pipelines) {
-	for (uint32_t i = 0; i < pipelineCount; ++i) {
-		// TODO: pipelines[i]のエラーを取る。
-		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(pipelines[i]).pipeline);
-	}
+void bind(const vk::CommandBuffer &commandBuffer, const char *pipeline) {
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, g_pipelines.at(pipeline).pipeline);
 }
 
 void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices) {
