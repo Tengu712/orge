@@ -107,8 +107,10 @@ int main() {
 	TRY(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0));
 	TRY(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1));
 
-	TRY(orgeCreateImageFromFile("image", "image.png", 0, 0, 0));
+	TRY(orgeCreateImageFromFile("image", "image.png"));
 	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0));
+	TRY(orgeCreateSampler("sampler", 0, 0, 0));
+	TRY(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1));
 
 	float ang = 0.0f;
 	while (orgeUpdate()) {
