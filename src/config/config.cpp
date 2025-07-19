@@ -226,6 +226,13 @@ Config::Config(const YAML::Node &node) {
 	for (const auto &n: node["pipelines"]) {
 		pipelines.emplace_back(n);
 	}
+
+	for (const auto &n: attachments) {
+		attachmentMap.emplace(n.id, static_cast<uint32_t>(attachmentMap.size()));
+	}
+	for (const auto &n: subpasses) {
+		subpassMap.emplace(n.id, static_cast<uint32_t>(subpassMap.size()));
+	}
 }
 
 Config parse(const char *yaml) {

@@ -2,12 +2,46 @@
 
 // TODO: ちょっと気持ち悪い。
 #include "../swapchain/swapchain.hpp"
-// TODO: 統合する。
-#include "config.hpp"
 #include "buffer/buffer.hpp"
 #include "image/image.hpp"
 
+#include <fstream>
+
 namespace graphics::rendering::pipeline {
+
+struct PipelineCreateTemporaryInfos {
+	// シェーダステージ
+	vk::ShaderModule vertexShader;
+	vk::ShaderModule fragmentShader;
+	std::vector<vk::PipelineShaderStageCreateInfo> sscis;
+
+	// 頂点入力
+	std::vector<vk::VertexInputAttributeDescription> viads;
+	std::vector<vk::VertexInputBindingDescription> vibds;
+	vk::PipelineVertexInputStateCreateInfo visci;
+
+	// ラスタライゼーション
+	vk::PipelineRasterizationStateCreateInfo rsci;
+
+	// デプスステンシル
+	vk::PipelineDepthStencilStateCreateInfo dssci;
+
+	// カラーブレンド
+	std::vector<vk::PipelineColorBlendAttachmentState> cbass;
+	vk::PipelineColorBlendStateCreateInfo cbsci;
+
+	// パイプラインレイアウト
+	vk::PipelineLayout pipelineLayout;
+
+	// ディスクリプタセットレイアウト
+	std::vector<vk::DescriptorSetLayout> descSetLayouts;
+
+	// サブパスID
+	uint32_t subpass;
+
+	// ディスクリプタセット
+	std::vector<std::vector<vk::DescriptorSet>> descSets;
+};
 
 struct Pipeline {
 	const vk::Pipeline pipeline;
@@ -90,14 +124,35 @@ void createDescriptorPool(const config::Config &config, const vk::Device &device
 	g_descPool = device.createDescriptorPool(ci);
 }
 
-void createPipelines(
-	const config::Config &config,
-	const std::unordered_map<std::string, uint32_t> &subpassMap,
-	const vk::Device &device,
-	const vk::RenderPass &renderPass
-) {
+vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
+	std::fstream file(path, std::ios::in | std::ios::binary);
+	if (!file) {
+		return nullptr;
+	}
+
+	file.seekg(0, std::ios::end);
+	const auto size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	if (size <= 0 || size % sizeof(uint32_t) != 0) {
+		return nullptr;
+	}
+
+	std::vector<uint32_t> code(size / sizeof(uint32_t));
+	file.read(reinterpret_cast<char *>(code.data()), size);
+
+	if (!file || file.gcount() != size) {
+		return nullptr;
+	}
+
+	const auto ci = vk::ShaderModuleCreateInfo()
+		.setCode(code);
+	return device.createShaderModule(ci);
+}
+
+void createPipelines(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
 	// 入力アセンブリ
-	const auto piasci = vk::PipelineInputAssemblyStateCreateInfo()
+	const auto iasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
 
 	// ビューポート
@@ -106,38 +161,167 @@ void createPipelines(
 	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(imageSize.width), static_cast<float>(imageSize.height), 0.0f, 1.0f);
 	std::vector<vk::Rect2D> scissors;
 	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(imageSize.width, imageSize.height));
-	const auto pvsci = vk::PipelineViewportStateCreateInfo()
+	const auto vsci = vk::PipelineViewportStateCreateInfo()
 		.setViewports(viewports)
 		.setScissors(scissors);
 
 	// マルチサンプル
-	const auto pmsci = vk::PipelineMultisampleStateCreateInfo()
+	const auto msci = vk::PipelineMultisampleStateCreateInfo()
 		.setRasterizationSamples(vk::SampleCountFlagBits::e1);
 
-	// 一時情報作成
-	std::vector<PipelineCreateDynamicInfo> cdis;
+	// 作成情報作成
+	std::vector<PipelineCreateTemporaryInfos> ctis;
+	std::vector<vk::GraphicsPipelineCreateInfo> cis;
+	ctis.reserve(config.pipelines.size());
+	cis.reserve(config.pipelines.size());
 	for (const auto &n: config.pipelines) {
-		cdis.emplace_back(n, subpassMap, device, g_descPool);
+		ctis.push_back({});
+		auto &cti = ctis.back();
+
+		// シェーダステージ
+		cti.vertexShader = createShaderModule(device, n.vertexShader);
+		cti.fragmentShader = createShaderModule(device, n.fragmentShader);
+		if (!cti.vertexShader || !cti.fragmentShader) {
+			throw "failed to create shader modules.";
+		}
+		cti.sscis.emplace_back(
+			vk::PipelineShaderStageCreateFlags(),
+			vk::ShaderStageFlagBits::eVertex,
+			cti.vertexShader,
+			"main"
+		);
+		cti.sscis.emplace_back(
+			vk::PipelineShaderStageCreateFlags(),
+			vk::ShaderStageFlagBits::eFragment,
+			cti.fragmentShader,
+			"main"
+		);
+
+		// 頂点入力
+		uint32_t sum = 0;
+		for (size_t i = 0; i < n.vertexInputAttributes.size(); ++i) {
+			const auto &m = n.vertexInputAttributes.at(i);
+			cti.viads.emplace_back(
+				static_cast<uint32_t>(i),
+				0,
+				m == 1 ? vk::Format::eR32Sfloat
+				: m == 2 ? vk::Format::eR32G32Sfloat
+				: m == 3 ? vk::Format::eR32G32B32Sfloat
+				: vk::Format::eR32G32B32A32Sfloat,
+				static_cast<uint32_t>(sizeof(float)) * sum
+			);
+			sum += m;
+		}
+		cti.vibds.emplace_back(0, static_cast<uint32_t>(sizeof(float) * sum), vk::VertexInputRate::eVertex);
+		cti.visci = vk::PipelineVertexInputStateCreateInfo()
+			.setVertexBindingDescriptions(cti.vibds)
+			.setVertexAttributeDescriptions(cti.viads);
+
+		// ラスタライゼーション
+		cti.rsci = vk::PipelineRasterizationStateCreateInfo()
+			.setPolygonMode(vk::PolygonMode::eFill)
+			.setCullMode(n.culling ? vk::CullModeFlagBits::eBack : vk::CullModeFlagBits::eNone)
+			.setFrontFace(vk::FrontFace::eCounterClockwise)
+			.setLineWidth(1.0f);
+
+		// デプスステンシル
+		cti.dssci = vk::PipelineDepthStencilStateCreateInfo()
+			.setDepthTestEnable(n.depthTest)
+			.setDepthWriteEnable(n.depthTest)
+			.setDepthCompareOp(vk::CompareOp::eLess)
+			.setMaxDepthBounds(1.0f);
+
+		// カラーブレンド
+		for (const auto &m: n.colorBlends) {
+			cti.cbass.emplace_back(
+				m ? vk::True : vk::False,
+				vk::BlendFactor::eSrcAlpha,
+				vk::BlendFactor::eOneMinusSrcAlpha,
+				vk::BlendOp::eAdd,
+				vk::BlendFactor::eSrcAlpha,
+				vk::BlendFactor::eOneMinusSrcAlpha,
+				vk::BlendOp::eAdd,
+				vk::ColorComponentFlagBits::eR
+				| vk::ColorComponentFlagBits::eG
+				| vk::ColorComponentFlagBits::eB
+				| vk::ColorComponentFlagBits::eA
+			);
+		}
+		cti.cbsci = vk::PipelineColorBlendStateCreateInfo()
+			.setAttachments(cti.cbass);
+
+		// ディスクリプタセットレイアウト
+		for (const auto &m: n.descSets) {
+			std::vector<vk::DescriptorSetLayoutBinding> bindings;
+			for (const auto &o: m.bindings) {
+				bindings.emplace_back(
+					static_cast<uint32_t>(bindings.size()),
+					o.type == config::DescriptorType::CombinedImageSampler
+						? vk::DescriptorType::eCombinedImageSampler
+						: o.type == config::DescriptorType::UniformBuffer
+						? vk::DescriptorType::eUniformBuffer
+						: o.type == config::DescriptorType::StorageBuffer
+						? vk::DescriptorType::eStorageBuffer
+						: o.type == config::DescriptorType::InputAttachment
+						? vk::DescriptorType::eInputAttachment
+						: throw,
+					o.count,
+					o.stage == config::ShaderStages::Vertex
+						? vk::ShaderStageFlagBits::eVertex
+						: o.stage == config::ShaderStages::Fragment
+						? vk::ShaderStageFlagBits::eFragment
+						: o.stage == config::ShaderStages::VertexAndFragment
+						? vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment
+						: throw,
+					nullptr
+				);
+			}
+			const auto ci = vk::DescriptorSetLayoutCreateInfo()
+				.setBindings(bindings);
+			cti.descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
+		}
+
+		// パイプラインレイアウト
+		const auto plci = vk::PipelineLayoutCreateInfo()
+			.setSetLayouts(cti.descSetLayouts);
+		cti.pipelineLayout = device.createPipelineLayout(plci);
+
+		// サブパスID
+		if (!config.subpassMap.contains(n.subpass)) {
+			throw std::format("subpass '{}' is not defined.", n.subpass);
+		}
+		cti.subpass = config.subpassMap.at(n.subpass);
+
+		// ディスクリプタセット確保
+		for (size_t i = 0; i < n.descSets.size(); ++i) {
+			std::vector<vk::DescriptorSetLayout> layouts;
+			for (size_t j = 0; j < n.descSets[i].count; ++j) {
+				layouts.push_back(cti.descSetLayouts[i]);
+			}
+			const auto ai = vk::DescriptorSetAllocateInfo()
+				.setDescriptorPool(g_descPool)
+				.setSetLayouts(layouts);
+			cti.descSets.push_back(device.allocateDescriptorSets(ai));
+		}
+
+		// 作成情報
+		cis.push_back(
+			vk::GraphicsPipelineCreateInfo()
+				.setStages(cti.sscis)
+				.setPVertexInputState(&cti.visci)
+				.setPInputAssemblyState(&iasci)
+				.setPViewportState(&vsci)
+				.setPRasterizationState(&cti.rsci)
+				.setPMultisampleState(&msci)
+				.setPDepthStencilState(&cti.dssci)
+				.setPColorBlendState(&cti.cbsci)
+				.setLayout(cti.pipelineLayout)
+				.setRenderPass(renderPass)
+				.setSubpass(cti.subpass)
+		);
 	}
 
 	// パイプライン作成
-	std::vector<vk::GraphicsPipelineCreateInfo> cis;
-	for (const auto &n: cdis) {
-		cis.push_back(
-			vk::GraphicsPipelineCreateInfo()
-				.setStages(n.psscis)
-				.setPVertexInputState(&n.pvisci)
-				.setPInputAssemblyState(&piasci)
-				.setPViewportState(&pvsci)
-				.setPRasterizationState(&n.prsci)
-				.setPMultisampleState(&pmsci)
-				.setPDepthStencilState(&n.pdssci)
-				.setPColorBlendState(&n.pcbsci)
-				.setLayout(n.pipelineLayout)
-				.setRenderPass(renderPass)
-				.setSubpass(n.subpass)
-		);
-	}
 	const auto pipelines = device.createGraphicsPipelines(nullptr, cis).value;
 
 	// 作成
@@ -146,22 +330,22 @@ void createPipelines(
 			config.pipelines[i].id,
 			Pipeline {
 				pipelines[i],
-				cdis[i].pipelineLayout,
-				std::move(cdis[i].descSetLayouts),
-				std::move(cdis[i].descSets),
+				ctis[i].pipelineLayout,
+				std::move(ctis[i].descSetLayouts),
+				std::move(ctis[i].descSets),
 			}
 		);
 	}
 
 	// 終了
-	for (auto &n: cdis) {
-		n.destroy(device);
+	for (auto &n: ctis) {
+		device.destroyShaderModule(n.fragmentShader);
+		device.destroyShaderModule(n.vertexShader);
 	}
 }
 
 void initialize(
 	const config::Config &config,
-	const std::unordered_map<std::string, uint32_t> &subpassMap,
 	const vk::Device &device,
 	const vk::CommandPool &commandPool,
 	const vk::RenderPass &renderPass
@@ -170,7 +354,7 @@ void initialize(
 		return;
 	}
 	createDescriptorPool(config, device);
-	createPipelines(config, subpassMap, device, renderPass);
+	createPipelines(config, device, renderPass);
 
 	image::initialize(device, commandPool);
 }

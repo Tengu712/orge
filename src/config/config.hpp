@@ -3,6 +3,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -108,6 +109,9 @@ struct Config {
 	std::vector<AttachmentConfig> attachments;
 	std::vector<SubpassConfig> subpasses;
 	std::vector<PipelineConfig> pipelines;
+
+	std::unordered_map<std::string, uint32_t> attachmentMap;
+	std::unordered_map<std::string, uint32_t> subpassMap;
 
 	Config(const YAML::Node &node);
 };
