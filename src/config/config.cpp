@@ -99,8 +99,8 @@ InputLayout parseInputLayout(const std::string& s) {
 }
 
 DescriptorType parseDescriptorType(const std::string& s) {
-	return s == "image"
-		? DescriptorType::Image
+	return s == "texture"
+		? DescriptorType::Texture
 		: s == "sampler"
 		? DescriptorType::Sampler
 		: s == "uniform-buffer"
@@ -180,8 +180,8 @@ DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
 	if (type == DescriptorType::InputAttachment && attachment == "") {
 		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
 	}
-	if (attachment != "" && type != DescriptorType::InputAttachment && type != DescriptorType::Image) {
-		throw "config error: 'type' must be 'input-attachment' or 'image' if 'attachment' is defined.";
+	if (attachment != "" && type != DescriptorType::InputAttachment && type != DescriptorType::Texture) {
+		throw "config error: 'type' must be 'input-attachment' or 'texture' if 'attachment' is defined.";
 	}
 }
 

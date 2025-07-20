@@ -100,7 +100,7 @@ pipelines: []
         bindings: []
             # ディスクリプタの種類
             # 取りうる値は以下:
-            #   - image
+            #   - texture
             #   - sampler
             #   - uniform-buffer
             #   - storage-buffer

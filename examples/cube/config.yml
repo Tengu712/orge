@@ -33,7 +33,7 @@ pipelines:
             stage: vertex
       - count: 1
         bindings:
-          - type: image
+          - type: texture
             stage: fragment
           - type: sampler
             stage: fragment
