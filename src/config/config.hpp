@@ -15,11 +15,6 @@ enum class Format: uint8_t {
 	ShareColorAttachment,
 };
 
-enum class InputLayout: uint8_t {
-	DepthStencilReadOnly,
-	ShaderReadOnly,
-};
-
 enum class DescriptorType: uint8_t {
 	Texture,
 	Sampler,
@@ -44,13 +39,6 @@ struct AttachmentConfig {
 	AttachmentConfig(const YAML::Node &node);
 };
 
-struct SubpassInputConfig {
-	std::string id;
-	InputLayout layout;
-
-	SubpassInputConfig(const YAML::Node &node);
-};
-
 struct SubpassDepthConfig {
 	std::string id;
 	bool readOnly;
@@ -60,7 +48,7 @@ struct SubpassDepthConfig {
 
 struct SubpassConfig {
 	std::string id;
-	std::vector<SubpassInputConfig> inputs;
+	std::vector<std::string> inputs;
 	std::vector<std::string> outputs;
 	std::optional<SubpassDepthConfig> depth;
 	std::vector<std::string> depends;

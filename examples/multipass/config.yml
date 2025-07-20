@@ -17,11 +17,7 @@ subpasses:
   - id: pattern-sp
     outputs: [pattern-rt]
   - id: integration-sp
-    inputs:
-      - id: mesh-rt
-        layout: shader-read-only
-      - id: pattern-rt
-        layout: shader-read-only
+    inputs: [mesh-rt, pattern-rt]
     outputs: [RT]
     depends: [mesh-sp, pattern-sp]
 pipelines:

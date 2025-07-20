@@ -80,14 +80,6 @@ Format parseFormat(const std::string& s) {
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 
-InputLayout parseInputLayout(const std::string& s) {
-	return s == "depth-stencil-read-only"
-		? InputLayout::DepthStencilReadOnly
-		: s == "shader-read-only"
-		? InputLayout::ShaderReadOnly
-		: throw std::format("config error: layout '{}' is invalid.", s);
-}
-
 DescriptorType parseDescriptorType(const std::string& s) {
 	return s == "texture"
 		? DescriptorType::Texture
@@ -125,13 +117,6 @@ AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
 	}
 }
 
-SubpassInputConfig::SubpassInputConfig(const YAML::Node &node) {
-	validateKeys(node, {"id", "layout"}, {});
-
-	id = s(node, "id");
-	layout = parseInputLayout(s(node, "layout"));
-}
-
 SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node) {
 	validateKeys(node, {"id", "read-only"}, {});
 
@@ -143,11 +128,12 @@ SubpassConfig::SubpassConfig(const YAML::Node &node) {
 	validateKeys(node, {"id", "outputs"}, {"inputs", "depth", "depends"});
 
 	id = s(node, "id");
-	outputs = ss(node, "outputs");
 
-	for (const auto &n: node["inputs"]) {
-		inputs.emplace_back(n);
+	if (node["inputs"]) {
+		inputs = ss(node, "inputs");
 	}
+
+	outputs = ss(node, "outputs");
 
 	if (node["depth"]) {
 		depth = SubpassDepthConfig(node["depth"]);

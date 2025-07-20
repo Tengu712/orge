@@ -48,16 +48,9 @@ attachments: []
 subpasses: []
   - id: string
 
-    # 入力となるアタッチメントの配列
+    # 入力となるアタッチメントのIDの配列
     # 省略可能
-    inputs: []
-      - id: string
-
-        # そのアタッチメントの処理中のレイアウト
-        # 取りうる値は以下:
-        #   - depth-stencil-read-only
-        #   - shader-read-only
-        layout: string
+    inputs: string[]
 
     # 出力となるカラーアタッチメントのIDの配列
     outputs: string[]
@@ -68,10 +61,10 @@ subpasses: []
         id: string
         read-only: bool
 
-    # 依存するサブパスIDの配列
+    # 依存するサブパスのIDの配列
     # 既に定義されているサブパスのIDであること
     # 省略可能
-    depends: []
+    depends: string[]
 
 # ========== Pipeline Definition =============== #
 
