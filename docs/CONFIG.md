@@ -118,6 +118,10 @@ pipelines: []
             #   - vertex-and-fragment
             stage: string
 
+            # バインドするアタッチメントのID
+            # 省略可能
+            attachment: string
+
     # 各頂点入力属性のサイズの配列
     # 各値は1から4まで
     vertex-input-attributes: uint[]
