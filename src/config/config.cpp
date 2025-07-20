@@ -180,6 +180,9 @@ DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
 	if (type == DescriptorType::InputAttachment && attachment == "") {
 		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
 	}
+	if (attachment != "" && type != DescriptorType::InputAttachment && type != DescriptorType::Image) {
+		throw "config error: 'type' must be 'input-attachment' or 'image' if 'attachment' is defined.";
+	}
 }
 
 DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {

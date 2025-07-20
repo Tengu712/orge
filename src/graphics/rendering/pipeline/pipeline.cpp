@@ -337,7 +337,7 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 				const auto isTexture = n.descSets[i].bindings[j].type == config::DescriptorType::Image;
 				const auto isAttachment = n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment;
 				if (!isTexture && !isAttachment) {
-					continue;
+					throw;
 				}
 				cti.inputs.emplace_back(
 					config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
