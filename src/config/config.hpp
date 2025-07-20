@@ -15,12 +15,6 @@ enum class Format: uint8_t {
 	ShareColorAttachment,
 };
 
-enum class FinalLayout: uint8_t {
-	ShaderReadOnly,
-	DepthStencilAttachment,
-	PresentSrc,
-};
-
 enum class InputLayout: uint8_t {
 	DepthStencilReadOnly,
 	ShaderReadOnly,
@@ -44,7 +38,6 @@ struct AttachmentConfig {
 	std::string id;
 	Format format;
 	bool discard;
-	FinalLayout finalLayout;
 	std::optional<std::array<float, 4>> colorClearValue;
 	std::optional<float> depthClearValue;
 

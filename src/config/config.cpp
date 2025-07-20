@@ -80,16 +80,6 @@ Format parseFormat(const std::string& s) {
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 
-FinalLayout parseFinalLayout(const std::string& s) {
-	return s == "shader-read-only"
-		? FinalLayout::ShaderReadOnly
-		: s == "depth-stencil-attachment"
-		? FinalLayout::DepthStencilAttachment
-		: s == "present-src"
-		? FinalLayout::PresentSrc
-		: throw std::format("config error: final-layout '{}' is invalid.", s);
-}
-
 InputLayout parseInputLayout(const std::string& s) {
 	return s == "depth-stencil-read-only"
 		? InputLayout::DepthStencilReadOnly
@@ -123,12 +113,11 @@ ShaderStages parseShaderStages(const std::string& s) {
 }
 
 AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
-	validateKeys(node, {"id", "format", "final-layout", "clear-value"}, {"discard"});
+	validateKeys(node, {"id", "format", "clear-value"}, {"discard"});
 
 	id = s(node, "id");
 	format = parseFormat(s(node, "format"));
 	discard = b(node, "discard", false);
-	finalLayout = parseFinalLayout(s(node, "final-layout"));
 	if (node["clear-value"].IsSequence()) {
 		colorClearValue = get<std::array<float, 4>>(node, "clear-value", "float[4]");
 	} else {

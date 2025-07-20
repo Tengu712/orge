@@ -4,7 +4,6 @@ height: 480
 attachments:
   - id: RT
     format: render-target
-    final-layout: present-src
     clear-value: [0.25, 0.25, 0.25, 1.0]
 subpasses:
   - id: SP

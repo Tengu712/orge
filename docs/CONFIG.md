@@ -39,13 +39,6 @@ attachments: []
     # 省略された場合、falseとみなされる
     discard: bool
 
-    # レンダーパス終了時に変換されるアタッチメントのレイアウト
-    # 取りうる値は以下:
-    #   - shader-read-only
-    #   - depth-stencil-attachment
-    #   - present-src
-    final-layout: string
-
     # アタッチメントのクリア値
     # カラーアタッチメントであればfloat[4]を、深度アタッチメントであればfloatを指定する
     clear-value: float[4] | float
