@@ -4,11 +4,9 @@ height: 480
 attachments:
   - id: RT
     format: render-target
-    final-layout: present-src
     clear-value: [0.0, 0.0, 0.0, 1.0]
   - id: DB
     format: depth-buffer
-    final-layout: depth-stencil-attachment
     clear-value: 1.0
 subpasses:
   - id: SP

@@ -85,12 +85,12 @@ void createRenderPass(const config::Config &config, const vk::Device &device) {
 			vk::AttachmentLoadOp::eDontCare,
 			vk::AttachmentStoreOp::eDontCare,
 			vk::ImageLayout::eUndefined,
-			n.finalLayout == config::FinalLayout::ShaderReadOnly
-				? vk::ImageLayout::eShaderReadOnlyOptimal
-				: n.finalLayout == config::FinalLayout::DepthStencilAttachment
-				? vk::ImageLayout::eDepthStencilAttachmentOptimal
-				: n.finalLayout == config::FinalLayout::PresentSrc
+			n.format == config::Format::RenderTarget
 				? vk::ImageLayout::ePresentSrcKHR
+				: n.format == config::Format::DepthBuffer
+				? vk::ImageLayout::eDepthStencilAttachmentOptimal
+				: n.format == config::Format::ShareColorAttachment
+				? vk::ImageLayout::eShaderReadOnlyOptimal
 				: throw
 		);
 	}
@@ -104,13 +104,15 @@ void createRenderPass(const config::Config &config, const vk::Device &device) {
 	for (const auto &n: config.subpasses) {
 		std::vector<vk::AttachmentReference> inputs;
 		for (const auto &m: n.inputs) {
+			const auto index = config.attachmentMap.at(m);
+			const auto &attachment = config.attachments.at(index);
 			inputs.emplace_back(
-				config.attachmentMap.at(m.id),
-				m.layout == config::InputLayout::DepthStencilReadOnly
+				index,
+				attachment.format == config::Format::DepthBuffer
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-					: m.layout == config::InputLayout::ShaderReadOnly
+					: attachment.format == config::Format::ShareColorAttachment
 					? vk::ImageLayout::eShaderReadOnlyOptimal
-					: throw
+					: throw "the attachment format of a subpass input must be 'depth-buffer' or 'share-color-attachment'."
 			);
 		}
 		inputss.push_back(std::move(inputs));

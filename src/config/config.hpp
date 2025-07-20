@@ -15,17 +15,6 @@ enum class Format: uint8_t {
 	ShareColorAttachment,
 };
 
-enum class FinalLayout: uint8_t {
-	ShaderReadOnly,
-	DepthStencilAttachment,
-	PresentSrc,
-};
-
-enum class InputLayout: uint8_t {
-	DepthStencilReadOnly,
-	ShaderReadOnly,
-};
-
 enum class DescriptorType: uint8_t {
 	Texture,
 	Sampler,
@@ -37,25 +26,17 @@ enum class DescriptorType: uint8_t {
 enum class ShaderStages: uint8_t {
 	Vertex,
 	Fragment,
-	VertexAndFragment
+	VertexAndFragment,
 };
 
 struct AttachmentConfig {
 	std::string id;
 	Format format;
 	bool discard;
-	FinalLayout finalLayout;
 	std::optional<std::array<float, 4>> colorClearValue;
 	std::optional<float> depthClearValue;
 
 	AttachmentConfig(const YAML::Node &node);
-};
-
-struct SubpassInputConfig {
-	std::string id;
-	InputLayout layout;
-
-	SubpassInputConfig(const YAML::Node &node);
 };
 
 struct SubpassDepthConfig {
@@ -67,7 +48,7 @@ struct SubpassDepthConfig {
 
 struct SubpassConfig {
 	std::string id;
-	std::vector<SubpassInputConfig> inputs;
+	std::vector<std::string> inputs;
 	std::vector<std::string> outputs;
 	std::optional<SubpassDepthConfig> depth;
 	std::vector<std::string> depends;
