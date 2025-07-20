@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 #include <orge.h>
 #include <vector>
@@ -64,16 +65,29 @@ int main() {
 		SQUARE_INDICES.data())
 	);
 
-	TRY(orgeCreateBuffer("time", static_cast<uint64_t>(sizeof(float)), false));
-	TRY(orgeUpdateBufferDescriptor("time", "pattern-pl", 0, 0, 0));
+	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
+	TRY(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0));
 
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
 	TRY(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2));
 
-	float time = 0.0f;
+	std::array<float, 16> transform{
+		0.7f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.7f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+	};
 	while (orgeUpdate()) {
-		time += 0.025f;
-		TRY(orgeUpdateBuffer("time", &time));
+		const auto l = orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_LEFT))  > 0;
+		const auto r = orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_RIGHT)) > 0;
+		const auto u = orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_UP))    > 0;
+		const auto d = orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_DOWN))  > 0;
+		const auto lr = static_cast<int>(r) - static_cast<int>(l);
+		const auto ud = static_cast<int>(d) - static_cast<int>(u);
+		const auto k = lr * lr > 0 && ud * ud > 0 ? 0.7071f : 1.0f;
+		transform[12] += lr * k * 0.01f;
+		transform[13] += ud * k * 0.01f;
+		TRY(orgeUpdateBuffer("transform", transform.data()));
 
 		TRY(orgeBeginRender());
 		TRY(orgeDraw("mesh-pl", "triangle", 1, 0));

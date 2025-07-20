@@ -9,7 +9,7 @@ attachments:
   - id: pattern-rt
     format: share-color-attachment
     final-layout: shader-read-only
-    clear-value: [0.0, 0.0, 0.0, 1.0]
+    clear-value: [0.5, 0.5, 0.0, 0.0]
   - id: RT
     format: render-target
     final-layout: present-src
@@ -35,18 +35,18 @@ pipelines:
     color-blends: [false]
     subpass: mesh-sp
   - id: pattern-pl
-    vertex-shader: screen.vert.spv
+    vertex-shader: pattern.vert.spv
     fragment-shader: pattern.frag.spv
     desc-sets:
       - count: 1
         bindings:
           - type: uniform-buffer
-            stage: fragment
+            stage: vertex
     vertex-input-attributes: [3, 2]
     color-blends: [false]
     subpass: pattern-sp
   - id: integration-pl
-    vertex-shader: screen.vert.spv
+    vertex-shader: integration.vert.spv
     fragment-shader: integration.frag.spv
     desc-sets:
       - count: 1

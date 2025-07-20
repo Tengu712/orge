@@ -1,14 +1,12 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Time { float time; } time;
-
 layout(location = 0) in vec2 bridgeUV;
 
 layout(location = 0) out vec4 outColor;
 
 void main() {
 	const float R = 0.4;
-	const float D = 0.1;
+	const float D = 0.025;
 
 	vec2 pos = bridgeUV - 0.5;
 	float dis = length(pos);
