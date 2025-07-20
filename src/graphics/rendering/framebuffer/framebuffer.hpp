@@ -28,6 +28,6 @@ const std::vector<vk::ClearValue> &getClearValues();
 
 const vk::Framebuffer &getFramebuffer(uint32_t index);
 
-const Attachment &getAttachment(uint32_t swapchainImageIndex, uint32_t attachmentIndex);
+const Attachment &getAttachment(uint32_t attachmentIndex, uint32_t swapchainImageIndex);
 
 } // namespace graphics::rendering::framebuffer

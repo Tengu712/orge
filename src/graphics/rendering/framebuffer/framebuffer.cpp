@@ -173,8 +173,8 @@ const vk::Framebuffer &getFramebuffer(uint32_t index) {
 	return g_framebuffers.at(index);
 }
 
-const Attachment &getAttachment(uint32_t swapchainImageIndex, uint32_t attachmentIndex) {
-	return g_attachments.at(swapchainImageIndex).at(attachmentIndex);
+const Attachment &getAttachment(uint32_t attachmentIndex, uint32_t swapchainImageIndex) {
+	return g_attachments.at(attachmentIndex).at(swapchainImageIndex);
 }
 
 } // namespace graphics::rendering::framebuffer

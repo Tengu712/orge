@@ -409,7 +409,7 @@ void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint
 	// NOTE: アタッチメントはスワップチェーンイメージの枚数分作られるため、
 	//       レンダーパスコマンドごとに更新しなければならない。
 	for (const auto &n: pipeline.inputs) {
-		const auto &attachment = framebuffer::getAttachment(index, n.id);
+		const auto &attachment = framebuffer::getAttachment(n.id, index);
 		const auto ii = vk::DescriptorImageInfo(nullptr, attachment.view, vk::ImageLayout::eShaderReadOnlyOptimal);
 		const auto &descSets = pipeline.descSets.at(n.set);
 		std::vector<vk::WriteDescriptorSet> wdss;
