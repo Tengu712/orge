@@ -26,7 +26,7 @@ enum class DescriptorType: uint8_t {
 enum class ShaderStages: uint8_t {
 	Vertex,
 	Fragment,
-	VertexAndFragment
+	VertexAndFragment,
 };
 
 struct AttachmentConfig {
