@@ -4,11 +4,11 @@ height: 480
 attachments:
   - id: mesh-rt
     format: share-color-attachment
-    final-layout: color-attachment
+    final-layout: shader-read-only
     clear-value: [0.0, 0.0, 0.0, 1.0]
   - id: pattern-rt
     format: share-color-attachment
-    final-layout: color-attachment
+    final-layout: shader-read-only
     clear-value: [0.0, 0.0, 0.0, 1.0]
   - id: RT
     format: render-target

@@ -85,8 +85,8 @@ void createRenderPass(const config::Config &config, const vk::Device &device) {
 			vk::AttachmentLoadOp::eDontCare,
 			vk::AttachmentStoreOp::eDontCare,
 			vk::ImageLayout::eUndefined,
-			n.finalLayout == config::FinalLayout::ColorAttachment
-				? vk::ImageLayout::eColorAttachmentOptimal
+			n.finalLayout == config::FinalLayout::ShaderReadOnly
+				? vk::ImageLayout::eShaderReadOnlyOptimal
 				: n.finalLayout == config::FinalLayout::DepthStencilAttachment
 				? vk::ImageLayout::eDepthStencilAttachmentOptimal
 				: n.finalLayout == config::FinalLayout::PresentSrc

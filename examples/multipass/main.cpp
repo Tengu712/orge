@@ -68,6 +68,7 @@ int main() {
 	TRY(orgeUpdateBufferDescriptor("time", "pattern-pl", 0, 0, 0));
 
 	float time = 0.0f;
+	while (orgeUpdate()) {
 		time += 0.025f;
 		TRY(orgeUpdateBuffer("time", &time));
 
@@ -80,6 +81,7 @@ int main() {
 		TRY(orgeBindDescriptorSets("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
 		TRY(orgeDraw("integration-pl", "square", 1, 0));
 		TRY(orgeEndRender());
+	}
 
 	orgeTerminate();
 	return 0;

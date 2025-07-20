@@ -41,7 +41,7 @@ attachments: []
 
     # レンダーパス終了時に変換されるアタッチメントのレイアウト
     # 取りうる値は以下:
-    #   - color-attachment
+    #   - shader-read-only
     #   - depth-stencil-attachment
     #   - present-src
     final-layout: string

@@ -81,8 +81,8 @@ Format parseFormat(const std::string& s) {
 }
 
 FinalLayout parseFinalLayout(const std::string& s) {
-	return s == "color-attachment"
-		? FinalLayout::ColorAttachment
+	return s == "shader-read-only"
+		? FinalLayout::ShaderReadOnly
 		: s == "depth-stencil-attachment"
 		? FinalLayout::DepthStencilAttachment
 		: s == "present-src"

@@ -16,6 +16,12 @@ struct InputAttachment {
 	const uint32_t id;
 	const uint32_t set;
 	const uint32_t binding;
+	const bool isTexture;
+
+	InputAttachment() = delete;
+	InputAttachment(uint32_t id, uint32_t set, uint32_t binding, bool isTexture):
+		id(id), set(set), binding(binding), isTexture(isTexture)
+	{}
 };
 
 struct PipelineCreateTemporaryInfos {
@@ -325,12 +331,14 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 		// インプットアタッチメント
 		for (size_t i = 0; i < n.descSets.size(); ++i) {
 			for (size_t j = 0; j < n.descSets[i].bindings.size(); ++j) {
-				if (n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment) {
-					cti.inputs.push_back(InputAttachment {
+				const auto isAttachment = n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment;
+				if (isAttachment) {
+					cti.inputs.emplace_back(
 						config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
 						static_cast<uint32_t>(i),
 						static_cast<uint32_t>(j),
-					});
+						!isAttachment
+					);
 				}
 			}
 		}
@@ -411,7 +419,7 @@ void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint
 					.setDstSet(descSets.at(i))
 					.setDstBinding(n.binding)
 					.setDescriptorCount(1)
-					.setDescriptorType(vk::DescriptorType::eSampledImage)
+					.setDescriptorType(n.isTexture ? vk::DescriptorType::eSampledImage : vk::DescriptorType::eInputAttachment)
 					.setImageInfo(ii)
 			);
 		}

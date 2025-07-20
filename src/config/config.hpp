@@ -16,7 +16,7 @@ enum class Format: uint8_t {
 };
 
 enum class FinalLayout: uint8_t {
-	ColorAttachment,
+	ShaderReadOnly,
 	DepthStencilAttachment,
 	PresentSrc,
 };
