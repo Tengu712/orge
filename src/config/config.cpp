@@ -54,8 +54,8 @@ uint32_t u(const YAML::Node &n, const std::string &k, std::optional<bool> d = st
 	return get<uint32_t>(n, k, "unsigned int", d);
 }
 
-std::string s(const YAML::Node &n, const std::string &k) {
-	return get<std::string>(n, k, "string");
+std::string s(const YAML::Node &n, const std::string &k, std::optional<std::string> d = std::nullopt) {
+	return get<std::string>(n, k, "string", d);
 }
 
 std::vector<bool> bs(const YAML::Node &n, const std::string &k) {
@@ -75,12 +75,14 @@ Format parseFormat(const std::string& s) {
 		? Format::RenderTarget
 		: s == "depth-buffer"
 		? Format::DepthBuffer
+		: s == "share-color-attachment"
+		? Format::ShareColorAttachment
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 
 FinalLayout parseFinalLayout(const std::string& s) {
-	return s == "color-attachment"
-		? FinalLayout::ColorAttachment
+	return s == "shader-read-only"
+		? FinalLayout::ShaderReadOnly
 		: s == "depth-stencil-attachment"
 		? FinalLayout::DepthStencilAttachment
 		: s == "present-src"
@@ -168,11 +170,19 @@ SubpassConfig::SubpassConfig(const YAML::Node &node) {
 }
 
 DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
-	validateKeys(node, {"type", "stage"}, {"count"});
+	validateKeys(node, {"type", "stage"}, {"count", "attachment"});
 
 	type = parseDescriptorType(s(node, "type"));
 	count = u(node, "count", 1);
 	stage = parseShaderStages(s(node, "stage"));
+	attachment = s(node, "attachment", "");
+
+	if (type == DescriptorType::InputAttachment && attachment == "") {
+		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
+	}
+	if (attachment != "" && type != DescriptorType::InputAttachment && type != DescriptorType::Image) {
+		throw "config error: 'type' must be 'input-attachment' or 'image' if 'attachment' is defined.";
+	}
 }
 
 DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {

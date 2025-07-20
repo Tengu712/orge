@@ -15,7 +15,7 @@ void initialize(
 	const vk::RenderPass &renderPass
 );
 
-void bind(const vk::CommandBuffer &commandBuffer, const char *pipeline);
+void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint32_t index, const char *id);
 
 void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices);
 

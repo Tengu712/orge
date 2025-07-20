@@ -5,13 +5,6 @@
 
 namespace graphics::rendering::framebuffer {
 
-struct Attachment {
-	const bool isRenderTarget;
-	const vk::Image image;
-	const vk::ImageView view;
-	const vk::DeviceMemory memory;
-};
-
 std::vector<std::vector<Attachment>> g_attachments;
 std::vector<vk::ClearValue> g_clearValues;
 std::vector<vk::Framebuffer> g_framebuffers;
@@ -40,12 +33,18 @@ vk::Format convertFormat(const config::Format &format) {
 		? platformRenderTargetPixelFormat()
 		: format == config::Format::DepthBuffer
 		? vk::Format::eD32Sfloat
+		: format == config::Format::ShareColorAttachment
+		? platformRenderTargetPixelFormat()
 		: throw;
 }
 
 vk::ImageUsageFlags convertUsage(const config::Format &format) {
 	return format == config::Format::DepthBuffer
 		? vk::ImageUsageFlagBits::eDepthStencilAttachment
+		: format == config::Format::ShareColorAttachment
+		? vk::ImageUsageFlagBits::eColorAttachment
+			| vk::ImageUsageFlagBits::eInputAttachment
+			| vk::ImageUsageFlagBits::eSampled
 		: throw;
 }
 
@@ -54,6 +53,8 @@ vk::ImageAspectFlags convertAspect(const config::Format &format) {
 		? vk::ImageAspectFlagBits::eColor
 		: format == config::Format::DepthBuffer
 		? vk::ImageAspectFlagBits::eDepth
+		: format == config::Format::ShareColorAttachment
+		? vk::ImageAspectFlagBits::eColor
 		: throw;
 }
 
@@ -170,6 +171,10 @@ const std::vector<vk::ClearValue> &getClearValues() {
 
 const vk::Framebuffer &getFramebuffer(uint32_t index) {
 	return g_framebuffers.at(index);
+}
+
+const Attachment &getAttachment(uint32_t attachmentIndex, uint32_t swapchainImageIndex) {
+	return g_attachments.at(attachmentIndex).at(swapchainImageIndex);
 }
 
 } // namespace graphics::rendering::framebuffer

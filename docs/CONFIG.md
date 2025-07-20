@@ -32,6 +32,7 @@ attachments: []
     # 取りうる値は以下:
     #   - render-target
     #   - depth-buffer
+    #   - share-color-attachment
     format: string
 
     # レンダーパス終了時にアタッチメントの内容を破棄するか
@@ -40,7 +41,7 @@ attachments: []
 
     # レンダーパス終了時に変換されるアタッチメントのレイアウト
     # 取りうる値は以下:
-    #   - color-attachment
+    #   - shader-read-only
     #   - depth-stencil-attachment
     #   - present-src
     final-layout: string
@@ -116,6 +117,10 @@ pipelines: []
             #   - fragment
             #   - vertex-and-fragment
             stage: string
+
+            # バインドするアタッチメントのID
+            # 省略可能
+            attachment: string
 
     # 各頂点入力属性のサイズの配列
     # 各値は1から4まで

@@ -12,10 +12,11 @@ namespace config {
 enum class Format: uint8_t {
 	RenderTarget,
 	DepthBuffer,
+	ShareColorAttachment,
 };
 
 enum class FinalLayout: uint8_t {
-	ColorAttachment,
+	ShaderReadOnly,
 	DepthStencilAttachment,
 	PresentSrc,
 };
@@ -78,6 +79,7 @@ struct DescriptorBindingConfig {
 	DescriptorType type;
 	uint32_t count;
 	ShaderStages stage;
+	std::string attachment;
 
 	DescriptorBindingConfig(const YAML::Node &node);
 };
