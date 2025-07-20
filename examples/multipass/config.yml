@@ -51,12 +51,14 @@ pipelines:
     desc-sets:
       - count: 1
         bindings:
-          - type: input-attachment
+          - type: image
             stage: fragment
             attachment: mesh-rt
           - type: input-attachment
             stage: fragment
             attachment: pattern-rt
+          - type: sampler
+            stage: fragment
     vertex-input-attributes: [3, 2]
     color-blends: [false]
     subpass: integration-sp

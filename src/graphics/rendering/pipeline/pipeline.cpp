@@ -331,15 +331,20 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 		// インプットアタッチメント
 		for (size_t i = 0; i < n.descSets.size(); ++i) {
 			for (size_t j = 0; j < n.descSets[i].bindings.size(); ++j) {
-				const auto isAttachment = n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment;
-				if (isAttachment) {
-					cti.inputs.emplace_back(
-						config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
-						static_cast<uint32_t>(i),
-						static_cast<uint32_t>(j),
-						!isAttachment
-					);
+				if (n.descSets[i].bindings[j].attachment == "") {
+					continue;
 				}
+				const auto isTexture = n.descSets[i].bindings[j].type == config::DescriptorType::Image;
+				const auto isAttachment = n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment;
+				if (!isTexture && !isAttachment) {
+					continue;
+				}
+				cti.inputs.emplace_back(
+					config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
+					static_cast<uint32_t>(i),
+					static_cast<uint32_t>(j),
+					isTexture
+				);
 			}
 		}
 

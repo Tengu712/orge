@@ -67,6 +67,9 @@ int main() {
 	TRY(orgeCreateBuffer("time", static_cast<uint64_t>(sizeof(float)), false));
 	TRY(orgeUpdateBufferDescriptor("time", "pattern-pl", 0, 0, 0));
 
+	TRY(orgeCreateSampler("sampler", 0, 0, 0));
+	TRY(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2));
+
 	float time = 0.0f;
 	while (orgeUpdate()) {
 		time += 0.025f;
