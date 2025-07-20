@@ -123,7 +123,7 @@ void createDescriptorPool(const config::Config &config, const vk::Device &device
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	for (const auto &[k, v]: sizesMap) {
 		poolSizes.emplace_back(
-			k == config::DescriptorType::Image
+			k == config::DescriptorType::Texture
 				? vk::DescriptorType::eSampledImage
 				: k == config::DescriptorType::Sampler
 				? vk::DescriptorType::eSampler
@@ -278,7 +278,7 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 			for (const auto &o: m.bindings) {
 				bindings.emplace_back(
 					static_cast<uint32_t>(bindings.size()),
-					o.type == config::DescriptorType::Image
+					o.type == config::DescriptorType::Texture
 						? vk::DescriptorType::eSampledImage
 						: o.type == config::DescriptorType::Sampler
 						? vk::DescriptorType::eSampler
@@ -334,7 +334,7 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 				if (n.descSets[i].bindings[j].attachment == "") {
 					continue;
 				}
-				const auto isTexture = n.descSets[i].bindings[j].type == config::DescriptorType::Image;
+				const auto isTexture = n.descSets[i].bindings[j].type == config::DescriptorType::Texture;
 				const auto isAttachment = n.descSets[i].bindings[j].type == config::DescriptorType::InputAttachment;
 				if (!isTexture && !isAttachment) {
 					throw;

@@ -51,7 +51,7 @@ pipelines:
     desc-sets:
       - count: 1
         bindings:
-          - type: image
+          - type: texture
             stage: fragment
             attachment: mesh-rt
           - type: input-attachment
