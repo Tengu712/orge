@@ -34,4 +34,6 @@ uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &se
 /// プレゼンテーションが完了するまでスレッドを待機する。
 void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
 
+void toggleFullscreen();
+
 } // namespace graphics::rendering::swapchain

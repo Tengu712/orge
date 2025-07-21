@@ -132,4 +132,12 @@ void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32
 	}
 }
 
+void toggleFullscreen() {
+	if (SDL_GetWindowFlags(g_window) & SDL_WINDOW_FULLSCREEN) {
+		SDL_SetWindowFullscreen(g_window, false);
+	} else {
+		SDL_SetWindowFullscreen(g_window, true);
+	}
+}
+
 } // namespace graphics::rendering::swapchain
