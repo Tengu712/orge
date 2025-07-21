@@ -14,6 +14,16 @@ void terminate(const vk::Device &device);
 
 void initialize(const vk::Device &device, const vk::CommandPool &commandPool);
 
+void create(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Queue &queue,
+	const char *id,
+	uint32_t width,
+	uint32_t height,
+	const unsigned char *pixels
+);
+
 void createFromFile(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
