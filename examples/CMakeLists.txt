@@ -20,6 +20,11 @@ if(BUILD_EXAMPLES OR BUILD_EXAMPLE_INPUT)
 	add_subdirectory(input)
 endif()
 
+option(BUILD_EXAMPLE_SAMPLER "examples/samplerをビルドする" OFF)
+if(BUILD_EXAMPLES OR BUILD_EXAMPLE_SAMPLER)
+	add_subdirectory(sampler)
+endif()
+
 option(BUILD_EXAMPLE_MULTIPASS "examples/multipassをビルドする" OFF)
 if(BUILD_EXAMPLES OR BUILD_EXAMPLE_MULTIPASS)
 	add_subdirectory(multipass)

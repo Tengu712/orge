@@ -65,6 +65,12 @@ int orgeUpdateBufferDescriptor(
 	uint32_t offset
 );
 
+/// orgeにイメージを追加する関数 (ビットマップデータ指定)
+///
+/// pixelsはビットマップデータ。
+/// 必ずRGBAで並んでいること。
+int orgeCreateImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels);
+
 /// orgeにイメージを追加する関数 (pngファイル指定)
 ///
 /// - id: イメージID

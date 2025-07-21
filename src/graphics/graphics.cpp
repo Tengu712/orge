@@ -186,6 +186,18 @@ int orgeUpdateBufferDescriptor(
 	));
 }
 
+int orgeCreateImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
+	TRY(graphics::rendering::pipeline::image::create(
+		graphics::g_physicalDevice.getMemoryProperties(),
+		graphics::g_device,
+		graphics::g_queue,
+		id,
+		width,
+		height,
+		pixels
+	));
+}
+
 int orgeCreateImageFromFile(const char *id, const char *path) {
 	TRY(graphics::rendering::pipeline::image::createFromFile(
 		graphics::g_physicalDevice.getMemoryProperties(),
