@@ -99,18 +99,18 @@ int main() {
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
 	TRY(orgeUpdateBuffer("camera", &CAMERA));
-	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0));
+	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
 
 	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0));
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
 	TRY(orgeUpdateBuffer("scl", SCL.data()));
-	TRY(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0));
-	TRY(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1));
+	TRY(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
+	TRY(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1, 0));
 
 	TRY(orgeCreateImageFromFile("image", "image.png"));
-	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0));
+	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0, 0));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
-	TRY(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1));
+	TRY(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1, 0));
 
 	float ang = 0.0f;
 	while (orgeUpdate()) {

@@ -457,13 +457,15 @@ void updateBufferDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	const auto &buffer = buffer::get(bufferId);
 	const auto bi = vk::DescriptorBufferInfo(buffer.buffer, 0, vk::WholeSize);
 	const auto ds = vk::WriteDescriptorSet()
 		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
 		.setDstBinding(binding)
+		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
 		.setDescriptorType(buffer.isStorage ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
 		.setBufferInfo(bi);
@@ -476,13 +478,15 @@ void updateImageDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	const auto &image = image::get(imageId);
 	const auto ii = vk::DescriptorImageInfo(nullptr, image.view, vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
 		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
 		.setDstBinding(binding)
+		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
 		.setDescriptorType(vk::DescriptorType::eSampledImage)
 		.setImageInfo(ii);
@@ -495,13 +499,15 @@ void updateSamplerDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	const auto &sampler = sampler::get(samplerId);
 	const auto ii = vk::DescriptorImageInfo(sampler, nullptr, vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
 		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
 		.setDstBinding(binding)
+		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
 		.setDescriptorType(vk::DescriptorType::eSampler)
 		.setImageInfo(ii);

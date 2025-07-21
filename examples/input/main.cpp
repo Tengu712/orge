@@ -34,9 +34,9 @@ int main() {
 	TRY(orgeUpdateBuffer("red",   RED.data()));
 	TRY(orgeUpdateBuffer("green", GREEN.data()));
 	TRY(orgeUpdateBuffer("blue",  BLUE.data()));
-	TRY(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0));
-	TRY(orgeUpdateBufferDescriptor("green", "PL", 0, 1, 0));
-	TRY(orgeUpdateBufferDescriptor("blue",  "PL", 0, 2, 0));
+	TRY(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0, 0));
+	TRY(orgeUpdateBufferDescriptor("green", "PL", 0, 1, 0, 0));
+	TRY(orgeUpdateBufferDescriptor("blue",  "PL", 0, 2, 0, 0));
 
 	uint32_t state = 0;
 	while (orgeUpdate()) {

@@ -25,7 +25,8 @@ void updateBufferDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 void updateImageDescriptor(
@@ -34,7 +35,8 @@ void updateImageDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 void updateSamplerDescriptor(
@@ -43,7 +45,8 @@ void updateSamplerDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 } // namespace graphics::rendering::pipeline

@@ -66,10 +66,10 @@ int main() {
 	);
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
-	TRY(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0));
+	TRY(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0, 0));
 
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
-	TRY(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2));
+	TRY(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2, 0));
 
 	std::array<float, 16> transform{
 		0.7f, 0.0f, 0.0f, 0.0f,

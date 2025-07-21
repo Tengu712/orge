@@ -55,12 +55,14 @@ int orgeUpdateBuffer(const char *id, const void *data);
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 int orgeUpdateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 /// orgeにイメージを追加する関数 (pngファイル指定)
@@ -79,12 +81,14 @@ void orgeDestroyImage(const char *id);
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 int orgeUpdateImageDescriptor(
 	const char *imageId,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 /// orgeにサンプラを追加する関数
@@ -111,12 +115,14 @@ void orgeDestroySampler(const char *id);
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 int orgeUpdateSamplerDescriptor(
 	const char *samplerId,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 );
 
 /// orgeにメッシュを追加する関数

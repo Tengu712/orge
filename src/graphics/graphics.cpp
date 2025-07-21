@@ -172,7 +172,8 @@ int orgeUpdateBufferDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	TRY(graphics::rendering::pipeline::updateBufferDescriptor(
 		graphics::g_device,
@@ -180,7 +181,8 @@ int orgeUpdateBufferDescriptor(
 		pipelineId,
 		set,
 		index,
-		binding
+		binding,
+		offset
 	));
 }
 
@@ -203,7 +205,8 @@ int orgeUpdateImageDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	TRY(graphics::rendering::pipeline::updateImageDescriptor(
 		graphics::g_device,
@@ -211,7 +214,8 @@ int orgeUpdateImageDescriptor(
 		pipelineId,
 		set,
 		index,
-		binding
+		binding,
+		offset
 	));
 }
 
@@ -234,7 +238,8 @@ int orgeUpdateSamplerDescriptor(
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
-	uint32_t binding
+	uint32_t binding,
+	uint32_t offset
 ) {
 	TRY(graphics::rendering::pipeline::updateSamplerDescriptor(
 		graphics::g_device,
@@ -242,7 +247,8 @@ int orgeUpdateSamplerDescriptor(
 		pipelineId,
 		set,
 		index,
-		binding
+		binding,
+		offset
 	));
 }
 
