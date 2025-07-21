@@ -9,6 +9,12 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 
+#ifdef __APPLE__
+# define MODKEY SDL_KMOD_GUI
+#else
+# define MODKEY SDL_KMOD_ALT
+#endif
+
 namespace {
 
 int initialize(config::Config config) {
@@ -43,7 +49,7 @@ int orgeUpdate(void) {
 		if (event.type == SDL_EVENT_QUIT) {
 			return 0;
 		}
-		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & SDL_KMOD_ALT)) {
+		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
 			graphics::rendering::swapchain::toggleFullscreen();
 		}
 	}
