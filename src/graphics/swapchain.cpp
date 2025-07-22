@@ -1,24 +1,10 @@
 #include "swapchain.hpp"
 
-#include "../../platform.hpp"
+#include "platform.hpp"
 
 #include <SDL3/SDL_vulkan.h>
 
-namespace graphics::rendering::swapchain {
-
-std::span<const char *const> getInstanceExtensions() {
-	Uint32 count = 0;
-	const char *const *extensions = SDL_Vulkan_GetInstanceExtensions(&count);
-	if (!extensions || count == 0) {
-		return {};
-	}
-	return std::span(extensions, count);
-}
-
-std::span<const char *const> getDeviceExtensions() {
-	static constexpr const char *EXTENSIONS[] = {"VK_KHR_swapchain"};
-	return std::span(EXTENSIONS);
-}
+namespace graphics {
 
 uint32_t getImageCount(const vk::SurfaceCapabilitiesKHR &caps) {
 	if (caps.maxImageCount < 2) {
@@ -109,4 +95,4 @@ Swapchain::Swapchain(
 	}
 }
 
-} // namespace graphics::rendering::swapchain
+} // namespace graphics

@@ -1,9 +1,9 @@
 #include "framebuffer.hpp"
 
-#include "../../platform.hpp"
-#include "../../utils.hpp"
+#include "platform.hpp"
+#include "utils.hpp"
 
-namespace graphics::rendering::framebuffer {
+namespace graphics {
 
 vk::Format convertFormat(const config::Format &format) {
 	return format == config::Format::RenderTarget
@@ -155,4 +155,4 @@ Framebuffer::Framebuffer(
 	_framebuffer(createFramebuffer(device, renderPass, swapchainImageExtent, _attachments))
 {}
 
-} // namespace graphics::rendering::framebuffer
+} // namespace graphics

@@ -1,15 +1,30 @@
 #pragma once
 
-#include "../../../config/config.hpp"
+#include "../config/config.hpp"
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::rendering::framebuffer {
+namespace graphics {
 
 struct Attachment {
 	const vk::Image image;
 	const vk::ImageView view;
 	const vk::DeviceMemory memory;
+
+	Attachment() = delete;
+	Attachment(const vk::Image &image, const vk::ImageView &view, const vk::DeviceMemory &memory):
+		image(image), view(view), memory(memory)
+	{}
+
+	void destroy(const vk::Device &device) const noexcept {
+		if (memory) {
+			device.freeMemory(memory);
+		}
+		device.destroyImageView(view);
+		if (image) {
+			device.destroyImage(image);
+		}
+	}
 };
 
 class Framebuffer {
@@ -30,16 +45,10 @@ public:
 	);
 
 	void destroy(const vk::Device &device) const noexcept {
-		for (auto &n: _attachments) {
-			if (n.memory) {
-				device.freeMemory(n.memory);
-			}
-			device.destroyImageView(n.view);
-			if (n.image) {
-				device.destroyImage(n.image);
-			}
-		}
 		device.destroy(_framebuffer);
+		for (auto &n: _attachments) {
+			n.destroy(device);
+		}
 	}
 
 	const vk::Framebuffer &get() const noexcept {
@@ -55,4 +64,4 @@ public:
 	}
 };
 
-} // namespace graphics::rendering::framebuffer
+} // namespace graphics

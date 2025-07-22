@@ -1,8 +1,8 @@
-#include "rendering.hpp"
+#include "renderer.hpp"
 
-#include "../platform.hpp"
+#include "platform.hpp"
 
-namespace graphics::rendering {
+namespace graphics {
 
 vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &device) {
 	// アタッチメント
@@ -117,15 +117,15 @@ std::vector<vk::Semaphore> createSemaphores(const vk::Device &device, size_t cou
 	return semaphores;
 }
 
-std::vector<framebuffer::Framebuffer> createFramebuffers(
+std::vector<Framebuffer> createFramebuffers(
 	const config::Config &config,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
-	const std::unique_ptr<swapchain::Swapchain> &swapchain,
+	const std::unique_ptr<Swapchain> &swapchain,
 	const vk::RenderPass &renderPass
 ) {
 	const auto swapchainImages = swapchain->getImages();
-	std::vector<framebuffer::Framebuffer> framebuffers;
+	std::vector<Framebuffer> framebuffers;
 	framebuffers.reserve(swapchainImages.size());
 	for (const auto &n: swapchainImages) {
 		framebuffers.emplace_back(
@@ -147,7 +147,7 @@ Renderer::Renderer(
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) :
-	_swapchain(std::make_unique<swapchain::Swapchain>(
+	_swapchain(std::make_unique<Swapchain>(
 		config.title,
 		config.width,
 		config.height,
@@ -161,11 +161,10 @@ Renderer::Renderer(
 	_semaphoreForImageEnabled(device.createSemaphore({})),
 	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain->getImages().size())),
 	_frameInFlightFence(device.createFence({vk::FenceCreateFlagBits::eSignaled})),
-	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass))
-{
-	// TODO:
-	pipeline::initialize(config, device, commandPool, _renderPass);
-}
+	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass)),
+	_descPool(createDescriptorPool(config, device)),
+	_pipelines(createPipelines(config, device, _renderPass, _descPool))
+{}
 
 void Renderer::beginRender(const vk::Device &device) {
 	// TODO: フレーム情報が残っている場合、前のフレームで描画に失敗したことを意味する。
@@ -242,7 +241,7 @@ void Renderer::toggleFullscreen(
 	_framebuffers.clear();
 	_swapchain->destroy(instance, device);
 
-	_swapchain = std::make_unique<swapchain::Swapchain>(
+	_swapchain = std::make_unique<Swapchain>(
 		config.title,
 		config.width,
 		config.height,

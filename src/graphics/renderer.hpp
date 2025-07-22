@@ -1,14 +1,13 @@
 #pragma once
 
-#include "../../config/config.hpp"
-#include "../mesh/mesh.hpp"
-#include "framebuffer/framebuffer.hpp"
-#include "pipeline/pipeline.hpp"
-#include "swapchain/swapchain.hpp"
+#include "../config/config.hpp"
+#include "descpool.hpp"
+#include "mesh.hpp"
+#include "framebuffer.hpp"
+#include "pipeline.hpp"
+#include "swapchain.hpp"
 
-#include <vulkan/vulkan.hpp>
-
-namespace graphics::rendering {
+namespace graphics {
 
 class Renderer {
 private:
@@ -19,7 +18,7 @@ private:
 		std::string pipelineId;
 	};
 
-	std::unique_ptr<swapchain::Swapchain> _swapchain;
+	std::unique_ptr<Swapchain> _swapchain;
 	const vk::RenderPass _renderPass;
 	/// 描画処理コマンド用のコマンドバッファ
 	/// orgeは描画完了まで待機するので1個で十分
@@ -33,7 +32,9 @@ private:
 	/// フレーム完了を監視するフェンス
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
 	const vk::Fence _frameInFlightFence;
-	std::vector<framebuffer::Framebuffer> _framebuffers;
+	std::vector<Framebuffer> _framebuffers;
+	const vk::DescriptorPool _descPool;
+	std::unordered_map<std::string, Pipeline> _pipelines;
 	std::optional<FrameInfo> _frameInfo;
 
 	void _ensureWhileRendering(const char *emsg) const {
@@ -58,8 +59,12 @@ public:
 	);
 
 	void destroy(const vk::Instance &instance, const vk::Device &device) const {
-		// TODO:
-		pipeline::terminate(device);
+		for (const auto &n: _pipelines) {
+			n.second.destroy(device);
+		}
+		if (_descPool) {
+			device.destroyDescriptorPool(_descPool);
+		}
 		for (const auto &n: _framebuffers) {
 			n.destroy(device);
 		}
@@ -72,29 +77,34 @@ public:
 		_swapchain->destroy(instance, device);
 	}
 
+	const Pipeline &getPipeline(const char *id) const {
+		return _pipelines.at(id);
+	}
+
 	void beginRender(const vk::Device &device);
 
 	void endRender(const vk::Queue &queue);
 
-	void bindMesh(const char *meshId) {
+	void bindMesh(const char *meshId, const Mesh &mesh) {
 		_ensureWhileRendering("try to bind a mesh before starting rendering.");
 		if (meshId != nullptr && meshId != _frameInfo->pipelineId) {
-			_frameInfo->meshIndexCount = mesh::bind(_commandBuffer, meshId);
+			mesh.bind(_commandBuffer);
+			_frameInfo->meshIndexCount = mesh.getIndexCount();
 			_frameInfo->meshId = meshId;
 		}
 	}
 
-	void bindPipeline(const vk::Device &device, const char *pipelineId) {
+	void bindPipeline(const char *pipelineId) {
 		_ensureWhileRendering("try to bind a pipeline before starting rendering.");
 		if (pipelineId != nullptr && pipelineId != _frameInfo->pipelineId) {
-			pipeline::bind(device, _commandBuffer, _framebuffers.at(_frameInfo->index), pipelineId);
+			_pipelines.at(pipelineId).bind(_commandBuffer);
 			_frameInfo->pipelineId = pipelineId;
 		}
 	}
 
-	void bindDescriptorSets(const char *id, uint32_t const *indices) const {
+	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_ensureWhileRendering("try to bind descriptor sets before starting rendering.");
-		pipeline::bindDescriptorSets(_commandBuffer, id, indices);
+		_pipelines.at(pipelineId).bindDescriptorSets(_commandBuffer, indices);
 	}
 
 	void nextSubpass() const {
@@ -115,4 +125,4 @@ public:
 	);
 };
 
-} // namespace graphics::rendering
+} // namespace graphics

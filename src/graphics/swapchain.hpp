@@ -3,7 +3,7 @@
 #include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::rendering::swapchain {
+namespace graphics {
 
 using Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 
@@ -73,4 +73,4 @@ public:
 	}
 };
 
-} // namespace graphics::rendering::swapchain
+} // namespace graphics
