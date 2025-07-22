@@ -7,9 +7,13 @@
 
 namespace graphics::rendering::swapchain {
 
+std::string g_title;
+uint32_t g_width = 0;
+uint32_t g_height = 0;
+SDL_WindowFlags g_fullscreenFlag = static_cast<SDL_WindowFlags>(0);
+
 SDL_Window *g_window;
 vk::SurfaceKHR g_surface;
-vk::Extent2D g_imageSize;
 vk::SwapchainKHR g_swapchain;
 std::vector<vk::Image> g_images;
 
@@ -46,14 +50,9 @@ std::span<const char *const> getDeviceExtensions() {
 	return std::span(EXTENSIONS);
 }
 
-void initialize(
-	const config::Config &config,
-	const vk::Instance &instance,
-	const vk::PhysicalDevice &physicalDevice,
-	const vk::Device &device
-) {
+void create(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
 	// ウィンドウ作成
-	g_window = SDL_CreateWindow(config.title.c_str(), config.width, config.height, SDL_WINDOW_VULKAN);
+	g_window = SDL_CreateWindow(g_title.c_str(), g_width, g_height, SDL_WINDOW_VULKAN | g_fullscreenFlag);
 	if (!g_window) {
 		throw "failed to create a window.";
 	}
@@ -75,9 +74,8 @@ void initialize(
 		throw "the surface color space is invalid.";
 	}
 
-	// イメージサイズ取得
+	// capabilities取得
 	const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(g_surface);
-	g_imageSize = caps.currentExtent;
 
 	// イメージ数取得
 	const auto imageCount = caps.minImageCount > 2 ? caps.minImageCount : 2;
@@ -91,7 +89,7 @@ void initialize(
 		.setMinImageCount(imageCount)
 		.setImageFormat(platformRenderTargetPixelFormat())
 		.setImageColorSpace(platformRenderTargetColorSpace())
-		.setImageExtent(g_imageSize)
+		.setImageExtent(caps.currentExtent)
 		.setImageArrayLayers(1)
 		.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
 		.setImageSharingMode(vk::SharingMode::eExclusive)
@@ -109,12 +107,22 @@ void initialize(
 	g_images.resize(imageCount);
 }
 
-const std::vector<vk::Image> &getImages() {
-	return g_images;
+void initialize(
+	const config::Config &config,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	g_title = config.title;
+	g_width = config.width;
+	g_height = config.height;
+	// TODO: configからフルスクリーンを指定できるように。
+	g_fullscreenFlag = static_cast<SDL_WindowFlags>(0);
+	create(instance, physicalDevice, device);
 }
 
-vk::Extent2D getImageSize() {
-	return g_imageSize;
+const std::vector<vk::Image> &getImages() {
+	return g_images;
 }
 
 uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore) {
@@ -132,12 +140,19 @@ void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32
 	}
 }
 
-void toggleFullscreen() {
+void toggleFullscreen(
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
 	if (SDL_GetWindowFlags(g_window) & SDL_WINDOW_FULLSCREEN) {
-		SDL_SetWindowFullscreen(g_window, false);
+		g_fullscreenFlag = static_cast<SDL_WindowFlags>(0);
 	} else {
-		SDL_SetWindowFullscreen(g_window, true);
+		g_fullscreenFlag = SDL_WINDOW_FULLSCREEN;
 	}
+	device.waitIdle();
+	terminate(instance, device);
+	create(instance, physicalDevice, device);
 }
 
 } // namespace graphics::rendering::swapchain

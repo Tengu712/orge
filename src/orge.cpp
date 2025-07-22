@@ -3,7 +3,6 @@
 #include "config/config.hpp"
 #include "error/error.hpp"
 #include "graphics/graphics.hpp"
-#include "graphics/rendering/swapchain/swapchain.hpp"
 #include "input/input.hpp"
 
 #include <SDL3/SDL.h>
@@ -50,7 +49,7 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
-			graphics::rendering::swapchain::toggleFullscreen();
+			graphics::toggleFullscreen();
 		}
 	}
 	input::update();

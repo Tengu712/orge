@@ -1,8 +1,6 @@
 #include "pipeline.hpp"
 
 // TODO: ちょっと気持ち悪い。
-#include "../swapchain/swapchain.hpp"
-// TODO: ちょっと気持ち悪い。
 #include "../framebuffer/framebuffer.hpp"
 #include "buffer/buffer.hpp"
 #include "image/image.hpp"
@@ -178,11 +176,10 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
 
 	// ビューポート
-	const auto imageSize = swapchain::getImageSize();
 	std::vector<vk::Viewport> viewports;
-	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(imageSize.width), static_cast<float>(imageSize.height), 0.0f, 1.0f);
+	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(config.width), static_cast<float>(config.height), 0.0f, 1.0f);
 	std::vector<vk::Rect2D> scissors;
-	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(imageSize.width, imageSize.height));
+	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(config.width, config.height));
 	const auto vsci = vk::PipelineViewportStateCreateInfo()
 		.setViewports(viewports)
 		.setScissors(scissors);

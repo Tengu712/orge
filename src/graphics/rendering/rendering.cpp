@@ -8,6 +8,8 @@
 
 namespace graphics::rendering {
 
+vk::Extent2D g_extent;
+
 vk::RenderPass g_renderPass;
 // 描画処理コマンド用のコマンドバッファ
 // orgeはプレゼンテーション時に描画完了まで待機するので1個で十分
@@ -188,6 +190,8 @@ void initialize(
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) {
+	g_extent = vk::Extent2D(config.width, config.height);
+
 	swapchain::initialize(config, instance, physicalDevice, device);
 
 	createRenderPass(config, device);
@@ -200,7 +204,7 @@ void initialize(
 		physicalDevice.getMemoryProperties(),
 		device,
 		g_renderPass,
-		swapchain::getImageSize(),
+		g_extent,
 		swapchain::getImages()
 	);
 	pipeline::initialize(config, device, commandPool, g_renderPass);
@@ -232,7 +236,7 @@ void beginRender(const vk::Device &device) {
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(g_renderPass)
 		.setFramebuffer(framebuffer::getFramebuffer(g_index))
-		.setRenderArea(vk::Rect2D({0, 0}, swapchain::getImageSize()))
+		.setRenderArea(vk::Rect2D({0, 0}, g_extent))
 		.setClearValues(framebuffer::getClearValues());
 	g_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }

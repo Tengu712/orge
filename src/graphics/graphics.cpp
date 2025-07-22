@@ -140,6 +140,10 @@ void initialize(const config::Config &config) {
 	rendering::initialize(config, g_instance, g_physicalDevice, g_device, g_commandPool);
 }
 
+void toggleFullscreen() {
+	rendering::swapchain::toggleFullscreen(g_instance, g_physicalDevice, g_device);
+}
+
 } // namespace graphics
 
 #include "../error/error.hpp"

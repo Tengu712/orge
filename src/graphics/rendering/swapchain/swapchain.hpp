@@ -21,8 +21,6 @@ void initialize(
 
 const std::vector<vk::Image> &getImages();
 
-vk::Extent2D getImageSize();
-
 /// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
 ///
 /// イメージの取得が完了したら与えられたセマフォをシグナルする。
@@ -34,6 +32,13 @@ uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &se
 /// プレゼンテーションが完了するまでスレッドを待機する。
 void presentation(const vk::Queue &queue, const vk::Semaphore &semaphore, uint32_t index);
 
-void toggleFullscreen();
+/// フルスクリーンでなければフルスクリーンに、フルスクリーンであればウィンドウにする関数
+///
+/// ウィンドウおよびスワップチェインが再作成される。
+void toggleFullscreen(
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+);
 
 } // namespace graphics::rendering::swapchain
