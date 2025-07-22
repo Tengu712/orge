@@ -94,10 +94,11 @@ public:
 		}
 	}
 
-	void bindPipeline(const char *pipelineId) {
+	void bindPipeline(const vk::Device &device, const char *pipelineId) {
 		_ensureWhileRendering("try to bind a pipeline before starting rendering.");
 		if (pipelineId != nullptr && pipelineId != _frameInfo->pipelineId) {
 			_pipelines.at(pipelineId).bind(_commandBuffer);
+			_pipelines.at(pipelineId).updateInputAttachmentDescriptors(device, _framebuffers.at(_frameInfo->index));
 			_frameInfo->pipelineId = pipelineId;
 		}
 	}

@@ -177,7 +177,7 @@ public:
 	}
 
 	void draw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
-		_renderer.bindPipeline(pipelineId);
+		_renderer.bindPipeline(_device, pipelineId);
 		_renderer.bindMesh(meshId, _meshes.at(meshId));
 		_renderer.draw(instanceCount, instanceOffset);
 	}

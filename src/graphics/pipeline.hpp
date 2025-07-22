@@ -2,6 +2,7 @@
 
 #include "../config/config.hpp"
 #include "buffer.hpp"
+#include "framebuffer.hpp"
 #include "image.hpp"
 
 namespace graphics {
@@ -69,6 +70,26 @@ public:
 			0,
 			nullptr
 		);
+	}
+
+	void updateInputAttachmentDescriptors(const vk::Device &device, const Framebuffer &framebuffer) const {
+		for (const auto &n: _inputs) {
+			const auto &view = framebuffer.getAttachmentView(n.id);
+			const auto ii = vk::DescriptorImageInfo(nullptr, view, vk::ImageLayout::eShaderReadOnlyOptimal);
+			const auto &descSets = _descSets.at(n.set);
+			std::vector<vk::WriteDescriptorSet> wdss;
+			for (size_t i = 0; i < descSets.size(); ++i) {
+				wdss.push_back(
+					vk::WriteDescriptorSet()
+						.setDstSet(descSets.at(i))
+						.setDstBinding(n.binding)
+						.setDescriptorCount(1)
+						.setDescriptorType(n.isTexture ? vk::DescriptorType::eSampledImage : vk::DescriptorType::eInputAttachment)
+						.setImageInfo(ii)
+				);
+			}
+			device.updateDescriptorSets(static_cast<uint32_t>(descSets.size()), wdss.data(), 0, nullptr);
+		}
 	}
 
 	void updateBufferDescriptor(
