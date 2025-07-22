@@ -2,8 +2,6 @@
 
 #include "utils.hpp"
 
-#include <vulkan/vulkan.hpp>
-
 #define VB_SIZE() (sizeof(float)    * vertexCount)
 #define IB_SIZE() (sizeof(uint32_t) * indexCount)
 

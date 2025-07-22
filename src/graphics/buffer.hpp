@@ -2,8 +2,6 @@
 
 #include "utils.hpp"
 
-#include <vulkan/vulkan.hpp>
-
 namespace graphics {
 
 class Buffer {

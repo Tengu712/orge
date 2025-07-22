@@ -253,4 +253,4 @@ void Renderer::toggleFullscreen(
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
 }
 
-} // namespace graphics::rendering
+} // namespace graphics

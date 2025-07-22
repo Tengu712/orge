@@ -84,7 +84,11 @@ public:
 						.setDstSet(descSets.at(i))
 						.setDstBinding(n.binding)
 						.setDescriptorCount(1)
-						.setDescriptorType(n.isTexture ? vk::DescriptorType::eSampledImage : vk::DescriptorType::eInputAttachment)
+						.setDescriptorType(
+							n.isTexture
+								? vk::DescriptorType::eSampledImage
+								: vk::DescriptorType::eInputAttachment
+						)
 						.setImageInfo(ii)
 				);
 			}
