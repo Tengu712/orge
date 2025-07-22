@@ -2,6 +2,7 @@
 
 #include "platform.hpp"
 
+#include <memory>
 #include <SDL3/SDL_vulkan.h>
 
 namespace graphics {
