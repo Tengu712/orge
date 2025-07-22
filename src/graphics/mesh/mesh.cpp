@@ -1,10 +1,10 @@
 #include "mesh.hpp"
 
-#include "../../utils.hpp"
+#include "../utils.hpp"
 
 #include <unordered_map>
 
-namespace graphics::rendering::mesh {
+namespace graphics::mesh {
 
 struct Mesh {
 	const uint32_t iCount;
@@ -93,4 +93,4 @@ uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id) {
 	return g_meshes.at(id).iCount;
 }
 
-} // namespace graphics::rendering::mesh
+} // namespace graphics::mesh

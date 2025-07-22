@@ -7,27 +7,52 @@
 namespace graphics::rendering::framebuffer {
 
 struct Attachment {
-	const bool isRenderTarget;
 	const vk::Image image;
 	const vk::ImageView view;
 	const vk::DeviceMemory memory;
 };
 
-void terminate(const vk::Device &device);
+class Framebuffer {
+private:
+	const std::vector<Attachment> _attachments;
+	const std::vector<vk::ClearValue> _clearValues;
+	const vk::Framebuffer _framebuffer;
 
-void initialize(
-	const config::Config &config,
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::RenderPass &renderPass,
-	const vk::Extent2D &extent,
-	const std::vector<vk::Image> &swapchainImages
-);
+public:
+	Framebuffer() = delete;
+	Framebuffer(
+		const config::Config &config,
+		const vk::PhysicalDeviceMemoryProperties &memoryProps,
+		const vk::Device &device,
+		const vk::RenderPass &renderPass,
+		const vk::Image &swapchainImage,
+		const vk::Extent2D &swapchainImageExtent
+	);
 
-const std::vector<vk::ClearValue> &getClearValues();
+	void destroy(const vk::Device &device) const noexcept {
+		for (auto &n: _attachments) {
+			if (n.memory) {
+				device.freeMemory(n.memory);
+			}
+			device.destroyImageView(n.view);
+			if (n.image) {
+				device.destroyImage(n.image);
+			}
+		}
+		device.destroy(_framebuffer);
+	}
 
-const vk::Framebuffer &getFramebuffer(uint32_t index);
+	const vk::Framebuffer &get() const noexcept {
+		return _framebuffer;
+	}
 
-const Attachment &getAttachment(uint32_t attachmentIndex, uint32_t swapchainImageIndex);
+	const vk::ImageView &getAttachmentView(uint32_t index) const {
+		return _attachments.at(index).view;
+	}
+
+	const std::vector<vk::ClearValue> &getClearValues() const noexcept {
+		return _clearValues;
+	}
+};
 
 } // namespace graphics::rendering::framebuffer

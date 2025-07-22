@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics::rendering::mesh {
+namespace graphics::mesh {
 
 void terminate(const vk::Device &device);
 
@@ -18,9 +18,6 @@ void createMesh(
 
 void destroy(const vk::Device &device, const char *id);
 
-/// メッシュをバインドする関数
-///
-/// バインドされたメッシュのインデックスカウントを返す。
 uint32_t bind(const vk::CommandBuffer &commandBuffer, const char *id);
 
-} // namespace graphics::rendering::mesh
+} // namespace graphics::mesh

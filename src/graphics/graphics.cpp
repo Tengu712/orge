@@ -5,6 +5,7 @@
 #include "rendering/rendering.hpp"
 
 #include <vulkan/vulkan.hpp>
+#include <SDL3/SDL_vulkan.h>
 
 namespace graphics {
 
@@ -13,13 +14,14 @@ vk::PhysicalDevice g_physicalDevice;
 vk::Device g_device;
 vk::Queue g_queue;
 vk::CommandPool g_commandPool;
+std::unique_ptr<rendering::Renderer> g_renderer;
 
 void terminate() {
 	if (g_device) {
 		g_device.waitIdle();
 	}
 
-	rendering::terminate(g_instance, g_device);
+	g_renderer->destroy(g_instance, g_device);
 
 	if (g_device && g_commandPool) {
 		g_device.destroyCommandPool(g_commandPool);
@@ -39,7 +41,10 @@ void terminate() {
 
 std::vector<const char *> getInstanceExtensions() {
 	const auto platformExtensions = platformInstanceExtensions();
-	const auto windowExtensions = rendering::swapchain::getInstanceExtensions();
+
+	Uint32 count = 0;
+	const auto windowExtensions_ = SDL_Vulkan_GetInstanceExtensions(&count);
+	const auto windowExtensions = std::span(windowExtensions_, static_cast<size_t>(count));
 
 	std::vector<const char *> extensions;
 	extensions.reserve(platformExtensions.size() + windowExtensions.size());
@@ -92,12 +97,11 @@ uint32_t getQueueFamilyIndex() {
 
 std::vector<const char *> getDeviceExtensions() {
 	const auto platformExtensions = platformDeviceExtensions();
-	const auto swapchainExtensions = rendering::swapchain::getDeviceExtensions();
 
 	std::vector<const char *> extensions;
-	extensions.reserve(platformExtensions.size() + swapchainExtensions.size());
+	extensions.reserve(platformExtensions.size() + 1);
 	extensions.insert(extensions.end(), platformExtensions.begin(), platformExtensions.end());
-	extensions.insert(extensions.end(), swapchainExtensions.begin(), swapchainExtensions.end());
+	extensions.push_back("VK_KHR_swapchain");
 
 	return extensions;
 }
@@ -137,17 +141,17 @@ void initialize(const config::Config &config) {
 
 	createCommandPool(queueFamilyIndex);
 
-	rendering::initialize(config, g_instance, g_physicalDevice, g_device, g_commandPool);
+	g_renderer = std::make_unique<rendering::Renderer>(config, g_instance, g_physicalDevice, g_device, g_commandPool);
 }
 
-void toggleFullscreen() {
-	rendering::swapchain::toggleFullscreen(g_instance, g_physicalDevice, g_device);
+void toggleFullscreen(const config::Config &config) {
+	g_renderer->toggleFullscreen(config, g_instance, g_physicalDevice, g_device);
 }
 
 } // namespace graphics
 
 #include "../error/error.hpp"
-#include "rendering/mesh/mesh.hpp"
+#include "mesh/mesh.hpp"
 #include "rendering/pipeline/buffer/buffer.hpp"
 #include "rendering/pipeline/image/image.hpp"
 #include "rendering/pipeline/pipeline.hpp"
@@ -275,7 +279,7 @@ int orgeCreateMesh(
 	const uint32_t indexCount,
 	const uint32_t *indices
 ) {
-	TRY(graphics::rendering::mesh::createMesh(
+	TRY(graphics::mesh::createMesh(
 		graphics::g_physicalDevice.getMemoryProperties(),
 		graphics::g_device,
 		id,
@@ -287,17 +291,29 @@ int orgeCreateMesh(
 }
 
 void orgeDestroyMesh(const char *id) {
-	graphics::rendering::mesh::destroy(graphics::g_device, id);
+	graphics::mesh::destroy(graphics::g_device, id);
 }
 
 int orgeBeginRender() {
-	TRY(graphics::rendering::beginRender(graphics::g_device));
+	TRY(graphics::g_renderer->beginRender(graphics::g_device));
 }
 
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
-	TRY(graphics::rendering::draw(graphics::g_device, pipelineId, meshId, instanceCount, instanceOffset));
+	TRY(
+		graphics::g_renderer->bindPipeline(graphics::g_device, pipelineId);
+		graphics::g_renderer->bindMesh(meshId);
+		graphics::g_renderer->draw(instanceCount, instanceOffset);
+	)
 }
 
 int orgeEndRender() {
-	TRY(graphics::rendering::endRender(graphics::g_queue));
+	TRY(graphics::g_renderer->endRender(graphics::g_queue));
+}
+
+int orgeBindDescriptorSets(const char *id, uint32_t const *indices) {
+	TRY(graphics::g_renderer->bindDescriptorSets(id, indices));
+}
+
+void orgeNextSubpass() {
+	graphics::g_renderer->nextSubpass();
 }

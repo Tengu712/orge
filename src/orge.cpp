@@ -16,7 +16,9 @@
 
 namespace {
 
-int initialize(config::Config config) {
+std::optional<config::Config> g_config;
+
+int initialize() {
 	TRY(
 		if (!SDL_Init(SDL_INIT_VIDEO)) {
 			throw "failed to prepare for creating a window.";
@@ -24,18 +26,24 @@ int initialize(config::Config config) {
 		if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 			throw "failed to load Vulkan.";
 		}
-		graphics::initialize(config);
+		graphics::initialize(g_config.value());
 	)
 }
 
 } // namespace
 
 int orgeInitialize(const char *yaml) {
-	TRY(initialize(config::parse(yaml)));
+	TRY(
+		g_config = config::parse(yaml);
+		initialize();
+	)
 }
 
 int orgeInitializeWith(const char *yamlFilePath) {
-	TRY(initialize(config::parseFromFile(yamlFilePath)));
+	TRY(
+		g_config = config::parseFromFile(yamlFilePath);
+		initialize();
+	)
 }
 
 void orgeTerminate(void) {
@@ -49,7 +57,8 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
-			graphics::toggleFullscreen();
+			// TODO: エラーハンドリング。
+			graphics::toggleFullscreen(g_config.value());
 		}
 	}
 	input::update();

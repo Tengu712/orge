@@ -8,6 +8,6 @@ void terminate();
 
 void initialize(const config::Config &config);
 
-void toggleFullscreen();
+void toggleFullscreen(const config::Config &config);
 
 } // namespace graphics

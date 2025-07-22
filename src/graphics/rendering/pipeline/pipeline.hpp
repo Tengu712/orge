@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../config/config.hpp"
+#include "../framebuffer/framebuffer.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -15,7 +16,7 @@ void initialize(
 	const vk::RenderPass &renderPass
 );
 
-void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint32_t index, const char *id);
+void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, const framebuffer::Framebuffer &framebuffer, const char *id);
 
 void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices);
 

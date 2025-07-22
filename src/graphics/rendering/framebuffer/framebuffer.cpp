@@ -5,29 +5,6 @@
 
 namespace graphics::rendering::framebuffer {
 
-std::vector<std::vector<Attachment>> g_attachments;
-std::vector<vk::ClearValue> g_clearValues;
-std::vector<vk::Framebuffer> g_framebuffers;
-
-void terminate(const vk::Device &device) {
-	for (auto &n: g_attachments) {
-		for (auto &m: n) {
-			if (!m.isRenderTarget) {
-				device.freeMemory(m.memory);
-			}
-			device.destroyImageView(m.view);
-			if (!m.isRenderTarget) {
-				device.destroyImage(m.image);
-			}
-		}
-	}
-	g_attachments.clear();
-
-	for (auto &n: g_framebuffers) {
-		device.destroyFramebuffer(n);
-	}
-}
-
 vk::Format convertFormat(const config::Format &format) {
 	return format == config::Format::RenderTarget
 		? platformRenderTargetPixelFormat()
@@ -61,7 +38,7 @@ vk::ImageAspectFlags convertAspect(const config::Format &format) {
 Attachment createAttachment(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::Extent3D &extent,
+	const vk::Extent3D &swapchainImageExtent,
 	const vk::Image &swapchainImage,
 	config::Format format
 ) {
@@ -73,7 +50,7 @@ Attachment createAttachment(
 		const auto ci = vk::ImageCreateInfo()
 			.setImageType(vk::ImageType::e2D)
 			.setFormat(convertFormat(format))
-			.setExtent(extent)
+			.setExtent(swapchainImageExtent)
 			.setMipLevels(1)
 			.setArrayLayers(1)
 			.setSamples(vk::SampleCountFlagBits::e1)
@@ -112,69 +89,70 @@ Attachment createAttachment(
 	const auto view = device.createImageView(vci);
 
 	// 終了
-	return Attachment{isRenderTarget, image, view, memory};
+	return Attachment{isRenderTarget ? nullptr : image, view, memory};
 }
 
-void initialize(
+std::vector<Attachment> createAttachments(
+	const config::Config &config,
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Image &swapchainImage,
+	const vk::Extent2D &swapchainImageExtent
+) {
+	const auto extent = vk::Extent3D(swapchainImageExtent.width, swapchainImageExtent.height, 1);
+	std::vector<Attachment> attachments;
+	attachments.reserve(config.attachments.size());
+	for (const auto &n: config.attachments) {
+		attachments.push_back(createAttachment(memoryProps, device, extent, swapchainImage, n.format));
+	}
+	return attachments;
+}
+
+std::vector<vk::ClearValue> collectClearValues(const config::Config &config) {
+	std::vector<vk::ClearValue> clearValues;
+	clearValues.reserve(config.attachments.size());
+	for (const auto &n: config.attachments) {
+		if (n.colorClearValue) {
+			clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearColorValue(n.colorClearValue.value())));
+		} else {
+			clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(n.depthClearValue.value(), 0)));
+		}
+	}
+	return clearValues;
+}
+
+vk::Framebuffer createFramebuffer(
+	const vk::Device &device,
+	const vk::RenderPass &renderPass,
+	const vk::Extent2D &swapchainImageExtent,
+	const std::vector<Attachment> &attachments
+) {
+	std::vector<vk::ImageView> as;
+	as.reserve(attachments.size());
+	for (const auto &n: attachments) {
+		as.push_back(n.view);
+	}
+
+	const auto ci = vk::FramebufferCreateInfo()
+		.setRenderPass(renderPass)
+		.setAttachments(as)
+		.setWidth(swapchainImageExtent.width)
+		.setHeight(swapchainImageExtent.height)
+		.setLayers(1);
+	return device.createFramebuffer(ci);
+}
+
+Framebuffer::Framebuffer(
 	const config::Config &config,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
-	const vk::Extent2D &extent,
-	const std::vector<vk::Image> &swapchainImages
-) {
-	const auto extent3D = vk::Extent3D(extent.width, extent.height, 1);
-
-	// アタッチメント作成 & クリアバリュー収集
-	g_attachments.reserve(swapchainImages.size());
-	for (const auto &n: config.attachments) {
-		// アタッチメント作成
-		std::vector<Attachment> attachments;
-		attachments.reserve(swapchainImages.size());
-		for (size_t i = 0; i < swapchainImages.size(); ++i) {
-			attachments.push_back(createAttachment(memoryProps, device, extent3D, swapchainImages[i], n.format));
-		}
-		g_attachments.push_back(std::move(attachments));
-
-		// クリアバリュー収集
-		if (n.colorClearValue) {
-			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearColorValue(n.colorClearValue.value())));
-		} else {
-			g_clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearDepthStencilValue(n.depthClearValue.value(), 0)));
-		}
-	}
-
-	// フレームバッファ作成
-	g_framebuffers.reserve(swapchainImages.size());
-	for (size_t i = 0; i < swapchainImages.size(); ++i) {
-		// アタッチメント収集
-		std::vector<vk::ImageView> attachments;
-		attachments.reserve(g_attachments.size());
-		for (const auto &n: g_attachments) {
-			attachments.push_back(n[i].view);
-		}
-
-		// 作成
-		const auto ci = vk::FramebufferCreateInfo()
-			.setRenderPass(renderPass)
-			.setAttachments(attachments)
-			.setWidth(extent.width)
-			.setHeight(extent.height)
-			.setLayers(1);
-		g_framebuffers.push_back(device.createFramebuffer(ci));
-	}
-}
-
-const std::vector<vk::ClearValue> &getClearValues() {
-	return g_clearValues;
-}
-
-const vk::Framebuffer &getFramebuffer(uint32_t index) {
-	return g_framebuffers.at(index);
-}
-
-const Attachment &getAttachment(uint32_t attachmentIndex, uint32_t swapchainImageIndex) {
-	return g_attachments.at(attachmentIndex).at(swapchainImageIndex);
-}
+	const vk::Image &swapchainImage,
+	const vk::Extent2D &swapchainImageExtent
+) :
+	_attachments(createAttachments(config, memoryProps, device, swapchainImage, swapchainImageExtent)),
+	_clearValues(collectClearValues(config)),
+	_framebuffer(createFramebuffer(device, renderPass, swapchainImageExtent, _attachments))
+{}
 
 } // namespace graphics::rendering::framebuffer

@@ -1,5 +1,7 @@
 #include "pipeline.hpp"
 
+#include <iostream>
+
 // TODO: ちょっと気持ち悪い。
 #include "../framebuffer/framebuffer.hpp"
 #include "buffer/buffer.hpp"
@@ -401,7 +403,7 @@ void initialize(
 	image::initialize(device, commandPool);
 }
 
-void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint32_t index, const char *id) {
+void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, const framebuffer::Framebuffer &framebuffer, const char *id) {
 	const auto &pipeline = g_pipelines.at(id);
 
 	// パイプラインをバインド
@@ -411,8 +413,8 @@ void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint
 	// NOTE: アタッチメントはスワップチェーンイメージの枚数分作られるため、
 	//       レンダーパスコマンドごとに更新しなければならない。
 	for (const auto &n: pipeline.inputs) {
-		const auto &attachment = framebuffer::getAttachment(n.id, index);
-		const auto ii = vk::DescriptorImageInfo(nullptr, attachment.view, vk::ImageLayout::eShaderReadOnlyOptimal);
+		const auto &view = framebuffer.getAttachmentView(n.id);
+		const auto ii = vk::DescriptorImageInfo(nullptr, view, vk::ImageLayout::eShaderReadOnlyOptimal);
 		const auto &descSets = pipeline.descSets.at(n.set);
 		std::vector<vk::WriteDescriptorSet> wdss;
 		for (size_t i = 0; i < descSets.size(); ++i) {
