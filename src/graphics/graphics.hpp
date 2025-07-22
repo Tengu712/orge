@@ -33,7 +33,7 @@ public:
 
 	~Graphics() {
 		_device.waitIdle();
-		destroyCommandBufferForCreatingImage(_device);
+		terminateUtils(_device);
 		for (const auto &n: _meshes) {
 			n.second.destroy(_device);
 		}

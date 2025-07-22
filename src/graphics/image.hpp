@@ -4,10 +4,6 @@
 
 namespace graphics {
 
-void createCommandBufferForCreatingImage(const vk::Device &device, const vk::CommandPool &commandPool);
-
-void destroyCommandBufferForCreatingImage(const vk::Device &device);
-
 class Image {
 private:
 	const vk::Image _image;

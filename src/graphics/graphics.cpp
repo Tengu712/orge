@@ -101,7 +101,7 @@ Graphics::Graphics(const config::Config &config) :
 	)),
 	_renderer(config, _instance, _physicalDevice, _device, _commandPool)
 {
-	createCommandBufferForCreatingImage(_device, _commandPool);
+	initializeUtils(_device, _commandPool);
 }
 
 } // namespace graphics
