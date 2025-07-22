@@ -4,6 +4,10 @@
 
 namespace graphics {
 
+void terminateUtils(const vk::Device &device);
+
+void initializeUtils(const vk::Device &device, const vk::CommandPool &commandPool);
+
 inline uint32_t findMemoryType(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	uint32_t typeBits,
@@ -57,5 +61,15 @@ inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &d
 	memcpy(p, src, size);
 	device.unmapMemory(dst);
 }
+
+void uploadImage(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Queue &queue,
+	const vk::Image &dst,
+	uint32_t width,
+	uint32_t height,
+	const unsigned char *src
+);
 
 } // namespace graphics

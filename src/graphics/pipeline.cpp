@@ -1,28 +1,8 @@
 #include "pipeline.hpp"
 
-// TODO: ちょっと気持ち悪い。
-#include "../swapchain/swapchain.hpp"
-// TODO: ちょっと気持ち悪い。
-#include "../framebuffer/framebuffer.hpp"
-#include "buffer/buffer.hpp"
-#include "image/image.hpp"
-#include "sampler/sampler.hpp"
-
 #include <fstream>
 
-namespace graphics::rendering::pipeline {
-
-struct InputAttachment {
-	const uint32_t id;
-	const uint32_t set;
-	const uint32_t binding;
-	const bool isTexture;
-
-	InputAttachment() = delete;
-	InputAttachment(uint32_t id, uint32_t set, uint32_t binding, bool isTexture):
-		id(id), set(set), binding(binding), isTexture(isTexture)
-	{}
-};
+namespace graphics {
 
 struct PipelineCreateTemporaryInfos {
 	// シェーダステージ
@@ -61,90 +41,6 @@ struct PipelineCreateTemporaryInfos {
 	std::vector<InputAttachment> inputs;
 };
 
-struct Pipeline {
-	const vk::Pipeline pipeline;
-	const vk::PipelineLayout pipelineLayout;
-	const std::vector<vk::DescriptorSetLayout> descSetLayouts;
-	const std::vector<std::vector<vk::DescriptorSet>> descSets;
-	const std::vector<InputAttachment> inputs;
-};
-
-vk::DescriptorPool g_descPool;
-std::unordered_map<std::string, Pipeline> g_pipelines;
-
-void terminate(const vk::Device &device) {
-	sampler::terminate(device);
-	image::terminate(device);
-	buffer::terminate(device);
-
-	for (auto &n: g_pipelines) {
-		device.destroyPipeline(n.second.pipeline);
-		device.destroyPipelineLayout(n.second.pipelineLayout);
-		for (auto &m: n.second.descSetLayouts) {
-			device.destroyDescriptorSetLayout(m);
-		}
-	}
-	g_pipelines.clear();
-
-	if (g_descPool) {
-		device.destroyDescriptorPool(g_descPool);
-		g_descPool = nullptr;
-	}
-}
-
-void createDescriptorPool(const config::Config &config, const vk::Device &device) {
-	// 集計
-	uint32_t maxSets = 0;
-	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
-	for (const auto &n: config.pipelines) {
-		for (const auto &m: n.descSets) {
-			maxSets += m.count;
-
-			std::unordered_map<config::DescriptorType, uint32_t> map;
-			for (const auto &b: m.bindings) {
-				if (!map.contains(b.type)) {
-					map.emplace(b.type, 0);
-				}
-				map[b.type] += b.count;
-			}
-
-			for (const auto &[k, v]: map) {
-				sizesMap[k] += v * m.count;
-			}
-		}
-	}
-
-	// ディスクリプタセットが不要ならディスクリプタプールも不要
-	if (maxSets == 0) {
-		return;
-	}
-
-	// マップからベクタへ
-	std::vector<vk::DescriptorPoolSize> poolSizes;
-	for (const auto &[k, v]: sizesMap) {
-		poolSizes.emplace_back(
-			k == config::DescriptorType::Texture
-				? vk::DescriptorType::eSampledImage
-				: k == config::DescriptorType::Sampler
-				? vk::DescriptorType::eSampler
-				: k == config::DescriptorType::UniformBuffer
-				? vk::DescriptorType::eUniformBuffer
-				: k == config::DescriptorType::StorageBuffer
-				? vk::DescriptorType::eStorageBuffer
-				: k == config::DescriptorType::InputAttachment
-				? vk::DescriptorType::eInputAttachment
-				: throw,
-			v
-		);
-	}
-
-	// 作成
-	const auto ci = vk::DescriptorPoolCreateInfo()
-		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-		.setMaxSets(maxSets)
-		.setPoolSizes(poolSizes);
-	g_descPool = device.createDescriptorPool(ci);
-}
 
 vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
 	std::fstream file(path, std::ios::in | std::ios::binary);
@@ -172,17 +68,25 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 	return device.createShaderModule(ci);
 }
 
-void createPipelines(const config::Config &config, const vk::Device &device, const vk::RenderPass &renderPass) {
+std::unordered_map<std::string, Pipeline> createPipelines(
+	const config::Config &config,
+	const vk::Device &device,
+	const vk::RenderPass &renderPass,
+	const vk::DescriptorPool &descPool
+) {
+	if (config.pipelines.empty()) {
+		return {};
+	}
+
 	// 入力アセンブリ
 	const auto iasci = vk::PipelineInputAssemblyStateCreateInfo()
 		.setTopology(vk::PrimitiveTopology::eTriangleList);
 
 	// ビューポート
-	const auto imageSize = swapchain::getImageSize();
 	std::vector<vk::Viewport> viewports;
-	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(imageSize.width), static_cast<float>(imageSize.height), 0.0f, 1.0f);
+	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(config.width), static_cast<float>(config.height), 0.0f, 1.0f);
 	std::vector<vk::Rect2D> scissors;
-	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(imageSize.width, imageSize.height));
+	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(config.width, config.height));
 	const auto vsci = vk::PipelineViewportStateCreateInfo()
 		.setViewports(viewports)
 		.setScissors(scissors);
@@ -323,7 +227,7 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 				layouts.push_back(cti.descSetLayouts[i]);
 			}
 			const auto ai = vk::DescriptorSetAllocateInfo()
-				.setDescriptorPool(g_descPool)
+				.setDescriptorPool(descPool)
 				.setSetLayouts(layouts);
 			cti.descSets.push_back(device.allocateDescriptorSets(ai));
 		}
@@ -366,14 +270,16 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 	}
 
 	// パイプライン作成
-	const auto pipelines = device.createGraphicsPipelines(nullptr, cis).value;
+	const auto ps = device.createGraphicsPipelines(nullptr, cis).value;
 
 	// 作成
-	for (size_t i = 0; i < pipelines.size(); ++i) {
-		g_pipelines.emplace(
+	std::unordered_map<std::string, Pipeline> pipelines;
+	pipelines.reserve(ps.size());
+	for (size_t i = 0; i < ps.size(); ++i) {
+		pipelines.emplace(
 			config.pipelines[i].id,
 			Pipeline {
-				pipelines[i],
+				ps[i],
 				ctis[i].pipelineLayout,
 				std::move(ctis[i].descSetLayouts),
 				std::move(ctis[i].descSets),
@@ -387,131 +293,8 @@ void createPipelines(const config::Config &config, const vk::Device &device, con
 		device.destroyShaderModule(n.fragmentShader);
 		device.destroyShaderModule(n.vertexShader);
 	}
+
+	return pipelines;
 }
 
-void initialize(
-	const config::Config &config,
-	const vk::Device &device,
-	const vk::CommandPool &commandPool,
-	const vk::RenderPass &renderPass
-) {
-	if (config.pipelines.empty()) {
-		return;
-	}
-	createDescriptorPool(config, device);
-	createPipelines(config, device, renderPass);
-
-	image::initialize(device, commandPool);
-}
-
-void bind(const vk::Device &device, const vk::CommandBuffer &commandBuffer, uint32_t index, const char *id) {
-	const auto &pipeline = g_pipelines.at(id);
-
-	// パイプラインをバインド
-	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.pipeline);
-
-	// すべてのインプットアタッチメントを更新
-	// NOTE: アタッチメントはスワップチェーンイメージの枚数分作られるため、
-	//       レンダーパスコマンドごとに更新しなければならない。
-	for (const auto &n: pipeline.inputs) {
-		const auto &attachment = framebuffer::getAttachment(n.id, index);
-		const auto ii = vk::DescriptorImageInfo(nullptr, attachment.view, vk::ImageLayout::eShaderReadOnlyOptimal);
-		const auto &descSets = pipeline.descSets.at(n.set);
-		std::vector<vk::WriteDescriptorSet> wdss;
-		for (size_t i = 0; i < descSets.size(); ++i) {
-			wdss.push_back(
-				vk::WriteDescriptorSet()
-					.setDstSet(descSets.at(i))
-					.setDstBinding(n.binding)
-					.setDescriptorCount(1)
-					.setDescriptorType(n.isTexture ? vk::DescriptorType::eSampledImage : vk::DescriptorType::eInputAttachment)
-					.setImageInfo(ii)
-			);
-		}
-		device.updateDescriptorSets(static_cast<uint32_t>(descSets.size()), wdss.data(), 0, nullptr);
-	}
-}
-
-void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, const char *id, uint32_t const *indices) {
-	const auto &pipeline = g_pipelines.at(id);
-
-	std::vector<vk::DescriptorSet> sets;
-	for (size_t i = 0; i < pipeline.descSets.size(); ++i) {
-		sets.push_back(pipeline.descSets.at(i).at(indices[i]));
-	}
-
-	commandBuffer.bindDescriptorSets(
-		vk::PipelineBindPoint::eGraphics,
-		pipeline.pipelineLayout,
-		0,
-		static_cast<uint32_t>(sets.size()),
-		sets.data(),
-		0,
-		nullptr
-	);
-}
-
-void updateBufferDescriptor(
-	const vk::Device &device,
-	const char *bufferId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding,
-	uint32_t offset
-) {
-	const auto &buffer = buffer::get(bufferId);
-	const auto bi = vk::DescriptorBufferInfo(buffer.buffer, 0, vk::WholeSize);
-	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
-		.setDstBinding(binding)
-		.setDstArrayElement(offset)
-		.setDescriptorCount(1)
-		.setDescriptorType(buffer.isStorage ? vk::DescriptorType::eStorageBuffer : vk::DescriptorType::eUniformBuffer)
-		.setBufferInfo(bi);
-	device.updateDescriptorSets(1, &ds, 0, nullptr);
-}
-
-void updateImageDescriptor(
-	const vk::Device &device,
-	const char *imageId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding,
-	uint32_t offset
-) {
-	const auto &image = image::get(imageId);
-	const auto ii = vk::DescriptorImageInfo(nullptr, image.view, vk::ImageLayout::eShaderReadOnlyOptimal);
-	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
-		.setDstBinding(binding)
-		.setDstArrayElement(offset)
-		.setDescriptorCount(1)
-		.setDescriptorType(vk::DescriptorType::eSampledImage)
-		.setImageInfo(ii);
-	device.updateDescriptorSets(1, &ds, 0, nullptr);
-}
-
-void updateSamplerDescriptor(
-	const vk::Device &device,
-	const char *samplerId,
-	const char *pipelineId,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding,
-	uint32_t offset
-) {
-	const auto &sampler = sampler::get(samplerId);
-	const auto ii = vk::DescriptorImageInfo(sampler, nullptr, vk::ImageLayout::eShaderReadOnlyOptimal);
-	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(g_pipelines.at(pipelineId).descSets.at(set).at(index))
-		.setDstBinding(binding)
-		.setDstArrayElement(offset)
-		.setDescriptorCount(1)
-		.setDescriptorType(vk::DescriptorType::eSampler)
-		.setImageInfo(ii);
-	device.updateDescriptorSets(1, &ds, 0, nullptr);
-}
-
-} // namespace graphics::rendering::pipeline
+} // namespace graphics

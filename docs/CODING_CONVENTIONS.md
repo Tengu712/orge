@@ -28,11 +28,6 @@
 
 `const`が使えるなら使う。
 
-## No noexcept
-
-`noexcept`を書く場合、ほぼ殆どすべての関数に書くことになるだろう。
-それでは馬鹿馬鹿しいので、`noexcept`は書かない。
-
 ## No namespace Indentation
 
 `namespace`ブロックはインデントしない。

@@ -1,11 +1,194 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "buffer.hpp"
+#include "image.hpp"
+#include "mesh.hpp"
+#include "renderer.hpp"
 
 namespace graphics {
 
-void terminate();
+class Graphics {
+private:
+	const vk::Instance _instance;
+	const vk::PhysicalDevice _physicalDevice;
+	const uint32_t _queueFamilyIndex;
+	const vk::Device _device;
+	const vk::Queue _queue;
+	const vk::CommandPool _commandPool;
+	Renderer _renderer;
+	std::unordered_map<std::string, Buffer> _buffers;
+	std::unordered_map<std::string, Image> _images;
+	std::unordered_map<std::string, vk::Sampler> _samplers;
+	std::unordered_map<std::string, Mesh> _meshes;
 
-void initialize(const config::Config &config);
+public:
+	Graphics(const Graphics &)  = delete;
+	Graphics(const Graphics &&) = delete;
+	Graphics &operator =(const Graphics &)  = delete;
+	Graphics &operator =(const Graphics &&) = delete;
+
+	Graphics() = delete;
+	Graphics(const config::Config &config);
+
+	~Graphics() {
+		_device.waitIdle();
+		terminateUtils(_device);
+		for (const auto &n: _meshes) {
+			n.second.destroy(_device);
+		}
+		for (const auto &n: _samplers) {
+			_device.destroySampler(n.second);
+		}
+		for (const auto &n: _images) {
+			n.second.destroy(_device);
+		}
+		for (const auto &n: _buffers) {
+			n.second.destroy(_device);
+		}
+		_renderer.destroy(_instance, _device);
+		_device.destroyCommandPool(_commandPool);
+		_device.destroy();
+		_instance.destroy();
+	}
+
+	void toggleFullscreen(const config::Config &config) {
+		_renderer.toggleFullscreen(config, _instance, _physicalDevice, _device);
+	}
+
+	void createBuffer(const char *id, uint64_t size, int isStorage) {
+		_buffers.emplace(id, Buffer(_physicalDevice.getMemoryProperties(), _device, size, isStorage));
+	}
+
+	void destroyBuffer(const char *id) noexcept {
+		if (_buffers.contains(id)) {
+			_buffers.at(id).destroy(_device);
+			_buffers.erase(id);
+		}
+	}
+
+	void updateBuffer(const char *id, const void *data) const {
+		_buffers.at(id).update(_device, data);
+	}
+
+	void updateBufferDescriptor(
+		const char *bufferId,
+		const char *pipelineId,
+		uint32_t set,
+		uint32_t index,
+		uint32_t binding,
+		uint32_t offset
+	) const {
+		_renderer
+			.getPipeline(pipelineId)
+			.updateBufferDescriptor(_device, _buffers.at(bufferId), set, index, binding, offset);
+	}
+
+	void createImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
+		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
+	}
+
+	void createImage(const char *id, const char *path) {
+		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, path));
+	}
+
+	void destroyImage(const char *id) noexcept {
+		if (_images.contains(id)) {
+			_images.at(id).destroy(_device);
+			_images.erase(id);
+		}
+	}
+
+	void updateImageDescriptor(
+		const char *imageId,
+		const char *pipelineId,
+		uint32_t set,
+		uint32_t index,
+		uint32_t binding,
+		uint32_t offset
+	) const {
+		_renderer
+			.getPipeline(pipelineId)
+			.updateImageDescriptor(_device, _images.at(imageId), set, index, binding, offset);
+	}
+
+	void createSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
+		_samplers.emplace(id, _device.createSampler(
+			vk::SamplerCreateInfo()
+				.setMagFilter(linearMagFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
+				.setMinFilter(linearMinFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
+				.setMipmapMode(vk::SamplerMipmapMode::eLinear)
+				.setAddressModeU(repeat ? vk::SamplerAddressMode::eRepeat : vk::SamplerAddressMode::eClampToEdge)
+				.setAddressModeV(repeat ? vk::SamplerAddressMode::eRepeat : vk::SamplerAddressMode::eClampToEdge)
+				.setMaxLod(vk::LodClampNone)
+		));
+	}
+
+	void destroySampler(const char *id) noexcept {
+		if (_samplers.contains(id)) {
+			_device.destroySampler(_samplers.at(id));
+			_samplers.erase(id);
+		}
+	}
+
+	void updateSamplerDescriptor(
+		const char *samplerId,
+		const char *pipelineId,
+		uint32_t set,
+		uint32_t index,
+		uint32_t binding,
+		uint32_t offset
+	) const {
+		_renderer
+			.getPipeline(pipelineId)
+			.updateSamplerDescriptor(_device, _samplers.at(samplerId), set, index, binding, offset);
+	}
+
+	void createMesh(
+		const char *id,
+		const uint32_t vertexCount,
+		const float *vertices,
+		const uint32_t indexCount,
+		const uint32_t *indices
+	) {
+		_meshes.emplace(id, Mesh(
+			_physicalDevice.getMemoryProperties(),
+			_device,
+			vertexCount,
+			vertices,
+			indexCount,
+			indices
+		));
+	}
+
+	void destroyMesh(const char *id) noexcept {
+		if (_meshes.contains(id)) {
+			_meshes.at(id).destroy(_device);
+			_meshes.erase(id);
+		}
+	}
+
+	void beginRender() {
+		_renderer.beginRender(_device);
+	}
+
+	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
+		_renderer.bindDescriptorSets(pipelineId, indices);
+	}
+
+	void draw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
+		_renderer.bindPipeline(_device, pipelineId);
+		_renderer.bindMesh(meshId, _meshes.at(meshId));
+		_renderer.draw(instanceCount, instanceOffset);
+	}
+
+	void nextSubpass() const {
+		_renderer.nextSubpass();
+	}
+
+	void endRender() {
+		_renderer.endRender(_queue);
+	}
+};
 
 } // namespace graphics

@@ -158,14 +158,14 @@ int orgeBeginRender(void);
 
 /// ディスクリプタセットをバインドする関数
 ///
-/// - id: パイプラインID
+/// - pipelineId: パイプラインID
 /// - indices: 各セットにおいて何個目のセットを使うか
 ///
 /// indicesはディスクリプタセットの個数分データを持つこと。
 ///
 /// 例えば、set = 0とset = 1があり、それぞれ2個と3個確保されている場合、
 /// indicesの要素数は2、indicesの各要素は0-1と0-2を取る。
-int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
+int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
 
 /// 描画関数
 ///
@@ -177,7 +177,7 @@ int orgeBindDescriptorSets(const char *id, uint32_t const *indices);
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// 次のサブパスへ移るための関数
-void orgeNextSubpass();
+int orgeNextSubpass();
 
 /// orgeの描画を終了する関数
 int orgeEndRender(void);
