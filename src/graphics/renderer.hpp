@@ -25,7 +25,7 @@ private:
 	const vk::CommandBuffer _commandBuffer;
 	/// スワップチェインイメージ取得の完了を知るためのセマフォ
 	/// コマンドバッファ提出を待機させるために使う
-	const vk::Semaphore _semaphoreForImageEnabled;
+	vk::Semaphore _semaphoreForImageEnabled;
 	/// コマンドバッファ実行の完了を知るためのセマフォ
 	/// プレゼンテーション開始を待機させるために使う
 	const std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
@@ -41,6 +41,17 @@ private:
 		if (!_frameInfo) {
 			throw emsg;
 		}
+	}
+
+	void _destroyForRecreatingSwapchainOrSurface(const vk::Device &device) {
+		for (const auto &n: _framebuffers) {
+			n.destroy(device);
+		}
+		_framebuffers.clear();
+		// NOTE: vk::Result::eSuboptimalKHRはセマフォをシグナルするらしいので、
+		//       直後のacuireNextImageKHRでヴァリデーションエラーが出ないように再作成。
+		device.destroy(_semaphoreForImageEnabled);
+		_semaphoreForImageEnabled = device.createSemaphore({});
 	}
 
 public:

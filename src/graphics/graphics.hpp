@@ -52,10 +52,6 @@ public:
 		_instance.destroy();
 	}
 
-	void toggleFullscreen() const noexcept {
-		_renderer.toggleFullscreen();
-	}
-
 	void createBuffer(const char *id, uint64_t size, int isStorage) {
 		_buffers.emplace(id, Buffer(_physicalDevice.getMemoryProperties(), _device, size, isStorage));
 	}
@@ -186,6 +182,17 @@ public:
 
 	void endRender() {
 		_renderer.endRender(_queue);
+	}
+
+	void toggleFullscreen() const noexcept {
+		try {
+			_device.waitIdle();
+		} catch (...) {
+			// NOTE: フルスクリーン切り替えは必須動作ではないし、waitIdleの失敗は致命的なので、
+			//       エラーハンドリングすることなく早期リターンする。
+			return;
+		}
+		_renderer.toggleFullscreen();
 	}
 };
 
