@@ -230,8 +230,6 @@ void Renderer::recreateSwapchain(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
-	// TODO: 然るべき場所で。
-	_commandBuffer.reset();
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSwapchain(physicalDevice, device);
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
@@ -245,8 +243,6 @@ void Renderer::recreateSurface(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
-	// TODO: 然るべき場所で。
-	_commandBuffer.reset();
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSurface(instance, physicalDevice, device);
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
