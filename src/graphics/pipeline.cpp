@@ -68,11 +68,28 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 	return device.createShaderModule(ci);
 }
 
+vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent) {
+	float o = static_cast<float>(ow)           / static_cast<float>(oh);
+	float n = static_cast<float>(extent.width) / static_cast<float>(extent.height);
+	if (n > o) {
+		const auto h = static_cast<float>(extent.height);
+		const auto w = h * o;
+		const auto x = (extent.width - w) / 2.0f;
+		return vk::Viewport(x, 0.0f, w, h, 0.0f, 1.0f);
+	} else {
+		const auto w = static_cast<float>(extent.width);
+		const auto h = w / o;
+		const auto y = (extent.height - h) / 2.0f;
+		return vk::Viewport(0.0f, y, w, h, 0.0f, 1.0f);
+	}
+}
+
 std::unordered_map<std::string, Pipeline> createPipelines(
 	const config::Config &config,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
-	const vk::DescriptorPool &descPool
+	const vk::DescriptorPool &descPool,
+	const vk::Extent2D &extent
 ) {
 	if (config.pipelines.empty()) {
 		return {};
@@ -84,9 +101,9 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 
 	// ビューポート
 	std::vector<vk::Viewport> viewports;
-	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(config.width), static_cast<float>(config.height), 0.0f, 1.0f);
+	viewports.emplace_back(adjustViewport(config.width, config.height, extent));
 	std::vector<vk::Rect2D> scissors;
-	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(config.width, config.height));
+	scissors.emplace_back(vk::Offset2D(0, 0), extent);
 	const auto vsci = vk::PipelineViewportStateCreateInfo()
 		.setViewports(viewports)
 		.setScissors(scissors);

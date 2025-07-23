@@ -52,10 +52,6 @@ public:
 		_instance.destroy();
 	}
 
-	void toggleFullscreen(const config::Config &config) {
-		_renderer.toggleFullscreen(config, _instance, _physicalDevice, _device);
-	}
-
 	void createBuffer(const char *id, uint64_t size, int isStorage) {
 		_buffers.emplace(id, Buffer(_physicalDevice.getMemoryProperties(), _device, size, isStorage));
 	}
@@ -168,9 +164,7 @@ public:
 		}
 	}
 
-	void beginRender() {
-		_renderer.beginRender(_device);
-	}
+	void beginRender(const config::Config &config);
 
 	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);
@@ -187,7 +181,18 @@ public:
 	}
 
 	void endRender() {
-		_renderer.endRender(_queue);
+		_renderer.endRender(_device, _queue);
+	}
+
+	void toggleFullscreen() const noexcept {
+		try {
+			_device.waitIdle();
+		} catch (...) {
+			// NOTE: フルスクリーン切り替えは必須動作ではないし、waitIdleの失敗は致命的なので、
+			//       エラーハンドリングすることなく早期リターンする。
+			return;
+		}
+		_renderer.toggleFullscreen();
 	}
 };
 

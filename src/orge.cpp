@@ -58,8 +58,7 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
-			// TODO: エラーハンドリング。
-			g_graphics->toggleFullscreen(g_config.value());
+			g_graphics->toggleFullscreen();
 		}
 	}
 	input::update();
@@ -146,7 +145,7 @@ void orgeDestroyMesh(const char *id) {
 }
 
 int orgeBeginRender() {
-	TRY(g_graphics->beginRender());
+	TRY(g_graphics->beginRender(g_config.value()));
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {

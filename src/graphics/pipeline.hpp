@@ -158,7 +158,8 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 	const config::Config &config,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
-	const vk::DescriptorPool &descPool
+	const vk::DescriptorPool &descPool,
+	const vk::Extent2D &extent
 );
 
 } // namespace graphics

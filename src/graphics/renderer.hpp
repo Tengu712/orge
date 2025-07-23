@@ -18,14 +18,14 @@ private:
 		std::string pipelineId;
 	};
 
-	std::unique_ptr<Swapchain> _swapchain;
+	Swapchain _swapchain;
 	const vk::RenderPass _renderPass;
 	/// 描画処理コマンド用のコマンドバッファ
 	/// orgeは描画完了まで待機するので1個で十分
 	const vk::CommandBuffer _commandBuffer;
 	/// スワップチェインイメージ取得の完了を知るためのセマフォ
 	/// コマンドバッファ提出を待機させるために使う
-	const vk::Semaphore _semaphoreForImageEnabled;
+	vk::Semaphore _semaphoreForImageEnabled;
 	/// コマンドバッファ実行の完了を知るためのセマフォ
 	/// プレゼンテーション開始を待機させるために使う
 	const std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
@@ -33,7 +33,7 @@ private:
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
 	const vk::Fence _frameInFlightFence;
 	std::vector<Framebuffer> _framebuffers;
-	const vk::DescriptorPool _descPool;
+	vk::DescriptorPool _descPool;
 	std::unordered_map<std::string, Pipeline> _pipelines;
 	std::optional<FrameInfo> _frameInfo;
 
@@ -41,6 +41,21 @@ private:
 		if (!_frameInfo) {
 			throw emsg;
 		}
+	}
+
+	void _destroyForRecreatingSwapchainOrSurface(const vk::Device &device) {
+		for (const auto &n: _pipelines) {
+			n.second.destroy(device);
+		}
+		device.destroyDescriptorPool(_descPool);
+		for (const auto &n: _framebuffers) {
+			n.destroy(device);
+		}
+		_framebuffers.clear();
+		// NOTE: vk::Result::eSuboptimalKHRはセマフォをシグナルするらしいので、
+		//       直後のacuireNextImageKHRでヴァリデーションエラーが出ないように再作成。
+		device.destroy(_semaphoreForImageEnabled);
+		_semaphoreForImageEnabled = device.createSemaphore({});
 	}
 
 public:
@@ -74,7 +89,7 @@ public:
 		}
 		device.destroySemaphore(_semaphoreForImageEnabled);
 		device.destroyRenderPass(_renderPass);
-		_swapchain->destroy(instance, device);
+		_swapchain.destroy(instance, device);
 	}
 
 	const Pipeline &getPipeline(const char *id) const {
@@ -83,7 +98,7 @@ public:
 
 	void beginRender(const vk::Device &device);
 
-	void endRender(const vk::Queue &queue);
+	void endRender(const vk::Device &device, const vk::Queue &queue);
 
 	void bindMesh(const char *meshId, const Mesh &mesh) {
 		_ensureWhileRendering("try to bind a mesh before starting rendering.");
@@ -118,12 +133,22 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
-	void toggleFullscreen(
+	void recreateSwapchain(
+		const config::Config &config,
+		const vk::PhysicalDevice &physicalDevice,
+		const vk::Device &device
+	);
+
+	void recreateSurface(
 		const config::Config &config,
 		const vk::Instance &instance,
 		const vk::PhysicalDevice &physicalDevice,
 		const vk::Device &device
 	);
+
+	void toggleFullscreen() const noexcept {
+		_swapchain.toggleFullscreen();
+	}
 };
 
 } // namespace graphics

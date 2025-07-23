@@ -9,7 +9,7 @@
 		return 1; \
 	}
 
-#define TRY_CONTINUE(n) \
+#define CHECK(n) \
 	if (!(n)) { \
 		std::cout << orgeGetErrorMessage() << std::endl; \
 		continue; \
@@ -66,10 +66,7 @@ int main() {
 	);
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
-	TRY(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0, 0));
-
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
-	TRY(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2, 0));
 
 	std::array<float, 16> transform{
 		0.7f, 0.0f, 0.0f, 0.0f,
@@ -87,17 +84,20 @@ int main() {
 		const auto k = lr * lr > 0 && ud * ud > 0 ? 0.7071f : 1.0f;
 		transform[12] += lr * k * 0.01f;
 		transform[13] += ud * k * 0.01f;
-		TRY(orgeUpdateBuffer("transform", transform.data()));
+		CHECK(orgeUpdateBuffer("transform", transform.data()));
 
-		TRY(orgeBeginRender());
-		TRY(orgeDraw("mesh-pl", "triangle", 1, 0));
-		orgeNextSubpass();
-		TRY(orgeBindDescriptorSets("pattern-pl", PATTERN_PL_SET_INDICES.data()));
-		TRY(orgeDraw("pattern-pl", "square", 1, 0));
-		orgeNextSubpass();
-		TRY(orgeBindDescriptorSets("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
-		TRY(orgeDraw("integration-pl", "square", 1, 0));
-		TRY(orgeEndRender());
+		CHECK(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0, 0));
+		CHECK(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2, 0));
+
+		CHECK(orgeBeginRender());
+		CHECK(orgeDraw("mesh-pl", "triangle", 1, 0));
+		CHECK(orgeNextSubpass());
+		CHECK(orgeBindDescriptorSets("pattern-pl", PATTERN_PL_SET_INDICES.data()));
+		CHECK(orgeDraw("pattern-pl", "square", 1, 0));
+		CHECK(orgeNextSubpass());
+		CHECK(orgeBindDescriptorSets("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
+		CHECK(orgeDraw("integration-pl", "square", 1, 0));
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();

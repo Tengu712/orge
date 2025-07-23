@@ -8,6 +8,12 @@
 		return 1; \
 	}
 
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
+	}
+
 const std::vector<float> VERTICES{
 	-1.0f, 1.0f, 0.0f,
 	0.0f, -1.0f, 0.0f,
@@ -34,9 +40,6 @@ int main() {
 	TRY(orgeUpdateBuffer("red",   RED.data()));
 	TRY(orgeUpdateBuffer("green", GREEN.data()));
 	TRY(orgeUpdateBuffer("blue",  BLUE.data()));
-	TRY(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0, 0));
-	TRY(orgeUpdateBufferDescriptor("green", "PL", 0, 1, 0, 0));
-	TRY(orgeUpdateBufferDescriptor("blue",  "PL", 0, 2, 0, 0));
 
 	uint32_t state = 0;
 	while (orgeUpdate()) {
@@ -52,15 +55,16 @@ int main() {
 			std::cout << "return key released" << std::endl;
 		}
 
+		CHECK(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("green", "PL", 0, 1, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("blue",  "PL", 0, 2, 0, 0));
+
 		const std::vector<uint32_t> sets{state};
-		const auto result =
-			orgeBeginRender()
-			&& orgeBindDescriptorSets("PL", sets.data())
-			&& orgeDraw("PL", "triangle", 1, 0)
-			&& orgeEndRender();
-		if (!result) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+
+		CHECK(orgeBeginRender());
+		CHECK(orgeBindDescriptorSets("PL", sets.data()));
+		CHECK(orgeDraw("PL", "triangle", 1, 0));
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();

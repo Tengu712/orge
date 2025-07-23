@@ -121,10 +121,10 @@ std::vector<Framebuffer> createFramebuffers(
 	const config::Config &config,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
-	const std::unique_ptr<Swapchain> &swapchain,
+	const Swapchain &swapchain,
 	const vk::RenderPass &renderPass
 ) {
-	const auto swapchainImages = swapchain->getImages();
+	const auto swapchainImages = swapchain.getImages();
 	std::vector<Framebuffer> framebuffers;
 	framebuffers.reserve(swapchainImages.size());
 	for (const auto &n: swapchainImages) {
@@ -134,7 +134,7 @@ std::vector<Framebuffer> createFramebuffers(
 			device,
 			renderPass,
 			n,
-			swapchain->getExtent()
+			swapchain.getExtent()
 		);
 	}
 	return framebuffers;
@@ -147,7 +147,7 @@ Renderer::Renderer(
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) :
-	_swapchain(std::make_unique<Swapchain>(
+	_swapchain(
 		config.title,
 		config.width,
 		config.height,
@@ -155,15 +155,15 @@ Renderer::Renderer(
 		instance,
 		physicalDevice,
 		device
-	)),
+	),
 	_renderPass(createRenderPass(config, device)),
 	_commandBuffer(createCommandBuffer(device, commandPool)),
 	_semaphoreForImageEnabled(device.createSemaphore({})),
-	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain->getImages().size())),
+	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain.getImages().size())),
 	_frameInFlightFence(device.createFence({vk::FenceCreateFlagBits::eSignaled})),
 	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass)),
 	_descPool(createDescriptorPool(config, device)),
-	_pipelines(createPipelines(config, device, _renderPass, _descPool))
+	_pipelines(createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent()))
 {}
 
 void Renderer::beginRender(const vk::Device &device) {
@@ -171,29 +171,21 @@ void Renderer::beginRender(const vk::Device &device) {
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
 
-	// 前のフレームのGPU処理が完全に終了するまで待機
-	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
-		throw "failed to wait for rendering comletion.";
-	}
-	device.resetFences({_frameInFlightFence});
-
-	// コマンドバッファリセット
-	_commandBuffer.reset();
-
 	// コマンドバッファ開始
+	_commandBuffer.reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	_commandBuffer.begin(cbi);
 
 	// スワップチェインイメージ番号取得
-	const auto index = _swapchain->acquireNextImageIndex(device, _semaphoreForImageEnabled);
+	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
 
 	// レンダーパス開始
 	const auto &framebuffer = _framebuffers.at(index);
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(_renderPass)
 		.setFramebuffer(framebuffer.get())
-		.setRenderArea(vk::Rect2D({0, 0}, _swapchain->getExtent()))
+		.setRenderArea(vk::Rect2D({0, 0}, _swapchain.getExtent()))
 		.setClearValues(framebuffer.getClearValues());
 	_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 
@@ -201,12 +193,15 @@ void Renderer::beginRender(const vk::Device &device) {
 	_frameInfo.emplace(FrameInfo{index, "", 0, ""});
 }
 
-void Renderer::endRender(const vk::Queue &queue) {
+void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 	_ensureWhileRendering("try to end rendering before the rendering started.");
 
 	// 終了
 	_commandBuffer.endRenderPass();
 	_commandBuffer.end();
+
+	// フェンスのリセット
+	device.resetFences({_frameInFlightFence});
 
 	// 提出
 	// TODO: 提出に失敗するとフェンスがシグナルされない？
@@ -219,38 +214,40 @@ void Renderer::endRender(const vk::Queue &queue) {
 	queue.submit(si, _frameInFlightFence);
 
 	// プレゼンテーション
-	_swapchain->present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
+	_swapchain.present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
+
+	// 前のフレームのGPU処理が完全に終了するまで待機
+	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+		throw "failed to wait for rendering comletion.";
+	}
 
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
 }
 
-void Renderer::toggleFullscreen(
+void Renderer::recreateSwapchain(
+	const config::Config &config,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	_destroyForRecreatingSwapchainOrSurface(device);
+	_swapchain.recreateSwapchain(physicalDevice, device);
+	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(config, device);
+	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
+}
+
+void Renderer::recreateSurface(
 	const config::Config &config,
 	const vk::Instance &instance,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
-	device.waitIdle();
-
-	const auto fullscreen = _swapchain->isFullscreen();
-
-	for (const auto &n: _framebuffers) {
-		n.destroy(device);
-	}
-	_framebuffers.clear();
-	_swapchain->destroy(instance, device);
-
-	_swapchain = std::make_unique<Swapchain>(
-		config.title,
-		config.width,
-		config.height,
-		!fullscreen,
-		instance,
-		physicalDevice,
-		device
-	);
+	_destroyForRecreatingSwapchainOrSurface(device);
+	_swapchain.recreateSurface(instance, physicalDevice, device);
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(config, device);
+	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
 }
 
 } // namespace graphics

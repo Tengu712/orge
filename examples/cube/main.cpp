@@ -10,6 +10,12 @@
 		return 1; \
 	}
 
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
+	}
+
 const std::vector<float> VERTICES{
 	// 前
 	-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
@@ -99,34 +105,30 @@ int main() {
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
 	TRY(orgeUpdateBuffer("camera", &CAMERA));
-	TRY(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
 
 	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0));
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
 	TRY(orgeUpdateBuffer("scl", SCL.data()));
-	TRY(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
-	TRY(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1, 0));
 
 	TRY(orgeCreateImageFromFile("image", "image.png"));
-	TRY(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0, 0));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
-	TRY(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1, 0));
 
 	float ang = 0.0f;
 	while (orgeUpdate()) {
 		ang += 0.01f;
 		const auto rot = rotY(ang);
+		CHECK(orgeUpdateBuffer("rot", rot.data()));
 
-		const auto result =
-			orgeUpdateBuffer("rot", rot.data())
-			&& orgeBeginRender()
-			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
-			&& orgeDraw("PL", "cube", 1, 0)
-			&& orgeEndRender();
+		CHECK(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1, 0));
+		CHECK(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0, 0));
+		CHECK(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1, 0));
 
-		if (!result) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+		CHECK(orgeBeginRender());
+		CHECK(orgeBindDescriptorSets("PL", SET_INDICES.data()));
+		CHECK(orgeDraw("PL", "cube", 1, 0));
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();
