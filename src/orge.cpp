@@ -145,7 +145,7 @@ void orgeDestroyMesh(const char *id) {
 }
 
 int orgeBeginRender() {
-	TRY(g_graphics->beginRender());
+	TRY(g_graphics->beginRender(g_config.value()));
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {

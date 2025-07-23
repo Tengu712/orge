@@ -18,7 +18,7 @@ private:
 		std::string pipelineId;
 	};
 
-	std::unique_ptr<Swapchain> _swapchain;
+	Swapchain _swapchain;
 	const vk::RenderPass _renderPass;
 	/// 描画処理コマンド用のコマンドバッファ
 	/// orgeは描画完了まで待機するので1個で十分
@@ -74,7 +74,7 @@ public:
 		}
 		device.destroySemaphore(_semaphoreForImageEnabled);
 		device.destroyRenderPass(_renderPass);
-		_swapchain->destroy(instance, device);
+		_swapchain.destroy(instance, device);
 	}
 
 	const Pipeline &getPipeline(const char *id) const {
@@ -118,8 +118,21 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
+	void recreateSwapchain(
+		const config::Config &config,
+		const vk::PhysicalDevice &physicalDevice,
+		const vk::Device &device
+	);
+
+	void recreateSurface(
+		const config::Config &config,
+		const vk::Instance &instance,
+		const vk::PhysicalDevice &physicalDevice,
+		const vk::Device &device
+	);
+
 	void toggleFullscreen() const noexcept {
-		_swapchain->toggleFullscreen();
+		_swapchain.toggleFullscreen();
 	}
 };
 

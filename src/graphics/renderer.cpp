@@ -121,10 +121,10 @@ std::vector<Framebuffer> createFramebuffers(
 	const config::Config &config,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
-	const std::unique_ptr<Swapchain> &swapchain,
+	const Swapchain &swapchain,
 	const vk::RenderPass &renderPass
 ) {
-	const auto swapchainImages = swapchain->getImages();
+	const auto swapchainImages = swapchain.getImages();
 	std::vector<Framebuffer> framebuffers;
 	framebuffers.reserve(swapchainImages.size());
 	for (const auto &n: swapchainImages) {
@@ -134,7 +134,7 @@ std::vector<Framebuffer> createFramebuffers(
 			device,
 			renderPass,
 			n,
-			swapchain->getExtent()
+			swapchain.getExtent()
 		);
 	}
 	return framebuffers;
@@ -147,7 +147,7 @@ Renderer::Renderer(
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) :
-	_swapchain(std::make_unique<Swapchain>(
+	_swapchain(
 		config.title,
 		config.width,
 		config.height,
@@ -155,11 +155,11 @@ Renderer::Renderer(
 		instance,
 		physicalDevice,
 		device
-	)),
+	),
 	_renderPass(createRenderPass(config, device)),
 	_commandBuffer(createCommandBuffer(device, commandPool)),
 	_semaphoreForImageEnabled(device.createSemaphore({})),
-	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain->getImages().size())),
+	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain.getImages().size())),
 	_frameInFlightFence(device.createFence({vk::FenceCreateFlagBits::eSignaled})),
 	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass)),
 	_descPool(createDescriptorPool(config, device)),
@@ -175,7 +175,6 @@ void Renderer::beginRender(const vk::Device &device) {
 	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
 		throw "failed to wait for rendering comletion.";
 	}
-	device.resetFences({_frameInFlightFence});
 
 	// コマンドバッファリセット
 	_commandBuffer.reset();
@@ -186,14 +185,22 @@ void Renderer::beginRender(const vk::Device &device) {
 	_commandBuffer.begin(cbi);
 
 	// スワップチェインイメージ番号取得
-	const auto index = _swapchain->acquireNextImageIndex(device, _semaphoreForImageEnabled);
+	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
+
+	// フェンスのリセット
+	//
+	// NOTE: acquireNextImageIndex失敗時の回復処理で再度beginRenderが呼ばれた時に
+	//       フェンスがシグナルされることなく一生待機してしまうのを防ぐため遅めにリセットする。
+	// NOTE: コマンドバッファ提出前にリセットするのがコード的には綺麗なんだけど、
+	//       まあ挙動的には変わらないし、そのためにendRenderにdeviceを渡さないといけないのはアレなので。
+	device.resetFences({_frameInFlightFence});
 
 	// レンダーパス開始
 	const auto &framebuffer = _framebuffers.at(index);
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(_renderPass)
 		.setFramebuffer(framebuffer.get())
-		.setRenderArea(vk::Rect2D({0, 0}, _swapchain->getExtent()))
+		.setRenderArea(vk::Rect2D({0, 0}, _swapchain.getExtent()))
 		.setClearValues(framebuffer.getClearValues());
 	_commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 
@@ -219,10 +226,35 @@ void Renderer::endRender(const vk::Queue &queue) {
 	queue.submit(si, _frameInFlightFence);
 
 	// プレゼンテーション
-	_swapchain->present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
+	_swapchain.present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
 
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
+}
+
+void Renderer::recreateSwapchain(
+	const config::Config &config,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	for (const auto &n: _framebuffers) {
+		n.destroy(device);
+	}
+	_swapchain.recreateSwapchain(physicalDevice, device);
+	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
+}
+
+void Renderer::recreateSurface(
+	const config::Config &config,
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	for (const auto &n: _framebuffers) {
+		n.destroy(device);
+	}
+	_swapchain.recreateSurface(instance, physicalDevice, device);
+	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
 }
 
 } // namespace graphics

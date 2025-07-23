@@ -168,9 +168,7 @@ public:
 		}
 	}
 
-	void beginRender() {
-		_renderer.beginRender(_device);
-	}
+	void beginRender(const config::Config &config);
 
 	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);

@@ -38,7 +38,8 @@ vk::SwapchainKHR createSwapchain(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const vk::SurfaceKHR &surface,
-	const vk::Extent2D &extent
+	const vk::Extent2D &extent,
+	const vk::SwapchainKHR &oldSwapchain = nullptr
 ) {
 	const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 	const auto ci = vk::SwapchainCreateInfoKHR()
@@ -53,7 +54,8 @@ vk::SwapchainKHR createSwapchain(
 		.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
 		.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
 		.setPresentMode(vk::PresentModeKHR::eFifo)
-		.setClipped(vk::True);
+		.setClipped(vk::True)
+		.setOldSwapchain(oldSwapchain);
 	return device.createSwapchainKHR(ci);
 }
 
@@ -96,6 +98,25 @@ Swapchain::Swapchain(
 	if (!ok) {
 		throw "the surface color space is invalid.";
 	}
+}
+
+void Swapchain::recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
+	const auto old = _swapchain;
+	_extent = physicalDevice.getSurfaceCapabilitiesKHR(_surface).currentExtent;
+	_swapchain = createSwapchain(physicalDevice, device, _surface, _extent, old);
+	_images = getImagesFrom(physicalDevice, device, _surface, _swapchain);
+	device.destroySwapchainKHR(old);
+}
+
+void Swapchain::recreateSurface(
+	const vk::Instance &instance,
+	const vk::PhysicalDevice &physicalDevice,
+	const vk::Device &device
+) {
+	const auto old = _surface;
+	_surface = createSurface(_window, instance);
+	recreateSwapchain(physicalDevice, device);
+	instance.destroySurfaceKHR(old);
 }
 
 } // namespace graphics

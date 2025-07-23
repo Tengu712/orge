@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "../error/error.hpp"
 #include "platform.hpp"
 
 #include <SDL3/SDL_vulkan.h>
@@ -102,6 +103,25 @@ Graphics::Graphics(const config::Config &config) :
 	_renderer(config, _instance, _physicalDevice, _device, _commandPool)
 {
 	initializeUtils(_device, _commandPool);
+}
+
+void Graphics::beginRender(const config::Config &config) {
+	try {
+		_renderer.beginRender(_device);
+	} catch (const error::SpecialError &e) {
+		switch (e) {
+		case error::SpecialError::NeedRecreateSwapchain:
+			_device.waitIdle();
+			_renderer.recreateSwapchain(config, _physicalDevice, _device);
+			throw "swapchain recreated.";
+		case error::SpecialError::NeedRecreateSurface:
+			_device.waitIdle();
+			_renderer.recreateSurface(config, _instance, _physicalDevice, _device);
+			throw "surface recreated.";
+		default:
+			throw e;
+		}
+	}
 }
 
 } // namespace graphics

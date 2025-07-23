@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../error/error.hpp"
+
 #include <memory>
 #include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>
@@ -11,10 +13,10 @@ using Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 class Swapchain {
 private:
 	const Window _window;
-	const vk::SurfaceKHR _surface;
-	const vk::Extent2D _extent;
-	const vk::SwapchainKHR _swapchain;
-	const std::vector<vk::Image> _images;
+	vk::SurfaceKHR _surface;
+	vk::Extent2D _extent;
+	vk::SwapchainKHR _swapchain;
+	std::vector<vk::Image> _images;
 
 public:
 	Swapchain(const Swapchain &)  = delete;
@@ -46,13 +48,29 @@ public:
 		return _images;
 	}
 
+	void recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
+
+	void recreateSurface(const vk::Instance &instance, const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
+
 	/// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
 	///
 	/// イメージの取得が完了したら与えられたセマフォをシグナルする。
+	///
+	/// WARN: 対処すべき例外が発生したらSpecialErrorを投げるので、適宜対処すること。
 	uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore) const {
-		// TODO: ここでスワップチェインの有効性を確認できるので、
-		//       独自の例外をキャッチしてもらってSwapchainを再作成してもらう。
-		return device.acquireNextImageKHR(_swapchain, UINT64_MAX, semaphore, nullptr).value;
+		const auto result = device.acquireNextImageKHR(_swapchain, UINT64_MAX, semaphore, nullptr);
+		if (result.result == vk::Result::eSuccess) {
+			return result.value;
+		}
+		switch (result.result) {
+		case vk::Result::eSuboptimalKHR:
+		case vk::Result::eErrorOutOfDateKHR:
+			throw error::SpecialError::NeedRecreateSwapchain;
+		case vk::Result::eErrorSurfaceLostKHR:
+			throw error::SpecialError::NeedRecreateSurface;
+		default:
+			throw result.result;
+		}
 	}
 
 	/// プレゼンテーションを行う関数
