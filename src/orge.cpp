@@ -58,8 +58,7 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
-			// TODO: エラーハンドリング。
-			g_graphics->toggleFullscreen(g_config.value());
+			g_graphics->toggleFullscreen();
 		}
 	}
 	input::update();

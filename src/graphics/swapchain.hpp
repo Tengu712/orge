@@ -46,10 +46,6 @@ public:
 		return _images;
 	}
 
-	bool isFullscreen() const noexcept {
-		return static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
-	}
-
 	/// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
 	///
 	/// イメージの取得が完了したら与えられたセマフォをシグナルする。
@@ -71,6 +67,13 @@ public:
 		if (queue.presentKHR(pi) != vk::Result::eSuccess) {
 			throw "failed to present the screen.";
 		}
+	}
+
+	// TODO: エラーハンドリング
+	void toggleFullscreen() const noexcept {
+		const auto isFullscreen = static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
+		SDL_SetWindowFullscreen(_window.get(), !isFullscreen);
+		SDL_SyncWindow(_window.get());
 	}
 };
 

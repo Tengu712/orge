@@ -118,12 +118,9 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
-	void toggleFullscreen(
-		const config::Config &config,
-		const vk::Instance &instance,
-		const vk::PhysicalDevice &physicalDevice,
-		const vk::Device &device
-	);
+	void toggleFullscreen() const noexcept {
+		_swapchain->toggleFullscreen();
+	}
 };
 
 } // namespace graphics

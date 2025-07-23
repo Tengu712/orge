@@ -19,6 +19,9 @@ Window createWindow(const std::string &title, uint32_t width, uint32_t height, b
 	if (!window) {
 		throw "failed to create a window.";
 	}
+	if (!SDL_SetWindowFullscreenMode(window, nullptr)) {
+		throw "failed to set borderless fullscreen desktop mode.";
+	}
 	return Window(window, SDL_DestroyWindow);
 }
 

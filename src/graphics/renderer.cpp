@@ -225,32 +225,4 @@ void Renderer::endRender(const vk::Queue &queue) {
 	_frameInfo = std::nullopt;
 }
 
-void Renderer::toggleFullscreen(
-	const config::Config &config,
-	const vk::Instance &instance,
-	const vk::PhysicalDevice &physicalDevice,
-	const vk::Device &device
-) {
-	device.waitIdle();
-
-	const auto fullscreen = _swapchain->isFullscreen();
-
-	for (const auto &n: _framebuffers) {
-		n.destroy(device);
-	}
-	_framebuffers.clear();
-	_swapchain->destroy(instance, device);
-
-	_swapchain = std::make_unique<Swapchain>(
-		config.title,
-		config.width,
-		config.height,
-		!fullscreen,
-		instance,
-		physicalDevice,
-		device
-	);
-	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
-}
-
 } // namespace graphics

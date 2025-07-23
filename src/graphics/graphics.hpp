@@ -52,8 +52,8 @@ public:
 		_instance.destroy();
 	}
 
-	void toggleFullscreen(const config::Config &config) {
-		_renderer.toggleFullscreen(config, _instance, _physicalDevice, _device);
+	void toggleFullscreen() const noexcept {
+		_renderer.toggleFullscreen();
 	}
 
 	void createBuffer(const char *id, uint64_t size, int isStorage) {
