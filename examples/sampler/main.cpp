@@ -9,6 +9,12 @@
 		return 1; \
 	}
 
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
+	}
+
 const std::vector<float> VERTICES{
 	-1.0f, 1.0f, 0.0f,
 	0.0f, 1.0f,
@@ -41,18 +47,10 @@ int main() {
 	);
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
-	TRY(orgeUpdateBufferDescriptor("transform", "PL", 0, 0, 0, 0));
-
 	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));
-	TRY(orgeUpdateBufferDescriptor("sampler-index", "PL", 1, 0, 0, 0));
-
 	TRY(orgeCreateImage("texture", 2, 2, PIXELS.data()));
-	TRY(orgeUpdateImageDescriptor("texture", "PL", 1, 0, 1, 0));
-
 	TRY(orgeCreateSampler("nearest", 0, 0, 0));
 	TRY(orgeCreateSampler("linear",  1, 1, 0));
-	TRY(orgeUpdateSamplerDescriptor("nearest", "PL", 1, 0, 2, 0));
-	TRY(orgeUpdateSamplerDescriptor("linear",  "PL", 1, 0, 2, 1));
 
 	std::array<float, 16> transform{
 		0.5f, 0.0f, 0.0f, 0.0f,
@@ -81,16 +79,19 @@ int main() {
 			}
 		}
 
-		const auto result =
-			orgeUpdateBuffer("transform", transform.data())
-			&& orgeUpdateBuffer("sampler-index", &samplerIndex)
-			&& orgeBeginRender()
-			&& orgeBindDescriptorSets("PL", SET_INDICES.data())
-			&& orgeDraw("PL", "square", 1, 0)
-			&& orgeEndRender();
-		if (!result) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+		CHECK(orgeUpdateBuffer("transform", transform.data()));
+		CHECK(orgeUpdateBuffer("sampler-index", &samplerIndex));
+
+		CHECK(orgeUpdateBufferDescriptor("transform", "PL", 0, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("sampler-index", "PL", 1, 0, 0, 0));
+		CHECK(orgeUpdateImageDescriptor("texture", "PL", 1, 0, 1, 0));
+		CHECK(orgeUpdateSamplerDescriptor("nearest", "PL", 1, 0, 2, 0));
+		CHECK(orgeUpdateSamplerDescriptor("linear",  "PL", 1, 0, 2, 1));
+
+		CHECK(orgeBeginRender());
+		CHECK(orgeBindDescriptorSets("PL", SET_INDICES.data()));
+		CHECK(orgeDraw("PL", "square", 1, 0));
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();
