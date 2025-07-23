@@ -72,7 +72,8 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 	const config::Config &config,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
-	const vk::DescriptorPool &descPool
+	const vk::DescriptorPool &descPool,
+	const vk::Extent2D &extent
 ) {
 	if (config.pipelines.empty()) {
 		return {};
@@ -84,9 +85,9 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 
 	// ビューポート
 	std::vector<vk::Viewport> viewports;
-	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(config.width), static_cast<float>(config.height), 0.0f, 1.0f);
+	viewports.emplace_back(0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f);
 	std::vector<vk::Rect2D> scissors;
-	scissors.emplace_back(vk::Offset2D(0, 0), vk::Extent2D(config.width, config.height));
+	scissors.emplace_back(vk::Offset2D(0, 0), extent);
 	const auto vsci = vk::PipelineViewportStateCreateInfo()
 		.setViewports(viewports)
 		.setScissors(scissors);

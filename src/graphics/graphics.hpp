@@ -181,7 +181,7 @@ public:
 	}
 
 	void endRender() {
-		_renderer.endRender(_queue);
+		_renderer.endRender(_device, _queue);
 	}
 
 	void toggleFullscreen() const noexcept {

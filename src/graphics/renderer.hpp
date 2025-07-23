@@ -33,7 +33,7 @@ private:
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
 	const vk::Fence _frameInFlightFence;
 	std::vector<Framebuffer> _framebuffers;
-	const vk::DescriptorPool _descPool;
+	vk::DescriptorPool _descPool;
 	std::unordered_map<std::string, Pipeline> _pipelines;
 	std::optional<FrameInfo> _frameInfo;
 
@@ -44,6 +44,10 @@ private:
 	}
 
 	void _destroyForRecreatingSwapchainOrSurface(const vk::Device &device) {
+		for (const auto &n: _pipelines) {
+			n.second.destroy(device);
+		}
+		device.destroyDescriptorPool(_descPool);
 		for (const auto &n: _framebuffers) {
 			n.destroy(device);
 		}
@@ -94,7 +98,7 @@ public:
 
 	void beginRender(const vk::Device &device);
 
-	void endRender(const vk::Queue &queue);
+	void endRender(const vk::Device &device, const vk::Queue &queue);
 
 	void bindMesh(const char *meshId, const Mesh &mesh) {
 		_ensureWhileRendering("try to bind a mesh before starting rendering.");

@@ -163,7 +163,7 @@ Renderer::Renderer(
 	_frameInFlightFence(device.createFence({vk::FenceCreateFlagBits::eSignaled})),
 	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass)),
 	_descPool(createDescriptorPool(config, device)),
-	_pipelines(createPipelines(config, device, _renderPass, _descPool))
+	_pipelines(createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent()))
 {}
 
 void Renderer::beginRender(const vk::Device &device) {
@@ -171,29 +171,14 @@ void Renderer::beginRender(const vk::Device &device) {
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
 
-	// 前のフレームのGPU処理が完全に終了するまで待機
-	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
-		throw "failed to wait for rendering comletion.";
-	}
-
-	// コマンドバッファリセット
-	_commandBuffer.reset();
-
 	// コマンドバッファ開始
+	_commandBuffer.reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	_commandBuffer.begin(cbi);
 
 	// スワップチェインイメージ番号取得
 	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
-
-	// フェンスのリセット
-	//
-	// NOTE: acquireNextImageIndex失敗時の回復処理で再度beginRenderが呼ばれた時に
-	//       フェンスがシグナルされることなく一生待機してしまうのを防ぐため遅めにリセットする。
-	// NOTE: コマンドバッファ提出前にリセットするのがコード的には綺麗なんだけど、
-	//       まあ挙動的には変わらないし、そのためにendRenderにdeviceを渡さないといけないのはアレなので。
-	device.resetFences({_frameInFlightFence});
 
 	// レンダーパス開始
 	const auto &framebuffer = _framebuffers.at(index);
@@ -208,12 +193,15 @@ void Renderer::beginRender(const vk::Device &device) {
 	_frameInfo.emplace(FrameInfo{index, "", 0, ""});
 }
 
-void Renderer::endRender(const vk::Queue &queue) {
+void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 	_ensureWhileRendering("try to end rendering before the rendering started.");
 
 	// 終了
 	_commandBuffer.endRenderPass();
 	_commandBuffer.end();
+
+	// フェンスのリセット
+	device.resetFences({_frameInFlightFence});
 
 	// 提出
 	// TODO: 提出に失敗するとフェンスがシグナルされない？
@@ -228,6 +216,11 @@ void Renderer::endRender(const vk::Queue &queue) {
 	// プレゼンテーション
 	_swapchain.present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
 
+	// 前のフレームのGPU処理が完全に終了するまで待機
+	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+		throw "failed to wait for rendering comletion.";
+	}
+
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
 }
@@ -237,9 +230,13 @@ void Renderer::recreateSwapchain(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
+	// TODO: 然るべき場所で。
+	_commandBuffer.reset();
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSwapchain(physicalDevice, device);
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(config, device);
+	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
 }
 
 void Renderer::recreateSurface(
@@ -248,9 +245,13 @@ void Renderer::recreateSurface(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
+	// TODO: 然るべき場所で。
+	_commandBuffer.reset();
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSurface(instance, physicalDevice, device);
 	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(config, device);
+	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
 }
 
 } // namespace graphics
