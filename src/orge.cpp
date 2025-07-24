@@ -65,6 +65,10 @@ int orgeUpdate(void) {
 	return 1;
 }
 
+void orgeShowErrorDialog() {
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
+}
+
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	TRY(g_graphics->createBuffer(id, size, isStorage));
 }

@@ -5,6 +5,11 @@ if(BUILD_EXAMPLES OR BUILD_EXAMPLE_SIMPLE)
 	add_subdirectory(simple)
 endif()
 
+option(BUILD_EXAMPLE_DIALOG "examples/dialogをビルドする" OFF)
+if(BUILD_EXAMPLES OR BUILD_EXAMPLE_DIALOG)
+	add_subdirectory(dialog)
+endif()
+
 option(BUILD_EXAMPLE_TRIANGLE "examples/triangleをビルドする" OFF)
 if(BUILD_EXAMPLES OR BUILD_EXAMPLE_TRIANGLE)
 	add_subdirectory(triangle)
