@@ -4,18 +4,18 @@
 
 namespace graphics {
 
-vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &device) {
+vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &device, const vk::Format &rtFormat) {
 	// アタッチメント
 	std::vector<vk::AttachmentDescription> attachments;
 	for (const auto &n: config.attachments) {
 		attachments.emplace_back(
 			vk::AttachmentDescriptionFlags(),
 			n.format == config::Format::RenderTarget
-				? platformRenderTargetPixelFormat()
+				? rtFormat
 				: n.format == config::Format::DepthBuffer
 				? vk::Format::eD32Sfloat
 				: n.format == config::Format::ShareColorAttachment
-				? platformRenderTargetPixelFormat()
+				? rtFormat
 				: throw,
 			vk::SampleCountFlagBits::e1,
 			vk::AttachmentLoadOp::eClear,
@@ -132,9 +132,9 @@ std::vector<Framebuffer> createFramebuffers(
 			config,
 			physicalDevice.getMemoryProperties(),
 			device,
-			renderPass,
+			swapchain,
 			n,
-			swapchain.getExtent()
+			renderPass
 		);
 	}
 	return framebuffers;
@@ -156,7 +156,7 @@ Renderer::Renderer(
 		physicalDevice,
 		device
 	),
-	_renderPass(createRenderPass(config, device)),
+	_renderPass(createRenderPass(config, device, _swapchain.getFormat())),
 	_commandBuffer(createCommandBuffer(device, commandPool)),
 	_semaphoreForImageEnabled(device.createSemaphore({})),
 	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain.getImages().size())),

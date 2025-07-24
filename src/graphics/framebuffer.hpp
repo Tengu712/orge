@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "swapchain.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -39,9 +40,9 @@ public:
 		const config::Config &config,
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
-		const vk::RenderPass &renderPass,
+		const Swapchain &swapchain,
 		const vk::Image &swapchainImage,
-		const vk::Extent2D &swapchainImageExtent
+		const vk::RenderPass &renderPass
 	);
 
 	void destroy(const vk::Device &device) const noexcept {

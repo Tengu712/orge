@@ -15,6 +15,7 @@ private:
 	const Window _window;
 	vk::SurfaceKHR _surface;
 	vk::Extent2D _extent;
+	vk::Format _format;
 	vk::SwapchainKHR _swapchain;
 	std::vector<vk::Image> _images;
 
@@ -42,6 +43,10 @@ public:
 
 	const vk::Extent2D &getExtent() const noexcept {
 		return _extent;
+	}
+
+	const vk::Format &getFormat() const noexcept {
+		return _format;
 	}
 
 	const std::vector<vk::Image> &getImages() const noexcept {

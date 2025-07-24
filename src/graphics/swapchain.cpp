@@ -34,19 +34,39 @@ vk::SurfaceKHR createSurface(const Window &window, const vk::Instance &instance)
 	}
 }
 
+vk::Format getFormatFrom(const vk::PhysicalDevice &physicalDevice, const vk::SurfaceKHR &surface) {
+	const std::vector<vk::Format> favorites{
+		vk::Format::eB8G8R8A8Srgb,
+		vk::Format::eR8G8B8A8Srgb,
+		vk::Format::eB8G8R8A8Unorm,
+		vk::Format::eR8G8B8A8Unorm,
+	};
+	const auto formats = physicalDevice.getSurfaceFormatsKHR(surface);
+	for (const auto &n: favorites) {
+		const auto ok = std::any_of(formats.cbegin(), formats.cend(), [&n](const auto &m) {
+			return m.format == n && m.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+		});
+		if (ok) {
+			return n;
+		}
+	}
+	throw "the surface format and color space are invalid.";
+}
+
 vk::SwapchainKHR createSwapchain(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const vk::SurfaceKHR &surface,
 	const vk::Extent2D &extent,
+	const vk::Format &format,
 	const vk::SwapchainKHR &oldSwapchain = nullptr
 ) {
 	const auto caps = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 	const auto ci = vk::SwapchainCreateInfoKHR()
 		.setSurface(surface)
 		.setMinImageCount(getImageCount(caps))
-		.setImageFormat(platformRenderTargetPixelFormat())
-		.setImageColorSpace(platformRenderTargetColorSpace())
+		.setImageFormat(format)
+		.setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear)
 		.setImageExtent(extent)
 		.setImageArrayLayers(1)
 		.setImageUsage(vk::ImageUsageFlagBits::eColorAttachment)
@@ -87,23 +107,16 @@ Swapchain::Swapchain(
 	_window(createWindow(title, width, height, fullscreen)),
 	_surface(createSurface(_window, instance)),
 	_extent(physicalDevice.getSurfaceCapabilitiesKHR(_surface).currentExtent),
-	_swapchain(createSwapchain(physicalDevice, device, _surface, _extent)),
+	_format(getFormatFrom(physicalDevice, _surface)),
+	_swapchain(createSwapchain(physicalDevice, device, _surface, _extent, _format)),
 	_images(getImagesFrom(physicalDevice, device, _surface, _swapchain))
-{
-	// TODO: 決め打ちしない方が良いかもしれない。
-	const auto formats = physicalDevice.getSurfaceFormatsKHR(_surface);
-	const auto ok = std::any_of(formats.cbegin(), formats.cend(), [](const auto &n) {
-		return n.format == platformRenderTargetPixelFormat() && n.colorSpace == platformRenderTargetColorSpace();
-	});
-	if (!ok) {
-		throw "the surface color space is invalid.";
-	}
-}
+{}
 
 void Swapchain::recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device) {
 	const auto old = _swapchain;
 	_extent = physicalDevice.getSurfaceCapabilitiesKHR(_surface).currentExtent;
-	_swapchain = createSwapchain(physicalDevice, device, _surface, _extent, old);
+	_format = getFormatFrom(physicalDevice, _surface);
+	_swapchain = createSwapchain(physicalDevice, device, _surface, _extent, _format, old);
 	_images = getImagesFrom(physicalDevice, device, _surface, _swapchain);
 	device.destroySwapchainKHR(old);
 }
