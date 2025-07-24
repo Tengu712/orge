@@ -1,24 +1,18 @@
 #include "graphics.hpp"
 
 #include "../error/error.hpp"
-#include "platform.hpp"
 
 #include <SDL3/SDL_vulkan.h>
 
 namespace graphics {
 
 std::vector<const char *> getInstanceExtensions() {
-	const auto platformExtensions = platformInstanceExtensions();
-
 	Uint32 count = 0;
-	const auto windowExtensions_ = SDL_Vulkan_GetInstanceExtensions(&count);
-	const auto windowExtensions = std::span(windowExtensions_, static_cast<size_t>(count));
-
-	std::vector<const char *> extensions;
-	extensions.reserve(platformExtensions.size() + windowExtensions.size());
-	extensions.insert(extensions.end(), platformExtensions.begin(), platformExtensions.end());
-	extensions.insert(extensions.end(), windowExtensions.begin(), windowExtensions.end());
-
+	const auto extensions_ = SDL_Vulkan_GetInstanceExtensions(&count);
+	auto extensions = std::vector(extensions_, extensions_ + static_cast<size_t>(count));
+#ifdef __APPLE__
+	extensions.push_back("VK_KHR_portability_enumeration");
+#endif
 	return extensions;
 }
 
@@ -31,13 +25,18 @@ std::vector<const char *> getInstanceLayers() {
 }
 
 vk::Instance createInstance() {
+#ifdef __APPLE__
+	const auto flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+#else
+	const auto flags = vk::InstanceCreateFlags();
+#endif
 	const auto extensions = getInstanceExtensions();
 	const auto layers = getInstanceLayers();
 	const auto ai = vk::ApplicationInfo()
 		.setPEngineName("orge")
 		.setApiVersion(VK_API_VERSION_1_1);
 	const auto ci = vk::InstanceCreateInfo()
-		.setFlags(platformInstanceCreateFlags())
+		.setFlags(flags)
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions)
 		.setPEnabledLayerNames(layers);
@@ -66,19 +65,12 @@ uint32_t getQueueFamilyIndex(const vk::PhysicalDevice &physicalDevice) {
 	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
 
-std::vector<const char *> getDeviceExtensions() {
-	const auto platformExtensions = platformDeviceExtensions();
-
-	std::vector<const char *> extensions;
-	extensions.reserve(platformExtensions.size() + 1);
-	extensions.insert(extensions.end(), platformExtensions.begin(), platformExtensions.end());
-	extensions.push_back("VK_KHR_swapchain");
-
-	return extensions;
-}
-
 vk::Device createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queueFamilyIndex) {
-	const auto extensions = getDeviceExtensions();
+#ifdef __APPLE__
+	const std::array<const char *, 2> extensions{"VK_KHR_swapchain", "VK_KHR_portability_subset"};
+#else
+	const std::array<const char *, 1> extensions{"VK_KHR_swapchain"};
+#endif
 	const auto priority = 1.0f;
 	const auto qci = vk::DeviceQueueCreateInfo()
 		.setQueueFamilyIndex(queueFamilyIndex)

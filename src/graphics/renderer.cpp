@@ -1,7 +1,5 @@
 #include "renderer.hpp"
 
-#include "platform.hpp"
-
 namespace graphics {
 
 vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &device, const vk::Format &rtFormat) {
