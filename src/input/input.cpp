@@ -1,7 +1,5 @@
 #include "input.hpp"
 
-#include <orge.h>
-
 #include <unordered_map>
 #include <SDL3/SDL.h>
 
@@ -69,14 +67,6 @@ const std::unordered_map<OrgeScancode, SDL_Scancode> ORGE_SDL_MAP{
 
 std::unordered_map<OrgeScancode, int32_t> g_states;
 
-int32_t getState(OrgeScancode scancode) {
-	if (input::g_states.contains(scancode)) {
-		return input::g_states.at(scancode);
-	} else {
-		return 0;
-	}
-}
-
 void update() {
 	int numKeys = 0;
 	const auto states = SDL_GetKeyboardState(&numKeys);
@@ -110,8 +100,12 @@ void update() {
 	}
 }
 
-} // namespace input
-
-int32_t orgeGetKeyState(uint32_t scancode) {
-	return input::getState(static_cast<OrgeScancode>(scancode));
+int32_t getState(OrgeScancode scancode) {
+	if (input::g_states.contains(scancode)) {
+		return input::g_states.at(scancode);
+	} else {
+		return 0;
+	}
 }
+
+} // namespace input

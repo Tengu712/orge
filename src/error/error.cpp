@@ -8,8 +8,8 @@ void setMessage(const std::string &e) {
 	g_message = e;
 }
 
-} // namespace error
-
-const char *orgeGetErrorMessage(void) {
-	return error::g_message.c_str();
+const std::string &getMessage() {
+	return g_message;
 }
+
+} // namespace error

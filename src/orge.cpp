@@ -7,6 +7,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 #ifdef __APPLE__
 # define MODKEY SDL_KMOD_GUI
@@ -14,24 +15,77 @@
 # define MODKEY SDL_KMOD_ALT
 #endif
 
+#define TRY(n) \
+	try { \
+		n; \
+		return 1; \
+	} catch (const char *e) { \
+		error::setMessage(std::string(e)); \
+		return 0; \
+	} catch (const std::string &e) { \
+		error::setMessage(e); \
+		return 0; \
+	} catch (const vk::Result &e) { \
+		error::setMessage("vulkan result: " + std::to_string(static_cast<int64_t>(e))); \
+		return 0; \
+	} catch (const vk::SystemError &e) { \
+		error::setMessage(std::string(e.what())); \
+		return 0; \
+	} catch (const std::exception &e) { \
+		error::setMessage(e.what()); \
+		return 0; \
+	} catch (...) { \
+		error::setMessage("unbound error."); \
+		return 0; \
+    }
+
 namespace {
 
 std::optional<config::Config> g_config;
 std::unique_ptr<graphics::Graphics> g_graphics;
 
-int initialize() {
-	TRY(
-		if (!SDL_Init(SDL_INIT_VIDEO)) {
-			throw "failed to prepare for creating a window.";
-		}
-		if (!SDL_Vulkan_LoadLibrary(nullptr)) {
-			throw "failed to load Vulkan.";
-		}
-		g_graphics = std::make_unique<graphics::Graphics>(g_config.value());
-	)
+void initialize() {
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		throw "failed to prepare for creating a window.";
+	}
+	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
+		throw "failed to load Vulkan.";
+	}
+	g_graphics = std::make_unique<graphics::Graphics>(g_config.value());
 }
 
 } // namespace
+
+// ================================================================================================================== //
+//     Information                                                                                                    //
+// ================================================================================================================== //
+
+void orgeShowDialog(uint32_t dtype, const char *title, const char *message) {
+	SDL_MessageBoxFlags flags = SDL_MESSAGEBOX_ERROR;
+	switch (static_cast<OrgeDialogType>(dtype)) {
+	case ORGE_DIALOG_TYPE_WARNING:
+		flags = SDL_MESSAGEBOX_WARNING;
+		break;
+	case ORGE_DIALOG_TYPE_INFORMATION:
+		flags = SDL_MESSAGEBOX_INFORMATION;
+		break;
+	default:
+		break;
+	}
+	SDL_ShowSimpleMessageBox(flags, title, message, nullptr);
+}
+
+const char *orgeGetErrorMessage(void) {
+	return error::getMessage().c_str();
+}
+
+void orgeShowErrorDialog() {
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
+}
+
+// ================================================================================================================== //
+//     Lifetime Managiment                                                                                            //
+// ================================================================================================================== //
 
 int orgeInitialize(const char *yaml) {
 	TRY(
@@ -65,24 +119,9 @@ int orgeUpdate(void) {
 	return 1;
 }
 
-void orgeShowDialog(uint32_t dtype, const char *title, const char *message) {
-	SDL_MessageBoxFlags flags = SDL_MESSAGEBOX_ERROR;
-	switch (static_cast<OrgeDialogType>(dtype)) {
-	case ORGE_DIALOG_TYPE_WARNING:
-		flags = SDL_MESSAGEBOX_WARNING;
-		break;
-	case ORGE_DIALOG_TYPE_INFORMATION:
-		flags = SDL_MESSAGEBOX_INFORMATION;
-		break;
-	default:
-		break;
-	}
-	SDL_ShowSimpleMessageBox(flags, title, message, nullptr);
-}
-
-void orgeShowErrorDialog() {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
-}
+// ================================================================================================================== //
+//     Graphics Resources                                                                                             //
+// ================================================================================================================== //
 
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	TRY(g_graphics->createBuffer(id, size, isStorage));
@@ -163,6 +202,10 @@ void orgeDestroyMesh(const char *id) {
 	g_graphics->destroyMesh(id);
 }
 
+// ================================================================================================================== //
+//     Rendering                                                                                                      //
+// ================================================================================================================== //
+
 int orgeBeginRender() {
 	TRY(g_graphics->beginRender(g_config.value()));
 }
@@ -181,4 +224,12 @@ int orgeNextSubpass() {
 
 int orgeEndRender() {
 	TRY(g_graphics->endRender());
+}
+
+// ================================================================================================================== //
+//     Input                                                                                                          //
+// ================================================================================================================== //
+
+int32_t orgeGetKeyState(uint32_t scancode) {
+	return input::getState(static_cast<OrgeScancode>(scancode));
 }
