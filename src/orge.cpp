@@ -111,7 +111,12 @@ int orgeUpdate(void) {
 		if (event.type == SDL_EVENT_QUIT) {
 			return 0;
 		}
-		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
+		if (
+			g_config->altTabToggleFullscreen
+				&& event.type == SDL_EVENT_KEY_DOWN
+				&& event.key.key == SDLK_RETURN
+				&& (event.key.mod & MODKEY)
+		) {
 			g_graphics->toggleFullscreen();
 		}
 	}

@@ -20,8 +20,17 @@ orgeでは初期化時の設定をYAMLファイルあるいはYAML形式の文�
 title: string
 
 # ウィンドウの内側のサイズ
+# フルスクリーン時はこのサイズのアスペクト比を保ってスケーリングされる
 width: unsigned int
 height: unsigned int
+
+# フルスクリーン状態で開始するか
+# 省略された場合、falseとみなされる
+fullscreen: bool
+
+# Alt+TabあるいはCmd+Tabでのフルスクリーン・非フルスクリーンを許可するか
+# 省略された場合、trueとみなされる
+alt-tab-toggle-fullscreen: bool
 
 # ========== Attachment Definition ============= #
 

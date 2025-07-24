@@ -12,6 +12,8 @@ using Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 
 class Swapchain {
 private:
+	const uint32_t _width;
+	const uint32_t _height;
 	const Window _window;
 	vk::SurfaceKHR _surface;
 	vk::Extent2D _extent;
@@ -96,6 +98,9 @@ public:
 	void toggleFullscreen() const noexcept {
 		const auto isFullscreen = static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
 		SDL_SetWindowFullscreen(_window.get(), !isFullscreen);
+		if (isFullscreen) {
+			SDL_SetWindowSize(_window.get(), static_cast<int>(_width), static_cast<int>(_height));
+		}
 		SDL_SyncWindow(_window.get());
 	}
 };

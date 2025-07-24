@@ -196,11 +196,17 @@ PipelineConfig::PipelineConfig(const YAML::Node &node) {
 }
 
 Config::Config(const YAML::Node &node) {
-	validateKeys(node, {"title", "width", "height", "attachments", "subpasses"}, {"pipelines"});
+	validateKeys(
+		node,
+		{"title", "width", "height", "attachments", "subpasses"},
+		{"fullscreen", "alt-tab-toggle-fullscreen", "pipelines"}
+	);
 
 	title = s(node, "title");
 	width = u(node, "width");
 	height = u(node, "height");
+	fullscreen = b(node, "fullscreen", false);
+	altTabToggleFullscreen = b(node, "alt-tab-toggle-fullscreen", true);
 
 	for (const auto &n: node["attachments"]) {
 		attachments.emplace_back(n);
