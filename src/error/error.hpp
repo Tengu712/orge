@@ -15,7 +15,7 @@ std::string enumToInt64String(const T &n) {
 }
 
 template<typename T, typename U>
-decltype(auto) at(const T &container, const U &key, const std::string &subject) {
+auto at(const T &container, const U &key, const std::string &subject) -> decltype((container.at(key))) {
 	try {
 		return container.at(key);
 	} catch (const std::out_of_range &e) {
