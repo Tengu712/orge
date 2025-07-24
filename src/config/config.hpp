@@ -60,7 +60,7 @@ struct DescriptorBindingConfig {
 	DescriptorType type;
 	uint32_t count;
 	ShaderStages stage;
-	std::string attachment;
+	std::optional<std::string> attachment;
 
 	DescriptorBindingConfig(const YAML::Node &node);
 };
