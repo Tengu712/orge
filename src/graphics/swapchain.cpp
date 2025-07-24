@@ -102,6 +102,8 @@ Swapchain::Swapchain(
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) :
+	_width(width),
+	_height(height),
 	_window(createWindow(title, width, height, fullscreen)),
 	_surface(createSurface(_window, instance)),
 	_extent(physicalDevice.getSurfaceCapabilitiesKHR(_surface).currentExtent),

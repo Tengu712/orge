@@ -12,12 +12,22 @@ using Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
 
 class Swapchain {
 private:
+	const uint32_t _width;
+	const uint32_t _height;
 	const Window _window;
 	vk::SurfaceKHR _surface;
 	vk::Extent2D _extent;
 	vk::Format _format;
 	vk::SwapchainKHR _swapchain;
 	std::vector<vk::Image> _images;
+
+	void _setFullscreen(bool toFullscreen) const noexcept {
+		SDL_SetWindowFullscreen(_window.get(), toFullscreen);
+		if (!toFullscreen) {
+			SDL_SetWindowSize(_window.get(), static_cast<int>(_width), static_cast<int>(_height));
+		}
+		SDL_SyncWindow(_window.get());
+	}
 
 public:
 	Swapchain(const Swapchain &)  = delete;
@@ -92,11 +102,20 @@ public:
 		}
 	}
 
-	// TODO: エラーハンドリング
+	bool isFullscreen() const noexcept {
+		return static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
+	}
+
+	void setFullscreen(bool toFullscreen) const noexcept {
+		const auto isFullscreen = static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
+		if (toFullscreen != isFullscreen) {
+			_setFullscreen(toFullscreen);
+		}
+	}
+
 	void toggleFullscreen() const noexcept {
 		const auto isFullscreen = static_cast<bool>(SDL_GetWindowFlags(_window.get()) & SDL_WINDOW_FULLSCREEN);
-		SDL_SetWindowFullscreen(_window.get(), !isFullscreen);
-		SDL_SyncWindow(_window.get());
+		_setFullscreen(!isFullscreen);
 	}
 };
 

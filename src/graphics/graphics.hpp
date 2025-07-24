@@ -184,6 +184,21 @@ public:
 		_renderer.endRender(_device, _queue);
 	}
 
+	bool isFullscreen() const noexcept {
+		return _renderer.isFullscreen();
+	}
+
+	void setFullscreen(bool toFullscreen) const noexcept {
+		try {
+			_device.waitIdle();
+		} catch (...) {
+			// NOTE: フルスクリーン切り替えは必須動作ではないし、waitIdleの失敗は致命的なので、
+			//       エラーハンドリングすることなく早期リターンする。
+			return;
+		}
+		_renderer.setFullscreen(toFullscreen);
+	}
+
 	void toggleFullscreen() const noexcept {
 		try {
 			_device.waitIdle();

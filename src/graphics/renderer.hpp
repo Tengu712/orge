@@ -146,6 +146,14 @@ public:
 		const vk::Device &device
 	);
 
+	bool isFullscreen() const noexcept {
+		return _swapchain.isFullscreen();
+	}
+
+	void setFullscreen(bool toFullscreen) const noexcept {
+		_swapchain.setFullscreen(toFullscreen);
+	}
+
 	void toggleFullscreen() const noexcept {
 		_swapchain.toggleFullscreen();
 	}

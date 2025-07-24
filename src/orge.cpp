@@ -111,12 +111,33 @@ int orgeUpdate(void) {
 		if (event.type == SDL_EVENT_QUIT) {
 			return 0;
 		}
-		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_RETURN && (event.key.mod & MODKEY)) {
+		if (
+			g_config->altTabToggleFullscreen
+				&& event.type == SDL_EVENT_KEY_DOWN
+				&& event.key.key == SDLK_RETURN
+				&& (event.key.mod & MODKEY)
+		) {
 			g_graphics->toggleFullscreen();
 		}
 	}
 	input::update();
 	return 1;
+}
+
+// ================================================================================================================== //
+//     Window                                                                                                         //
+// ================================================================================================================== //
+
+int orgeIsFullscreen(void) {
+	return static_cast<int>(g_graphics->isFullscreen());
+}
+
+void orgeSetFullscreen(int toFullscreen) {
+	g_graphics->setFullscreen(toFullscreen);
+}
+
+void orgeToggleFullscreen(void) {
+	g_graphics->toggleFullscreen();
 }
 
 // ================================================================================================================== //

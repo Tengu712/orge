@@ -149,7 +149,7 @@ Renderer::Renderer(
 		config.title,
 		config.width,
 		config.height,
-		false, // TODO:
+		config.fullscreen,
 		instance,
 		physicalDevice,
 		device

@@ -90,6 +90,8 @@ struct Config {
 	std::string title;
 	uint32_t width;
 	uint32_t height;
+	bool fullscreen;
+	bool altTabToggleFullscreen;
 	std::vector<AttachmentConfig> attachments;
 	std::vector<SubpassConfig> subpasses;
 	std::vector<PipelineConfig> pipelines;
