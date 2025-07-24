@@ -103,7 +103,7 @@ vk::CommandBuffer createCommandBuffer(const vk::Device &device, const vk::Comman
 		.setCommandPool(commandPool)
 		.setLevel(vk::CommandBufferLevel::ePrimary)
 		.setCommandBufferCount(1);
-	return device.allocateCommandBuffers(ai).at(0);
+	return error::at(device.allocateCommandBuffers(ai), 0, "command buffers allocated");
 }
 
 std::vector<vk::Semaphore> createSemaphores(const vk::Device &device, size_t count) {
@@ -179,7 +179,7 @@ void Renderer::beginRender(const vk::Device &device) {
 	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
 
 	// レンダーパス開始
-	const auto &framebuffer = _framebuffers.at(index);
+	const auto &framebuffer = error::at(_framebuffers, index, "framebuffers");
 	const auto rbi = vk::RenderPassBeginInfo()
 		.setRenderPass(_renderPass)
 		.setFramebuffer(framebuffer.get())
@@ -204,15 +204,20 @@ void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 	// 提出
 	// TODO: 提出に失敗するとフェンスがシグナルされない？
 	const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+	const auto &semaphore = error::at(
+		_semaphoreForRenderFinisheds,
+		_frameInfo->index,
+		"semaphores for waiting for rendering finished"
+	);
 	const auto si = vk::SubmitInfo()
 		.setWaitSemaphores({_semaphoreForImageEnabled})
 		.setWaitDstStageMask({waitStage})
 		.setCommandBuffers({_commandBuffer})
-		.setSignalSemaphores({_semaphoreForRenderFinisheds.at(_frameInfo->index)});
+		.setSignalSemaphores({semaphore});
 	queue.submit(si, _frameInFlightFence);
 
 	// プレゼンテーション
-	_swapchain.present(queue, _semaphoreForRenderFinisheds.at(_frameInfo->index), _frameInfo->index);
+	_swapchain.present(queue, semaphore, _frameInfo->index);
 
 	// 前のフレームのGPU処理が完全に終了するまで待機
 	if (device.waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {

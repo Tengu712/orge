@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+#include "../error/error.hpp"
+
 namespace graphics {
 
 vk::CommandBuffer g_commandBuffer;
@@ -20,7 +22,7 @@ void initializeUtils(const vk::Device &device, const vk::CommandPool &commandPoo
 		.setCommandPool(commandPool)
 		.setLevel(vk::CommandBufferLevel::ePrimary)
 		.setCommandBufferCount(1);
-	g_commandBuffer = device.allocateCommandBuffers(ai).at(0);
+	g_commandBuffer = error::at(device.allocateCommandBuffers(ai), 0, "command buffers allocated");
 
 	g_fence = device.createFence({});
 }

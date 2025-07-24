@@ -143,7 +143,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		// 頂点入力
 		uint32_t sum = 0;
 		for (size_t i = 0; i < n.vertexInputAttributes.size(); ++i) {
-			const auto &m = n.vertexInputAttributes.at(i);
+			const auto &m = n.vertexInputAttributes[i];
 			cti.viads.emplace_back(
 				static_cast<uint32_t>(i),
 				0,
@@ -252,7 +252,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		// インプットアタッチメント
 		for (size_t i = 0; i < n.descSets.size(); ++i) {
 			for (size_t j = 0; j < n.descSets[i].bindings.size(); ++j) {
-				if (n.descSets[i].bindings[j].attachment == "") {
+				if (!n.descSets[i].bindings[j].attachment.has_value()) {
 					continue;
 				}
 				const auto isTexture = n.descSets[i].bindings[j].type == config::DescriptorType::Texture;
@@ -261,7 +261,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 					throw;
 				}
 				cti.inputs.emplace_back(
-					config.attachmentMap.at(n.descSets[i].bindings[j].attachment),
+					config.attachmentMap.at(n.descSets[i].bindings[j].attachment.value()),
 					static_cast<uint32_t>(i),
 					static_cast<uint32_t>(j),
 					isTexture

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "../error/error.hpp"
 #include "swapchain.hpp"
 
 #include <vulkan/vulkan.hpp>
@@ -57,7 +58,7 @@ public:
 	}
 
 	const vk::ImageView &getAttachmentView(uint32_t index) const {
-		return _attachments.at(index).view;
+		return error::at(_attachments, index, "attachments").view;
 	}
 
 	const std::vector<vk::ClearValue> &getClearValues() const noexcept {

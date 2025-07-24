@@ -150,12 +150,15 @@ DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
 	type = parseDescriptorType(s(node, "type"));
 	count = u(node, "count", 1);
 	stage = parseShaderStages(s(node, "stage"));
-	attachment = s(node, "attachment", "");
 
-	if (type == DescriptorType::InputAttachment && attachment == "") {
+	if (node["attachment"]) {
+		attachment = s(node, "attachment");
+	}
+
+	if (type == DescriptorType::InputAttachment && !attachment.has_value()) {
 		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
 	}
-	if (attachment != "" && type != DescriptorType::InputAttachment && type != DescriptorType::Texture) {
+	if (attachment.has_value() && type != DescriptorType::InputAttachment && type != DescriptorType::Texture) {
 		throw "config error: 'type' must be 'input-attachment' or 'texture' if 'attachment' is defined.";
 	}
 }
@@ -225,6 +228,42 @@ Config::Config(const YAML::Node &node) {
 	}
 	for (const auto &n: subpasses) {
 		subpassMap.emplace(n.id, static_cast<uint32_t>(subpassMap.size()));
+		for (const auto &m: n.inputs) {
+			if (!attachmentMap.contains(m)) {
+				throw std::format("config error: attachment '{}' not defined.", m);
+			}
+		}
+		for (const auto &m: n.outputs) {
+			if (!attachmentMap.contains(m)) {
+				throw std::format("config error: attachment '{}' not defined.", m);
+			}
+		}
+		if (n.depth.has_value()) {
+			const auto &id = n.depth->id;
+			if (!attachmentMap.contains(id)) {
+				throw std::format("config error: attachment '{}' not defined.", id);
+			}
+		}
+		for (const auto &m: n.depends) {
+			if (!subpassMap.contains(m)) {
+				throw std::format("config error: subpass '{}' not defined.", m);
+			}
+		}
+	}
+	for (const auto &n: pipelines) {
+		for (const auto &m: n.descSets) {
+			for (const auto &x: m.bindings) {
+				if (x.attachment.has_value()) {
+					const auto &id = x.attachment.value();
+					if (!attachmentMap.contains(id)) {
+						throw std::format("config error: attachment '{}' not defined.", id);
+					}
+				}
+			}
+		}
+		if (!subpassMap.contains(n.subpass)) {
+			throw std::format("config error: subpass '{}' not defined.", n.subpass);
+		}
 	}
 }
 
