@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "../error/error.hpp"
 #include "buffer.hpp"
 #include "framebuffer.hpp"
 #include "image.hpp"
@@ -59,7 +60,7 @@ public:
 		std::vector<vk::DescriptorSet> sets;
 		sets.reserve(_descSets.size());
 		for (size_t i = 0; i < _descSets.size(); ++i) {
-			sets.push_back(_descSets[i].at(indices[i]));
+			sets.push_back(error::at(_descSets[i], indices[i], "descriptor sets allocated"));
 		}
 		commandBuffer.bindDescriptorSets(
 			vk::PipelineBindPoint::eGraphics,
@@ -76,12 +77,12 @@ public:
 		for (const auto &n: _inputs) {
 			const auto &view = framebuffer.getAttachmentView(n.id);
 			const auto ii = vk::DescriptorImageInfo(nullptr, view, vk::ImageLayout::eShaderReadOnlyOptimal);
-			const auto &descSets = _descSets.at(n.set);
+			const auto &descSets = error::at(_descSets, n.set, "descriptor sets");
 			std::vector<vk::WriteDescriptorSet> wdss;
-			for (size_t i = 0; i < descSets.size(); ++i) {
+			for (const auto &m: descSets) {
 				wdss.push_back(
 					vk::WriteDescriptorSet()
-						.setDstSet(descSets.at(i))
+						.setDstSet(m)
 						.setDstBinding(n.binding)
 						.setDescriptorCount(1)
 						.setDescriptorType(
@@ -104,9 +105,11 @@ public:
 		uint32_t binding,
 		uint32_t offset
 	) const {
+		const auto &descSets = error::at(_descSets, set, "descriptor sets");
+		const auto &descSet = error::at(descSets, index, "descriptor sets allocated");
 		const auto bi = vk::DescriptorBufferInfo(buffer.get(), 0, vk::WholeSize);
 		const auto ds = vk::WriteDescriptorSet()
-			.setDstSet(_descSets.at(set).at(index))
+			.setDstSet(descSet)
 			.setDstBinding(binding)
 			.setDstArrayElement(offset)
 			.setDescriptorCount(1)
@@ -123,9 +126,11 @@ public:
 		uint32_t binding,
 		uint32_t offset
 	) const {
+		const auto &descSets = error::at(_descSets, set, "descriptor sets");
+		const auto &descSet = error::at(descSets, index, "descriptor sets allocated");
 		const auto ii = vk::DescriptorImageInfo(nullptr, image.get(), vk::ImageLayout::eShaderReadOnlyOptimal);
 		const auto ds = vk::WriteDescriptorSet()
-			.setDstSet(_descSets.at(set).at(index))
+			.setDstSet(descSet)
 			.setDstBinding(binding)
 			.setDstArrayElement(offset)
 			.setDescriptorCount(1)
@@ -142,9 +147,11 @@ public:
 		uint32_t binding,
 		uint32_t offset
 	) const {
+		const auto &descSets = error::at(_descSets, set, "descriptor sets");
+		const auto &descSet = error::at(descSets, index, "descriptor sets allocated");
 		const auto ii = vk::DescriptorImageInfo(sampler, nullptr, vk::ImageLayout::eShaderReadOnlyOptimal);
 		const auto ds = vk::WriteDescriptorSet()
-			.setDstSet(_descSets.at(set).at(index))
+			.setDstSet(descSet)
 			.setDstBinding(binding)
 			.setDstArrayElement(offset)
 			.setDescriptorCount(1)

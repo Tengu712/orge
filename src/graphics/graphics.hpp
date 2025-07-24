@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "../error/error.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
@@ -64,7 +65,7 @@ public:
 	}
 
 	void updateBuffer(const char *id, const void *data) const {
-		_buffers.at(id).update(_device, data);
+		error::at(_buffers, id, "buffers").update(_device, data);
 	}
 
 	void updateBufferDescriptor(
@@ -77,7 +78,7 @@ public:
 	) const {
 		_renderer
 			.getPipeline(pipelineId)
-			.updateBufferDescriptor(_device, _buffers.at(bufferId), set, index, binding, offset);
+			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
 	void createImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
@@ -105,7 +106,7 @@ public:
 	) const {
 		_renderer
 			.getPipeline(pipelineId)
-			.updateImageDescriptor(_device, _images.at(imageId), set, index, binding, offset);
+			.updateImageDescriptor(_device, error::at(_images, imageId, "images"), set, index, binding, offset);
 	}
 
 	void createSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
@@ -137,7 +138,7 @@ public:
 	) const {
 		_renderer
 			.getPipeline(pipelineId)
-			.updateSamplerDescriptor(_device, _samplers.at(samplerId), set, index, binding, offset);
+			.updateSamplerDescriptor(_device, error::at(_samplers, samplerId, "samplers"), set, index, binding, offset);
 	}
 
 	void createMesh(
@@ -172,7 +173,7 @@ public:
 
 	void draw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
 		_renderer.bindPipeline(_device, pipelineId);
-		_renderer.bindMesh(meshId, _meshes.at(meshId));
+		_renderer.bindMesh(meshId, error::at(_meshes, meshId, "meshes"));
 		_renderer.draw(instanceCount, instanceOffset);
 	}
 

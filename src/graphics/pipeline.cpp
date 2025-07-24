@@ -143,7 +143,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		// 頂点入力
 		uint32_t sum = 0;
 		for (size_t i = 0; i < n.vertexInputAttributes.size(); ++i) {
-			const auto &m = n.vertexInputAttributes.at(i);
+			const auto &m = n.vertexInputAttributes[i];
 			cti.viads.emplace_back(
 				static_cast<uint32_t>(i),
 				0,

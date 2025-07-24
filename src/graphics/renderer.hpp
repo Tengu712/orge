@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config/config.hpp"
+#include "../error/error.hpp"
 #include "descpool.hpp"
 #include "mesh.hpp"
 #include "framebuffer.hpp"
@@ -93,7 +94,7 @@ public:
 	}
 
 	const Pipeline &getPipeline(const char *id) const {
-		return _pipelines.at(id);
+		return error::at(_pipelines, id, "pipelines");
 	}
 
 	void beginRender(const vk::Device &device);
@@ -112,15 +113,16 @@ public:
 	void bindPipeline(const vk::Device &device, const char *pipelineId) {
 		_ensureWhileRendering("try to bind a pipeline before starting rendering.");
 		if (pipelineId != nullptr && pipelineId != _frameInfo->pipelineId) {
-			_pipelines.at(pipelineId).bind(_commandBuffer);
-			_pipelines.at(pipelineId).updateInputAttachmentDescriptors(device, _framebuffers.at(_frameInfo->index));
+			const auto &framebuffer = error::at(_framebuffers, _frameInfo->index, "framebuffers");
+			error::at(_pipelines, pipelineId, "pipelines").bind(_commandBuffer);
+			error::at(_pipelines, pipelineId, "pipelines").updateInputAttachmentDescriptors(device, framebuffer);
 			_frameInfo->pipelineId = pipelineId;
 		}
 	}
 
 	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_ensureWhileRendering("try to bind descriptor sets before starting rendering.");
-		_pipelines.at(pipelineId).bindDescriptorSets(_commandBuffer, indices);
+		error::at(_pipelines, pipelineId, "pipelines").bindDescriptorSets(_commandBuffer, indices);
 	}
 
 	void nextSubpass() const {

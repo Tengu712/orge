@@ -1,5 +1,7 @@
 #include "input.hpp"
 
+#include "../error/error.hpp"
+
 #include <unordered_map>
 #include <SDL3/SDL.h>
 
@@ -102,7 +104,7 @@ void update() {
 
 int32_t getState(OrgeScancode scancode) {
 	if (input::g_states.contains(scancode)) {
-		return input::g_states.at(scancode);
+		return error::at(input::g_states, scancode, "inputs");
 	} else {
 		return 0;
 	}
