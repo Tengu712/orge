@@ -17,12 +17,16 @@ enum OrgeDialogType {
 /// - dtype: ダイアログの種類 (OrgeDialogType)
 /// - title: ダイアログのタイトル
 /// - message: ダイアログのメッセージ
+///
+/// ダイアログが閉じられるまでスレッドを停止する。
 void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
 
 /// orgeの直近のエラーメッセージを取得する関数
 const char *orgeGetErrorMessage();
 
 /// orgeの直近のエラーメッセージをダイアログで表示する関数
+///
+/// ダイアログが閉じられるまでスレッドを停止する。
 void orgeShowErrorDialog();
 
 // ================================================================================================================== //
