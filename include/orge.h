@@ -6,6 +6,19 @@
 //     Information                                                                                                    //
 // ================================================================================================================== //
 
+enum OrgeDialogType {
+	ORGE_DIALOG_TYPE_ERROR = 0,
+	ORGE_DIALOG_TYPE_WARNING,
+	ORGE_DIALOG_TYPE_INFORMATION,
+};
+
+/// ダイアログを表示する関数
+///
+/// - dtype: ダイアログの種類 (OrgeDialogType)
+/// - title: ダイアログのタイトル
+/// - message: ダイアログのメッセージ
+void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
+
 /// orgeの直近のエラーメッセージを取得する関数
 const char *orgeGetErrorMessage();
 
@@ -189,7 +202,6 @@ int orgeEndRender(void);
 //     Input                                                                                                          //
 // ================================================================================================================== //
 
-/// orgeで用いられるスキャンコード
 enum OrgeScancode {
 	ORGE_SCANCODE_A = 0,
 	ORGE_SCANCODE_B,
@@ -248,7 +260,6 @@ enum OrgeScancode {
 	ORGE_SCANCODE_LEFT,
 	ORGE_SCANCODE_DOWN,
 	ORGE_SCANCODE_UP,
-	FORCE_UINT32 = UINT32_MAX,
 };
 
 /// キー入力状態を取得する関数
