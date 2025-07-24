@@ -23,6 +23,7 @@ jobs:
           build-essential \
           cmake \
           ninja-build \
+          clang \
           libx11-dev \
           libxcb1-dev \
           libxkbcommon-dev \
