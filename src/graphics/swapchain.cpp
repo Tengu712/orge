@@ -1,7 +1,5 @@
 #include "swapchain.hpp"
 
-#include "platform.hpp"
-
 #include <SDL3/SDL_vulkan.h>
 
 namespace graphics {

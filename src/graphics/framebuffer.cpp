@@ -1,6 +1,5 @@
 #include "framebuffer.hpp"
 
-#include "platform.hpp"
 #include "utils.hpp"
 
 namespace graphics {
