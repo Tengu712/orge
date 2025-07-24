@@ -5,13 +5,13 @@
 
 namespace graphics {
 
-vk::Format convertFormat(const config::Format &format) {
+vk::Format convertFormat(const config::Format &format, const vk::Format &rtFormat) {
 	return format == config::Format::RenderTarget
-		? platformRenderTargetPixelFormat()
+		? rtFormat
 		: format == config::Format::DepthBuffer
 		? vk::Format::eD32Sfloat
 		: format == config::Format::ShareColorAttachment
-		? platformRenderTargetPixelFormat()
+		? rtFormat
 		: throw;
 }
 
@@ -38,18 +38,19 @@ vk::ImageAspectFlags convertAspect(const config::Format &format) {
 Attachment createAttachment(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::Extent3D &swapchainImageExtent,
+	const Swapchain &swapchain,
 	const vk::Image &swapchainImage,
 	config::Format format
 ) {
 	const auto isRenderTarget = format == config::Format::RenderTarget;
+	const auto swapchainImageExtent = vk::Extent3D(swapchain.getExtent().width, swapchain.getExtent().height, 1);
 
 	// イメージ作成
 	vk::Image image = swapchainImage;
 	if (!isRenderTarget) {
 		const auto ci = vk::ImageCreateInfo()
 			.setImageType(vk::ImageType::e2D)
-			.setFormat(convertFormat(format))
+			.setFormat(convertFormat(format, swapchain.getFormat()))
 			.setExtent(swapchainImageExtent)
 			.setMipLevels(1)
 			.setArrayLayers(1)
@@ -77,7 +78,7 @@ Attachment createAttachment(
 		vk::ImageViewCreateFlags(),
 		image,
 		vk::ImageViewType::e2D,
-		convertFormat(format),
+		convertFormat(format, swapchain.getFormat()),
 		vk::ComponentMapping(
 			vk::ComponentSwizzle::eR,
 			vk::ComponentSwizzle::eG,
@@ -96,14 +97,13 @@ std::vector<Attachment> createAttachments(
 	const config::Config &config,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::Image &swapchainImage,
-	const vk::Extent2D &swapchainImageExtent
+	const Swapchain &swapchain,
+	const vk::Image &swapchainImage
 ) {
-	const auto extent = vk::Extent3D(swapchainImageExtent.width, swapchainImageExtent.height, 1);
 	std::vector<Attachment> attachments;
 	attachments.reserve(config.attachments.size());
 	for (const auto &n: config.attachments) {
-		attachments.push_back(createAttachment(memoryProps, device, extent, swapchainImage, n.format));
+		attachments.push_back(createAttachment(memoryProps, device, swapchain, swapchainImage, n.format));
 	}
 	return attachments;
 }
@@ -124,9 +124,11 @@ std::vector<vk::ClearValue> collectClearValues(const config::Config &config) {
 vk::Framebuffer createFramebuffer(
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
-	const vk::Extent2D &swapchainImageExtent,
+	const Swapchain &swapchain,
 	const std::vector<Attachment> &attachments
 ) {
+	const auto swapchainImageExtent = vk::Extent3D(swapchain.getExtent().width, swapchain.getExtent().height, 1);
+
 	std::vector<vk::ImageView> as;
 	as.reserve(attachments.size());
 	for (const auto &n: attachments) {
@@ -146,13 +148,13 @@ Framebuffer::Framebuffer(
 	const config::Config &config,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::RenderPass &renderPass,
+	const Swapchain &swapchain,
 	const vk::Image &swapchainImage,
-	const vk::Extent2D &swapchainImageExtent
+	const vk::RenderPass &renderPass
 ) :
-	_attachments(createAttachments(config, memoryProps, device, swapchainImage, swapchainImageExtent)),
+	_attachments(createAttachments(config, memoryProps, device, swapchain, swapchainImage)),
 	_clearValues(collectClearValues(config)),
-	_framebuffer(createFramebuffer(device, renderPass, swapchainImageExtent, _attachments))
+	_framebuffer(createFramebuffer(device, renderPass, swapchain, _attachments))
 {}
 
 } // namespace graphics

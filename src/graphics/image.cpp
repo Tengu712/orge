@@ -12,7 +12,7 @@ namespace graphics {
 vk::Image createImage(const vk::Device &device, uint32_t width, uint32_t height) {
 	const auto ci = vk::ImageCreateInfo()
 		.setImageType(vk::ImageType::e2D)
-		.setFormat(vk::Format::eR8G8B8A8Unorm)
+		.setFormat(vk::Format::eR8G8B8A8Srgb)
 		.setExtent(vk::Extent3D(width, height, 1))
 		.setMipLevels(1)
 		.setArrayLayers(1)
@@ -28,7 +28,7 @@ vk::ImageView createImageView(const vk::Device &device, const vk::Image &image) 
 		vk::ImageViewCreateFlags(),
 		image,
 		vk::ImageViewType::e2D,
-		vk::Format::eR8G8B8A8Unorm,
+		vk::Format::eR8G8B8A8Srgb,
 		vk::ComponentMapping(
 			vk::ComponentSwizzle::eR,
 			vk::ComponentSwizzle::eG,
