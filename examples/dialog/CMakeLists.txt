@@ -1,0 +1,10 @@
+add_executable(dialog main.cpp)
+if(TARGET orge::orge)
+	target_link_libraries(dialog PRIVATE orge::orge)
+elseif(TARGET orge::orgestatic)
+	target_link_libraries(dialog PRIVATE orge::orgestatic)
+	# NOTE: MSVCでは/MTを指定
+	if(MSVC)
+		set_target_properties(dialog PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	endif()
+endif()

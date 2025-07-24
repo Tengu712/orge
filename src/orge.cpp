@@ -65,6 +65,25 @@ int orgeUpdate(void) {
 	return 1;
 }
 
+void orgeShowDialog(uint32_t dtype, const char *title, const char *message) {
+	SDL_MessageBoxFlags flags = SDL_MESSAGEBOX_ERROR;
+	switch (static_cast<OrgeDialogType>(dtype)) {
+	case ORGE_DIALOG_TYPE_WARNING:
+		flags = SDL_MESSAGEBOX_WARNING;
+		break;
+	case ORGE_DIALOG_TYPE_INFORMATION:
+		flags = SDL_MESSAGEBOX_INFORMATION;
+		break;
+	default:
+		break;
+	}
+	SDL_ShowSimpleMessageBox(flags, title, message, nullptr);
+}
+
+void orgeShowErrorDialog() {
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
+}
+
 int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
 	TRY(g_graphics->createBuffer(id, size, isStorage));
 }
