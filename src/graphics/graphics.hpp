@@ -187,11 +187,6 @@ public:
 		_renderer.endRender(_device, _queue);
 	}
 
-	void resetRendering() {
-		_device.waitIdle();
-		_renderer.resetRendering(_device);
-	}
-
 	void recreateSwapchain() {
 		_device.waitIdle();
 		_renderer.recreateSwapchain(_physicalDevice, _device);

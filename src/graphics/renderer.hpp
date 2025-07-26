@@ -136,25 +136,6 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
-	void resetRendering(const vk::Device &device) {
-		// vk::Swapchain::acquireNextImageIndex()に失敗した場合、別の場所で処理
-		// vk::CommandBuffer::begin()に失敗した場合、特になし
-
-		// 各種コマンド記録に失敗した場合およびvk::CommandBuffer::end()に失敗した場合
-		_commandBuffer.reset();
-
-		// vk::Device::resetFences()に失敗した場合、特になし
-
-		// _semaphoreForRenderFinisheds.at()やvk::Queue::submit()に失敗した場合
-		device.destroyFence(_frameInFlightFence);
-		_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
-
-		// vk::Swapchain::present()に失敗した場合、別の場所で処理
-
-		// 終了
-		_frameInfo = std::nullopt;
-	}
-
 	void recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
 
 	void recreateSurface(
