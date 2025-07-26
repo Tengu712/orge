@@ -38,6 +38,7 @@ int main() {
 			&& orgeEndRender();
 		if (!result) {
 			std::cout << orgeGetErrorMessage() << std::endl;
+			orgeResetRendering();
 		}
 	}
 
