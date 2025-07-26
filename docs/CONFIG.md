@@ -28,9 +28,9 @@ height: unsigned int
 # 省略された場合、falseとみなされる
 fullscreen: bool
 
-# Alt+TabあるいはCmd+Tabでのフルスクリーン・非フルスクリーンを許可するか
+# Alt+ReturnあるいはCmd+Returnでのフルスクリーン・非フルスクリーンを許可するか
 # 省略された場合、trueとみなされる
-alt-tab-toggle-fullscreen: bool
+alt-return-toggle-fullscreen: bool
 
 # ========== Attachment Definition ============= #
 

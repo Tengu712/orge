@@ -111,7 +111,7 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (
-			config::config().altTabToggleFullscreen
+			config::config().altReturnToggleFullscreen
 				&& event.type == SDL_EVENT_KEY_DOWN
 				&& event.key.key == SDLK_RETURN
 				&& (event.key.mod & MODKEY)

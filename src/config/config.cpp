@@ -207,7 +207,7 @@ Config::Config(YAML::Node node):
 	width(u(node, "width")),
 	height(u(node, "height")),
 	fullscreen(b(node, "fullscreen", false)),
-	altTabToggleFullscreen(b(node, "alt-tab-toggle-fullscreen", true)),
+	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
 	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
@@ -216,7 +216,7 @@ Config::Config(YAML::Node node):
 {
 	checkUnexpectedKeys(
 		node,
-		{"title", "width", "height", "fullscreen", "alt-tab-toggle-fullscreen", "attachments", "subpasses", "pipelines"}
+		{"title", "width", "height", "fullscreen", "alt-return-toggle-fullscreen", "attachments", "subpasses", "pipelines"}
 	);
 
 	for (const auto &n: subpasses) {
