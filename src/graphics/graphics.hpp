@@ -188,6 +188,7 @@ public:
 	}
 
 	void resetRendering() {
+		_device.waitIdle();
 		_renderer.resetRendering(_device);
 	}
 

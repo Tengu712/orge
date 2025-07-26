@@ -136,7 +136,6 @@ public:
 	}
 
 	void resetRendering(const vk::Device &device) {
-		device.waitIdle();
 		_commandBuffer.reset();
 		for (auto &n : _semaphoreForRenderFinisheds) {
 			device.destroySemaphore(n);
