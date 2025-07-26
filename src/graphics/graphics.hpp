@@ -206,25 +206,13 @@ public:
 		return _renderer.isFullscreen();
 	}
 
-	void setFullscreen(bool toFullscreen) const noexcept {
-		try {
-			_device.waitIdle();
-		} catch (...) {
-			// NOTE: フルスクリーン切り替えは必須動作ではないし、waitIdleの失敗は致命的なので、
-			//       エラーハンドリングすることなく早期リターンする。
-			return;
-		}
+	void setFullscreen(bool toFullscreen) const {
+		_device.waitIdle();
 		_renderer.setFullscreen(toFullscreen);
 	}
 
-	void toggleFullscreen() const noexcept {
-		try {
-			_device.waitIdle();
-		} catch (...) {
-			// NOTE: フルスクリーン切り替えは必須動作ではないし、waitIdleの失敗は致命的なので、
-			//       エラーハンドリングすることなく早期リターンする。
-			return;
-		}
+	void toggleFullscreen() const {
+		_device.waitIdle();
 		_renderer.toggleFullscreen();
 	}
 };

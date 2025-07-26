@@ -173,11 +173,13 @@ int orgeIsFullscreen(void) {
 }
 
 void orgeSetFullscreen(int toFullscreen) {
-	g_graphics->setFullscreen(toFullscreen);
+	// NOTE: 発生する例外はすべて致命的であり、TRY_WITHで強制終了されるので、返戻型はvoid。
+	TRY_WITH(g_graphics->setFullscreen(toFullscreen), , );
 }
 
 void orgeToggleFullscreen(void) {
-	g_graphics->toggleFullscreen();
+	// NOTE: 発生する例外はすべて致命的であり、TRY_WITHで強制終了されるので、返戻型はvoid。
+	TRY_WITH(g_graphics->toggleFullscreen(), , );
 }
 
 // ================================================================================================================== //
