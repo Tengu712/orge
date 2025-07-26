@@ -41,7 +41,6 @@
 
 namespace {
 
-std::optional<config::Config> g_config;
 std::unique_ptr<graphics::Graphics> g_graphics;
 
 void initialize() {
@@ -51,7 +50,7 @@ void initialize() {
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw "failed to load Vulkan.";
 	}
-	g_graphics = std::make_unique<graphics::Graphics>(g_config.value());
+	g_graphics = std::make_unique<graphics::Graphics>(config::config());
 }
 
 } // namespace
@@ -89,14 +88,14 @@ void orgeShowErrorDialog(void) {
 
 int orgeInitialize(const char *yaml) {
 	TRY(
-		g_config = config::parse(yaml);
+		config::initializeConfig(yaml);
 		initialize();
 	)
 }
 
 int orgeInitializeWith(const char *yamlFilePath) {
 	TRY(
-		g_config = config::parseFromFile(yamlFilePath);
+		config::initializeConfigFromFile(yamlFilePath);
 		initialize();
 	)
 }
@@ -112,7 +111,7 @@ int orgeUpdate(void) {
 			return 0;
 		}
 		if (
-			g_config->altTabToggleFullscreen
+			config::config().altTabToggleFullscreen
 				&& event.type == SDL_EVENT_KEY_DOWN
 				&& event.key.key == SDLK_RETURN
 				&& (event.key.mod & MODKEY)
@@ -228,7 +227,7 @@ void orgeDestroyMesh(const char *id) {
 // ================================================================================================================== //
 
 int orgeBeginRender(void) {
-	TRY(g_graphics->beginRender(g_config.value()));
+	TRY(g_graphics->beginRender(config::config()));
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {

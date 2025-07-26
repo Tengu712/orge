@@ -5,16 +5,13 @@
 
 namespace config {
 
-void validateKeys(const YAML::Node &n, const std::set<std::string> &rs, const std::set<std::string> &os) {
+std::optional<Config> g_config;
+
+void checkUnexpectedKeys(const YAML::Node &n, const std::set<std::string> &ks) {
 	for (const auto &p: n) {
 		const auto k = p.first.as<std::string>();
-		if (!rs.contains(k) && !os.contains(k)) {
+		if (!ks.contains(k)) {
 			throw std::format("config error: unexpected key '{}' found.", k);
-		}
-	}
-	for (const auto &k: rs) {
-		if (!n[k]) {
-			throw std::format("config error: '{}' not found.", k);
 		}
 	}
 }
@@ -66,8 +63,12 @@ std::vector<uint32_t> us(const YAML::Node &n, const std::string &k) {
 	return get<std::vector<uint32_t>>(n, k, "unsigned int[]");
 }
 
-std::vector<std::string> ss(const YAML::Node &n, const std::string &k) {
-	return get<std::vector<std::string>>(n, k, "string[]");
+std::vector<std::string> ss(
+	const YAML::Node &n,
+	const std::string &k,
+	std::optional<std::vector<std::string>> d = std::nullopt
+) {
+	return get<std::vector<std::string>>(n, k, "string[]", d);
 }
 
 Format parseFormat(const std::string& s) {
@@ -104,56 +105,51 @@ ShaderStages parseShaderStages(const std::string& s) {
 		: throw std::format("config error: stages '{}' is invalid.", s);
 }
 
-AttachmentConfig::AttachmentConfig(const YAML::Node &node) {
-	validateKeys(node, {"id", "format", "clear-value"}, {"discard"});
-
-	id = s(node, "id");
-	format = parseFormat(s(node, "format"));
-	discard = b(node, "discard", false);
-	if (node["clear-value"].IsSequence()) {
-		colorClearValue = get<std::array<float, 4>>(node, "clear-value", "float[4]");
-	} else {
-		depthClearValue = f(node, "clear-value");
+template<typename T>
+std::vector<T> parseConfigs(const YAML::Node &node, const std::string &k) {
+	std::vector<T> results;
+	for (const auto &n: node[k]) {
+		results.emplace_back(n);
 	}
+	return results;
 }
 
-SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node) {
-	validateKeys(node, {"id", "read-only"}, {});
-
-	id = s(node, "id");
-	readOnly = b(node, "read-only");
+AttachmentConfig::AttachmentConfig(const YAML::Node &node):
+	id(s(node, "id")),
+	format(parseFormat(s(node, "format"))),
+	discard(b(node, "discard", false)),
+	// TODO: clear-valueの存在を確認する。
+	colorClearValue(node["clear-value"].IsSequence()
+		? std::make_optional(get<std::array<float, 4>>(node, "clear-value", "float[4]"))
+		: std::nullopt),
+	depthClearValue(!node["clear-value"].IsSequence()
+		? std::make_optional(f(node, "clear-value"))
+		: std::nullopt)
+{
+	checkUnexpectedKeys(node, {"id", "format", "discard", "clear-value"});
 }
 
-SubpassConfig::SubpassConfig(const YAML::Node &node) {
-	validateKeys(node, {"id", "outputs"}, {"inputs", "depth", "depends"});
-
-	id = s(node, "id");
-
-	if (node["inputs"]) {
-		inputs = ss(node, "inputs");
-	}
-
-	outputs = ss(node, "outputs");
-
-	if (node["depth"]) {
-		depth = SubpassDepthConfig(node["depth"]);
-	}
-
-	if (node["depends"]) {
-		depends = ss(node, "depends");
-	}
+SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node): id(s(node, "id")), readOnly(b(node, "read-only")) {
+	checkUnexpectedKeys(node, {"id", "read-only"});
 }
 
-DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
-	validateKeys(node, {"type", "stage"}, {"count", "attachment"});
+SubpassConfig::SubpassConfig(const YAML::Node &node):
+	id(s(node, "id")),
+	inputs(ss(node, "inputs", std::make_optional<std::vector<std::string>>({}))),
+	outputs(ss(node, "outputs")),
+	depth(node["depth"] ? std::make_optional<SubpassDepthConfig>(node["depth"]) : std::nullopt),
+	depends(ss(node, "depends", std::make_optional<std::vector<std::string>>({})))
+{
+	checkUnexpectedKeys(node, {"id", "inputs", "outputs", "depth", "depends"});
+}
 
-	type = parseDescriptorType(s(node, "type"));
-	count = u(node, "count", 1);
-	stage = parseShaderStages(s(node, "stage"));
-
-	if (node["attachment"]) {
-		attachment = s(node, "attachment");
-	}
+DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node):
+	type(parseDescriptorType(s(node, "type"))),
+	count(u(node, "count", 1)),
+	stage(parseShaderStages(s(node, "stage"))),
+	attachment(node["attachment"] ? std::make_optional(s(node, "attachment")) : std::nullopt)
+{
+	checkUnexpectedKeys(node, {"type", "count", "stage", "attachment"});
 
 	if (type == DescriptorType::InputAttachment && !attachment.has_value()) {
 		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
@@ -163,71 +159,64 @@ DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node) {
 	}
 }
 
-DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node) {
-	validateKeys(node, {"count", "bindings"}, {});
-
-	count = u(node, "count");
-
-	for (const auto &n: node["bindings"]) {
-		bindings.emplace_back(n);
-	}
+DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node):
+	count(u(node, "count")),
+	bindings(parseConfigs<DescriptorBindingConfig>(node, "bindings"))
+{
+	checkUnexpectedKeys(node, {"count", "bindings"});
 }
 
-PipelineConfig::PipelineConfig(const YAML::Node &node) {
-	validateKeys(
+PipelineConfig::PipelineConfig(const YAML::Node &node):
+	id(s(node, "id")),
+	vertexShader(s(node, "vertex-shader")),
+	fragmentShader(s(node, "fragment-shader")),
+	descSets(parseConfigs<DescriptorSetConfig>(node, "desc-sets")),
+	vertexInputAttributes(us(node, "vertex-input-attributes")),
+	culling(b(node, "culling", false)),
+	depthTest(b(node, "depth-test", false)),
+	colorBlends(bs(node, "color-blends")),
+	subpass(s(node, "subpass"))
+{
+	checkUnexpectedKeys(
 		node,
-		{"id", "vertex-shader", "fragment-shader", "vertex-input-attributes", "color-blends", "subpass"},
-		{"desc-sets", "culling", "depth-test"}
+		{
+			"id", "vertex-shader", "fragment-shader", "desc-sets", "vertex-input-attributes",
+			"culling", "depth-test", "color-blends", "subpass"
+		}
 	);
-
-	id = s(node, "id");
-	vertexShader = s(node, "vertex-shader");
-	fragmentShader = s(node, "fragment-shader");
-	vertexInputAttributes = us(node, "vertex-input-attributes");
-	culling = b(node, "culling", false);
-	depthTest = b(node, "depth-test", false);
-	colorBlends = bs(node, "color-blends");
-	subpass = s(node, "subpass");
-
-	for (const auto &descSetNode: node["desc-sets"]) {
-		descSets.emplace_back(descSetNode);
-	}
 
 	for (const auto &n: vertexInputAttributes) {
 		validateValue(n, {1, 2, 3, 4}, "vertex input attribute");
 	}
 }
 
-Config::Config(const YAML::Node &node) {
-	validateKeys(
+template<typename T>
+std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
+	std::unordered_map<std::string, u_int32_t> map;
+	for (const auto &n: v) {
+		map.emplace(n.id, static_cast<uint32_t>(map.size()));
+	}
+	return map;
+}
+
+Config::Config(YAML::Node node):
+	title(s(node, "title")),
+	width(u(node, "width")),
+	height(u(node, "height")),
+	fullscreen(b(node, "fullscreen", false)),
+	altTabToggleFullscreen(b(node, "alt-tab-toggle-fullscreen", true)),
+	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
+	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
+	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
+	attachmentMap(collectMap(attachments)),
+	subpassMap(collectMap(subpasses))
+{
+	checkUnexpectedKeys(
 		node,
-		{"title", "width", "height", "attachments", "subpasses"},
-		{"fullscreen", "alt-tab-toggle-fullscreen", "pipelines"}
+		{"title", "width", "height", "fullscreen", "alt-tab-toggle-fullscreen", "attachments", "subpasses", "pipelines"}
 	);
 
-	title = s(node, "title");
-	width = u(node, "width");
-	height = u(node, "height");
-	fullscreen = b(node, "fullscreen", false);
-	altTabToggleFullscreen = b(node, "alt-tab-toggle-fullscreen", true);
-
-	for (const auto &n: node["attachments"]) {
-		attachments.emplace_back(n);
-	}
-
-	for (const auto &n: node["subpasses"]) {
-		subpasses.emplace_back(n);
-	}
-
-	for (const auto &n: node["pipelines"]) {
-		pipelines.emplace_back(n);
-	}
-
-	for (const auto &n: attachments) {
-		attachmentMap.emplace(n.id, static_cast<uint32_t>(attachmentMap.size()));
-	}
 	for (const auto &n: subpasses) {
-		subpassMap.emplace(n.id, static_cast<uint32_t>(subpassMap.size()));
 		for (const auto &m: n.inputs) {
 			if (!attachmentMap.contains(m)) {
 				throw std::format("config error: attachment '{}' not defined.", m);
@@ -267,15 +256,23 @@ Config::Config(const YAML::Node &node) {
 	}
 }
 
-Config parse(const char *yaml) {
-	return Config(YAML::Load(yaml));
+void initializeConfig(const char *yaml) {
+	g_config.emplace(YAML::Load(yaml));
 }
 
-Config parseFromFile(const char *yamlFilePath) {
+void initializeConfigFromFile(const char *yamlFilePath) {
 	try {
-		return Config(YAML::LoadFile(yamlFilePath));
+		g_config.emplace(YAML::LoadFile(yamlFilePath));
 	} catch (const YAML::BadFile &) {
 		throw std::format("config error: config file '{}' not found.", yamlFilePath);
+	}
+}
+
+const Config &config() {
+	if (g_config.has_value()) {
+		return g_config.value();
+	} else {
+		throw "config not initialized.";
 	}
 }
 
