@@ -118,15 +118,18 @@ AttachmentConfig::AttachmentConfig(const YAML::Node &node):
 	id(s(node, "id")),
 	format(parseFormat(s(node, "format"))),
 	discard(b(node, "discard", false)),
-	// TODO: clear-valueの存在を確認する。
-	colorClearValue(node["clear-value"].IsSequence()
+	colorClearValue(node["clear-value"] && node["clear-value"].IsSequence()
 		? std::make_optional(get<std::array<float, 4>>(node, "clear-value", "float[4]"))
 		: std::nullopt),
-	depthClearValue(!node["clear-value"].IsSequence()
+	depthClearValue(node["clear-value"] && !node["clear-value"].IsSequence()
 		? std::make_optional(f(node, "clear-value"))
 		: std::nullopt)
 {
 	checkUnexpectedKeys(node, {"id", "format", "discard", "clear-value"});
+
+	if (!node["clear-value"]) {
+		throw "config error: 'clear-value' not found.";
+	}
 }
 
 SubpassDepthConfig::SubpassDepthConfig(const YAML::Node &node): id(s(node, "id")), readOnly(b(node, "read-only")) {
