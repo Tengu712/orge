@@ -1,12 +1,14 @@
 #include "descpool.hpp"
 
+#include "../config/config.hpp"
+
 namespace graphics {
 
-vk::DescriptorPool createDescriptorPool(const config::Config &config, const vk::Device &device) {
+vk::DescriptorPool createDescriptorPool(const vk::Device &device) {
 	// 集計
 	uint32_t maxSets = 0;
 	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
-	for (const auto &n: config.pipelines) {
+	for (const auto &n: config::config().pipelines) {
 		for (const auto &m: n.descSets) {
 			maxSets += m.count;
 

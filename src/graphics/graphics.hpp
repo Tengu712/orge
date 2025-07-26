@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
 #include "renderer.hpp"
+
+#include <unordered_map>
 
 namespace graphics {
 
@@ -29,8 +30,7 @@ public:
 	Graphics &operator =(const Graphics &)  = delete;
 	Graphics &operator =(const Graphics &&) = delete;
 
-	Graphics() = delete;
-	Graphics(const config::Config &config);
+	Graphics();
 
 	~Graphics() {
 		_device.waitIdle();
@@ -165,7 +165,7 @@ public:
 		}
 	}
 
-	void beginRender(const config::Config &config);
+	void beginRender();
 
 	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);

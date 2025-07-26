@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "swapchain.hpp"
 
@@ -38,7 +37,6 @@ private:
 public:
 	Framebuffer() = delete;
 	Framebuffer(
-		const config::Config &config,
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const Swapchain &swapchain,

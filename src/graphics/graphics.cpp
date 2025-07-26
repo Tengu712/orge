@@ -81,7 +81,7 @@ vk::Device createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queue
 	return physicalDevice.createDevice(ci);
 }
 
-Graphics::Graphics(const config::Config &config) :
+Graphics::Graphics() :
 	_instance(createInstance()),
 	_physicalDevice(selectPhysicalDevice(_instance)),
 	_queueFamilyIndex(getQueueFamilyIndex(_physicalDevice)),
@@ -92,23 +92,23 @@ Graphics::Graphics(const config::Config &config) :
 			.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
 			.setQueueFamilyIndex(_queueFamilyIndex)
 	)),
-	_renderer(config, _instance, _physicalDevice, _device, _commandPool)
+	_renderer(_instance, _physicalDevice, _device, _commandPool)
 {
 	initializeUtils(_device, _commandPool);
 }
 
-void Graphics::beginRender(const config::Config &config) {
+void Graphics::beginRender() {
 	try {
 		_renderer.beginRender(_device);
 	} catch (const error::SpecialError &e) {
 		switch (e) {
 		case error::SpecialError::NeedRecreateSwapchain:
 			_device.waitIdle();
-			_renderer.recreateSwapchain(config, _physicalDevice, _device);
+			_renderer.recreateSwapchain(_physicalDevice, _device);
 			throw "swapchain recreated.";
 		case error::SpecialError::NeedRecreateSurface:
 			_device.waitIdle();
-			_renderer.recreateSurface(config, _instance, _physicalDevice, _device);
+			_renderer.recreateSurface(_instance, _physicalDevice, _device);
 			throw "surface recreated.";
 		default:
 			throw e;

@@ -1,11 +1,13 @@
 #include "renderer.hpp"
 
+#include "../config/config.hpp"
+
 namespace graphics {
 
-vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &device, const vk::Format &rtFormat) {
+vk::RenderPass createRenderPass(const vk::Device &device, const vk::Format &rtFormat) {
 	// アタッチメント
 	std::vector<vk::AttachmentDescription> attachments;
-	for (const auto &n: config.attachments) {
+	for (const auto &n: config::config().attachments) {
 		attachments.emplace_back(
 			vk::AttachmentDescriptionFlags(),
 			n.format == config::Format::RenderTarget
@@ -39,11 +41,11 @@ vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &
 	std::vector<vk::AttachmentReference> depths;
 	std::vector<vk::SubpassDescription> subpasses;
 	std::vector<vk::SubpassDependency> dependencies;
-	for (const auto &n: config.subpasses) {
+	for (const auto &n: config::config().subpasses) {
 		std::vector<vk::AttachmentReference> inputs;
 		for (const auto &m: n.inputs) {
-			const auto index = config.attachmentMap.at(m);
-			const auto &attachment = config.attachments.at(index);
+			const auto index = config::config().attachmentMap.at(m);
+			const auto &attachment = config::config().attachments.at(index);
 			inputs.emplace_back(
 				index,
 				attachment.format == config::Format::DepthBuffer
@@ -57,13 +59,13 @@ vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &
 
 		std::vector<vk::AttachmentReference> outputs;
 		for (const auto &m: n.outputs) {
-			outputs.emplace_back(config.attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
+			outputs.emplace_back(config::config().attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
 		}
 		outputss.push_back(std::move(outputs));
 
 		if (n.depth) {
 			depths.emplace_back(
-				config.attachmentMap.at(n.depth->id),
+				config::config().attachmentMap.at(n.depth->id),
 				n.depth->readOnly
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 					: vk::ImageLayout::eDepthStencilAttachmentOptimal
@@ -80,8 +82,8 @@ vk::RenderPass createRenderPass(const config::Config &config, const vk::Device &
 
 		for (const auto &m: n.depends) {
 			dependencies.emplace_back(
-				config.subpassMap.at(m),
-				config.subpassMap.at(n.id),
+				config::config().subpassMap.at(m),
+				config::config().subpassMap.at(n.id),
 				vk::PipelineStageFlagBits::eAllCommands,
 				vk::PipelineStageFlagBits::eAllCommands,
 				vk::AccessFlagBits::eMemoryWrite,
@@ -116,7 +118,6 @@ std::vector<vk::Semaphore> createSemaphores(const vk::Device &device, size_t cou
 }
 
 std::vector<Framebuffer> createFramebuffers(
-	const config::Config &config,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const Swapchain &swapchain,
@@ -127,7 +128,6 @@ std::vector<Framebuffer> createFramebuffers(
 	framebuffers.reserve(swapchainImages.size());
 	for (const auto &n: swapchainImages) {
 		framebuffers.emplace_back(
-			config,
 			physicalDevice.getMemoryProperties(),
 			device,
 			swapchain,
@@ -139,29 +139,28 @@ std::vector<Framebuffer> createFramebuffers(
 }
 
 Renderer::Renderer(
-	const config::Config &config,
 	const vk::Instance &instance,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device,
 	const vk::CommandPool &commandPool
 ) :
 	_swapchain(
-		config.title,
-		config.width,
-		config.height,
-		config.fullscreen,
+		config::config().title,
+		config::config().width,
+		config::config().height,
+		config::config().fullscreen,
 		instance,
 		physicalDevice,
 		device
 	),
-	_renderPass(createRenderPass(config, device, _swapchain.getFormat())),
+	_renderPass(createRenderPass(device, _swapchain.getFormat())),
 	_commandBuffer(createCommandBuffer(device, commandPool)),
 	_semaphoreForImageEnabled(device.createSemaphore({})),
 	_semaphoreForRenderFinisheds(createSemaphores(device, _swapchain.getImages().size())),
 	_frameInFlightFence(device.createFence({vk::FenceCreateFlagBits::eSignaled})),
-	_framebuffers(createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass)),
-	_descPool(createDescriptorPool(config, device)),
-	_pipelines(createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent()))
+	_framebuffers(createFramebuffers(physicalDevice, device, _swapchain, _renderPass)),
+	_descPool(createDescriptorPool(device)),
+	_pipelines(createPipelines(device, _renderPass, _descPool, _swapchain.getExtent()))
 {}
 
 void Renderer::beginRender(const vk::Device &device) {
@@ -229,28 +228,26 @@ void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 }
 
 void Renderer::recreateSwapchain(
-	const config::Config &config,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSwapchain(physicalDevice, device);
-	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
-	_descPool = createDescriptorPool(config, device);
-	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
+	_framebuffers = createFramebuffers(physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(device);
+	_pipelines = createPipelines(device, _renderPass, _descPool, _swapchain.getExtent());
 }
 
 void Renderer::recreateSurface(
-	const config::Config &config,
 	const vk::Instance &instance,
 	const vk::PhysicalDevice &physicalDevice,
 	const vk::Device &device
 ) {
 	_destroyForRecreatingSwapchainOrSurface(device);
 	_swapchain.recreateSurface(instance, physicalDevice, device);
-	_framebuffers = createFramebuffers(config, physicalDevice, device, _swapchain, _renderPass);
-	_descPool = createDescriptorPool(config, device);
-	_pipelines = createPipelines(config, device, _renderPass, _descPool, _swapchain.getExtent());
+	_framebuffers = createFramebuffers(physicalDevice, device, _swapchain, _renderPass);
+	_descPool = createDescriptorPool(device);
+	_pipelines = createPipelines(device, _renderPass, _descPool, _swapchain.getExtent());
 }
 
 } // namespace graphics

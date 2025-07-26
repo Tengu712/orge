@@ -30,80 +30,82 @@ enum class ShaderStages: uint8_t {
 };
 
 struct AttachmentConfig {
-	std::string id;
-	Format format;
-	bool discard;
-	std::optional<std::array<float, 4>> colorClearValue;
-	std::optional<float> depthClearValue;
+	const std::string id;
+	const Format format;
+	const bool discard;
+	const std::optional<std::array<float, 4>> colorClearValue;
+	const std::optional<float> depthClearValue;
 
 	AttachmentConfig(const YAML::Node &node);
 };
 
 struct SubpassDepthConfig {
-	std::string id;
-	bool readOnly;
+	const std::string id;
+	const bool readOnly;
 
 	SubpassDepthConfig(const YAML::Node &node);
 };
 
 struct SubpassConfig {
-	std::string id;
-	std::vector<std::string> inputs;
-	std::vector<std::string> outputs;
-	std::optional<SubpassDepthConfig> depth;
-	std::vector<std::string> depends;
+	const std::string id;
+	const std::vector<std::string> inputs;
+	const std::vector<std::string> outputs;
+	const std::optional<SubpassDepthConfig> depth;
+	const std::vector<std::string> depends;
 
 	SubpassConfig(const YAML::Node &node);
 };
 
 struct DescriptorBindingConfig {
-	DescriptorType type;
-	uint32_t count;
-	ShaderStages stage;
-	std::optional<std::string> attachment;
+	const DescriptorType type;
+	const uint32_t count;
+	const ShaderStages stage;
+	const std::optional<std::string> attachment;
 
 	DescriptorBindingConfig(const YAML::Node &node);
 };
 
 struct DescriptorSetConfig {
-	uint32_t count;
-	std::vector<DescriptorBindingConfig> bindings;
+	const uint32_t count;
+	const std::vector<DescriptorBindingConfig> bindings;
 
 	DescriptorSetConfig(const YAML::Node &node);
 };
 
 struct PipelineConfig {
-	std::string id;
-	std::string vertexShader;
-	std::string fragmentShader;
-	std::vector<DescriptorSetConfig> descSets;
-	std::vector<uint32_t> vertexInputAttributes;
-	bool culling;
-	bool depthTest;
-	std::vector<bool> colorBlends;
-	std::string subpass;
+	const std::string id;
+	const std::string vertexShader;
+	const std::string fragmentShader;
+	const std::vector<DescriptorSetConfig> descSets;
+	const std::vector<uint32_t> vertexInputAttributes;
+	const bool culling;
+	const bool depthTest;
+	const std::vector<bool> colorBlends;
+	const std::string subpass;
 
 	PipelineConfig(const YAML::Node &node);
 };
 
 struct Config {
-	std::string title;
-	uint32_t width;
-	uint32_t height;
-	bool fullscreen;
-	bool altTabToggleFullscreen;
-	std::vector<AttachmentConfig> attachments;
-	std::vector<SubpassConfig> subpasses;
-	std::vector<PipelineConfig> pipelines;
+	const std::string title;
+	const uint32_t width;
+	const uint32_t height;
+	const bool fullscreen;
+	const bool altReturnToggleFullscreen;
+	const std::vector<AttachmentConfig> attachments;
+	const std::vector<SubpassConfig> subpasses;
+	const std::vector<PipelineConfig> pipelines;
 
-	std::unordered_map<std::string, uint32_t> attachmentMap;
-	std::unordered_map<std::string, uint32_t> subpassMap;
+	const std::unordered_map<std::string, uint32_t> attachmentMap;
+	const std::unordered_map<std::string, uint32_t> subpassMap;
 
-	Config(const YAML::Node &node);
+	Config(YAML::Node node);
 };
 
-Config parse(const char *yaml);
+void initializeConfig(const char *yaml);
 
-Config parseFromFile(const char *yamlFilePath);
+void initializeConfigFromFile(const char *yamlFilePath);
+
+const Config &config();
 
 } // namespace config
