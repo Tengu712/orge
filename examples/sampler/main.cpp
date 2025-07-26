@@ -12,7 +12,6 @@
 #define CHECK(n) \
 	if (!(n)) { \
 		std::cout << orgeGetErrorMessage() << std::endl; \
-		orgeResetRendering(); \
 		continue; \
 	}
 

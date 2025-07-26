@@ -24,7 +24,6 @@ int main() {
 	while (orgeUpdate()) {
 		if (!orgeBeginRender() || !orgeEndRender()) {
 			std::cout << orgeGetErrorMessage() << std::endl;
-			orgeResetRendering();
 		}
 
 		if (count % 60 == 0) {
