@@ -5,6 +5,7 @@
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
+#include <cstdlib>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <vulkan/vulkan.hpp>
@@ -15,29 +16,26 @@
 # define MODKEY SDL_KMOD_ALT
 #endif
 
-#define TRY(n) \
+#define CHECK(n) \
 	try { \
 		n; \
-		return 1; \
+		result = true; \
 	} catch (const char *e) { \
 		error::setMessage(std::string(e)); \
-		return 0; \
 	} catch (const std::string &e) { \
 		error::setMessage(e); \
-		return 0; \
 	} catch (const vk::Result &e) { \
-		error::setMessage("vulkan result: " + std::to_string(static_cast<int64_t>(e))); \
-		return 0; \
+		handleVkResult(e); \
 	} catch (const vk::SystemError &e) { \
-		error::setMessage(std::string(e.what())); \
-		return 0; \
+		handleVkResult(static_cast<vk::Result>(e.code().value())); \
 	} catch (const std::exception &e) { \
 		error::setMessage(e.what()); \
-		return 0; \
 	} catch (...) { \
 		error::setMessage("unbound error."); \
-		return 0; \
     }
+
+#define TRY(n)         bool result = false; CHECK(n); return static_cast<int>(result);
+#define TRY_DISCARD(n) bool result = false; CHECK(n); (void)result;
 
 namespace {
 
@@ -51,6 +49,44 @@ void initialize() {
 		throw "failed to load Vulkan.";
 	}
 	g_graphics = std::make_unique<graphics::Graphics>();
+}
+
+void handleVkResult(const vk::Result &e) {
+	switch (e) {
+	case vk::Result::eErrorInitializationFailed:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Failed to initialize Vulkan. Is Vulkan availabe and latest?", nullptr);
+		abort();
+	case vk::Result::eErrorLayerNotPresent:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Some Vulkan layers required are unavailable. Is Vulkan availabe and latest?", nullptr);
+		abort();
+	case vk::Result::eErrorExtensionNotPresent:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Some Vulkan extensions required are unavailable. Is Vulkan availabe and latest?", nullptr);
+		abort();
+	case vk::Result::eErrorDeviceLost:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Graphics device has been lost.", nullptr);
+		abort();
+	case vk::Result::eErrorOutOfHostMemory:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Host memory limit has been reached.", nullptr);
+		abort();
+	case vk::Result::eErrorOutOfDeviceMemory:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Graphics device memory limit has been reached.", nullptr);
+		abort();
+	case vk::Result::eErrorInvalidVideoStdParametersKHR:
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Video Std parameter is invalid.", nullptr);
+		abort();
+	case vk::Result::eSuboptimalKHR:
+	case vk::Result::eErrorOutOfDateKHR:
+		error::setMessage("Swapchain is out of date, performing recreation.");
+		g_graphics->recreateSwapchain();
+		break;
+	case vk::Result::eErrorSurfaceLostKHR:
+		error::setMessage("Surface is out of date, performing recreation.");
+		g_graphics->recreateSurface();
+		break;
+	default:
+		error::setMessage("vulkan error: " + vk::to_string(e) + " (" + std::to_string(static_cast<int64_t>(e)) + ")");
+		break;
+	}
 }
 
 } // namespace
@@ -132,11 +168,13 @@ int orgeIsFullscreen(void) {
 }
 
 void orgeSetFullscreen(int toFullscreen) {
-	g_graphics->setFullscreen(toFullscreen);
+	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
+	TRY_DISCARD(g_graphics->setFullscreen(toFullscreen));
 }
 
 void orgeToggleFullscreen(void) {
-	g_graphics->toggleFullscreen();
+	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
+	TRY_DISCARD(g_graphics->toggleFullscreen());
 }
 
 // ================================================================================================================== //
@@ -226,25 +264,33 @@ void orgeDestroyMesh(const char *id) {
 //     Rendering                                                                                                      //
 // ================================================================================================================== //
 
+#define TRY_OR(n) \
+	bool result = false; \
+	CHECK(n); \
+	if (!result) g_graphics->resetRendering(); \
+	return static_cast<int>(result);
+
 int orgeBeginRender(void) {
-	TRY(g_graphics->beginRender());
+	TRY_OR(g_graphics->beginRender());
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {
-	TRY(g_graphics->bindDescriptorSets(pipelineId, indices));
+	TRY_OR(g_graphics->bindDescriptorSets(pipelineId, indices));
 }
 
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
-	TRY(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
+	TRY_OR(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
 }
 
 int orgeNextSubpass(void) {
-	TRY(g_graphics->nextSubpass());
+	TRY_OR(g_graphics->nextSubpass());
 }
 
 int orgeEndRender(void) {
-	TRY(g_graphics->endRender());
+	TRY_OR(g_graphics->endRender());
 }
+
+#undef TRY_OR
 
 // ================================================================================================================== //
 //     Input                                                                                                          //

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../error/error.hpp"
-#include "descpool.hpp"
 #include "mesh.hpp"
 #include "framebuffer.hpp"
 #include "pipeline.hpp"
@@ -31,7 +30,7 @@ private:
 	vk::Semaphore _semaphoreForImageEnabled;
 	/// コマンドバッファ実行の完了を知るためのセマフォ
 	/// プレゼンテーション開始を待機させるために使う
-	const std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
+	std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
 	/// フレーム完了を監視するフェンス
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
 	const vk::Fence _frameInFlightFence;
@@ -134,6 +133,15 @@ public:
 	void draw(uint32_t instanceCount, uint32_t instanceOffset) const {
 		_ensureWhileRendering("try to draw before starting rendering.");
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
+	}
+
+	void resetRendering(const vk::Device &device) {
+		_commandBuffer.reset();
+		for (auto &n : _semaphoreForRenderFinisheds) {
+			device.destroySemaphore(n);
+			n = device.createSemaphore({});
+		}
+		_frameInfo = std::nullopt;
 	}
 
 	void recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device);

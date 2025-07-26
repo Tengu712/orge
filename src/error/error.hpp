@@ -23,11 +23,6 @@ const auto &at(const T &container, const U &key, const std::string &subject) {
 	}
 }
 
-enum class SpecialError {
-	NeedRecreateSwapchain,
-	NeedRecreateSurface,
-};
-
 void setMessage(const std::string &e);
 
 const std::string &getMessage();

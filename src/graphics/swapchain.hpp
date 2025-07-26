@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../error/error.hpp"
-
 #include <memory>
 #include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>
@@ -70,20 +68,11 @@ public:
 	/// 利用可能な次のスワップチェインイメージのインデックスを取得する関数
 	///
 	/// イメージの取得が完了したら与えられたセマフォをシグナルする。
-	///
-	/// WARN: 対処すべき例外が発生したらSpecialErrorを投げるので、適宜対処すること。
 	uint32_t acquireNextImageIndex(const vk::Device &device, const vk::Semaphore &semaphore) const {
 		const auto result = device.acquireNextImageKHR(_swapchain, UINT64_MAX, semaphore, nullptr);
 		if (result.result == vk::Result::eSuccess) {
 			return result.value;
-		}
-		switch (result.result) {
-		case vk::Result::eSuboptimalKHR:
-		case vk::Result::eErrorOutOfDateKHR:
-			throw error::SpecialError::NeedRecreateSwapchain;
-		case vk::Result::eErrorSurfaceLostKHR:
-			throw error::SpecialError::NeedRecreateSurface;
-		default:
+		} else {
 			throw result.result;
 		}
 	}

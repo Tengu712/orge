@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include "../config/config.hpp"
+#include "descpool.hpp"
 
 namespace graphics {
 
@@ -164,18 +165,17 @@ Renderer::Renderer(
 {}
 
 void Renderer::beginRender(const vk::Device &device) {
-	// TODO: フレーム情報が残っている場合、前のフレームで描画に失敗したことを意味する。
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
+
+	// スワップチェインイメージ番号取得
+	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
 
 	// コマンドバッファ開始
 	_commandBuffer.reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	_commandBuffer.begin(cbi);
-
-	// スワップチェインイメージ番号取得
-	const auto index = _swapchain.acquireNextImageIndex(device, _semaphoreForImageEnabled);
 
 	// レンダーパス開始
 	const auto &framebuffer = error::at(_framebuffers, index, "framebuffers");
@@ -201,7 +201,6 @@ void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 	device.resetFences({_frameInFlightFence});
 
 	// 提出
-	// TODO: 提出に失敗するとフェンスがシグナルされない？
 	const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 	const auto &semaphore = error::at(
 		_semaphoreForRenderFinisheds,
