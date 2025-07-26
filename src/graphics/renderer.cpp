@@ -207,7 +207,6 @@ void Renderer::endRender(const vk::Device &device, const vk::Queue &queue) {
 	device.resetFences({_frameInFlightFence});
 
 	// 提出
-	// TODO: 提出に失敗するとフェンスがシグナルされない？
 	const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 	const auto &semaphore = error::at(
 		_semaphoreForRenderFinisheds,
