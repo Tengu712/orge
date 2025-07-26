@@ -16,31 +16,26 @@
 # define MODKEY SDL_KMOD_ALT
 #endif
 
-#define TRY_WITH(n, s, f) \
+#define CHECK(n) \
 	try { \
 		n; \
-		return s; \
+		result = true; \
 	} catch (const char *e) { \
 		error::setMessage(std::string(e)); \
-		return f; \
 	} catch (const std::string &e) { \
 		error::setMessage(e); \
-		return f; \
 	} catch (const vk::Result &e) { \
 		handleVkResult(e); \
-		return f; \
 	} catch (const vk::SystemError &e) { \
 		handleVkResult(static_cast<vk::Result>(e.code().value())); \
-		return f; \
 	} catch (const std::exception &e) { \
 		error::setMessage(e.what()); \
-		return f; \
 	} catch (...) { \
 		error::setMessage("unbound error."); \
-		return f; \
     }
 
-#define TRY(n) TRY_WITH(n, 1, 0)
+#define TRY(n)         bool result = false; CHECK(n); return static_cast<int>(result);
+#define TRY_DISCARD(n) bool result = false; CHECK(n); (void)result;
 
 namespace {
 
@@ -60,25 +55,25 @@ void handleVkResult(const vk::Result &e) {
 	switch (e) {
 	case vk::Result::eErrorInitializationFailed:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Failed to initialize Vulkan. Is Vulkan availabe and latest?", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorLayerNotPresent:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Some Vulkan layers required are unavailable. Is Vulkan availabe and latest?", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorExtensionNotPresent:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Some Vulkan extensions required are unavailable. Is Vulkan availabe and latest?", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorDeviceLost:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Graphics device has been lost.", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorOutOfHostMemory:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Host memory limit has been reached.", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorOutOfDeviceMemory:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Graphics device memory limit has been reached.", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eErrorInvalidVideoStdParametersKHR:
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", "Video Std parameter is invalid.", nullptr);
-		std::exit(1);
+		abort();
 	case vk::Result::eSuboptimalKHR:
 	case vk::Result::eErrorOutOfDateKHR:
 		error::setMessage("Swapchain is out of date, performing recreation.");
@@ -173,13 +168,13 @@ int orgeIsFullscreen(void) {
 }
 
 void orgeSetFullscreen(int toFullscreen) {
-	// NOTE: 発生する例外はすべて致命的であり、TRY_WITHで強制終了されるので、返戻型はvoid。
-	TRY_WITH(g_graphics->setFullscreen(toFullscreen), , );
+	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
+	TRY_DISCARD(g_graphics->setFullscreen(toFullscreen));
 }
 
 void orgeToggleFullscreen(void) {
-	// NOTE: 発生する例外はすべて致命的であり、TRY_WITHで強制終了されるので、返戻型はvoid。
-	TRY_WITH(g_graphics->toggleFullscreen(), , );
+	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
+	TRY_DISCARD(g_graphics->toggleFullscreen());
 }
 
 // ================================================================================================================== //
@@ -269,25 +264,33 @@ void orgeDestroyMesh(const char *id) {
 //     Rendering                                                                                                      //
 // ================================================================================================================== //
 
+#define TRY_OR(n) \
+	bool result = false; \
+	CHECK(n); \
+	if (!result) g_graphics->resetRendering(); \
+	return static_cast<int>(result);
+
 int orgeBeginRender(void) {
-	TRY(g_graphics->beginRender());
+	TRY_OR(g_graphics->beginRender());
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {
-	TRY(g_graphics->bindDescriptorSets(pipelineId, indices));
+	TRY_OR(g_graphics->bindDescriptorSets(pipelineId, indices));
 }
 
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
-	TRY(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
+	TRY_OR(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
 }
 
 int orgeNextSubpass(void) {
-	TRY(g_graphics->nextSubpass());
+	TRY_OR(g_graphics->nextSubpass());
 }
 
 int orgeEndRender(void) {
-	TRY(g_graphics->endRender());
+	TRY_OR(g_graphics->endRender());
 }
+
+#undef TRY_OR
 
 // ================================================================================================================== //
 //     Input                                                                                                          //

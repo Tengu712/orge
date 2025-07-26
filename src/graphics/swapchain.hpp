@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../error/error.hpp"
-
 #include <memory>
 #include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>

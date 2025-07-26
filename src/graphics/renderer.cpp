@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include "../config/config.hpp"
+#include "descpool.hpp"
 
 namespace graphics {
 
@@ -164,12 +165,6 @@ Renderer::Renderer(
 {}
 
 void Renderer::beginRender(const vk::Device &device) {
-	if (_frameInfo.has_value()) {
-		device.waitIdle();
-		_commandBuffer.reset();
-		_frameInfo = std::nullopt;
-	}
-
 	// フレーム情報をリセット
 	_frameInfo = std::nullopt;
 
