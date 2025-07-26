@@ -97,23 +97,4 @@ Graphics::Graphics() :
 	initializeUtils(_device, _commandPool);
 }
 
-void Graphics::beginRender() {
-	try {
-		_renderer.beginRender(_device);
-	} catch (const error::SpecialError &e) {
-		switch (e) {
-		case error::SpecialError::NeedRecreateSwapchain:
-			_device.waitIdle();
-			_renderer.recreateSwapchain(_physicalDevice, _device);
-			throw "swapchain recreated.";
-		case error::SpecialError::NeedRecreateSurface:
-			_device.waitIdle();
-			_renderer.recreateSurface(_instance, _physicalDevice, _device);
-			throw "surface recreated.";
-		default:
-			throw e;
-		}
-	}
-}
-
 } // namespace graphics

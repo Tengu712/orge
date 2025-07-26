@@ -165,7 +165,9 @@ public:
 		}
 	}
 
-	void beginRender();
+	void beginRender() {
+		_renderer.beginRender(_device);
+	}
 
 	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);
@@ -183,6 +185,20 @@ public:
 
 	void endRender() {
 		_renderer.endRender(_device, _queue);
+	}
+
+	void resetRendering() {
+		_renderer.resetRendering(_device);
+	}
+
+	void recreateSwapchain() {
+		_device.waitIdle();
+		_renderer.recreateSwapchain(_physicalDevice, _device);
+	}
+
+	void recreateSurface() {
+		_device.waitIdle();
+		_renderer.recreateSurface(_instance, _physicalDevice, _device);
 	}
 
 	bool isFullscreen() const noexcept {
