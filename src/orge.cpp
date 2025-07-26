@@ -50,7 +50,7 @@ void initialize() {
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw "failed to load Vulkan.";
 	}
-	g_graphics = std::make_unique<graphics::Graphics>(config::config());
+	g_graphics = std::make_unique<graphics::Graphics>();
 }
 
 } // namespace
@@ -227,7 +227,7 @@ void orgeDestroyMesh(const char *id) {
 // ================================================================================================================== //
 
 int orgeBeginRender(void) {
-	TRY(g_graphics->beginRender(config::config()));
+	TRY(g_graphics->beginRender());
 }
 
 int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {

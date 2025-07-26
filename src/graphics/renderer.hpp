@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "descpool.hpp"
 #include "mesh.hpp"
@@ -67,7 +66,6 @@ public:
 
 	Renderer() = delete;
 	Renderer(
-		const config::Config &config,
 		const vk::Instance &instance,
 		const vk::PhysicalDevice &physicalDevice,
 		const vk::Device &device,
@@ -135,14 +133,9 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
-	void recreateSwapchain(
-		const config::Config &config,
-		const vk::PhysicalDevice &physicalDevice,
-		const vk::Device &device
-	);
+	void recreateSwapchain(const vk::PhysicalDevice &physicalDevice, const vk::Device &device);
 
 	void recreateSurface(
-		const config::Config &config,
 		const vk::Instance &instance,
 		const vk::PhysicalDevice &physicalDevice,
 		const vk::Device &device

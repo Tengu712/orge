@@ -1,5 +1,7 @@
 #include "pipeline.hpp"
 
+#include "../config/config.hpp"
+
 #include <fstream>
 
 namespace graphics {
@@ -85,13 +87,12 @@ vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent
 }
 
 std::unordered_map<std::string, Pipeline> createPipelines(
-	const config::Config &config,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
 	const vk::DescriptorPool &descPool,
 	const vk::Extent2D &extent
 ) {
-	if (config.pipelines.empty()) {
+	if (config::config().pipelines.empty()) {
 		return {};
 	}
 
@@ -101,7 +102,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 
 	// ビューポート
 	std::vector<vk::Viewport> viewports;
-	viewports.emplace_back(adjustViewport(config.width, config.height, extent));
+	viewports.emplace_back(adjustViewport(config::config().width, config::config().height, extent));
 	std::vector<vk::Rect2D> scissors;
 	scissors.emplace_back(vk::Offset2D(0, 0), extent);
 	const auto vsci = vk::PipelineViewportStateCreateInfo()
@@ -115,9 +116,9 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 	// 作成情報作成
 	std::vector<PipelineCreateTemporaryInfos> ctis;
 	std::vector<vk::GraphicsPipelineCreateInfo> cis;
-	ctis.reserve(config.pipelines.size());
-	cis.reserve(config.pipelines.size());
-	for (const auto &n: config.pipelines) {
+	ctis.reserve(config::config().pipelines.size());
+	cis.reserve(config::config().pipelines.size());
+	for (const auto &n: config::config().pipelines) {
 		ctis.push_back({});
 		auto &cti = ctis.back();
 
@@ -232,10 +233,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		cti.pipelineLayout = device.createPipelineLayout(plci);
 
 		// サブパスID
-		if (!config.subpassMap.contains(n.subpass)) {
-			throw std::format("subpass '{}' is not defined.", n.subpass);
-		}
-		cti.subpass = config.subpassMap.at(n.subpass);
+		cti.subpass = config::config().subpassMap.at(n.subpass);
 
 		// ディスクリプタセット確保
 		for (size_t i = 0; i < n.descSets.size(); ++i) {
@@ -261,7 +259,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 					throw;
 				}
 				cti.inputs.emplace_back(
-					config.attachmentMap.at(n.descSets[i].bindings[j].attachment.value()),
+					config::config().attachmentMap.at(n.descSets[i].bindings[j].attachment.value()),
 					static_cast<uint32_t>(i),
 					static_cast<uint32_t>(j),
 					isTexture
@@ -294,7 +292,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 	pipelines.reserve(ps.size());
 	for (size_t i = 0; i < ps.size(); ++i) {
 		pipelines.emplace(
-			config.pipelines[i].id,
+			config::config().pipelines[i].id,
 			Pipeline {
 				ps[i],
 				ctis[i].pipelineLayout,

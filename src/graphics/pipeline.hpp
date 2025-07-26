@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "buffer.hpp"
 #include "framebuffer.hpp"
@@ -162,7 +161,6 @@ public:
 };
 
 std::unordered_map<std::string, Pipeline> createPipelines(
-	const config::Config &config,
 	const vk::Device &device,
 	const vk::RenderPass &renderPass,
 	const vk::DescriptorPool &descPool,

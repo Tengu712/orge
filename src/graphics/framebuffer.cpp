@@ -1,5 +1,7 @@
 #include "framebuffer.hpp"
 
+#include "../config/config.hpp"
+
 #include "utils.hpp"
 
 namespace graphics {
@@ -93,24 +95,23 @@ Attachment createAttachment(
 }
 
 std::vector<Attachment> createAttachments(
-	const config::Config &config,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const Swapchain &swapchain,
 	const vk::Image &swapchainImage
 ) {
 	std::vector<Attachment> attachments;
-	attachments.reserve(config.attachments.size());
-	for (const auto &n: config.attachments) {
+	attachments.reserve(config::config().attachments.size());
+	for (const auto &n: config::config().attachments) {
 		attachments.push_back(createAttachment(memoryProps, device, swapchain, swapchainImage, n.format));
 	}
 	return attachments;
 }
 
-std::vector<vk::ClearValue> collectClearValues(const config::Config &config) {
+std::vector<vk::ClearValue> collectClearValues() {
 	std::vector<vk::ClearValue> clearValues;
-	clearValues.reserve(config.attachments.size());
-	for (const auto &n: config.attachments) {
+	clearValues.reserve(config::config().attachments.size());
+	for (const auto &n: config::config().attachments) {
 		if (n.colorClearValue) {
 			clearValues.emplace_back(static_cast<vk::ClearValue>(vk::ClearColorValue(n.colorClearValue.value())));
 		} else {
@@ -144,15 +145,14 @@ vk::Framebuffer createFramebuffer(
 }
 
 Framebuffer::Framebuffer(
-	const config::Config &config,
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const Swapchain &swapchain,
 	const vk::Image &swapchainImage,
 	const vk::RenderPass &renderPass
 ) :
-	_attachments(createAttachments(config, memoryProps, device, swapchain, swapchainImage)),
-	_clearValues(collectClearValues(config)),
+	_attachments(createAttachments(memoryProps, device, swapchain, swapchainImage)),
+	_clearValues(collectClearValues()),
 	_framebuffer(createFramebuffer(device, renderPass, swapchain, _attachments))
 {}
 
