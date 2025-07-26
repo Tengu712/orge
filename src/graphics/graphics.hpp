@@ -6,6 +6,8 @@
 #include "mesh.hpp"
 #include "renderer.hpp"
 
+#include <unordered_map>
+
 namespace graphics {
 
 class Graphics {

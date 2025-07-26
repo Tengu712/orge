@@ -7,6 +7,8 @@
 #include "pipeline.hpp"
 #include "swapchain.hpp"
 
+#include <unordered_map>
+
 namespace graphics {
 
 class Renderer {

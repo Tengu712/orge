@@ -5,6 +5,8 @@
 #include "framebuffer.hpp"
 #include "image.hpp"
 
+#include <unordered_map>
+
 namespace graphics {
 
 struct InputAttachment {
