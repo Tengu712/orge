@@ -165,9 +165,8 @@ Renderer::Renderer(
 
 void Renderer::beginRender(const vk::Device &device) {
 	if (_frameInfo.has_value()) {
+		device.waitIdle();
 		_commandBuffer.reset();
-		device.destroyFence(_frameInFlightFence);
-		_frameInFlightFence = device.createFence({vk::FenceCreateFlagBits::eSignaled});
 		_frameInfo = std::nullopt;
 	}
 

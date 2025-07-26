@@ -34,7 +34,7 @@ private:
 	const std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
 	/// フレーム完了を監視するフェンス
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
-	vk::Fence _frameInFlightFence;
+	const vk::Fence _frameInFlightFence;
 	std::vector<Framebuffer> _framebuffers;
 	vk::DescriptorPool _descPool;
 	std::unordered_map<std::string, Pipeline> _pipelines;
