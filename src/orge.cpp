@@ -79,7 +79,7 @@ const char *orgeGetErrorMessage(void) {
 	return error::getMessage().c_str();
 }
 
-void orgeShowErrorDialog() {
+void orgeShowErrorDialog(void) {
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
 }
 
@@ -227,7 +227,7 @@ void orgeDestroyMesh(const char *id) {
 //     Rendering                                                                                                      //
 // ================================================================================================================== //
 
-int orgeBeginRender() {
+int orgeBeginRender(void) {
 	TRY(g_graphics->beginRender(g_config.value()));
 }
 
@@ -239,11 +239,11 @@ int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount,
 	TRY(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
 }
 
-int orgeNextSubpass() {
+int orgeNextSubpass(void) {
 	TRY(g_graphics->nextSubpass());
 }
 
-int orgeEndRender() {
+int orgeEndRender(void) {
 	TRY(g_graphics->endRender());
 }
 

@@ -22,12 +22,12 @@ enum OrgeDialogType {
 void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
 
 /// orgeの直近のエラーメッセージを取得する関数
-const char *orgeGetErrorMessage();
+const char *orgeGetErrorMessage(void);
 
 /// orgeの直近のエラーメッセージをダイアログで表示する関数
 ///
 /// ダイアログが閉じられるまでスレッドを停止する。
-void orgeShowErrorDialog();
+void orgeShowErrorDialog(void);
 
 // ================================================================================================================== //
 //     Lifetime Managiment                                                                                            //
@@ -210,7 +210,7 @@ int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
 int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// 次のサブパスへ移るための関数
-int orgeNextSubpass();
+int orgeNextSubpass(void);
 
 /// orgeの描画を終了する関数
 int orgeEndRender(void);
