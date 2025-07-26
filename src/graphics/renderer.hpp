@@ -7,6 +7,7 @@
 #include "pipeline.hpp"
 #include "swapchain.hpp"
 
+#include <optional>
 #include <unordered_map>
 
 namespace graphics {

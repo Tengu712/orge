@@ -195,7 +195,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 
 template<typename T>
 std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
-	std::unordered_map<std::string, u_int32_t> map;
+	std::unordered_map<std::string, uint32_t> map;
 	for (const auto &n: v) {
 		map.emplace(n.id, static_cast<uint32_t>(map.size()));
 	}
