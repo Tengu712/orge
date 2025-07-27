@@ -73,12 +73,7 @@ Attachment createAttachment(
 	// メモリ確保
 	vk::DeviceMemory memory = nullptr;
 	if (!isRenderTarget) {
-		memory = allocateImageMemory(
-			memoryProps,
-			device,
-			image,
-			vk::MemoryPropertyFlagBits::eDeviceLocal
-		);
+		memory = allocateImageMemory(memoryProps, device, image, vk::MemoryPropertyFlagBits::eDeviceLocal);
 	}
 
 	// イメージビュー作成
