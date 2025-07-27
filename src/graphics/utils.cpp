@@ -27,6 +27,91 @@ void initializeUtils(const vk::Device &device, const vk::CommandPool &commandPoo
 	g_fence = device.createFence({});
 }
 
+void uploadBuffer(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Queue &queue,
+	const vk::Buffer &dst,
+	const void *src,
+	size_t size,
+	vk::PipelineStageFlags visibleStages
+) {
+	// ステージングバッファ作成
+	const auto bci = vk::BufferCreateInfo()
+		.setSize(static_cast<vk::DeviceSize>(size))
+		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
+		.setSharingMode(vk::SharingMode::eExclusive);
+	const auto buffer = device.createBuffer(bci);
+	const auto bufferMemory = allocateBufferMemory(memoryProps, device, buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+
+	// ステージングバッファへアップロード
+	copyDataToMemory(device, bufferMemory, src, size);
+
+	// アップロード準備
+	g_commandBuffer.reset();
+	const auto cbi = vk::CommandBufferBeginInfo()
+		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	g_commandBuffer.begin(cbi);
+
+	// メモリバリア (undegined -> transferDstOptimal)
+	const auto bmb = vk::BufferMemoryBarrier(
+		vk::AccessFlags(),
+		vk::AccessFlagBits::eTransferWrite,
+		vk::QueueFamilyIgnored,
+		vk::QueueFamilyIgnored,
+		dst,
+		0,
+		size
+	);
+	g_commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eAllCommands,
+		vk::PipelineStageFlagBits::eTransfer,
+		vk::DependencyFlags(),
+		{},
+		{bmb},
+		{}
+	);
+
+	// アップロード
+	const auto cr = vk::BufferCopy(0, 0, size);
+	g_commandBuffer.copyBuffer(buffer, dst, {cr});
+
+	// メモリバリア (transferDstOptimal -> shaderReadOnlyOptimal)
+	const auto amb = vk::BufferMemoryBarrier(
+		vk::AccessFlagBits::eTransferWrite,
+		vk::AccessFlagBits::eShaderRead,
+		vk::QueueFamilyIgnored,
+		vk::QueueFamilyIgnored,
+		dst,
+		0,
+		size
+	);
+	g_commandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eTransfer,
+		visibleStages,
+		vk::DependencyFlags(),
+		{},
+		{amb},
+		{}
+	);
+
+	// アップロード提出
+	g_commandBuffer.end();
+	device.resetFences({g_fence});
+	const auto si = vk::SubmitInfo()
+		.setCommandBuffers({g_commandBuffer});
+	queue.submit(si, g_fence);
+
+	// 完了まで待機
+	if (device.waitForFences({g_fence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+		throw "failed to wait for uploading a buffer.";
+	}
+
+	// ステージングバッファ削除
+	device.freeMemory(bufferMemory);
+	device.destroyBuffer(buffer);
+}
+
 void uploadImage(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
@@ -46,18 +131,12 @@ void uploadImage(
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(
-		memoryProps,
-		device,
-		buffer,
-		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-	);
+	const auto bufferMemory = allocateBufferMemory(memoryProps, device, buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
 	copyDataToMemory(device, bufferMemory, src, bufferSize);
 
 	// アップロード準備
-	device.resetFences({g_fence});
 	g_commandBuffer.reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -111,6 +190,7 @@ void uploadImage(
 
 	// アップロード提出
 	g_commandBuffer.end();
+	device.resetFences({g_fence});
 	const auto si = vk::SubmitInfo()
 		.setCommandBuffers({g_commandBuffer});
 	queue.submit(si, g_fence);

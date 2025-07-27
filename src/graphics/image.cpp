@@ -49,7 +49,7 @@ Image::Image(
 	const uint8_t *pixels
 ) :
 	_image(createImage(device, width, height)),
-	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eHostCoherent)),
+	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eDeviceLocal)),
 	_view(createImageView(device, _image))
 {
 	uploadImage(memoryProps, device, queue, _image, width, height, pixels);

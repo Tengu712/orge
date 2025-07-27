@@ -20,6 +20,7 @@ public:
 	Mesh(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
+		const vk::Queue &queue,
 		const uint32_t vertexCount,
 		const float *vertices,
 		const uint32_t indexCount,
@@ -29,28 +30,34 @@ public:
 		_vb(device.createBuffer(
 			vk::BufferCreateInfo()
 				.setSize(VB_SIZE())
-				.setUsage(vk::BufferUsageFlagBits::eVertexBuffer)
+				.setUsage(vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 		)),
 		_ib(device.createBuffer(
 			vk::BufferCreateInfo()
 				.setSize(IB_SIZE())
-				.setUsage(vk::BufferUsageFlagBits::eIndexBuffer)
+				.setUsage(vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 		)),
-		_vbMemory(allocateBufferMemory(
-			memoryProps,
-			device,
-			_vb,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		)),
-		_ibMemory(allocateBufferMemory(
-			memoryProps,
-			device,
-			_ib,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		))
+		_vbMemory(allocateBufferMemory(memoryProps, device, _vb, vk::MemoryPropertyFlagBits::eDeviceLocal)),
+		_ibMemory(allocateBufferMemory(memoryProps, device, _ib, vk::MemoryPropertyFlagBits::eDeviceLocal))
 	{
-		copyDataToMemory(device, _vbMemory, vertices, VB_SIZE());
-		copyDataToMemory(device, _ibMemory, indices,  IB_SIZE());
+		uploadBuffer(
+			memoryProps,
+			device,
+			queue,
+			_vb,
+			static_cast<const void *>(vertices),
+			VB_SIZE(),
+			vk::PipelineStageFlagBits::eVertexShader
+		);
+		uploadBuffer(
+			memoryProps,
+			device,
+			queue,
+			_ib,
+			static_cast<const void *>(indices),
+			IB_SIZE(),
+			vk::PipelineStageFlagBits::eVertexShader
+		);
 	}
 
 	void destroy(const vk::Device &device) const noexcept {
