@@ -152,6 +152,7 @@ public:
 		_meshes.emplace(id, Mesh(
 			_physicalDevice.getMemoryProperties(),
 			_device,
+			_queue,
 			vertexCount,
 			vertices,
 			indexCount,

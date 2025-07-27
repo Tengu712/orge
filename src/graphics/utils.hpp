@@ -62,6 +62,16 @@ inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &d
 	device.unmapMemory(dst);
 }
 
+void uploadBuffer(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Queue &queue,
+	const vk::Buffer &dst,
+	const void *src,
+	size_t size,
+	vk::PipelineStageFlags visibleStages
+);
+
 void uploadImage(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
