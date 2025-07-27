@@ -114,10 +114,6 @@ const char *orgeGetErrorMessage(void) {
 	return error::getMessage().c_str();
 }
 
-void orgeShowErrorDialog(void) {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
-}
-
 // ================================================================================================================== //
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
