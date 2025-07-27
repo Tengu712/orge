@@ -13,6 +13,8 @@ vk::Format convertFormat(const config::Format &format, const vk::Format &rtForma
 		? vk::Format::eD32Sfloat
 		: format == config::Format::ShareColorAttachment
 		? rtFormat
+		: format == config::Format::SignedShareColorAttachment
+		? vk::Format::eR8G8B8A8Snorm
 		: throw;
 }
 
@@ -20,6 +22,10 @@ vk::ImageUsageFlags convertUsage(const config::Format &format) {
 	return format == config::Format::DepthBuffer
 		? vk::ImageUsageFlagBits::eDepthStencilAttachment
 		: format == config::Format::ShareColorAttachment
+		? vk::ImageUsageFlagBits::eColorAttachment
+			| vk::ImageUsageFlagBits::eInputAttachment
+			| vk::ImageUsageFlagBits::eSampled
+		: format == config::Format::SignedShareColorAttachment
 		? vk::ImageUsageFlagBits::eColorAttachment
 			| vk::ImageUsageFlagBits::eInputAttachment
 			| vk::ImageUsageFlagBits::eSampled
@@ -32,6 +38,8 @@ vk::ImageAspectFlags convertAspect(const config::Format &format) {
 		: format == config::Format::DepthBuffer
 		? vk::ImageAspectFlagBits::eDepth
 		: format == config::Format::ShareColorAttachment
+		? vk::ImageAspectFlagBits::eColor
+		: format == config::Format::SignedShareColorAttachment
 		? vk::ImageAspectFlagBits::eColor
 		: throw;
 }

@@ -17,6 +17,8 @@ vk::RenderPass createRenderPass(const vk::Device &device, const vk::Format &rtFo
 				? vk::Format::eD32Sfloat
 				: n.format == config::Format::ShareColorAttachment
 				? rtFormat
+				: n.format == config::Format::SignedShareColorAttachment
+				? vk::Format::eR8G8B8A8Snorm
 				: throw,
 			vk::SampleCountFlagBits::e1,
 			vk::AttachmentLoadOp::eClear,
@@ -31,6 +33,8 @@ vk::RenderPass createRenderPass(const vk::Device &device, const vk::Format &rtFo
 				: n.format == config::Format::DepthBuffer
 				? vk::ImageLayout::eDepthStencilAttachmentOptimal
 				: n.format == config::Format::ShareColorAttachment
+				? vk::ImageLayout::eShaderReadOnlyOptimal
+				: n.format == config::Format::SignedShareColorAttachment
 				? vk::ImageLayout::eShaderReadOnlyOptimal
 				: throw
 		);
@@ -52,6 +56,8 @@ vk::RenderPass createRenderPass(const vk::Device &device, const vk::Format &rtFo
 				attachment.format == config::Format::DepthBuffer
 					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
 					: attachment.format == config::Format::ShareColorAttachment
+					? vk::ImageLayout::eShaderReadOnlyOptimal
+					: attachment.format == config::Format::SignedShareColorAttachment
 					? vk::ImageLayout::eShaderReadOnlyOptimal
 					: throw "the attachment format of a subpass input must be 'depth-buffer' or 'share-color-attachment'."
 			);

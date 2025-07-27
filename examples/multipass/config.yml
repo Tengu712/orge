@@ -6,8 +6,8 @@ attachments:
     format: share-color-attachment
     clear-value: [0.0, 0.0, 0.0, 1.0]
   - id: pattern-rt
-    format: share-color-attachment
-    clear-value: [0.5, 0.5, 0.0, 0.0]
+    format: signed-share-color-attachment
+    clear-value: [0.0, 0.0, 0.0, 0.0]
   - id: RT
     format: render-target
     clear-value: [0.0, 0.0, 0.0, 1.0]
