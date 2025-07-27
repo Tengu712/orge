@@ -34,7 +34,7 @@
 		error::setMessage("unbound error."); \
     }
 
-#define TRY(n)         bool result = false; CHECK(n); return static_cast<int>(result);
+#define TRY(n)         bool result = false; CHECK(n); return static_cast<uint8_t>(result);
 #define TRY_DISCARD(n) bool result = false; CHECK(n); (void)result;
 
 namespace {
@@ -118,14 +118,14 @@ const char *orgeGetErrorMessage(void) {
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
 
-int orgeInitialize(const char *yaml) {
+uint8_t orgeInitialize(const char *yaml) {
 	TRY(
 		config::initializeConfig(yaml);
 		initialize();
 	)
 }
 
-int orgeInitializeWith(const char *yamlFilePath) {
+uint8_t orgeInitializeWith(const char *yamlFilePath) {
 	TRY(
 		config::initializeConfigFromFile(yamlFilePath);
 		initialize();
@@ -136,7 +136,7 @@ void orgeTerminate(void) {
 	g_graphics = nullptr;
 }
 
-int orgeUpdate(void) {
+uint8_t orgeUpdate(void) {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT) {
@@ -160,11 +160,11 @@ int orgeUpdate(void) {
 //     Window                                                                                                         //
 // ================================================================================================================== //
 
-int orgeIsFullscreen(void) {
-	return static_cast<int>(g_graphics->isFullscreen());
+uint8_t orgeIsFullscreen(void) {
+	return static_cast<uint8_t>(g_graphics->isFullscreen());
 }
 
-void orgeSetFullscreen(int toFullscreen) {
+void orgeSetFullscreen(uint8_t toFullscreen) {
 	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
 	TRY_DISCARD(g_graphics->setFullscreen(toFullscreen));
 }
@@ -173,7 +173,7 @@ void orgeSetFullscreen(int toFullscreen) {
 //     Graphics Resources                                                                                             //
 // ================================================================================================================== //
 
-int orgeCreateBuffer(const char *id, uint64_t size, int isStorage) {
+uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage) {
 	TRY(g_graphics->createBuffer(id, size, isStorage));
 }
 
@@ -181,11 +181,11 @@ void orgeDestroyBuffer(const char *id) {
 	g_graphics->destroyBuffer(id);
 }
 
-int orgeUpdateBuffer(const char *id, const void *data) {
+uint8_t orgeUpdateBuffer(const char *id, const void *data) {
 	TRY(g_graphics->updateBuffer(id, data));
 }
 
-int orgeUpdateBufferDescriptor(
+uint8_t orgeUpdateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,
 	uint32_t set,
@@ -196,11 +196,11 @@ int orgeUpdateBufferDescriptor(
 	TRY(g_graphics->updateBufferDescriptor(bufferId, pipelineId, set, index, binding, offset));
 }
 
-int orgeCreateImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
+uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels) {
 	TRY(g_graphics->createImage(id, width, height, pixels));
 }
 
-int orgeCreateImageFromFile(const char *id, const char *path) {
+uint8_t orgeCreateImageFromFile(const char *id, const char *path) {
 	TRY(g_graphics->createImage(id, path));
 }
 
@@ -208,7 +208,7 @@ void orgeDestroyImage(const char *id) {
 	g_graphics->destroyImage(id);
 }
 
-int orgeUpdateImageDescriptor(
+uint8_t orgeUpdateImageDescriptor(
 	const char *imageId,
 	const char *pipelineId,
 	uint32_t set,
@@ -219,7 +219,7 @@ int orgeUpdateImageDescriptor(
 	TRY(g_graphics->updateImageDescriptor(imageId, pipelineId, set, index, binding, offset));
 }
 
-int orgeCreateSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
+uint8_t orgeCreateSampler(const char *id, uint8_t linearMagFilter, uint8_t linearMinFilter, uint8_t repeat) {
 	TRY(g_graphics->createSampler(id, linearMagFilter, linearMinFilter, repeat));
 }
 
@@ -227,7 +227,7 @@ void orgeDestroySampler(const char *id) {
 	g_graphics->destroySampler(id);
 }
 
-int orgeUpdateSamplerDescriptor(
+uint8_t orgeUpdateSamplerDescriptor(
 	const char *samplerId,
 	const char *pipelineId,
 	uint32_t set,
@@ -238,7 +238,7 @@ int orgeUpdateSamplerDescriptor(
 	TRY(g_graphics->updateSamplerDescriptor(samplerId, pipelineId, set, index, binding, offset));
 }
 
-int orgeCreateMesh(
+uint8_t orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,
 	const float *vertices,
@@ -260,25 +260,25 @@ void orgeDestroyMesh(const char *id) {
 	bool result = false; \
 	CHECK(n); \
 	if (!result) g_graphics->resetRendering(); \
-	return static_cast<int>(result);
+	return static_cast<uint8_t>(result);
 
-int orgeBeginRender(void) {
+uint8_t orgeBeginRender(void) {
 	TRY_OR(g_graphics->beginRender());
 }
 
-int orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {
+uint8_t orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices) {
 	TRY_OR(g_graphics->bindDescriptorSets(pipelineId, indices));
 }
 
-int orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
+uint8_t orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
 	TRY_OR(g_graphics->draw(pipelineId, meshId, instanceCount, instanceOffset));
 }
 
-int orgeNextSubpass(void) {
+uint8_t orgeNextSubpass(void) {
 	TRY_OR(g_graphics->nextSubpass());
 }
 
-int orgeEndRender(void) {
+uint8_t orgeEndRender(void) {
 	TRY_OR(g_graphics->endRender());
 }
 
