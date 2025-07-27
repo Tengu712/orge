@@ -19,8 +19,8 @@ void main() {
 		vec2 dir = dis > 0.0 ? pos / dis : vec2(0.0);
 		vec2 res = dir * depth;
 
-		outColor = vec4(0.5 + res, 0.0, 0.0);
+		outColor = vec4(res, 0.0, 0.0);
 	} else {
-		outColor = vec4(0.5);
+		outColor = vec4(0.0);
 	}
 }

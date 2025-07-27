@@ -17,7 +17,7 @@ vk::RenderPass createRenderPass(const vk::Device &device, const vk::Format &rtFo
 				? vk::Format::eD32Sfloat
 				: n.format == config::Format::ShareColorAttachment
 				? rtFormat
-				: n.format == config::Format::ShareColorAttachment
+				: n.format == config::Format::SignedShareColorAttachment
 				? vk::Format::eR8G8B8A8Snorm
 				: throw,
 			vk::SampleCountFlagBits::e1,
