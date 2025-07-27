@@ -22,12 +22,7 @@ public:
 				.setUsage(_isStorage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 				.setSharingMode(vk::SharingMode::eExclusive)
 		)),
-		_memory(allocateBufferMemory(
-			memoryProps,
-			device,
-			_buffer,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		))
+		_memory(allocateBufferMemory(memoryProps, device, _buffer, vk::MemoryPropertyFlagBits::eHostVisible))
 	{}
 
 	void destroy(const vk::Device &device) const noexcept {
