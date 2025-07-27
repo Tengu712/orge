@@ -114,10 +114,6 @@ const char *orgeGetErrorMessage(void) {
 	return error::getMessage().c_str();
 }
 
-void orgeShowErrorDialog(void) {
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "error", orgeGetErrorMessage(), nullptr);
-}
-
 // ================================================================================================================== //
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
@@ -152,7 +148,8 @@ int orgeUpdate(void) {
 				&& event.key.key == SDLK_RETURN
 				&& (event.key.mod & MODKEY)
 		) {
-			g_graphics->toggleFullscreen();
+			const auto isFullscreen = g_graphics->isFullscreen();
+			g_graphics->setFullscreen(!isFullscreen);
 		}
 	}
 	input::update();
@@ -170,11 +167,6 @@ int orgeIsFullscreen(void) {
 void orgeSetFullscreen(int toFullscreen) {
 	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
 	TRY_DISCARD(g_graphics->setFullscreen(toFullscreen));
-}
-
-void orgeToggleFullscreen(void) {
-	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
-	TRY_DISCARD(g_graphics->toggleFullscreen());
 }
 
 // ================================================================================================================== //

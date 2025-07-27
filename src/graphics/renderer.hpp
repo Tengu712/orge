@@ -159,10 +159,6 @@ public:
 	void setFullscreen(bool toFullscreen) const noexcept {
 		_swapchain.setFullscreen(toFullscreen);
 	}
-
-	void toggleFullscreen() const noexcept {
-		_swapchain.toggleFullscreen();
-	}
 };
 
 } // namespace graphics

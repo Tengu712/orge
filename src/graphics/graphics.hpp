@@ -210,11 +210,6 @@ public:
 		_device.waitIdle();
 		_renderer.setFullscreen(toFullscreen);
 	}
-
-	void toggleFullscreen() const {
-		_device.waitIdle();
-		_renderer.toggleFullscreen();
-	}
 };
 
 } // namespace graphics

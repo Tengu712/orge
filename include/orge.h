@@ -24,11 +24,6 @@ void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
 /// orgeの直近のエラーメッセージを取得する関数
 const char *orgeGetErrorMessage(void);
 
-/// orgeの直近のエラーメッセージをダイアログで表示する関数
-///
-/// ダイアログが閉じられるまでスレッドを停止する。
-void orgeShowErrorDialog(void);
-
 // ================================================================================================================== //
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
@@ -58,9 +53,6 @@ int orgeIsFullscreen(void);
 
 /// フルスクリーン状態を設定する関数
 void orgeSetFullscreen(int toFullscreen);
-
-/// フルスクリーン状態をトグルする関数
-void orgeToggleFullscreen(void);
 
 // ================================================================================================================== //
 //     Graphics Resources                                                                                             //
