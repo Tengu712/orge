@@ -8,6 +8,9 @@
 - `UpperCamelCase`
   - 型名
   - 列挙子名 (`enum class`)
+- `_lowerCamelCase`
+  - privateメンバ変数名
+  - privateメンバ関数名
 - `lowerCamelCase`
   - 変数名
   - 関数名
@@ -18,7 +21,8 @@
 
 ## 120 Column
 
-1行最大120文字。
+原則1行最大120文字。
+タブ文字のせいで一見すると120文字を超えていることもあるが、面倒臭いので無視。
 
 ## auto
 
@@ -44,6 +48,10 @@ Include guardの代わりに`#pragma once`を書く。
 ## Namespace Base Directory
 
 名前空間に即してディレクトリ構成を行う。
+
+## No Legacy Code
+
+API部分を除いてC由来のレガシーなコードを書かない。
 
 ## Concise Code
 
