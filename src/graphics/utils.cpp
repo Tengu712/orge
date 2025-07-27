@@ -131,18 +131,12 @@ void uploadImage(
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(
-		memoryProps,
-		device,
-		buffer,
-		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-	);
+	const auto bufferMemory = allocateBufferMemory(memoryProps, device, buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
 	copyDataToMemory(device, bufferMemory, src, bufferSize);
 
 	// アップロード準備
-	device.resetFences({g_fence});
 	g_commandBuffer.reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
@@ -196,6 +190,7 @@ void uploadImage(
 
 	// アップロード提出
 	g_commandBuffer.end();
+	device.resetFences({g_fence});
 	const auto si = vk::SubmitInfo()
 		.setCommandBuffers({g_commandBuffer});
 	queue.submit(si, g_fence);
