@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics {
@@ -25,7 +26,7 @@ public:
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue,
-		const char *path
+		const std::string &path
 	);
 
 	void destroy(const vk::Device &device) const noexcept {

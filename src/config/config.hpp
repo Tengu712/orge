@@ -103,9 +103,9 @@ struct Config {
 	Config(YAML::Node node);
 };
 
-void initializeConfig(const char *yaml);
+void initializeConfig(const std::string &yaml);
 
-void initializeConfigFromFile(const char *yamlFilePath);
+void initializeConfigFromFile(const std::string &yamlFilePath);
 
 const Config &config();
 

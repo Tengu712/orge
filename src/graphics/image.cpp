@@ -59,7 +59,7 @@ Image Image::fromFile(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,
-	const char *path
+	const std::string &path
 ) {
 	using stbi_ptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
 
@@ -67,7 +67,7 @@ Image Image::fromFile(
 	int height = 0;
 	int channelCount = 0;
 	const auto pixels = stbi_ptr(
-		stbi_load(path, &width, &height, &channelCount, 0),
+		stbi_load(path.c_str(), &width, &height, &channelCount, 0),
 		stbi_image_free
 	);
 	if (!pixels) {
