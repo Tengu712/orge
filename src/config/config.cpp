@@ -78,6 +78,8 @@ Format parseFormat(const std::string& s) {
 		? Format::DepthBuffer
 		: s == "share-color-attachment"
 		? Format::ShareColorAttachment
+		: s == "signed-share-color-attachment"
+		? Format::SignedShareColorAttachment
 		: throw std::format("config error: format '{}' is invalid.", s);
 }
 

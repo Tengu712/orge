@@ -13,6 +13,7 @@ enum class Format: uint8_t {
 	RenderTarget,
 	DepthBuffer,
 	ShareColorAttachment,
+	SignedShareColorAttachment,
 };
 
 enum class DescriptorType: uint8_t {
