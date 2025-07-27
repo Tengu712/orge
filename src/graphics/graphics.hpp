@@ -53,7 +53,7 @@ public:
 		_instance.destroy();
 	}
 
-	void createBuffer(const char *id, uint64_t size, int isStorage) {
+	void createBuffer(const char *id, uint64_t size, bool isStorage) {
 		_buffers.emplace(id, Buffer(_physicalDevice.getMemoryProperties(), _device, size, isStorage));
 	}
 
@@ -81,7 +81,7 @@ public:
 			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
-	void createImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
+	void createImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels) {
 		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
 	}
 
@@ -109,7 +109,7 @@ public:
 			.updateImageDescriptor(_device, error::at(_images, imageId, "images"), set, index, binding, offset);
 	}
 
-	void createSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
+	void createSampler(const char *id, bool linearMagFilter, bool linearMinFilter, bool repeat) {
 		_samplers.emplace(id, _device.createSampler(
 			vk::SamplerCreateInfo()
 				.setMagFilter(linearMagFilter ? vk::Filter::eLinear : vk::Filter::eNearest)

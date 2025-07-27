@@ -84,7 +84,7 @@ int main() {
 		const auto k = lr * lr > 0 && ud * ud > 0 ? 0.7071f : 1.0f;
 		transform[12] += lr * k * 0.01f;
 		transform[13] += ud * k * 0.01f;
-		CHECK(orgeUpdateBuffer("transform", transform.data()));
+		CHECK(orgeUpdateBuffer("transform", reinterpret_cast<const uint8_t *>(transform.data())));
 
 		CHECK(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0, 0));
 		CHECK(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2, 0));

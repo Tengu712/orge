@@ -46,7 +46,7 @@ Image::Image(
 	const vk::Queue &queue,
 	uint32_t width,
 	uint32_t height,
-	const unsigned char *pixels
+	const uint8_t *pixels
 ) :
 	_image(createImage(device, width, height)),
 	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eHostCoherent)),

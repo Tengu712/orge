@@ -34,7 +34,7 @@ void uploadImage(
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,
-	const unsigned char *src
+	const uint8_t *src
 ) {
 	const auto extent = vk::Extent3D(width, height, 1);
 	const auto subresRange = vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);

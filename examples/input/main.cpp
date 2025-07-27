@@ -37,9 +37,9 @@ int main() {
 	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0));
 	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0));
 	TRY(orgeCreateBuffer("blue",  static_cast<uint64_t>(sizeof(float) * BLUE.size()),  0));
-	TRY(orgeUpdateBuffer("red",   RED.data()));
-	TRY(orgeUpdateBuffer("green", GREEN.data()));
-	TRY(orgeUpdateBuffer("blue",  BLUE.data()));
+	TRY(orgeUpdateBuffer("red",   reinterpret_cast<const uint8_t *>(RED.data())));
+	TRY(orgeUpdateBuffer("green", reinterpret_cast<const uint8_t *>(GREEN.data())));
+	TRY(orgeUpdateBuffer("blue",  reinterpret_cast<const uint8_t *>(BLUE.data())));
 
 	uint32_t state = 0;
 	while (orgeUpdate()) {

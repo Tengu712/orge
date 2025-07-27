@@ -18,7 +18,7 @@ public:
 		const vk::Queue &queue,
 		uint32_t width,
 		uint32_t height,
-		const unsigned char *pixels
+		const uint8_t *pixels
 	);
 
 	static Image fromFile(

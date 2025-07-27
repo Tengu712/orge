@@ -77,7 +77,7 @@ void orgeDestroyBuffer(const char *id);
 /// バッファを更新する関数
 ///
 /// dataはバッファ作成時に指定したサイズ分データを持つこと。
-uint8_t orgeUpdateBuffer(const char *id, const void *data);
+uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
 
 /// バッファディスクリプタを更新する関数
 ///

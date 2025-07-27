@@ -166,7 +166,7 @@ uint8_t orgeIsFullscreen(void) {
 
 void orgeSetFullscreen(uint8_t toFullscreen) {
 	// NOTE: 発生する例外はすべて致命的であり、TRY_DISCARDで強制終了されるので、返戻型はvoid。
-	TRY_DISCARD(g_graphics->setFullscreen(toFullscreen));
+	TRY_DISCARD(g_graphics->setFullscreen(static_cast<bool>(toFullscreen)));
 }
 
 // ================================================================================================================== //
@@ -174,15 +174,15 @@ void orgeSetFullscreen(uint8_t toFullscreen) {
 // ================================================================================================================== //
 
 uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage) {
-	TRY(g_graphics->createBuffer(id, size, isStorage));
+	TRY(g_graphics->createBuffer(id, size, static_cast<bool>(isStorage)));
 }
 
 void orgeDestroyBuffer(const char *id) {
 	g_graphics->destroyBuffer(id);
 }
 
-uint8_t orgeUpdateBuffer(const char *id, const void *data) {
-	TRY(g_graphics->updateBuffer(id, data));
+uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data) {
+	TRY(g_graphics->updateBuffer(id, static_cast<const void *>(data)));
 }
 
 uint8_t orgeUpdateBufferDescriptor(
@@ -220,7 +220,12 @@ uint8_t orgeUpdateImageDescriptor(
 }
 
 uint8_t orgeCreateSampler(const char *id, uint8_t linearMagFilter, uint8_t linearMinFilter, uint8_t repeat) {
-	TRY(g_graphics->createSampler(id, linearMagFilter, linearMinFilter, repeat));
+	TRY(g_graphics->createSampler(
+		id,
+		static_cast<bool>(linearMagFilter),
+		static_cast<bool>(linearMinFilter),
+		static_cast<bool>(repeat)
+	));
 }
 
 void orgeDestroySampler(const char *id) {

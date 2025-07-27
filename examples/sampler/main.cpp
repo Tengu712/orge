@@ -27,7 +27,7 @@ const std::vector<float> VERTICES{
 };
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 
-const std::vector<unsigned char> PIXELS{
+const std::vector<uint8_t> PIXELS{
 	255, 0, 0, 255,
 	0, 255, 0, 255,
 	0, 255, 0, 255,
@@ -79,8 +79,8 @@ int main() {
 			}
 		}
 
-		CHECK(orgeUpdateBuffer("transform", transform.data()));
-		CHECK(orgeUpdateBuffer("sampler-index", &samplerIndex));
+		CHECK(orgeUpdateBuffer("transform", reinterpret_cast<const uint8_t *>(transform.data())));
+		CHECK(orgeUpdateBuffer("sampler-index", reinterpret_cast<const uint8_t *>(&samplerIndex)));
 
 		CHECK(orgeUpdateBufferDescriptor("transform", "PL", 0, 0, 0, 0));
 		CHECK(orgeUpdateBufferDescriptor("sampler-index", "PL", 1, 0, 0, 0));
