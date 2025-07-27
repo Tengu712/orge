@@ -261,11 +261,11 @@ Config::Config(YAML::Node node):
 	}
 }
 
-void initializeConfig(const char *yaml) {
+void initializeConfig(const std::string &yaml) {
 	g_config.emplace(YAML::Load(yaml));
 }
 
-void initializeConfigFromFile(const char *yamlFilePath) {
+void initializeConfigFromFile(const std::string &yamlFilePath) {
 	try {
 		g_config.emplace(YAML::LoadFile(yamlFilePath));
 	} catch (const YAML::BadFile &) {

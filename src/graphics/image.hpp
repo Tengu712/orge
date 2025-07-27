@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vulkan/vulkan.hpp>
 
 namespace graphics {
@@ -18,14 +19,14 @@ public:
 		const vk::Queue &queue,
 		uint32_t width,
 		uint32_t height,
-		const unsigned char *pixels
+		const uint8_t *pixels
 	);
 
 	static Image fromFile(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue,
-		const char *path
+		const std::string &path
 	);
 
 	void destroy(const vk::Device &device) const noexcept {

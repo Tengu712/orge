@@ -46,7 +46,7 @@ Image::Image(
 	const vk::Queue &queue,
 	uint32_t width,
 	uint32_t height,
-	const unsigned char *pixels
+	const uint8_t *pixels
 ) :
 	_image(createImage(device, width, height)),
 	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eHostCoherent)),
@@ -59,7 +59,7 @@ Image Image::fromFile(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,
-	const char *path
+	const std::string &path
 ) {
 	using stbi_ptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
 
@@ -67,7 +67,7 @@ Image Image::fromFile(
 	int height = 0;
 	int channelCount = 0;
 	const auto pixels = stbi_ptr(
-		stbi_load(path, &width, &height, &channelCount, 0),
+		stbi_load(path.c_str(), &width, &height, &channelCount, 0),
 		stbi_image_free
 	);
 	if (!pixels) {

@@ -6,6 +6,7 @@
 #include "mesh.hpp"
 #include "renderer.hpp"
 
+#include <string>
 #include <unordered_map>
 
 namespace graphics {
@@ -53,24 +54,24 @@ public:
 		_instance.destroy();
 	}
 
-	void createBuffer(const char *id, uint64_t size, int isStorage) {
+	void createBuffer(const std::string &id, uint64_t size, bool isStorage) {
 		_buffers.emplace(id, Buffer(_physicalDevice.getMemoryProperties(), _device, size, isStorage));
 	}
 
-	void destroyBuffer(const char *id) noexcept {
+	void destroyBuffer(const std::string &id) noexcept {
 		if (_buffers.contains(id)) {
 			_buffers.at(id).destroy(_device);
 			_buffers.erase(id);
 		}
 	}
 
-	void updateBuffer(const char *id, const void *data) const {
+	void updateBuffer(const std::string &id, const void *data) const {
 		error::at(_buffers, id, "buffers").update(_device, data);
 	}
 
 	void updateBufferDescriptor(
-		const char *bufferId,
-		const char *pipelineId,
+		const std::string &bufferId,
+		const std::string &pipelineId,
 		uint32_t set,
 		uint32_t index,
 		uint32_t binding,
@@ -81,15 +82,15 @@ public:
 			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
-	void createImage(const char *id, uint32_t width, uint32_t height, const unsigned char *pixels) {
+	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
 		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
 	}
 
-	void createImage(const char *id, const char *path) {
+	void createImage(const std::string &id, const std::string &path) {
 		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, path));
 	}
 
-	void destroyImage(const char *id) noexcept {
+	void destroyImage(const std::string &id) noexcept {
 		if (_images.contains(id)) {
 			_images.at(id).destroy(_device);
 			_images.erase(id);
@@ -97,8 +98,8 @@ public:
 	}
 
 	void updateImageDescriptor(
-		const char *imageId,
-		const char *pipelineId,
+		const std::string &imageId,
+		const std::string &pipelineId,
 		uint32_t set,
 		uint32_t index,
 		uint32_t binding,
@@ -109,7 +110,7 @@ public:
 			.updateImageDescriptor(_device, error::at(_images, imageId, "images"), set, index, binding, offset);
 	}
 
-	void createSampler(const char *id, int linearMagFilter, int linearMinFilter, int repeat) {
+	void createSampler(const std::string &id, bool linearMagFilter, bool linearMinFilter, bool repeat) {
 		_samplers.emplace(id, _device.createSampler(
 			vk::SamplerCreateInfo()
 				.setMagFilter(linearMagFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
@@ -121,7 +122,7 @@ public:
 		));
 	}
 
-	void destroySampler(const char *id) noexcept {
+	void destroySampler(const std::string &id) noexcept {
 		if (_samplers.contains(id)) {
 			_device.destroySampler(_samplers.at(id));
 			_samplers.erase(id);
@@ -129,8 +130,8 @@ public:
 	}
 
 	void updateSamplerDescriptor(
-		const char *samplerId,
-		const char *pipelineId,
+		const std::string &samplerId,
+		const std::string &pipelineId,
 		uint32_t set,
 		uint32_t index,
 		uint32_t binding,
@@ -142,7 +143,7 @@ public:
 	}
 
 	void createMesh(
-		const char *id,
+		const std::string &id,
 		const uint32_t vertexCount,
 		const float *vertices,
 		const uint32_t indexCount,
@@ -158,7 +159,7 @@ public:
 		));
 	}
 
-	void destroyMesh(const char *id) noexcept {
+	void destroyMesh(const std::string &id) noexcept {
 		if (_meshes.contains(id)) {
 			_meshes.at(id).destroy(_device);
 			_meshes.erase(id);
@@ -169,11 +170,11 @@ public:
 		_renderer.beginRender(_device);
 	}
 
-	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
+	void bindDescriptorSets(const std::string &pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);
 	}
 
-	void draw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset) {
+	void draw(const std::string &pipelineId, const std::string &meshId, uint32_t instanceCount, uint32_t instanceOffset) {
 		_renderer.bindPipeline(_device, pipelineId);
 		_renderer.bindMesh(meshId, error::at(_meshes, meshId, "meshes"));
 		_renderer.draw(instanceCount, instanceOffset);

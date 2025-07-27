@@ -69,7 +69,7 @@ void uploadImage(
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,
-	const unsigned char *src
+	const uint8_t *src
 );
 
 } // namespace graphics

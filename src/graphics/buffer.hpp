@@ -13,8 +13,8 @@ private:
 
 public:
 	Buffer() = delete;
-	Buffer(const vk::PhysicalDeviceMemoryProperties &memoryProps, const vk::Device &device, uint64_t size, int isStorage) :
-		_isStorage(static_cast<bool>(isStorage)),
+	Buffer(const vk::PhysicalDeviceMemoryProperties &memoryProps, const vk::Device &device, uint64_t size, bool isStorage) :
+		_isStorage(isStorage),
 		_size(static_cast<vk::DeviceSize>(size)),
 		_buffer(device.createBuffer(
 			vk::BufferCreateInfo()

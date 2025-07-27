@@ -7,6 +7,7 @@
 #include "swapchain.hpp"
 
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 namespace graphics {
@@ -39,7 +40,7 @@ private:
 	std::unordered_map<std::string, Pipeline> _pipelines;
 	std::optional<FrameInfo> _frameInfo;
 
-	void _ensureWhileRendering(const char *emsg) const {
+	void _ensureWhileRendering(const std::string &emsg) const {
 		if (!_frameInfo) {
 			throw emsg;
 		}
@@ -93,7 +94,7 @@ public:
 		_swapchain.destroy(instance, device);
 	}
 
-	const Pipeline &getPipeline(const char *id) const {
+	const Pipeline &getPipeline(const std::string &id) const {
 		return error::at(_pipelines, id, "pipelines");
 	}
 
@@ -101,18 +102,18 @@ public:
 
 	void endRender(const vk::Device &device, const vk::Queue &queue);
 
-	void bindMesh(const char *meshId, const Mesh &mesh) {
+	void bindMesh(const std::string &meshId, const Mesh &mesh) {
 		_ensureWhileRendering("try to bind a mesh before starting rendering.");
-		if (meshId != nullptr && meshId != _frameInfo->pipelineId) {
+		if (meshId != _frameInfo->pipelineId) {
 			mesh.bind(_commandBuffer);
 			_frameInfo->meshIndexCount = mesh.getIndexCount();
 			_frameInfo->meshId = meshId;
 		}
 	}
 
-	void bindPipeline(const vk::Device &device, const char *pipelineId) {
+	void bindPipeline(const vk::Device &device, const std::string &pipelineId) {
 		_ensureWhileRendering("try to bind a pipeline before starting rendering.");
-		if (pipelineId != nullptr && pipelineId != _frameInfo->pipelineId) {
+		if (pipelineId != _frameInfo->pipelineId) {
 			const auto &framebuffer = error::at(_framebuffers, _frameInfo->index, "framebuffers");
 			error::at(_pipelines, pipelineId, "pipelines").bind(_commandBuffer);
 			error::at(_pipelines, pipelineId, "pipelines").updateInputAttachmentDescriptors(device, framebuffer);
@@ -120,7 +121,7 @@ public:
 		}
 	}
 
-	void bindDescriptorSets(const char *pipelineId, uint32_t const *indices) const {
+	void bindDescriptorSets(const std::string &pipelineId, uint32_t const *indices) const {
 		_ensureWhileRendering("try to bind descriptor sets before starting rendering.");
 		error::at(_pipelines, pipelineId, "pipelines").bindDescriptorSets(_commandBuffer, indices);
 	}

@@ -104,11 +104,11 @@ int main() {
 	);
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
-	TRY(orgeUpdateBuffer("camera", &CAMERA));
+	TRY(orgeUpdateBuffer("camera", reinterpret_cast<const uint8_t *>(&CAMERA)));
 
 	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0));
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
-	TRY(orgeUpdateBuffer("scl", SCL.data()));
+	TRY(orgeUpdateBuffer("scl", reinterpret_cast<const uint8_t *>(SCL.data())));
 
 	TRY(orgeCreateImageFromFile("image", "image.png"));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
@@ -117,7 +117,7 @@ int main() {
 	while (orgeUpdate()) {
 		ang += 0.01f;
 		const auto rot = rotY(ang);
-		CHECK(orgeUpdateBuffer("rot", rot.data()));
+		CHECK(orgeUpdateBuffer("rot", reinterpret_cast<const uint8_t *>(rot.data())));
 
 		CHECK(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
 		CHECK(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
