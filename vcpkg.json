@@ -3,12 +3,8 @@
   "version": "0.1.0",
   "description": "Ore ore game engine.",
   "dependencies": [
+    { "name": "sdl3", "features": ["vulkan"] },
     "vulkan-loader",
-    {
-      "name": "sdl3",
-      "features": ["vulkan"],
-      "default-features": false
-    },
     "yaml-cpp",
     "stb"
   ]

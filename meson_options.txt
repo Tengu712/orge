@@ -1,0 +1,1 @@
+option('vcpkg_root', type: 'string', value: '', description: 'vcpkg root directory path')
