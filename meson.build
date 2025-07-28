@@ -72,7 +72,7 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 cpp_args = []
 if host_system == 'windows'
   if get_option('default_library') == 'static'
-    cpp_args += ['/MT']
+    cpp_args += ['/MT', '-DORGE_BUILD_STATIC']
   else
     cpp_args += ['/MD', '-DORGE_BUILD_SHARED']
   endif
