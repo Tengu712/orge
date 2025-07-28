@@ -34,6 +34,9 @@ jobs:
           pkg-config \
           patchelf
 
+    - name: install meson
+      run: pip install meson
+
     - name: Cache vcpkg packages
       id: cache-vcpkg
       uses: actions/cache@v4
@@ -57,8 +60,8 @@ jobs:
         export CC=clang
         export CXX=clang++
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
-        pipx run meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
-        pipx run meson install -C build-static
+        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
+        meson install -C build-static
         tree installed-static
 
     - name: Build & install orge (shared)
@@ -66,8 +69,8 @@ jobs:
         export CC=clang
         export CXX=clang++
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
-        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
-        pipx run meson install -C build-shared
+        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
+        meson install -C build-shared
         tree installed-shared
 
     - name: Upload orge artifacts

@@ -23,6 +23,9 @@ jobs:
     - name: Install dependencies
       run: choco install pkgconfiglite
 
+    - name: install meson
+      run: pip install meson
+
     - name: Cache vcpkg packages
       id: cache-vcpkg
       uses: actions/cache@v4
@@ -50,14 +53,14 @@ jobs:
         dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib
         dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
         set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
-        pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini
-        pipx run meson install -C build-static
+        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini
+        meson install -C build-static
 
     - name: Build & install orge (shared)
       run: |
         set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared\lib\pkgconfig
-        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=.\meson\native-windows.ini
-        pipx run meson install -C build-shared
+        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=.\meson\native-windows.ini
+        meson install -C build-shared
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
