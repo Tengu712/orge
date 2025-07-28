@@ -2,26 +2,6 @@
 #     Project Settings                                                                                                #
 # =================================================================================================================== #
 
-cpp = meson.get_compiler('cpp')
-host_system = host_machine.system()
-
-b_vscrt = ''
-if host_system == 'windows'
-  if get_option('default_library') == 'static'
-    if get_option('buildtype') == 'release'
-      b_vscrt = 'mt'
-    else
-      b_vscrt = 'mtd'
-    endif
-  else
-    if get_option('buildtype') == 'release'
-      b_vscrt = 'md'
-    else
-      b_vscrt = 'mdd'
-    endif
-  endif
-endif
-
 project('orge', 'cpp',
   version : '0.1.0',
   default_options : [
@@ -33,6 +13,9 @@ project('orge', 'cpp',
     'b_vscrt=' + b_vscrt,
   ]
 )
+
+cpp = meson.get_compiler('cpp')
+host_system = host_machine.system()
 
 # default_library=bothを禁止
 if get_option('default_library') == 'both'

@@ -47,13 +47,23 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
-        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static --default-library=static
+        meson setup build-static ^
+          -Dbuildtype=release ^
+          -Db_vscrt=mt ^
+          --prefix=D:\orge\installed-static ^
+          --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static ^
+          --default-library=static
         meson install -C build-static
         tree /f D:\orge\installed-static
 
     - name: Build & install orge (shared)
       run: |
-        meson setup build-shared -Dbuildtype=release --prefix=D:\orge\installed-shared --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared --default-library=shared
+        meson setup build-shared ^
+          -Dbuildtype=release ^
+          -Db_vscrt=md ^
+          --prefix=D:\orge\installed-shared ^
+          --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared ^
+          --default-library=shared
         meson install -C build-shared
         tree /f D:\orge\installed-shared
 
