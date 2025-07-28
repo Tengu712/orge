@@ -91,11 +91,27 @@ sdl3_dep = dependency('SDL3', method: 'cmake', required: true, modules: ['SDL3::
 vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
 yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
 
+# 追加の依存ライブラリを取得
+#
+# NOTE: Windowsにおいてdll作成時にSDL3が依存するライブラリ不足で失敗するので。
+sdl3_ful_dep = sdl3_dep
+if host_system == 'windows'
+  interface_libraries = sdl3_dep.get_variable(cmake: 'INTERFACE_LINK_LIBRARIES')
+  interface_libraries = interface_libraries.split(';')
+  interface_libraries_founds = []
+  foreach n: interface_libraries
+    if n.endswith('.lib')
+      interface_libraries_founds += cpp.find_library(n.replace('.lib', ''), required: true)
+    endif
+  endforeach
+  sdl3_ful_dep = declare_dependency(dependencies: [sdl3_dep] + interface_libraries_founds)
+endif
+
 # ライブラリビルド
 orge = library('orge',
   sources,
   cpp_args : cpp_args,
-  dependencies : [sdl3_dep, vulkan_dep, yaml_cpp_dep],
+  dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
   pic: true,
   install : true
 )
