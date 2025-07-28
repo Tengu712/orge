@@ -128,13 +128,14 @@ else
   )
 endif
 
-# pkgconfig用のextra_cflagsを作成
-extra_cflags = ['-std=c++20']
+# pkgconfig用の値を作成
+libraries = ['-lorge']
+cflags = ['-std=c++20']
 if host_system == 'windows'
-  extra_cflags += ['-lvulkan-1']
+  libraries += ['-lvulkan-1']
 elif host_system == 'darwin'
-  extra_cflags += [
-    '-lvulkan.' + vulkan_dep.version(),
+  libraries += ['-lvulkan.' + vulkan_dep.version()]
+  cflags += [
     '-Wl,-framework,CoreMedia',
     '-Wl,-framework,CoreVideo',
     '-Wl,-framework,Cocoa',
@@ -152,9 +153,9 @@ elif host_system == 'darwin'
     '-Wl,-weak_framework,CoreHaptics',
     '-lpthread',
     '-lm'
-]
+  ]
 else
-  extra_cflags += ['-lvulkan']
+  libraries += ['-lvulkan']
 endif
 
 # pkgconfigファイルを生成
@@ -163,9 +164,9 @@ pc_conf.set('name', 'orge')
 pc_conf.set('description', 'Ore ore game engine.')
 pc_conf.set('url', 'https://github.com/Tengu712/orge')
 pc_conf.set('version', meson.project_version())
-pc_conf.set('libraries', ' '.join(['-lorge']))
+pc_conf.set('libraries', ' '.join(libraries))
 pc_conf.set('libraries_private', ' '.join(['-lSDL3', '-lyaml-cpp']))
-pc_conf.set('cflags', ' '.join(extra_cflags))
+pc_conf.set('cflags', ' '.join(cflags))
 configure_file(
   input : meson.current_source_dir() / 'meson' / 'orge.pc.in',
   output : 'orge.pc',
