@@ -66,7 +66,7 @@ if host_system == 'windows'
   if get_option('default_library') == 'static'
     cpp_args += ['/MT']
   else
-    cpp_args += ['/MD']
+    cpp_args += ['/MD', '-DORGE_BUILD_SHARED']
   endif
 endif
 
