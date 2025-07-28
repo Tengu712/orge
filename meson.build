@@ -9,8 +9,7 @@ project('orge', 'cpp',
     'warning_level=3',
     'werror=true',
     # NOTE: Linuxではlibではなくなるので。libに矯正。
-    'libdir=lib',
-    'b_vscrt=' + b_vscrt,
+    'libdir=lib'
   ]
 )
 
