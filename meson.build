@@ -2,20 +2,37 @@
 #     Project Settings                                                                                                #
 # =================================================================================================================== #
 
+cpp = meson.get_compiler('cpp')
+host_system = host_machine.system()
+
+b_vscrt = ''
+if host_system == 'windows'
+  if get_option('default_library') == 'static'
+    if get_option('buildtype') == 'release'
+      b_vscrt = 'mt'
+    else
+      b_vscrt = 'mtd'
+    endif
+  else
+    if get_option('buildtype') == 'release'
+      b_vscrt = 'md'
+    else
+      b_vscrt = 'mdd'
+    endif
+  endif
+endif
+
 project('orge', 'cpp',
   version : '0.1.0',
   default_options : [
     'cpp_std=c++20',
     'warning_level=3',
     'werror=true',
-    'default_library=static',
     # NOTE: Linuxではlibではなくなるので。libに矯正。
-    'libdir=lib'
+    'libdir=lib',
+    'b_vscrt=' + b_vscrt,
   ]
 )
-
-cpp = meson.get_compiler('cpp')
-host_system = host_machine.system()
 
 # default_library=bothを禁止
 if get_option('default_library') == 'both'
@@ -27,17 +44,11 @@ if get_option('buildtype') != 'release' and get_option('buildtype') != 'debug'
   error('buildtype must be release or debug. Current: ' + get_option('buildtype'))
 endif
 
-# macOSとLinuxではclangを強制、Windowsではmsvcを強制
+# macOSとLinuxではclangを強制
 if host_system == 'darwin' or host_system == 'linux'
   if not cpp.get_id().contains('clang')
     error('macOS/Linux requires clang compiler. Current: ' + cpp.get_id())
   endif
-elif host_system == 'windows'
-  if cpp.get_id() != 'msvc'
-    error('Windows requires msvc compiler. Current: ' + cpp.get_id())
-  endif
-else
-  error('Unsupported platform: ' + host_system)
 endif
 
 # macOSではarm64を強制
@@ -72,9 +83,17 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 cpp_args = []
 if host_system == 'windows'
   if get_option('default_library') == 'static'
-    cpp_args += ['/MT', '-DORGE_BUILD_STATIC']
+    if get_option('buildtype') == 'release'
+      cpp_args += ['/MT', '-DORGE_BUILD_STATIC']
+    else
+      cpp_args += ['/MTd', '-DORGE_BUILD_STATIC']
+    endif
   else
-    cpp_args += ['/MD', '-DORGE_BUILD_SHARED']
+    if get_option('buildtype') == 'release'
+      cpp_args += ['/MD', '-DORGE_BUILD_SHARED']
+    else
+      cpp_args += ['/MDd', '-DORGE_BUILD_SHARED']
+    endif
   endif
 endif
 

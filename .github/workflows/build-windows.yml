@@ -47,7 +47,7 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
-        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
+        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static --default-library=static
         meson install -C build-static
         tree /f D:\orge\installed-static
 
@@ -86,22 +86,22 @@ jobs:
         mkdir shared
         mkdir static
 
-    - name: Test build with shared
-      working-directory: shared
-      shell: cmd
-      env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
-      run: |
-        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
-        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
-        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
-
     - name: Test build with static
       working-directory: static
       shell: cmd
       env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
       run: |
         for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
+        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+
+    - name: Test build with shared
+      working-directory: shared
+      shell: cmd
+      env:
+        PKG_CONFIG_PATH: D:\orge\installed-shared\lib\pkgconfig
+      run: |
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
         cl %CFLAGS% D:\orge\main.cpp /link %LIBS%

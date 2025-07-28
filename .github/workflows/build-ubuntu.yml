@@ -59,7 +59,7 @@ jobs:
       run: |
         export CC=clang
         export CXX=clang++
-        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux
+        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux --default-library=static
         meson install -C build-static
         tree installed-static
 
