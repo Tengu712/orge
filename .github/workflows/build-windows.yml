@@ -45,14 +45,15 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
-        set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
+        dir ${{ github.workspace }}
+        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini
         pipx run meson install -C build-static
 
     - name: Build & install orge (shared)
       run: |
-        set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
-        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=D:\orge\meson\native-windows.ini
+        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
+        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=.\meson\native-windows.ini
         pipx run meson install -C build-shared
 
     - name: Copy example file

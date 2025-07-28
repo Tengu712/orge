@@ -91,6 +91,8 @@ jobs:
 
     - name: Test build with static
       run: |
+        cat ./orge/installed-static/lib/pkgconfig/orge.pc
+        echo =====
         export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
         echo =====
         pkg-config orge --cflags --libs --static
