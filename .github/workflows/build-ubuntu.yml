@@ -49,7 +49,7 @@ jobs:
       run: |
         export VCPKG_INSTALLED_PATH=$(pwd)/vcpkg_installed
         ./vcpkg/bootstrap-vcpkg.sh
-        ./vcpkg/vcpkg install --overlay-triprets=./triprets --tripret=custom-x64-linux
+        ./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
 
     - name: Build & install orge (static)
       run: |

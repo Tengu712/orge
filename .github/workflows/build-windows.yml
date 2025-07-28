@@ -43,8 +43,8 @@ jobs:
       run: |
         set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed
         vcpkg\bootstrap-vcpkg.bat
-        vcpkg\vcpkg install --overlay-triprets=.\triprets --tripret=custom-x64-windows-static
-        vcpkg\vcpkg install --overlay-triprets=.\triprets --tripret=custom-x64-windows-shared
+        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static
+        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared
 
     - name: Build & install orge (static)
       run: |
