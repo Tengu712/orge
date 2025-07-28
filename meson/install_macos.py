@@ -1,18 +1,17 @@
-import glob
 import shutil
 import subprocess
 import sys
 
 def install(src, dst):
-	for n in glob.glob(src):
-		print('Installing ' + n + ' to ' + dst)
-		shutil.copy(n, dst)
+	print('Installing ' + src + ' to ' + dst)
+	shutil.copy(src, dst)
 
 srcdir = sys.argv[1]
 dstdir = sys.argv[2]
 default_library = sys.argv[3]
+vulkan_version = sys.argv[4]
 
-install(srcdir + '/libvulkan.1.*.dylib', dstdir)
+install(srcdir + '/libvulkan.' + vulkan_version + '.dylib', dstdir)
 
 if default_library == 'static':
 	install(srcdir + '/libSDL3.a', dstdir)

@@ -154,7 +154,8 @@ elif host_system == 'darwin'
     meson.current_source_dir() / 'meson' / 'install_macos.py',
     vcpkg_libdir,
     get_option('prefix') / get_option('libdir'),
-    get_option('default_library')
+    get_option('default_library'),
+    vulkan_dep.version()
   )
 else
   meson.add_install_script(python,
