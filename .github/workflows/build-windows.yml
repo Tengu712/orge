@@ -49,7 +49,7 @@ jobs:
       env:
         CC: clang-cl
         CXX: clang-cl
-        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
+        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
       run: |
         tree /f ${{ github.workspace }}\vcpkg_installed_static
         dir ${{ github.workspace }}\vcpkg_installed_static
@@ -63,7 +63,7 @@ jobs:
       env:
         CC: clang-cl
         CXX: clang-cl
-        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
+        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
       run: |
         meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
         meson install -C build-shared
