@@ -79,7 +79,7 @@ endif
 
 # 依存ライブラリを取得
 sdl3_dep = dependency('sdl3', required: true)
-vulkan_dep = dependency('vulkan', required: true)
+vulkan_dep = dependency('vulkan', required: true, method: ['pkg-config', 'cmake'])
 yaml_cpp_dep = dependency('yaml-cpp', required: true)
 
 # ライブラリビルド
