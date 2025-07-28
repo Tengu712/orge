@@ -91,13 +91,15 @@ jobs:
 
     - name: Test build with static
       run: |
-        tree ./orge
-        ls
-        ls ./orge/installed-static/lib/pkgconfig
-        ls $(pwd)/orge/installed-static/lib/pkgconfig
         export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
+        echo =====
+        pkg-config orge --cflags --libs --static
+        echo =====
         mkdir ./static
         cd ./static
+        echo =====
+        pkg-config orge --cflags --libs --static
+        echo =====
         g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
 
     - name: Test build with shared
