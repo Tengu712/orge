@@ -158,18 +158,18 @@ else
 endif
 
 # pkgconfigファイルを生成
-pkg = import('pkgconfig')
-pkg.generate(
-  name: 'orge',
-  description: 'Ore ore game engine.',
-  url: 'https://github.com/Tengu712/orge',
-  version: meson.project_version(),
-  libraries: ['-L${libdir}', '-lorge'],
-  libraries_private: ['-lSDL3', '-lyaml-cpp'],
-  extra_cflags: extra_cflags,
-  variables : [
-    'prefix=${pcfiledir}/../..',
-    'libdir=${prefix}/lib',
-    'includedir=${prefix}/include'
-  ]
+pc_conf = configuration_data()
+pc_conf.set('name', 'orge')
+pc_conf.set('description', 'Ore ore game engine.')
+pc_conf.set('url', 'https://github.com/Tengu712/orge')
+pc_conf.set('version', meson.project_version())
+pc_conf.set('libraries', ' '.join(['-lorge']))
+pc_conf.set('libraries_private', ' '.join(['-lSDL3', '-lyaml-cpp']))
+pc_conf.set('cflags', ' '.join(extra_cflags))
+configure_file(
+  input : meson.current_source_dir() / 'meson' / 'orge.pc.in',
+  output : 'orge.pc',
+  configuration : pc_conf,
+  install : true,
+  install_dir: get_option('libdir') / 'pkgconfig'
 )
