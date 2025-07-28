@@ -3,8 +3,8 @@ import subprocess
 import sys
 
 def install(src, dst):
-	print('Installing ' + n + ' to ' + dst)
-	shutil.copy(n, dst)
+	print('Installing ' + src + ' to ' + dst)
+	shutil.copy(src, dst)
 
 srcdir = sys.argv[1]
 dstdir = sys.argv[2]

@@ -2,8 +2,8 @@ import shutil
 import sys
 
 def install(src, dst):
-	print('Installing ' + n + ' to ' + dst)
-	shutil.copy(n, dst)
+	print('Installing ' + src + ' to ' + dst)
+	shutil.copy(src, dst)
 
 srclibdir = sys.argv[1]
 srcbindir = sys.argv[2]

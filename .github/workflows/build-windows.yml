@@ -48,8 +48,8 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
-        set CC=clang-cl
-        set CXX=clang-cl
+        set CC=clang
+        set CXX=clang++
         set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
         pipx run meson install -C build-static
