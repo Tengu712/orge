@@ -16,12 +16,6 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: actions/setup-python@v1
-
-    - uses: BSFishy/meson-build@v1.0.3
-      with:
-        action: install
-
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -60,8 +54,8 @@ jobs:
     - name: Build & install orge (static)
       run: |
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
-        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
-        meson install -C build-static
+        pipx run meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
+        pipx run meson install -C build-static
 
     # DEBUG:
     - run: tree installed-static
@@ -69,8 +63,8 @@ jobs:
     - name: Build & install orge (shared)
       run: |
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
-        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
-        meson install -C build-shared
+        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
+        pipx run meson install -C build-shared
 
     # DEBUG:
     - run: tree installed-shared

@@ -16,12 +16,6 @@ jobs:
       with:
         submodules: recursive
 
-    - uses: actions/setup-python@v1
-
-    - uses: BSFishy/meson-build@v1.0.3
-      with:
-        action: install
-
     - uses: ilammy/msvc-dev-cmd@v1
 
     - uses: seanmiddleditch/gha-setup-ninja@master
@@ -55,14 +49,14 @@ jobs:
     - name: Build & install orge (static)
       run: |
         set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
-        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
-        meson install -C build-static
+        pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
+        pipx run meson install -C build-static
 
     - name: Build & install orge (shared)
       run: |
         set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
-        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
-        meson install -C build-shared
+        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
+        pipx run meson install -C build-shared
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
