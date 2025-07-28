@@ -59,8 +59,8 @@ jobs:
       run: |
         export CC=clang
         export CXX=clang++
-        export CMAKE_PREFIX_PATH=$(pwd)/vcpkg_installed/custom-x64-linux
-        tree $(pwd)/vcpkg_installed/custom-x64-linux
+        export CMAKE_TOOLCHAIN_FILE=$(pwd)/vcpkg/scripts/buildsystems/vcpkg.cmake
+        export VCPKG_TARGET_TRIPLET=custom-x64-linux
         meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
         meson install -C build-static
         tree installed-static
@@ -69,7 +69,8 @@ jobs:
       run: |
         export CC=clang
         export CXX=clang++
-        export CMAKE_PREFIX_PATH=$(pwd)/vcpkg_installed/custom-x64-linux
+        export CMAKE_TOOLCHAIN_FILE=$(pwd)/vcpkg/scripts/buildsystems/vcpkg.cmake
+        export VCPKG_TARGET_TRIPLET=custom-x64-linux
         meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
         meson install -C build-shared
         tree installed-shared

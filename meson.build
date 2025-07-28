@@ -78,9 +78,9 @@ if host_system == 'darwin'
 endif
 
 # 依存ライブラリを取得
-sdl3_dep = dependency('sdl3', required: true)
-vulkan_dep = dependency('vulkan', required: true)
-yaml_cpp_dep = dependency('yaml-cpp', required: true)
+sdl3_dep = dependency('sdl3', method: 'cmake', required: true)
+vulkan_dep = dependency('vulkan', method: 'cmake', required: true)
+yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
 
 # ライブラリビルド
 orge = library('orge',
