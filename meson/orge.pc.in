@@ -1,0 +1,11 @@
+prefix=${pcfiledir}/../..
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: @name@
+Description: @description@
+URL: @url@
+Version: @version@
+Libs: -L${libdir} @libraries@
+Libs.private: @libraries_private@
+Cflags: -I${includedir} @cflags@
