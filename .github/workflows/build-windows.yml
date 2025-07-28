@@ -51,7 +51,7 @@ jobs:
         CXX: clang-cl
         PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
       run: |
-        dir /s /b "D:\a\orge\orge\vcpkg_installed_static\custom-x64-windows-static\*vulkan*"
+        tree /f ${{ github.workspace }}\vcpkg_installed_static
         dir ${{ github.workspace }}\vcpkg_installed_static
         dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
         dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin
