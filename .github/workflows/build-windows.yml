@@ -16,6 +16,12 @@ jobs:
       with:
         submodules: recursive
 
+    - uses: actions/setup-python@v1
+
+    - uses: BSFishy/meson-build@1.0.3
+      with:
+        action: install
+
     - uses: ilammy/msvc-dev-cmd@v1
 
     - uses: seanmiddleditch/gha-setup-ninja@master
@@ -28,28 +34,35 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          vcpkg_installed_shared
           vcpkg_installed_static
+          vcpkg_installed_shared
           vcpkg/buildtrees
           vcpkg/packages
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
+    # DEBUG:
+    - run: dir
+
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: vcpkg\bootstrap-vcpkg.bat
-
-    - name: Build & install orge (shared)
       run: |
-        cmake -G Ninja -B build_shared -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build_shared
-        cmake --install build_shared
+        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed
+        vcpkg\bootstrap-vcpkg.bat
+        vcpkg\vcpkg install --overlay-triprets=.\triprets --tripret=custom-x64-windows-static
+        vcpkg\vcpkg install --overlay-triprets=.\triprets --tripret=custom-x64-windows-shared
 
     - name: Build & install orge (static)
       run: |
-        cmake -G Ninja -B build_static -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build_static
-        cmake --install build_static
+        set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
+        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
+        meson install -C build-static
+
+    - name: Build & install orge (shared)
+      run: |
+        set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
+        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
+        meson install -C build-shared
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\

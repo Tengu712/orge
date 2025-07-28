@@ -96,13 +96,21 @@ install_headers(['include/orge.h'])
 
 # 依存ライブラリのビルドディレクトリを取得
 #
-# NOTE: どのライブラリも同じディレクトリに存在するはずなので、SDL3から訊き出してそれを使う。
-vcpkg_libdir = sdl3_dep.get_variable('libdir', default_value: '')
+# NOTE: どのライブラリも同じディレクトリに存在するはずなので、vulkanから訊き出してそれを使う。
+vcpkg_libdir = vulkan_dep.get_variable('libdir', default_value: '')
+vcpkg_bindir = vulkan_dep.get_variable('bindir', default_value: '')
 
 # 依存ライブラリコピー用のインストールスクリプトを追加
 python = find_program('python', 'python3')
 if host_system == 'windows'
-  # TODO:
+  meson.add_install_script(python,
+    meson.current_source_dir() / 'meson' / 'install_windows.py',
+    vcpkg_libdir,
+    vcpkg_bindir,
+    get_option('prefix') / get_option('libdir'),
+    get_option('prefix') / get_option('bindir'),
+    get_option('default_library')
+  )
 elif host_system == 'darwin'
   meson.add_install_script(python,
     meson.current_source_dir() / 'meson' / 'install_macos.py',
@@ -115,7 +123,8 @@ else
     meson.current_source_dir() / 'meson' / 'install_linux.py',
     vcpkg_libdir,
     get_option('prefix') / get_option('libdir'),
-    get_option('default_library')
+    get_option('default_library'),
+    vulkan_dep.version()
   )
 endif
 
