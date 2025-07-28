@@ -1,7 +1,11 @@
+import os
 import shutil
 import sys
 
 def install(src, dst):
+	if not os.path.isfile(src):
+		print('error: ' + src + ' not found.')
+		exit(1)
 	print('Installing ' + src + ' to ' + dst)
 	shutil.copy(src, dst)
 
