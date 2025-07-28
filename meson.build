@@ -166,5 +166,10 @@ pkg.generate(
   version: meson.project_version(),
   libraries: ['-L${libdir}', '-lorge'],
   libraries_private: ['-lSDL3', '-lyaml-cpp'],
-  extra_cflags: extra_cflags
+  extra_cflags: extra_cflags,
+  variables : [
+    'prefix=${pcfiledir}/../..',
+    'libdir=${prefix}/lib',
+    'includedir=${prefix}/include'
+  ]
 )
