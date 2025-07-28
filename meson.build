@@ -96,7 +96,7 @@ yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
 # NOTE: Windowsにおいてdll作成時にSDL3が依存するライブラリ不足で失敗するので。
 sdl3_ful_dep = sdl3_dep
 if host_system == 'windows'
-  interface_libraries = sdl3_dep.get_variable(cmake: 'INTERFACE_LINK_LIBRARIES')
+  interface_libraries = sdl3_dep.get_variable('INTERFACE_LINK_LIBRARIES', '')
   interface_libraries = interface_libraries.split(';')
   interface_libraries_founds = []
   foreach n: interface_libraries
