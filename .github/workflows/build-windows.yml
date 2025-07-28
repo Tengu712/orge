@@ -47,8 +47,6 @@ jobs:
 
     - name: Build & install orge (static)
       env:
-        CC: clang-cl
-        CXX: clang-cl
         AR: lib
         LINK: link
       run: |
@@ -58,8 +56,6 @@ jobs:
 
     - name: Build & install orge (shared)
       env:
-        CC: clang-cl
-        CXX: clang-cl
         AR: lib
         LINK: link
       run: |
