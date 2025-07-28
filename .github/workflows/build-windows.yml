@@ -46,18 +46,12 @@ jobs:
         vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared --x-install-root=vcpkg_installed_shared
 
     - name: Build & install orge (static)
-      # env:
-      #   AR: lib
-      #   LINK: link
       run: |
         meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
         meson install -C build-static
         tree /f D:\orge\installed-static
 
     - name: Build & install orge (shared)
-      # env:
-      #   AR: lib
-      #   LINK: link
       run: |
         meson setup build-shared -Dbuildtype=release --prefix=D:\orge\installed-shared --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared --default-library=shared
         meson install -C build-shared

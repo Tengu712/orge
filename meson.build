@@ -106,13 +106,27 @@ if host_system == 'windows'
   sdl3_ful_dep = declare_dependency(dependencies: [sdl3_dep] + deps)
 endif
 
+# prefixとsufixを指定
+#
+# NOTE: MesonではたといWindowsであってもlibxxx.aという命名でライブラリを作る。
+#       ので、prefixとsufixを明示的に指定してxxx.libにする。
+#       https://mesonbuild.com/FAQ.html#why-does-building-my-project-with-msvc-output-static-libraries-called-libfooa
+prefix = []
+suffix = []
+if host_system == 'windows'
+  prefix = ''
+  suffix = 'lib'
+endif
+
 # ライブラリビルド
 orge = library('orge',
   sources,
   cpp_args : cpp_args,
   dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
   pic: true,
-  install : true
+  install : true,
+  name_prefix: prefix,
+  name_suffix: suffix
 )
 
 # include/orge.hをインストール対象に追加
