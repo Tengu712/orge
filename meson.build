@@ -18,6 +18,11 @@ if get_option('default_library') == 'both'
   error('default_library=both is not allowed. Use static or shared.')
 endif
 
+# buildtype=releaseとbuildtype=debug以外を禁止
+if get_option('buildtype') != 'release' and get_option('buildtype') != 'debug'
+  error('buildtype must be release or debug. Current: ' + get_option('buildtype'))
+endif
+
 # macOSとLinuxではclangを強制、Windowsではmsvcを強制
 if host_system == 'darwin' or host_system == 'linux'
   if not cpp.get_id().contains('clang')
@@ -107,8 +112,15 @@ if cmake_prefix_path == []
   error('You must set cmake_prefix_path.')
 endif
 message('Use cmake_prefix_path: ' + cmake_prefix_path[0])
-vcpkg_libdir = cmake_prefix_path[0] / 'lib'
-vcpkg_bindir = cmake_prefix_path[0] / 'bin'
+vcpkg_libdir = cmake_prefix_path[0]
+vcpkg_bindir = cmake_prefix_path[0]
+if get_option('buildtype') == 'release'
+  vcpkg_libdir = vcpkg_libdir / 'lib'
+  vcpkg_bindir = vcpkg_bindir / 'bin'
+else
+  vcpkg_libdir = vcpkg_libdir / 'debug' / 'lib'
+  vcpkg_bindir = vcpkg_bindir / 'debug' / 'bin'
+endif
 
 # 依存ライブラリコピー用のインストールスクリプトを追加
 python = find_program('python', 'python3')
