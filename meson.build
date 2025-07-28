@@ -23,14 +23,14 @@ if get_option('buildtype') != 'release' and get_option('buildtype') != 'debug'
   error('buildtype must be release or debug. Current: ' + get_option('buildtype'))
 endif
 
-# macOSとLinuxではclangを強制、Windowsではmsvcを強制
+# macOSとLinuxではclangを強制、Windowsではclang-clを強制
 if host_system == 'darwin' or host_system == 'linux'
   if not cpp.get_id().contains('clang')
     error('macOS/Linux requires clang compiler. Current: ' + cpp.get_id())
   endif
 elif host_system == 'windows'
-  if cpp.get_id() != 'msvc'
-    error('Windows requires msvc compiler. Current: ' + cpp.get_id())
+  if cpp.get_id() != 'clang-cl'
+    error('Windows requires clang-cl compiler. Current: ' + cpp.get_id())
   endif
 else
   error('Unsupported platform: ' + host_system)
