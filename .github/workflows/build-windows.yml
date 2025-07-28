@@ -38,30 +38,21 @@ jobs:
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
-        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed
         vcpkg\bootstrap-vcpkg.bat
+        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed_static
         vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static
+        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed_shared
         vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared
 
     - name: Build & install orge (static)
       run: |
-        dir ${{ github.workspace }}
-        echo =====
-        dir ${{ github.workspace }}\vcpkg_installed
-        echo =====
-        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static
-        echo =====
-        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib
-        echo =====
-        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
-        echo =====
-        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
+        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini
         pipx run meson install -C build-static
 
     - name: Build & install orge (shared)
       run: |
-        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
+        set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared\lib\pkgconfig
         pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=.\meson\native-windows.ini
         pipx run meson install -C build-shared
 
