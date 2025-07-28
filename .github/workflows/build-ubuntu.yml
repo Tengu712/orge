@@ -19,6 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
+        sudo apt-get remove --purge man-db
         sudo apt-get install -y --no-install-recommends \
           build-essential \
           cmake \
@@ -58,9 +59,7 @@ jobs:
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
         pipx run meson install -C build-static
-
-    # DEBUG:
-    - run: tree installed-static
+        tree installed-static
 
     - name: Build & install orge (shared)
       run: |
@@ -69,9 +68,7 @@ jobs:
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
         pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
         pipx run meson install -C build-shared
-
-    # DEBUG:
-    - run: tree installed-shared
+        tree installed-shared
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
@@ -92,14 +89,12 @@ jobs:
         name: orge-lib
         path: ./orge
 
-    # DEBUG:
-    - run: tree orge
-
     - name: Test build with static
       run: |
+        ls $(pwd)/orge/installed-static/lib/pkgconfig
+        export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
         mkdir ./static
         cd ./static
-        export PKG_CONFIG_PATH=$(pwd)/../orge/installed-static/lib/pkgconfig
         g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
 
     - name: Test build with shared

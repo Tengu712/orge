@@ -55,9 +55,7 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 
 # 追加のコンパイラフラグを生成
 cpp_args = []
-if host_system == 'darwin' or host_system == 'linux'
-  cpp_args += ['-fPIC']
-elif host_system == 'windows'
+if host_system == 'windows'
   if get_option('default_library') == 'static'
     cpp_args += ['/MT']
   else
@@ -88,6 +86,7 @@ orge = library('orge',
   sources,
   cpp_args : cpp_args,
   dependencies : [sdl3_dep, vulkan_dep, yaml_cpp_dep],
+  pic: true,
   install : true
 )
 
