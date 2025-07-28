@@ -46,6 +46,15 @@ jobs:
     - name: Build & install orge (static)
       run: |
         dir ${{ github.workspace }}
+        echo =====
+        dir ${{ github.workspace }}\vcpkg_installed
+        echo =====
+        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static
+        echo =====
+        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib
+        echo =====
+        dir ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
+        echo =====
         set PKG_CONFIG_PATH=${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini
         pipx run meson install -C build-static
