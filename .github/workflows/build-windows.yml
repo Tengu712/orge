@@ -51,6 +51,10 @@ jobs:
         CXX: clang-cl
         PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
       run: |
+        dir ${{ github.workspace }}\vcpkg_installed_static
+        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
+        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin
+        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
         meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
         meson install -C build-static
 
