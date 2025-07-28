@@ -91,6 +91,9 @@ jobs:
 
     - name: Test build with static
       run: |
+        tree ./orge
+        ls
+        ls ./orge/installed-static/lib/pkgconfig
         ls $(pwd)/orge/installed-static/lib/pkgconfig
         export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
         mkdir ./static

@@ -20,10 +20,6 @@ jobs:
 
     - uses: seanmiddleditch/gha-setup-ninja@master
 
-    # DEBUG:
-    - run: clang --version
-    - run: clang-cl --version
-
     - name: Install dependencies
       run: choco install pkgconfiglite
 
@@ -39,9 +35,6 @@ jobs:
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    # DEBUG:
-    - run: dir
-
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
@@ -52,18 +45,14 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
-        set CC=clang
-        set CXX=clang++
         set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-static\lib\pkgconfig
-        pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
+        pipx run meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=D:\orge\meson\native-windows.ini
         pipx run meson install -C build-static
 
     - name: Build & install orge (shared)
       run: |
-        set CC=clang-cl
-        set CXX=clang-cl
         set PKG_CONFIG_PATH=D:\orge\vcpkg_installed\custom-x64-windows-shared\lib\pkgconfig
-        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
+        pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=D:\orge\meson\native-windows.ini
         pipx run meson install -C build-shared
 
     - name: Copy example file
