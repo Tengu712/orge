@@ -46,13 +46,12 @@ jobs:
         vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared --x-install-root=vcpkg_installed_shared
 
     - name: Build & install orge (static)
+      env:
+        CC: clang-cl
+        CXX: clang-cl
+        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
       run: |
-        dir ${{ github.workspace }}
-        dir ${{ github.workspace }}\vcpkg_installed_static
-        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
-        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib
-        dir ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
-        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --native-file=.\meson\native-windows.ini -Dpkg_config_path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
+        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
         meson install -C build-static
 
     - name: Build & install orge (shared)
