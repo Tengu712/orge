@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
+        sudo apt-get install -y --no-install-recommends \
           build-essential \
           cmake \
           ninja-build \
@@ -53,6 +53,8 @@ jobs:
 
     - name: Build & install orge (static)
       run: |
+        export CC=clang
+        export CXX=clang++
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
         pipx run meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
         pipx run meson install -C build-static
@@ -62,6 +64,8 @@ jobs:
 
     - name: Build & install orge (shared)
       run: |
+        export CC=clang
+        export CXX=clang++
         export PKG_CONFIG_PATH=$(pwd)/vcpkg_installed/custom-x64-linux/lib/pkgconfig
         pipx run meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
         pipx run meson install -C build-shared
