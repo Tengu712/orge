@@ -49,14 +49,18 @@ jobs:
       env:
         CC: clang-cl
         CXX: clang-cl
-        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig
+        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
       run: |
         meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
         meson install -C build-static
 
     - name: Build & install orge (shared)
+      env:
+        CC: clang-cl
+        CXX: clang-cl
+        PKG_CONFIG_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\lib\pkgconfig;${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static\bin\pkgconfig
       run: |
-        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared --native-file=.\meson\native-windows.ini -Dpkg_config_path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared\lib\pkgconfig
+        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
         meson install -C build-shared
 
     - name: Copy example file
