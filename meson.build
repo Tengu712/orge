@@ -115,7 +115,11 @@ prefix = []
 suffix = []
 if host_system == 'windows'
   prefix = ''
-  suffix = 'lib'
+  if get_option('default_library') == 'static'
+    suffix = 'lib'
+  else
+    suffix = 'dll'
+  endif
 endif
 
 # ライブラリビルド
