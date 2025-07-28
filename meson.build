@@ -87,7 +87,7 @@ endif
 #
 # NOTE: VulkanLoaderがWindowsでのみpcファイルを生成しないせいでpkgconfigを利用できないので、
 #       cmakeで取得する。
-sdl3_dep = dependency('sdl3', method: 'cmake', required: true)
+sdl3_dep = dependency('SDL3', method: 'cmake', required: true)
 vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
 yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
 
