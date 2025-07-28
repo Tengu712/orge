@@ -49,8 +49,7 @@ jobs:
       env:
         CC: clang-cl
         CXX: clang-cl
-        CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
-        VCPKG_TARGET_TRIPLET: custom-x64-windows-static
+        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-static
       run: |
         tree /f ${{ github.workspace }}\vcpkg_installed_static
         meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
@@ -60,8 +59,7 @@ jobs:
       env:
         CC: clang-cl
         CXX: clang-cl
-        CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
-        VCPKG_TARGET_TRIPLET: custom-x64-windows-shared
+        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed\custom-x64-windows-shared
       run: |
         meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
         meson install -C build-shared
