@@ -59,8 +59,7 @@ jobs:
       run: |
         export CC=clang
         export CXX=clang++
-        export CMAKE_PREFIX_PATH=$(pwd)/vcpkg_installed/custom-x64-linux
-        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static
+        meson setup build-static -Dbuildtype=release --prefix=$(pwd)/installed-static --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux
         meson install -C build-static
         tree installed-static
 
@@ -68,8 +67,7 @@ jobs:
       run: |
         export CC=clang
         export CXX=clang++
-        export CMAKE_PREFIX_PATH=$(pwd)/vcpkg_installed/custom-x64-linux
-        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=$(pwd)/installed-shared
+        meson setup build-shared -Dbuildtype=release --prefix=$(pwd)/installed-shared --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux --default-library=shared 
         meson install -C build-shared
         tree installed-shared
 

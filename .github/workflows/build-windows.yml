@@ -46,23 +46,16 @@ jobs:
         vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared --x-install-root=vcpkg_installed_shared
 
     - name: Build & install orge (static)
-      env:
-        CC: clang-cl
-        CXX: clang-cl
-        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
       run: |
-        tree /f ${{ github.workspace }}\vcpkg_installed_static
-        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static
+        meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
         meson install -C build-static
+        tree /f D:\orge\installed-static
 
     - name: Build & install orge (shared)
-      env:
-        CC: clang-cl
-        CXX: clang-cl
-        CMAKE_PREFIX_PATH: ${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared
       run: |
-        meson setup build-shared -Dbuildtype=release -Ddefault_library=shared --prefix=D:\orge\installed-shared
+        meson setup build-shared -Dbuildtype=release --prefix=D:\orge\installed-shared --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared --default-library=shared
         meson install -C build-shared
+        tree /f D:\orge\installed-shared
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\

@@ -5,6 +5,7 @@ project('orge', 'cpp',
     'warning_level=3',
     'werror=true',
     'default_library=static',
+    # NOTE: Linuxではlibではなくなるので。libに矯正。
     'libdir=lib'
   ]
 )
@@ -17,14 +18,14 @@ if get_option('default_library') == 'both'
   error('default_library=both is not allowed. Use static or shared.')
 endif
 
-# clang系を強制
+# macOSとLinuxではclangを強制、Windowsではmsvcを強制
 if host_system == 'darwin' or host_system == 'linux'
   if not cpp.get_id().contains('clang')
     error('macOS/Linux requires clang compiler. Current: ' + cpp.get_id())
   endif
 elif host_system == 'windows'
-  if cpp.get_id() != 'clang-cl'
-    error('Windows requires clang-cl compiler. Current: ' + cpp.get_id())
+  if cpp.get_id() != 'msvc'
+    error('Windows requires msvc compiler. Current: ' + cpp.get_id())
   endif
 else
   error('Unsupported platform: ' + host_system)
@@ -78,6 +79,9 @@ if host_system == 'darwin'
 endif
 
 # 依存ライブラリを取得
+#
+# NOTE: VulkanLoaderがWindowsでのみpcファイルを生成しないせいでpkgconfigを利用できないので、
+#       cmakeで取得する。
 sdl3_dep = dependency('sdl3', method: 'cmake', required: true)
 vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
 yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
@@ -96,9 +100,15 @@ install_headers(['include/orge.h'])
 
 # 依存ライブラリのビルドディレクトリを取得
 #
-# NOTE: どのライブラリも同じディレクトリに存在するはずなので、vulkanから訊き出してそれを使う。
-vcpkg_libdir = vulkan_dep.get_variable('libdir', default_value: '')
-vcpkg_bindir = vulkan_dep.get_variable('bindir', default_value: '')
+# NOTE: VulkanLoaderがWindowsでのみpcファイルを生成しないせいでpkgconfigを利用できないので、
+#       cmake_prefix_pathの設定を強制して直接構築。
+cmake_prefix_path = get_option('cmake_prefix_path')
+if cmake_prefix_path == []
+  error('You must set cmake_prefix_path.')
+endif
+message('Use cmake_prefix_path: ' + cmake_prefix_path[0])
+vcpkg_libdir = cmake_prefix_path[0] / 'lib'
+vcpkg_bindir = cmake_prefix_path[0] / 'bin'
 
 # 依存ライブラリコピー用のインストールスクリプトを追加
 python = find_program('python', 'python3')
