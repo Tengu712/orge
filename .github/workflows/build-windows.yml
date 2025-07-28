@@ -20,6 +20,10 @@ jobs:
 
     - uses: seanmiddleditch/gha-setup-ninja@master
 
+    # DEBUG:
+    - run: clang --version
+    - run: clang-cl --version
+
     - name: Install dependencies
       run: choco install pkgconfiglite
 

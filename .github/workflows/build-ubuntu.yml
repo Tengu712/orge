@@ -90,21 +90,21 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: orge-lib
-        path: /
+        path: ./orge
 
-    - name: Prepare
-      run: |
-        mkdir shared
-        mkdir static
+    # DEBUG:
+    - run: tree orge
 
     - name: Test build with static
-      working-directory: static
       run: |
-        export PKG_CONFIG_PATH=/installed-static/lib/pkgconfig
-        g++ /examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
+        mkdir ./static
+        cd ./static
+        export PKG_CONFIG_PATH=$(pwd)/../orge/installed-static/lib/pkgconfig
+        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
 
     - name: Test build with shared
-      working-directory: shared
       run: |
-        export PKG_CONFIG_PATH=/installed-shared/lib/pkgconfig
-        g++ /examples/simple/main.cpp $(pkg-config orge --cflags --libs)
+        mkdir ./shared
+        cd ./shared
+        export PKG_CONFIG_PATH=$(pwd)/../orge/installed-shared/lib/pkgconfig
+        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs)
