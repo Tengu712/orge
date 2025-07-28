@@ -50,6 +50,7 @@ jobs:
         CC: clang-cl
         CXX: clang-cl
         AR: lib
+        LINK: link
       run: |
         meson setup build-static -Dbuildtype=release --prefix=D:\orge\installed-static --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static
         meson install -C build-static
@@ -60,6 +61,7 @@ jobs:
         CC: clang-cl
         CXX: clang-cl
         AR: lib
+        LINK: link
       run: |
         meson setup build-shared -Dbuildtype=release --prefix=D:\orge\installed-shared --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared --default-library=shared
         meson install -C build-shared
