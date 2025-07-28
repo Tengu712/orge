@@ -4,7 +4,8 @@ project('orge', 'cpp',
     'cpp_std=c++20',
     'warning_level=3',
     'werror=true',
-    'default_library=static'
+    'default_library=static',
+    'libdir=lib'
   ]
 )
 
