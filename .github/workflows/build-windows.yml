@@ -39,10 +39,8 @@ jobs:
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
         vcpkg\bootstrap-vcpkg.bat
-        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed_static
-        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static
-        set VCPKG_INSTALLED_PATH=D:\orge\vcpkg_installed_shared
-        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared
+        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static --x-install-root=vcpkg_installed_static
+        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared --x-install-root=vcpkg_installed_shared
 
     - name: Build & install orge (static)
       run: |
