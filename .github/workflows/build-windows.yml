@@ -105,6 +105,8 @@ jobs:
         mkdir shared
         mkdir static
 
+    - run: tree /f D:/orge/installed-static
+
     - name: Test build with static
       working-directory: static
       shell: cmd
@@ -113,6 +115,8 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs --static') do set LIBS=%%j
+        echo %CFLAGS%
+        echo %LIBS%
         clang++ %CFLAGS% D:\orge\main.cpp %LIBS%
 
     - name: Test build with shared
@@ -123,4 +127,6 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
+        echo %CFLAGS%
+        echo %LIBS%
         clang++ %CFLAGS% D:\orge\main.cpp %LIBS%
