@@ -105,16 +105,6 @@ jobs:
         mkdir shared
         mkdir static
 
-    # DEBUG:
-    - name: debug
-      env:
-        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
-      run: pkg-config orge --cflags
-    - name: debug2
-      env:
-        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
-      run: pkg-config orge --libs --static
-
     - name: Test build with static
       working-directory: static
       shell: cmd
@@ -123,7 +113,7 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs --static') do set LIBS=%%j
-        clang-cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+        clang++ %CFLAGS% D:\orge\main.cpp /link %LIBS%
 
     - name: Test build with shared
       working-directory: shared
@@ -133,4 +123,4 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
-        clang-cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+        clang++ %CFLAGS% D:\orge\main.cpp /link %LIBS%
