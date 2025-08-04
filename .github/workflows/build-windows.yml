@@ -16,6 +16,8 @@ jobs:
       with:
         submodules: recursive
 
+    # Setup
+
     - uses: ilammy/msvc-dev-cmd@v1
 
     - uses: seanmiddleditch/gha-setup-ninja@master
@@ -40,10 +42,15 @@ jobs:
 
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: |
-        vcpkg\bootstrap-vcpkg.bat
-        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static --x-install-root=vcpkg_installed_static
-        vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared --x-install-root=vcpkg_installed_shared
+      run: vcpkg\bootstrap-vcpkg.bat
+
+    # Static
+
+    - name: Install vcpkg packages (static)
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      env:
+        VCPKG_INSTALLLED_DIR: vcpkg_installed_static
+      run: vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static
 
     - name: Build & install orge (static)
       run: |
@@ -56,6 +63,14 @@ jobs:
         meson install -C build-static
         tree /f D:\orge\installed-static
 
+    # Shared
+
+    - name: Install vcpkg packages (shared)
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      env:
+        VCPKG_INSTALLLED_DIR: vcpkg_installed_shared
+      run: vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared
+
     - name: Build & install orge (shared)
       run: |
         meson setup build-shared `
@@ -66,6 +81,8 @@ jobs:
           --default-library=shared
         meson install -C build-shared
         tree /f D:\orge\installed-shared
+
+    # Post
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
