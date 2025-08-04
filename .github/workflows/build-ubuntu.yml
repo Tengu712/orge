@@ -51,7 +51,6 @@ jobs:
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
       run: |
-        export VCPKG_INSTALLED_PATH=$(pwd)/vcpkg_installed
         ./vcpkg/bootstrap-vcpkg.sh
         ./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
 
