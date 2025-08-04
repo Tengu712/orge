@@ -116,6 +116,9 @@ jobs:
         mkdir shared
         mkdir static
 
+    # DEBUG:
+    - run: type D:\orge\installed-static\lib\pkgconfig\orge.pc
+
     - name: Test build with static
       working-directory: static
       shell: cmd
