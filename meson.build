@@ -246,15 +246,12 @@ endif
 libraries = ['-lorge']
 libraries_private = ['-lyaml-cpp']
 cflags = ['-std=c++20']
-cflags_private = []
 if host_system == 'windows'
   libraries += ['-lvulkan-1']
   foreach n: sdl3_sysdep_names
     libraries += ['-l' + n]
   endforeach
   libraries_private += ['-lSDL3-static']
-  cflags += ['-DORGE_USE_SHARED']
-  cflags_private += ['-UORGE_USE_SHARED']
 elif host_system == 'darwin'
   libraries += ['-lvulkan.' + vulkan_dep.version()]
   libraries_private += ['-lSDL3']
@@ -280,7 +277,6 @@ pc_conf.set('version', meson.project_version())
 pc_conf.set('libraries', ' '.join(libraries))
 pc_conf.set('libraries_private', ' '.join(libraries_private))
 pc_conf.set('cflags', ' '.join(cflags))
-pc_conf.set('cflags_private', ' '.join(cflags_private))
 configure_file(
   input: meson.current_source_dir() / 'orge.pc.in',
   output: 'orge.pc',

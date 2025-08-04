@@ -113,7 +113,7 @@ jobs:
       env:
         PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
       run: |
-        for /f "delims=" %%i in ('pkg-config orge --cflags --static') do set CFLAGS=%%i
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs --static') do set LIBS=%%j
         echo %CFLAGS%
         echo %LIBS%
@@ -129,4 +129,4 @@ jobs:
         for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
         echo %CFLAGS%
         echo %LIBS%
-        clang++ %CFLAGS% D:\orge\main.cpp %LIBS%
+        clang++ %CFLAGS% -DORGE_USE_SHARED D:\orge\main.cpp %LIBS%

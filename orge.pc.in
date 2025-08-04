@@ -9,4 +9,3 @@ Version: @version@
 Libs: -L${libdir} @libraries@
 Libs.private: @libraries_private@
 Cflags: -I${includedir} @cflags@
-Cflags.private: @cflags_private@
