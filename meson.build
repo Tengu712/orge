@@ -207,7 +207,19 @@ libraries_private = ['-lyaml-cpp']
 cflags = ['-std=c++20']
 cflags_private = []
 if host_system == 'windows'
-  libraries += ['-lvulkan-1']
+  libraries += [
+    '-lvulkan-1',
+    '-luser32',
+    '-lwinmm',
+    '-ladvapi32',
+    '-lole32',
+    '-lgdi32',
+    '-lshell32',
+    '-lsetupapi',
+    '-lversion',
+    '-limm32',
+    '-lcfgmgr32',
+  ]
   libraries_private += ['-lSDL3-static']
   cflags += ['-DORGE_BUILD_SHARED']
   cflags_private += ['-UORGE_BUILD_SHARED', '-DORGE_BUILD_STATIC']
