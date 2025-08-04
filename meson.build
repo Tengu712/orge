@@ -253,8 +253,8 @@ if host_system == 'windows'
     libraries += ['-l' + n]
   endforeach
   libraries_private += ['-lSDL3-static']
-  cflags += ['-DORGE_BUILD_SHARED']
-  cflags_private += ['-UORGE_BUILD_SHARED', '-DORGE_BUILD_STATIC']
+  cflags += ['-DORGE_USE_SHARED']
+  cflags_private += ['-UORGE_USE_SHARED']
 elif host_system == 'darwin'
   libraries += ['-lvulkan.' + vulkan_dep.version()]
   libraries_private += ['-lSDL3']

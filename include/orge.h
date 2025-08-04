@@ -9,10 +9,10 @@
 #ifdef _WIN32
 # ifdef ORGE_BUILD_SHARED
 #  define API_EXPORT __declspec(dllexport)
-# elif ORGE_BUILD_STATIC
-#  define API_EXPORT
-# else
+# elif ORGE_USE_SHARED
 #  define API_EXPORT __declspec(dllimport)
+# else
+#  define API_EXPORT
 # endif
 #else
 # define API_EXPORT
