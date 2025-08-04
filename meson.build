@@ -39,6 +39,70 @@ if host_system == 'darwin' and host_machine.cpu_family() != 'aarch64'
 endif
 
 # =================================================================================================================== #
+#     Dependencies                                                                                                    #
+# =================================================================================================================== #
+
+# 依存ライブラリを取得
+#
+# NOTE: VulkanLoaderがWindowsでのみpcファイルを生成しないせいでpkgconfigを利用できないので、
+#       cmakeで取得する。
+sdl3_dep = dependency('SDL3', method: 'cmake', static: true, required: true)
+vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
+yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
+
+# SDL3の依存するシステムライブラリを取得
+sdl3_sysdep_names = []
+if host_system == 'windows'
+  sdl3_sysdep_names += [
+    'user32',
+    'winmm',
+    'advapi32',
+    'ole32',
+    'oleaut32',
+    'gdi32',
+    'shell32',
+    'setupapi',
+    'version',
+    'imm32',
+    'cfgmgr32',
+  ]
+elif host_system == 'darwin'
+  sdl3_sysdep_names += [
+    ['CoreMedia', true],
+    ['CoreVideo', true],
+    ['Cocoa', true],
+    ['UniformTypeIdentifiers', false],
+    ['IOKit', true],
+    ['ForceFeedback', true],
+    ['Carbon', true],
+    ['CoreAudio', true],
+    ['AudioToolbox', true],
+    ['AVFoundation', true],
+    ['Foundation', true],
+    ['GameController', true],
+    ['Metal', true],
+    ['QuartzCore', true],
+    ['CoreHaptics', false],
+  ]
+endif
+
+# SDL3の完全なdepを作成
+sdl3_ful_dep = sdl3_dep
+if host_system == 'windows'
+  deps = []
+  foreach n: sdl3_sysdep_names
+    deps += [cpp.find_library(n, required: true)]
+  endforeach
+  sdl3_ful_dep = declare_dependency(dependencies: [sdl3_dep] + deps)
+elif host_system == 'darwin'
+  deps = []
+  foreach n: sdl3_sysdep_names
+    deps += [dependency('appleframeworks', modules: [n[0]], required: n[1])]
+  endforeach
+  sdl3_ful_dep = declare_dependency(dependencies: [sdl3_dep] + deps)
+endif
+
+# =================================================================================================================== #
 #     Build Settings                                                                                                  #
 # =================================================================================================================== #
 
@@ -90,29 +154,6 @@ if host_system == 'darwin'
   else
     cpp_args += ['-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE']
   endif
-endif
-
-# 依存ライブラリを取得
-#
-# NOTE: VulkanLoaderがWindowsでのみpcファイルを生成しないせいでpkgconfigを利用できないので、
-#       cmakeで取得する。
-sdl3_dep = dependency('SDL3', method: 'cmake', static: true, required: true)
-vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
-yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
-
-# 追加の依存ライブラリを取得
-#
-# NOTE: Windowsにおいてdll作成時にSDL3が依存するライブラリ不足で失敗するので。
-sdl3_ful_dep = sdl3_dep
-if host_system == 'windows'
-  deps = [
-    cpp.find_library('winmm', required: true),
-    cpp.find_library('setupapi', required: true),
-    cpp.find_library('cfgmgr32', required: true),
-    cpp.find_library('version', required: true),
-    cpp.find_library('imm32', required: true)
-  ]
-  sdl3_ful_dep = declare_dependency(dependencies: [sdl3_dep] + deps)
 endif
 
 # prefixとsufixを指定
@@ -207,45 +248,24 @@ libraries_private = ['-lyaml-cpp']
 cflags = ['-std=c++20']
 cflags_private = []
 if host_system == 'windows'
-  libraries += [
-    '-lvulkan-1',
-    '-luser32',
-    '-lwinmm',
-    '-ladvapi32',
-    '-lole32',
-    '-loleaut32',
-    '-lgdi32',
-    '-lshell32',
-    '-lsetupapi',
-    '-lversion',
-    '-limm32',
-    '-lcfgmgr32',
-  ]
+  libraries += ['-lvulkan-1']
+  foreach n: sdl3_sysdep_names
+    libraries += ['-l' + n]
+  endforeach
   libraries_private += ['-lSDL3-static']
   cflags += ['-DORGE_BUILD_SHARED']
   cflags_private += ['-UORGE_BUILD_SHARED', '-DORGE_BUILD_STATIC']
 elif host_system == 'darwin'
   libraries += ['-lvulkan.' + vulkan_dep.version()]
   libraries_private += ['-lSDL3']
-  cflags += [
-    '-Wl,-framework,CoreMedia',
-    '-Wl,-framework,CoreVideo',
-    '-Wl,-framework,Cocoa',
-    '-Wl,-weak_framework,UniformTypeIdentifiers',
-    '-Wl,-framework,IOKit',
-    '-Wl,-framework,ForceFeedback',
-    '-Wl,-framework,Carbon',
-    '-Wl,-framework,CoreAudio',
-    '-Wl,-framework,AudioToolbox',
-    '-Wl,-framework,AVFoundation',
-    '-Wl,-framework,Foundation',
-    '-Wl,-framework,GameController',
-    '-Wl,-framework,Metal',
-    '-Wl,-framework,QuartzCore',
-    '-Wl,-weak_framework,CoreHaptics',
-    '-lpthread',
-    '-lm',
-  ]
+  foreach n: sdl3_sysdep_names
+    if n[1]
+      cflags += ['-Wl,-framework,' + n[0]]
+    else
+      cflags += ['-Wl,-weak_framework,' + n[0]]
+    endif
+  endforeach
+  cflags += ['-lpthread', '-lm']
 else
   libraries += ['-lvulkan']
   libraries_private += ['-lSDL3']
@@ -268,3 +288,53 @@ configure_file(
   install: true,
   install_dir: get_option('libdir') / 'pkgconfig'
 )
+
+# =================================================================================================================== #
+#     Examples                                                                                                        #
+# =================================================================================================================== #
+
+orge_dep = declare_dependency(
+  link_with: orge,
+  dependencies: [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
+  compile_args: cpp_args,
+  include_directories: include_directories('include')
+)
+
+example_dirs = []
+if get_option('build_examples')
+  example_dirs = [
+    'examples/simple',
+    'examples/dialog',
+    'examples/triangle',
+    'examples/cube',
+    'examples/input',
+    'examples/sampler',
+    'examples/multipass',
+  ]
+else
+  if get_option('build_example_simple')
+    example_dirs += ['examples/simple']
+  endif
+  if get_option('build_example_dialog')
+    example_dirs += ['examples/dialog']
+  endif
+  if get_option('build_example_triangle')
+    example_dirs += ['examples/triangle']
+  endif
+  if get_option('build_example_cube')
+    example_dirs += ['examples/cube']
+  endif
+  if get_option('build_example_input')
+    example_dirs += ['examples/input']
+  endif
+  if get_option('build_example_sampler')
+    example_dirs += ['examples/sampler']
+  endif
+  if get_option('build_example_multipass')
+    example_dirs += ['examples/multipass']
+  endif
+endif
+
+foreach n: example_dirs
+  subdir(n)
+endforeach
