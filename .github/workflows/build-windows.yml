@@ -40,17 +40,11 @@ jobs:
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Setup vcpkg
-      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: vcpkg\bootstrap-vcpkg.bat
-
     # Static
 
-    - name: Install vcpkg packages (static)
+    - name: Setup vcpkg packages (static)
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      env:
-        VCPKG_INSTALLLED_DIR: vcpkg_installed_static
-      run: vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-static
+      run: scripts\setup-vcpkg.bat static
 
     - name: Build & install orge (static)
       run: |
@@ -67,9 +61,7 @@ jobs:
 
     - name: Install vcpkg packages (shared)
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      env:
-        VCPKG_INSTALLLED_DIR: vcpkg_installed_shared
-      run: vcpkg\vcpkg install --overlay-triplets=.\triplets --triplet=custom-x64-windows-shared
+      run: scripts\setup-vcpkg.bat shared
 
     - name: Build & install orge (shared)
       run: |
