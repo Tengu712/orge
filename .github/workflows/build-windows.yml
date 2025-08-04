@@ -106,8 +106,14 @@ jobs:
         mkdir static
 
     # DEBUG:
-    - run: pkg-config orge --cflags
-    - run: pkg-config orge --libs --static
+    - name: debug
+      env:
+        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
+      run: pkg-config orge --cflags
+    - name: debug2
+      env:
+        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
+      run: pkg-config orge --libs --static
 
     - name: Test build with static
       working-directory: static
