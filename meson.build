@@ -134,10 +134,10 @@ endif
 # ライブラリビルド
 orge = library('orge',
   sources,
-  cpp_args : cpp_args,
+  cpp_args: cpp_args,
   dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
   pic: true,
-  install : true,
+  install: true,
   name_prefix: prefix,
   name_suffix: suffix
 )
@@ -241,9 +241,9 @@ pc_conf.set('libraries', ' '.join(libraries))
 pc_conf.set('libraries_private', ' '.join(['-lSDL3', '-lyaml-cpp']))
 pc_conf.set('cflags', ' '.join(cflags))
 configure_file(
-  input : meson.current_source_dir() / 'orge.pc.in',
-  output : 'orge.pc',
-  configuration : pc_conf,
-  install : true,
+  input: meson.current_source_dir() / 'orge.pc.in',
+  output: 'orge.pc',
+  configuration: pc_conf,
+  install: true,
   install_dir: get_option('libdir') / 'pkgconfig'
 )
