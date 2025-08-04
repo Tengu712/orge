@@ -242,7 +242,7 @@ pc_conf.set('description', 'Ore ore game engine.')
 pc_conf.set('url', 'https://github.com/Tengu712/orge')
 pc_conf.set('version', meson.project_version())
 pc_conf.set('libraries', ' '.join(libraries))
-pc_conf.set('libraries_private', ' '.join(['-lSDL3', '-lyaml-cpp']))
+pc_conf.set('libraries_private', ' '.join(libraries_private))
 pc_conf.set('cflags', ' '.join(cflags))
 configure_file(
   input: meson.current_source_dir() / 'orge.pc.in',
