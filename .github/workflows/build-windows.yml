@@ -105,8 +105,6 @@ jobs:
         mkdir shared
         mkdir static
 
-    - run: tree /f D:/orge/installed-static
-
     - name: Test build with static
       working-directory: static
       shell: cmd
