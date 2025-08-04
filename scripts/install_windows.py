@@ -7,6 +7,7 @@ def install(src, dst):
 		print('error: ' + src + ' not found.')
 		exit(1)
 	print('Installing ' + src + ' to ' + dst)
+	os.makedirs(os.path.dirname(dst), exist_ok=True)
 	shutil.copy(src, dst)
 
 srclibdir = sys.argv[1]
