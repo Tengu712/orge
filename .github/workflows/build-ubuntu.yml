@@ -60,6 +60,7 @@ jobs:
         export CC=clang
         export CXX=clang++
         meson setup build-static \
+          -Dbuild_examples=true \
           -Dbuildtype=release \
           --prefix=$(pwd)/installed-static \
           --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
@@ -72,6 +73,7 @@ jobs:
         export CC=clang
         export CXX=clang++
         meson setup build-shared \
+          -Dbuild_examples=true \
           -Dbuildtype=release \
           --prefix=$(pwd)/installed-shared \
           --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
