@@ -21,7 +21,7 @@ vulkan_lib = 'libvulkan.so.' + vulkan_version
 install(srcdir + '/' + vulkan_lib, dstdir + '/libvulkan.so')
 
 if default_library == 'static':
-	install(srcdir + '/libSDL3-static.a', dstdir)
+	install(srcdir + '/libSDL3.a', dstdir)
 	install(srcdir + '/libyaml-cpp.a', dstdir)
 
 print('Change libvulkan.so ID to libvulkan.so')
