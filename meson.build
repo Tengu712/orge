@@ -203,11 +203,14 @@ endif
 
 # pkgconfig用の値を作成
 libraries = ['-lorge']
+libraries_private = ['-lyaml-cpp']
 cflags = ['-std=c++20']
 if host_system == 'windows'
   libraries += ['-lvulkan-1']
+  libraries_private += ['-lSDL3-static']
 elif host_system == 'darwin'
   libraries += ['-lvulkan.' + vulkan_dep.version()]
+  libraries_private += ['-lSDL3']
   cflags += [
     '-Wl,-framework,CoreMedia',
     '-Wl,-framework,CoreVideo',
@@ -229,6 +232,7 @@ elif host_system == 'darwin'
   ]
 else
   libraries += ['-lvulkan']
+  libraries_private += ['-lSDL3']
 endif
 
 # pkgconfigファイルを生成
