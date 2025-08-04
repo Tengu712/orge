@@ -20,5 +20,5 @@ install(srclibdir + '/vulkan-1.lib', dstlibdir + '/vulkan-1.lib')
 install(srcbindir + '/vulkan-1.dll', dstbindir + '/vulkan-1.dll')
 
 if default_library == 'static':
-	install(srclibdir + '/SDL3-static.lib', dstlibdir + '/SDL3-static.lib')
+	install(srclibdir + '/SDL3.lib', dstlibdir + '/SDL3.lib')
 	install(srclibdir + '/yaml-cpp.lib', dstlibdir + '/yaml-cpp.lib')
