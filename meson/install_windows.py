@@ -15,9 +15,9 @@ dstlibdir = sys.argv[3]
 dstbindir = sys.argv[4]
 default_library = sys.argv[5]
 
-install(srclibdir + '/vulkan-1.lib', dstlibdir)
-install(srcbindir + '/vulkan-1.dll', dstbindir)
+install(srclibdir + '/vulkan-1.lib', dstlibdir + '/vulkan-1.lib')
+install(srcbindir + '/vulkan-1.dll', dstbindir + '/vulkan-1.dll')
 
 if default_library == 'static':
-	install(srclibdir + '/SDL3-static.lib', dstlibdir)
-	install(srclibdir + '/yaml-cpp.lib', dstlibdir)
+	install(srclibdir + '/SDL3-static.lib', dstlibdir + '/SDL3-static.lib')
+	install(srclibdir + '/yaml-cpp.lib', dstlibdir + '/yaml-cpp.lib')

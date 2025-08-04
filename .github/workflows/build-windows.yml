@@ -76,9 +76,6 @@ jobs:
 
     # Post
 
-    # DEBUG:
-    - run: dir D:\orge\installed-static
-
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
 
@@ -108,9 +105,6 @@ jobs:
         mkdir shared
         mkdir static
 
-    # DEBUG:
-    - run: type D:\orge\installed-static\lib\pkgconfig\orge.pc
-
     - name: Test build with static
       working-directory: static
       shell: cmd
@@ -119,7 +113,7 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
-        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+        clang-cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
 
     - name: Test build with shared
       working-directory: shared
@@ -129,4 +123,4 @@ jobs:
       run: |
         for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
         for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
-        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+        clang-cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
