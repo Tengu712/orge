@@ -299,6 +299,23 @@ orge_dep = declare_dependency(
   include_directories: include_directories('include')
 )
 
+example_cpp_args = []
+if host_system == 'windows'
+  if get_option('default_library') == 'static'
+    if get_option('buildtype') == 'release'
+      example_cpp_args += ['/MT']
+    else
+      example_cpp_args += ['/MTd']
+    endif
+  else
+    if get_option('buildtype') == 'release'
+      example_cpp_args += ['/MD', '-DORGE_USE_SHARED']
+    else
+      example_cpp_args += ['/MDd', '-DORGE_USE_SHARED']
+    endif
+  endif
+endif
+
 example_dirs = []
 if get_option('build_examples')
   example_dirs = [
