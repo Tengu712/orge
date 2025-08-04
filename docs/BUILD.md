@@ -1,71 +1,97 @@
 # Build
 
-## Requirements
+## Windows
 
-- Common
-  - CMake
-  - Ninja
-  - pkg-config
-- Windows
-  - MSVC
-  - Windows SDK
-- Linux
-  - C++コンパイラ
-  - ar
-  - x11
-  - xcb
-  - xkb
-  - wayland
-  - xrandr
-  - ltdl
-- macOS
-  - C++コンパイラ
-  - ar
+次をインストール:
 
-## Build & Install
+- MSVC
+- Windows SDK
+- CMake
+- Ninja
+- Python3
+- Meson (pip)
 
-本リポジトリをクローン:
+次を実行:
+
+```bat
+git clone --recursive https://github.com/Tengu712/orge.git
+
+.\scripts\setup-vcpkg.bat (static|shared)
+
+meson setup build ^
+  -Dbuild_examples=(true|false) ^
+  -Dbuildtype=(release|debug) ^
+  -Db_vscrt=(mt|mtd|md|mdd) ^
+  --cmake-prefix-path=.\vcpkg_installed_(static|shared) ^
+  --default-library=(static|shared) ^
+  --prefix=インストール先パス
+
+meson install -C build
+```
+
+## macOS
+
+次をインストール:
+
+- Clang系C++コンパイラ
+- CMake
+- Ninja
+- Python3
+- Meson (pip)
+- install_name_tool
+
+次を実行:
 
 ```sh
 git clone --recursive https://github.com/Tengu712/orge.git
-```
 
-vcpkgをセットアップ:
-
-```sh
-# Windows
-.\vcpkg\bootstrap-vcpkg.bat
-
-# Linux/macOS
 ./vcpkg/bootstrap-vcpkg.sh
+./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
+
+meson setup build \
+  -Dbuild_examples=(true|false) \
+  -Dbuildtype=(release|debug) \
+  --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
+  --default-library=(static|shared) \
+  --prefix=インストール先パス
+
+meson install -C build
 ```
 
-次を実行してビルド及びインストール:
+## Linux
+
+次をインストール:
+
+- Clang系C++コンパイラ
+- CMake
+- Ninja
+- Python3
+- Meson (pip)
+- x11
+- xcb
+- xkb
+- wayland
+- xrandr
+- ltdl
+- patchelf
+
+次を実行:
 
 ```sh
-cmake \
-	-G Ninja \
-	-B build \
-	-D ORGE_SHARED=(ON|OFF) \
-	-D ORGE_STATIC=(ON|OFF) \
-	-D CMAKE_BUILD_TYPE=(Release|Debug) \
-	-D CMAKE_INSTALL_PREFIX=インストール先ディレクトリパス
-cmake --build build
-cmake --install build
+git clone --recursive https://github.com/Tengu712/orge.git
+
+./vcpkg/bootstrap-vcpkg.sh
+./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
+
+meson setup build \
+  -Dbuild_examples=(true|false) \
+  -Dbuildtype=(release|debug) \
+  --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
+  --default-library=(static|shared) \
+  --prefix=インストール先パス
+
+meson install -C build
 ```
-
-ただし、
-
-- どのOSでも`ORGE_SHARED`と`ORGE_STATIC`の両方を`OFF`にできない
-- Windowsでは`ORGE_SHARED`と`ORGE_STATIC`の両方を`ON`にできない
-
-## Examples
-
-examples下のサンプルプログラムをビルドするには、orgeのCMake構成時にオプションを与える必要がある。
-オプションは[examples/CMakeLists.txt](../examples/CMakeLists.txt)を参照。
-
-ビルドされたサンプルプログラムはbuild/examplesディレクトリ下に生成される。
-また、インストールされない。
 
 ## Enable Vulkan Validation Layer
 

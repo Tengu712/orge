@@ -31,7 +31,6 @@ jobs:
           libwayland-dev \
           libxrandr-dev \
           libltdl-dev \
-          pkg-config \
           patchelf
 
     - name: install meson
