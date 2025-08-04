@@ -111,8 +111,8 @@ jobs:
       env:
         PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
       run: |
-        for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
-        for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs --static') do set LIBS=%%j
         clang-cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
 
     - name: Test build with shared
