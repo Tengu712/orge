@@ -127,6 +127,9 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 
 # 追加のコンパイラフラグを生成
 cpp_args = []
+if get_option('enable_vvl')
+  cpp_args += ['-DENABLE_VVL']
+endif
 if host_system == 'windows'
   if get_option('default_library') == 'static'
     if get_option('buildtype') == 'release'

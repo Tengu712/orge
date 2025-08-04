@@ -1,4 +1,5 @@
 option('vcpkg_root', type: 'string', value: '', description: 'vcpkg root directory path')
+option('enable_vvl', type: 'boolean', value: false, description: 'enable Vulkan Validation Layers')
 option('build_examples', type: 'boolean', value: false, description: 'build all examples')
 option('build_example_simple', type: 'boolean', value: false)
 option('build_example_dialog', type: 'boolean', value: false)

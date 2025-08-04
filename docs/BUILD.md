@@ -19,7 +19,6 @@ git clone --recursive https://github.com/Tengu712/orge.git
 .\scripts\setup-vcpkg.bat (static|shared)
 
 meson setup build ^
-  -Dbuild_examples=(true|false) ^
   -Dbuildtype=(release|debug) ^
   -Db_vscrt=(mt|mtd|md|mdd) ^
   --cmake-prefix-path=.\vcpkg_installed_(static|shared) ^
@@ -49,7 +48,6 @@ git clone --recursive https://github.com/Tengu712/orge.git
 ./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
 
 meson setup build \
-  -Dbuild_examples=(true|false) \
   -Dbuildtype=(release|debug) \
   --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
   --default-library=(static|shared) \
@@ -84,7 +82,6 @@ git clone --recursive https://github.com/Tengu712/orge.git
 ./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
 
 meson setup build \
-  -Dbuild_examples=(true|false) \
   -Dbuildtype=(release|debug) \
   --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
   --default-library=(static|shared) \
@@ -93,7 +90,11 @@ meson setup build \
 meson install -C build
 ```
 
+## Examples
+
+examples下のサンプルプログラムをビルドするためにはmeson setup時に`-Dbuild_examples=true`あるいは`-Dbuild_example_<EXAMPLE_NAME>=true`を与える。
+
 ## Enable Vulkan Validation Layer
 
-Vulkan Validation Layerを有効化するためには、orgeのCMake構成時に`-D ENABLE_VVL=ON`を与える。
+Vulkan Validation Layerを有効化するためには、orgeのCMake構成時に`-Denale_vvl=true`を与える。
 ただし、orgeはVulkan Validation Layerを提供しないため、自マシンにインストールしておくこと。
