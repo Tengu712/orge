@@ -1,7 +1,8 @@
+@echo off
+
 rem Windows用のvcpkg関連の初期化処理ユーティリティスクリプト
 rem その値が"static"か"shared"であるコマンドライン引数を必ず1個取る
 
-@echo off
 setlocal enabledelayedexpansion
 
 if not defined ERRORLEVEL set ERRORLEVEL=0
@@ -30,7 +31,7 @@ if not exist "%VCPKG_EXE%" (
 
 set "TRIPLET=custom-x64-windows-%CLARG%"
 set "INSTALL_DIR=%PROJROOT%\vcpkg_installed_%CLARG%"
-set "VCPKG_INSTALL_CMD=%VCPKG_EXE% install --overlay-triplets=.\triplets --triplet=%TRIPLET% --x-install-root=%INSTALL_DIR%"
+set "VCPKG_INSTALL_CMD=%VCPKG_EXE% install --overlay-triplets=%PROJROOT%\triplets --triplet=%TRIPLET% --x-install-root=%INSTALL_DIR%"
 echo [ info ] running %VCPKG_INSTALL_CMD%
 %VCPKG_INSTALL_CMD%
 if !ERRORLEVEL! neq 0 (
