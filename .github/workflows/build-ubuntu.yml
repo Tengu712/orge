@@ -19,7 +19,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
+        sudo apt-get remove --purge man-db
+        sudo apt-get install -y --no-install-recommends \
           build-essential \
           cmake \
           ninja-build \
@@ -30,7 +31,10 @@ jobs:
           libwayland-dev \
           libxrandr-dev \
           libltdl-dev \
-          pkg-config
+          patchelf
+
+    - name: install meson
+      run: pip install meson
 
     - name: Cache vcpkg packages
       id: cache-vcpkg
@@ -45,20 +49,43 @@ jobs:
 
     - name: Setup vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: ./vcpkg/bootstrap-vcpkg.sh
-
-    - name: Build & install orge
       run: |
-        CC=clang CXX=clang++ cmake -G Ninja -B build -D ORGE_SHARED=ON -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/opt/orge
-        cmake --build build
-        cmake --install build
+        ./vcpkg/bootstrap-vcpkg.sh
+        ./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
+
+    - name: Build & install orge (static)
+      run: |
+        export CC=clang
+        export CXX=clang++
+        meson setup build-static \
+          -Dbuild_examples=true \
+          -Dbuildtype=release \
+          --prefix=$(pwd)/installed-static \
+          --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
+          --default-library=static
+        meson install -C build-static
+        tree installed-static
+
+    - name: Build & install orge (shared)
+      run: |
+        export CC=clang
+        export CXX=clang++
+        meson setup build-shared \
+          -Dbuild_examples=true \
+          -Dbuildtype=release \
+          --prefix=$(pwd)/installed-shared \
+          --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
+          --default-library=shared
+        meson install -C build-shared
+        tree installed-shared
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
       with:
         name: orge-lib
         path: |
-          /opt/orge
+          ./installed-static
+          ./installed-shared
           ./examples/simple/main.cpp
 
   test-standalone:
@@ -69,17 +96,18 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: orge-lib
-        path: /
-
-    - name: Prepare
-      run: |
-        mkdir shared
-        mkdir static
-
-    - name: Test build with shared
-      working-directory: shared
-      run: g++ ../examples/simple/main.cpp $(pkg-config orge --cflags --libs --with-path /opt/orge/lib/pkgconfig)
+        path: ./orge
 
     - name: Test build with static
-      working-directory: static
-      run: g++ ../examples/simple/main.cpp $(pkg-config orgestatic --cflags --libs --static --with-path /opt/orge/lib/pkgconfig)
+      run: |
+        export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
+        mkdir ./static
+        cd ./static
+        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
+
+    - name: Test build with shared
+      run: |
+        export PKG_CONFIG_PATH=$(pwd)/orge/installed-shared/lib/pkgconfig
+        mkdir ./shared
+        cd ./shared
+        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs)

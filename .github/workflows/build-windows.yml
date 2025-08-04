@@ -16,6 +16,8 @@ jobs:
       with:
         submodules: recursive
 
+    # Setup
+
     - uses: ilammy/msvc-dev-cmd@v1
 
     - uses: seanmiddleditch/gha-setup-ninja@master
@@ -23,33 +25,58 @@ jobs:
     - name: Install dependencies
       run: choco install pkgconfiglite
 
+    - name: install meson
+      run: pip install meson
+
     - name: Cache vcpkg packages
       id: cache-vcpkg
       uses: actions/cache@v4
       with:
         path: |
-          vcpkg_installed_shared
           vcpkg_installed_static
+          vcpkg_installed_shared
           vcpkg/buildtrees
           vcpkg/packages
           vcpkg/vcpkg.exe
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'triplets/**', '.gitmodules') }}
 
-    - name: Setup vcpkg
-      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
-      run: vcpkg\bootstrap-vcpkg.bat
+    # Static
 
-    - name: Build & install orge (shared)
-      run: |
-        cmake -G Ninja -B build_shared -D ORGE_SHARED=ON -D ORGE_STATIC=OFF -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build_shared
-        cmake --install build_shared
+    - name: Setup vcpkg packages (static)
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: scripts\setup-vcpkg.bat static
 
     - name: Build & install orge (static)
       run: |
-        cmake -G Ninja -B build_static -D ORGE_SHARED=OFF -D ORGE_STATIC=ON -D BUILD_EXAMPLES=ON -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=D:\orge
-        cmake --build build_static
-        cmake --install build_static
+        meson setup build-static `
+          -Dbuild_examples=true `
+          -Dbuildtype=release `
+          -Db_vscrt=mt `
+          --prefix=D:\orge\installed-static `
+          --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_static\custom-x64-windows-static `
+          --default-library=static
+        meson install -C build-static
+        tree /f D:\orge\installed-static
+
+    # Shared
+
+    - name: Install vcpkg packages (shared)
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: scripts\setup-vcpkg.bat shared
+
+    - name: Build & install orge (shared)
+      run: |
+        meson setup build-shared `
+          -Dbuild_examples=true `
+          -Dbuildtype=release `
+          -Db_vscrt=md `
+          --prefix=D:\orge\installed-shared `
+          --cmake-prefix-path=${{ github.workspace }}\vcpkg_installed_shared\custom-x64-windows-shared `
+          --default-library=shared
+        meson install -C build-shared
+        tree /f D:\orge\installed-shared
+
+    # Post
 
     - name: Copy example file
       run: copy examples\simple\main.cpp D:\orge\
@@ -80,22 +107,26 @@ jobs:
         mkdir shared
         mkdir static
 
-    - name: Test build with shared
-      working-directory: shared
-      shell: cmd
-      env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
-      run: |
-        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
-        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
-        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
-
     - name: Test build with static
       working-directory: static
       shell: cmd
       env:
-        PKG_CONFIG_PATH: D:\orge\lib\pkgconfig
+        PKG_CONFIG_PATH: D:\orge\installed-static\lib\pkgconfig
       run: |
-        for /f "delims=" %%i in ('pkg-config orgestatic --cflags') do set CFLAGS=%%i
-        for /f "delims=" %%j in ('pkg-config orgestatic --libs --static') do set LIBS=%%j
-        cl %CFLAGS% D:\orge\main.cpp /link %LIBS%
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs --static') do set LIBS=%%j
+        echo %CFLAGS%
+        echo %LIBS%
+        clang++ %CFLAGS% D:\orge\main.cpp %LIBS%
+
+    - name: Test build with shared
+      working-directory: shared
+      shell: cmd
+      env:
+        PKG_CONFIG_PATH: D:\orge\installed-shared\lib\pkgconfig
+      run: |
+        for /f "delims=" %%i in ('pkg-config orge --cflags') do set CFLAGS=%%i
+        for /f "delims=" %%j in ('pkg-config orge --libs') do set LIBS=%%j
+        echo %CFLAGS%
+        echo %LIBS%
+        clang++ %CFLAGS% -DORGE_USE_SHARED D:\orge\main.cpp %LIBS%

@@ -6,6 +6,18 @@
 
 #pragma once
 
+#ifdef _WIN32
+# ifdef ORGE_BUILD_SHARED
+#  define API_EXPORT __declspec(dllexport)
+# elif ORGE_USE_SHARED
+#  define API_EXPORT __declspec(dllimport)
+# else
+#  define API_EXPORT
+# endif
+#else
+# define API_EXPORT
+#endif
+
 #include <stdint.h>
 
 // ================================================================================================================== //
@@ -25,40 +37,40 @@ enum OrgeDialogType {
 /// - message: ダイアログのメッセージ
 ///
 /// ダイアログが閉じられるまでスレッドを停止する。
-void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
+API_EXPORT void orgeShowDialog(uint32_t dtype, const char *title, const char *message);
 
 /// orgeの直近のエラーメッセージを取得する関数
-const char *orgeGetErrorMessage(void);
+API_EXPORT const char *orgeGetErrorMessage(void);
 
 // ================================================================================================================== //
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
 
 /// orgeを初期化する関数 (yaml文字列指定)
-uint8_t orgeInitialize(const char *yaml);
+API_EXPORT uint8_t orgeInitialize(const char *yaml);
 
 /// orgeを初期化する関数 (yamlファイル指定)
-uint8_t orgeInitializeWith(const char *yamlFilePath);
+API_EXPORT uint8_t orgeInitializeWith(const char *yamlFilePath);
 
 /// orgeを終了する関数
-void orgeTerminate(void);
+API_EXPORT void orgeTerminate(void);
 
 /// orgeを更新する関数
 ///
 /// 毎フレーム初めに必ず呼ぶこと。
 ///
 /// 0以外であればウィンドウが閉じられていないことを意味する。
-uint8_t orgeUpdate(void);
+API_EXPORT uint8_t orgeUpdate(void);
 
 // ================================================================================================================== //
 //     Window                                                                                                         //
 // ================================================================================================================== //
 
 /// フルスクリーン状態を取得する関数
-uint8_t orgeIsFullscreen(void);
+API_EXPORT uint8_t orgeIsFullscreen(void);
 
 /// フルスクリーン状態を設定する関数
-void orgeSetFullscreen(uint8_t toFullscreen);
+API_EXPORT void orgeSetFullscreen(uint8_t toFullscreen);
 
 // ================================================================================================================== //
 //     Graphics Resources                                                                                             //
@@ -69,15 +81,15 @@ void orgeSetFullscreen(uint8_t toFullscreen);
 /// - id: バッファID
 /// - size: バッファのサイズ (バイト数)
 /// - isStorage: ストレージバッファか (falseの場合ユニフォームバッファとみなされる)
-uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage);
+API_EXPORT uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage);
 
 /// バッファを破棄する関数
-void orgeDestroyBuffer(const char *id);
+API_EXPORT void orgeDestroyBuffer(const char *id);
 
 /// バッファを更新する関数
 ///
 /// dataはバッファ作成時に指定したサイズ分データを持つこと。
-uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
+API_EXPORT uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
 
 /// バッファディスクリプタを更新する関数
 ///
@@ -87,7 +99,7 @@ uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
-uint8_t orgeUpdateBufferDescriptor(
+API_EXPORT uint8_t orgeUpdateBufferDescriptor(
 	const char *bufferId,
 	const char *pipelineId,
 	uint32_t set,
@@ -100,16 +112,16 @@ uint8_t orgeUpdateBufferDescriptor(
 ///
 /// pixelsはビットマップデータ。
 /// 必ずRGBAで並んでいること。
-uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels);
+API_EXPORT uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels);
 
 /// orgeにイメージを追加する関数 (pngファイル指定)
 ///
 /// - id: イメージID
 /// - path: pngファイルパス
-uint8_t orgeCreateImageFromFile(const char *id, const char *path);
+API_EXPORT uint8_t orgeCreateImageFromFile(const char *id, const char *path);
 
 /// イメージを破棄する関数
-void orgeDestroyImage(const char *id);
+API_EXPORT void orgeDestroyImage(const char *id);
 
 /// イメージディスクリプタを更新する関数
 ///
@@ -119,7 +131,7 @@ void orgeDestroyImage(const char *id);
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
-uint8_t orgeUpdateImageDescriptor(
+API_EXPORT uint8_t orgeUpdateImageDescriptor(
 	const char *imageId,
 	const char *pipelineId,
 	uint32_t set,
@@ -140,10 +152,10 @@ uint8_t orgeUpdateImageDescriptor(
 /// - repeat: [0-1]の範囲外のUV座標における設定
 ///     - 0以外ならテクスチャを繰り返して参照
 ///     - 0なら0あるいは1の境界値を参照
-uint8_t orgeCreateSampler(const char *id, uint8_t linearMagFilter, uint8_t linearMinFilter, uint8_t repeat);
+API_EXPORT uint8_t orgeCreateSampler(const char *id, uint8_t linearMagFilter, uint8_t linearMinFilter, uint8_t repeat);
 
 /// サンプラを破棄する関数
-void orgeDestroySampler(const char *id);
+API_EXPORT void orgeDestroySampler(const char *id);
 
 /// サンプラディスクリプタを更新する関数
 ///
@@ -153,7 +165,7 @@ void orgeDestroySampler(const char *id);
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
-uint8_t orgeUpdateSamplerDescriptor(
+API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
 	const char *samplerId,
 	const char *pipelineId,
 	uint32_t set,
@@ -169,7 +181,7 @@ uint8_t orgeUpdateSamplerDescriptor(
 /// - vertices: 頂点データ
 /// - indexCount: indicesの要素数
 /// - indices: インデックスデータ
-uint8_t orgeCreateMesh(
+API_EXPORT uint8_t orgeCreateMesh(
 	const char *id,
 	const uint32_t vertexCount,
 	const float *vertices,
@@ -178,14 +190,14 @@ uint8_t orgeCreateMesh(
 );
 
 /// メッシュを破棄する関数
-void orgeDestroyMesh(const char *id);
+API_EXPORT void orgeDestroyMesh(const char *id);
 
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
 // ================================================================================================================== //
 
 /// orgeの描画を開始する関数
-uint8_t orgeBeginRender(void);
+API_EXPORT uint8_t orgeBeginRender(void);
 
 /// ディスクリプタセットをバインドする関数
 ///
@@ -196,7 +208,7 @@ uint8_t orgeBeginRender(void);
 ///
 /// 例えば、set = 0とset = 1があり、それぞれ2個と3個確保されている場合、
 /// indicesの要素数は2、indicesの各要素は0-1と0-2を取る。
-uint8_t orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
+API_EXPORT uint8_t orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
 
 /// 描画関数
 ///
@@ -205,13 +217,13 @@ uint8_t orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
 ///
 /// meshIdはバインドするメッシュのID。
 /// meshIdがnullptrであったり、既にバインドされているメッシュのIDである場合、バインドはスキップされる。
-uint8_t orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
+API_EXPORT uint8_t orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
 
 /// 次のサブパスへ移るための関数
-uint8_t orgeNextSubpass(void);
+API_EXPORT uint8_t orgeNextSubpass(void);
 
 /// orgeの描画を終了する関数
-uint8_t orgeEndRender(void);
+API_EXPORT uint8_t orgeEndRender(void);
 
 // ================================================================================================================== //
 //     Input                                                                                                          //
@@ -283,4 +295,4 @@ enum OrgeScancode {
 /// - = -1: キーアップ
 /// - = 0: ニュートラル
 /// - > 0: キーダウン (押されているフレーム数)
-int32_t orgeGetKeyState(uint32_t scancode);
+API_EXPORT int32_t orgeGetKeyState(uint32_t scancode);
