@@ -105,6 +105,10 @@ jobs:
         mkdir shared
         mkdir static
 
+    # DEBUG:
+    - run: pkg-config orge --cflags
+    - run: pkg-config orge --libs --static
+
     - name: Test build with static
       working-directory: static
       shell: cmd
