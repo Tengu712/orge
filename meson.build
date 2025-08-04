@@ -9,7 +9,7 @@ project('orge', 'cpp',
     'warning_level=3',
     'werror=true',
     # NOTE: Linuxではlibではなくなるので。libに矯正。
-    'libdir=lib'
+    'libdir=lib',
   ]
 )
 
@@ -55,7 +55,7 @@ sources = [
   'src/graphics/swapchain.cpp',
   'src/graphics/utils.cpp',
   'src/input/input.cpp',
-  'src/orge.cpp'
+  'src/orge.cpp',
 ]
 
 # includeを追加
@@ -213,6 +213,7 @@ if host_system == 'windows'
     '-lwinmm',
     '-ladvapi32',
     '-lole32',
+    '-loleaut32',
     '-lgdi32',
     '-lshell32',
     '-lsetupapi',
@@ -243,7 +244,7 @@ elif host_system == 'darwin'
     '-Wl,-framework,QuartzCore',
     '-Wl,-weak_framework,CoreHaptics',
     '-lpthread',
-    '-lm'
+    '-lm',
   ]
 else
   libraries += ['-lvulkan']
