@@ -172,7 +172,7 @@ endif
 python = find_program('python', 'python3')
 if host_system == 'windows'
   meson.add_install_script(python,
-    meson.current_source_dir() / 'meson' / 'install_windows.py',
+    meson.current_source_dir() / 'scripts' / 'install_windows.py',
     vcpkg_libdir,
     vcpkg_bindir,
     get_option('prefix') / get_option('libdir'),
@@ -181,7 +181,7 @@ if host_system == 'windows'
   )
 elif host_system == 'darwin'
   meson.add_install_script(python,
-    meson.current_source_dir() / 'meson' / 'install_macos.py',
+    meson.current_source_dir() / 'scripts' / 'install_macos.py',
     vcpkg_libdir,
     get_option('prefix') / get_option('libdir'),
     get_option('default_library'),
@@ -189,7 +189,7 @@ elif host_system == 'darwin'
   )
 else
   meson.add_install_script(python,
-    meson.current_source_dir() / 'meson' / 'install_linux.py',
+    meson.current_source_dir() / 'scripts' / 'install_linux.py',
     vcpkg_libdir,
     get_option('prefix') / get_option('libdir'),
     get_option('default_library'),
@@ -241,7 +241,7 @@ pc_conf.set('libraries', ' '.join(libraries))
 pc_conf.set('libraries_private', ' '.join(['-lSDL3', '-lyaml-cpp']))
 pc_conf.set('cflags', ' '.join(cflags))
 configure_file(
-  input : meson.current_source_dir() / 'meson' / 'orge.pc.in',
+  input : meson.current_source_dir() / 'orge.pc.in',
   output : 'orge.pc',
   configuration : pc_conf,
   install : true,
