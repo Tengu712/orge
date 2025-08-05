@@ -42,7 +42,7 @@ namespace {
 std::unique_ptr<graphics::Graphics> g_graphics;
 
 void initialize() {
-	if (!SDL_Init(SDL_INIT_VIDEO)) {
+	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		throw "failed to prepare for creating a window.";
 	}
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
