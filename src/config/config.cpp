@@ -47,7 +47,7 @@ float f(const YAML::Node &n, const std::string &k) {
 	return get<float>(n, k, "float");
 }
 
-uint32_t u(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+uint32_t u(const YAML::Node &n, const std::string &k, std::optional<uint32_t> d = std::nullopt) {
 	return get<uint32_t>(n, k, "unsigned int", d);
 }
 

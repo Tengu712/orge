@@ -21,6 +21,9 @@ int main() {
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_1)) == 1) {
 			CHECK(orgePlayWave("cdefgabc", 0));
 		}
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_2)) == 1) {
+			CHECK(orgePlayWave("cdefgabc", 1));
+		}
 
 		CHECK(orgeBeginRender());
 		CHECK(orgeEndRender());
