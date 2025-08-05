@@ -3,8 +3,6 @@
 #include "../config/config.hpp"
 #include "../error/error.hpp"
 
-#include <format>
-
 namespace audio {
 
 bool isSameSpec(const SDL_AudioSpec &a, const SDL_AudioSpec &b) {
