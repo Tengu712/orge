@@ -1,25 +1,29 @@
 #include <iostream>
 #include <orge.h>
 
-int main() {
-	if (!orgeInitializeWith("config.yml")) {
-		std::cout << orgeGetErrorMessage() << std::endl;
-		return 1;
+#define TRY(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		return 1; \
 	}
 
-	if (!orgeLoadWaveFromFile("cdefgabc", "cdefgabc.wav")) {
-		std::cout << orgeGetErrorMessage() << std::endl;
-		return 1;
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
 	}
-	if (!orgePlayWave("cdefgabc", 0)) {
-		std::cout << orgeGetErrorMessage() << std::endl;
-		return 1;
-	}
+
+int main() {
+	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeLoadWaveFromFile("cdefgabc", "cdefgabc.wav"));
 
 	while (orgeUpdate()) {
-		if (!orgeBeginRender() || !orgeEndRender()) {
-			std::cout << orgeGetErrorMessage() << std::endl;
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_1)) == 1) {
+			CHECK(orgePlayWave("cdefgabc", 0));
 		}
+
+		CHECK(orgeBeginRender());
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();
