@@ -26,8 +26,8 @@ struct Wave {
 struct AudioChannel {
 	using Stream = std::unique_ptr<SDL_AudioStream, decltype(&SDL_DestroyAudioStream)>;
 
-	SDL_AudioSpec spec;
-	Stream stream;
+	const SDL_AudioSpec spec;
+	const Stream stream;
 
 	AudioChannel(const SDL_AudioSpec &spec, SDL_AudioStream *stream):
 		spec(spec),
