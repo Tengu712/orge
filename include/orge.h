@@ -296,3 +296,13 @@ enum OrgeScancode {
 /// - = 0: ニュートラル
 /// - > 0: キーダウン (押されているフレーム数)
 API_EXPORT int32_t orgeGetKeyState(uint32_t scancode);
+
+// ================================================================================================================== //
+//     Audio                                                                                                          //
+// ================================================================================================================== //
+
+API_EXPORT int32_t orgeLoadWaveFromFile(const char *id, const char *path);
+
+API_EXPORT void orgeDestroyWave(const char *id);
+
+API_EXPORT int32_t orgePlayWave(const char *id, uint32_t index);

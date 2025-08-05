@@ -108,6 +108,7 @@ endif
 
 # ソースファイルを列挙
 sources = [
+  'src/audio/audio.cpp',
   'src/config/config.cpp',
   'src/error/error.cpp',
   'src/graphics/descpool.cpp',
@@ -326,6 +327,7 @@ if get_option('build_examples')
     'examples/input',
     'examples/sampler',
     'examples/multipass',
+    'examples/audio',
   ]
 else
   if get_option('build_example_simple')
@@ -348,6 +350,9 @@ else
   endif
   if get_option('build_example_multipass')
     example_dirs += ['examples/multipass']
+  endif
+  if get_option('build_example_audio')
+    example_dirs += ['examples/audio']
   endif
 endif
 
