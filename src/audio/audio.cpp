@@ -1,5 +1,6 @@
 #include "audio.hpp"
 
+#include "../config/config.hpp"
 #include "../error/error.hpp"
 
 #include <format>
@@ -10,8 +11,10 @@ bool isSameSpec(const SDL_AudioSpec &a, const SDL_AudioSpec &b) {
 	return a.format == b.format && a.channels == b.channels && a.freq == b.freq;
 }
 
-// TODO: チャンネル数をconfigで与える。
-Audio::Audio(): _device(SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)), _channels(16) {
+Audio::Audio():
+	_device(SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, nullptr)),
+	_channels(config::config().audioChannelCount)
+{
 	if (_device == 0) {
 		throw "failed to open an audio device.";
 	}
