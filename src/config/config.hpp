@@ -93,6 +93,7 @@ struct Config {
 	const uint32_t height;
 	const bool fullscreen;
 	const bool altReturnToggleFullscreen;
+	const uint32_t audioChannelCount;
 	const std::vector<AttachmentConfig> attachments;
 	const std::vector<SubpassConfig> subpasses;
 	const std::vector<PipelineConfig> pipelines;

@@ -32,6 +32,10 @@ fullscreen: bool
 # 省略された場合、trueとみなされる
 alt-return-toggle-fullscreen: bool
 
+# 音声チャンネルの数
+# 省略された場合、16とみなされる
+audio-channel-count: unsigned int
+
 # ========== Attachment Definition ============= #
 
 attachments: []

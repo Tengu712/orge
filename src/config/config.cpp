@@ -47,7 +47,7 @@ float f(const YAML::Node &n, const std::string &k) {
 	return get<float>(n, k, "float");
 }
 
-uint32_t u(const YAML::Node &n, const std::string &k, std::optional<bool> d = std::nullopt) {
+uint32_t u(const YAML::Node &n, const std::string &k, std::optional<uint32_t> d = std::nullopt) {
 	return get<uint32_t>(n, k, "unsigned int", d);
 }
 
@@ -210,6 +210,7 @@ Config::Config(YAML::Node node):
 	height(u(node, "height")),
 	fullscreen(b(node, "fullscreen", false)),
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
+	audioChannelCount(u(node, "audio-channel-count", 16)),
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
 	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
@@ -218,7 +219,17 @@ Config::Config(YAML::Node node):
 {
 	checkUnexpectedKeys(
 		node,
-		{"title", "width", "height", "fullscreen", "alt-return-toggle-fullscreen", "attachments", "subpasses", "pipelines"}
+		{
+			"title",
+			"width",
+			"height",
+			"fullscreen",
+			"alt-return-toggle-fullscreen",
+			"audio-channel-count",
+			"attachments",
+			"subpasses",
+			"pipelines",
+		}
 	);
 
 	for (const auto &n: subpasses) {

@@ -1,11 +1,13 @@
 #include <orge.h>
 
+#include "audio/audio.hpp"
 #include "config/config.hpp"
 #include "error/error.hpp"
 #include "graphics/graphics.hpp"
 #include "input/input.hpp"
 
 #include <cstdlib>
+#include <optional>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <vulkan/vulkan.hpp>
@@ -40,15 +42,17 @@
 namespace {
 
 std::unique_ptr<graphics::Graphics> g_graphics;
+std::optional<audio::Audio> g_audio;
 
 void initialize() {
-	if (!SDL_Init(SDL_INIT_VIDEO)) {
+	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		throw "failed to prepare for creating a window.";
 	}
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw "failed to load Vulkan.";
 	}
 	g_graphics = std::make_unique<graphics::Graphics>();
+	g_audio.emplace();
 }
 
 void handleVkResult(const vk::Result &e) {
@@ -134,6 +138,7 @@ uint8_t orgeInitializeWith(const char *yamlFilePath) {
 
 void orgeTerminate(void) {
 	g_graphics = nullptr;
+	g_audio.reset();
 }
 
 uint8_t orgeUpdate(void) {
@@ -149,10 +154,13 @@ uint8_t orgeUpdate(void) {
 				&& (event.key.mod & MODKEY)
 		) {
 			const auto isFullscreen = g_graphics->isFullscreen();
+			// TODO: 例外どうしよう。
 			g_graphics->setFullscreen(!isFullscreen);
 		}
 	}
 	input::update();
+	// TODO: 例外どうしよう。
+	g_audio->update();
 	return 1;
 }
 
@@ -295,4 +303,32 @@ uint8_t orgeEndRender(void) {
 
 int32_t orgeGetKeyState(uint32_t scancode) {
 	return input::getState(static_cast<OrgeScancode>(scancode));
+}
+
+// ================================================================================================================== //
+//     Audio                                                                                                          //
+// ================================================================================================================== //
+
+float orgeGetAudioChannelVolume(uint32_t index) {
+	try {
+		return g_audio->getVolume(index);
+	} catch (...) {
+		return -1.0f;
+	}
+}
+
+uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
+	TRY(g_audio->setVolume(index, volume));
+}
+
+uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
+	TRY(g_audio->loadWaveFromFile(id, path, startPosition));
+}
+
+void orgeDestroyWave(const char *id) {
+	g_audio->destroyWave(id);
+}
+
+uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop) {
+	TRY(g_audio->play(id, index, static_cast<bool>(loop)));
 }
