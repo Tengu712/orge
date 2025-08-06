@@ -41,7 +41,7 @@
 
 namespace {
 
-std::unique_ptr<graphics::Graphics> g_graphics;
+std::optional<graphics::Graphics> g_graphics;
 std::optional<audio::Audio> g_audio;
 
 void initialize() {
@@ -51,7 +51,7 @@ void initialize() {
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw "failed to load Vulkan.";
 	}
-	g_graphics = std::make_unique<graphics::Graphics>();
+	g_graphics.emplace();
 	g_audio.emplace();
 }
 
@@ -137,7 +137,7 @@ uint8_t orgeInitializeWith(const char *yamlFilePath) {
 }
 
 void orgeTerminate(void) {
-	g_graphics = nullptr;
+	g_graphics.reset();
 	g_audio.reset();
 }
 
