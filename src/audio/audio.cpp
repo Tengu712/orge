@@ -56,13 +56,10 @@ void Audio::setVolume(uint32_t index, float volume) {
 }
 
 void Audio::play(const std::string &id, uint32_t index, bool loop) {
-	if (index >= _channels.size()) {
-		throw std::format("the number of audio channels is {} but tried to use {} th.", _channels.size(), index);
-	}
-
 	auto &wave = error::at(_waves, id, "waves");
+	auto &channel = error::at(_channels, index, "channels");
 
-	if (!_channels[index] || !_channels[index]->binding || !isSameSpec(_channels[index]->binding->spec, wave->spec)) {
+	if (!channel || !channel->binding || !isSameSpec(channel->binding->spec, wave->spec)) {
 		auto stream = SDL_CreateAudioStream(&wave->spec, nullptr);
 		if (!stream) {
 			throw "failed to create an audio stream.";
@@ -72,14 +69,14 @@ void Audio::play(const std::string &id, uint32_t index, bool loop) {
 			_channels[index] = nullptr;
 			throw "failed to bind an audio stream to the device.";
 		}
-	} else if (!SDL_ClearAudioStream(_channels[index]->stream.get())) {
+	} else if (!SDL_ClearAudioStream(channel->stream.get())) {
 		throw "failed to clear an audio stream.";
 	}
 
-	_channels[index]->binding = wave;
-	_channels[index]->loop = loop;
+	channel->binding = wave;
+	channel->loop = loop;
 
-	if (!SDL_PutAudioStreamData(_channels[index]->stream.get(), wave->buffer.get(), wave->length)) {
+	if (!SDL_PutAudioStreamData(channel->stream.get(), wave->buffer.get(), wave->length)) {
 		throw "failed to put a wave data to the stream.";
 	}
 }
