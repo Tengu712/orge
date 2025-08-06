@@ -58,6 +58,8 @@ public:
 
 	void update();
 
+	float getVolume(uint32_t index) const;
+
 	void setVolume(uint32_t index, float volume);
 
 	void loadWaveFromFile(const std::string &id, const std::string &path, uint32_t startPosition) {

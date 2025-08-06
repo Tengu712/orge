@@ -25,9 +25,11 @@ int main() {
 	while (orgeUpdate()) {
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_RETURN)) == 1) {
 			LOG(orgeSetAudioChannelVolume(0, 0.25f));
+			std::cout << "current volume: " << orgeGetAudioChannelVolume(0) << std::endl;
 		}
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_SPACE)) == 1) {
 			LOG(orgeSetAudioChannelVolume(0, 0.75f));
+			std::cout << "current volume: " << orgeGetAudioChannelVolume(0) << std::endl;
 		}
 
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_1)) == 1) {

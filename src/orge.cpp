@@ -309,6 +309,14 @@ int32_t orgeGetKeyState(uint32_t scancode) {
 //     Audio                                                                                                          //
 // ================================================================================================================== //
 
+float orgeGetAudioChannelVolume(uint32_t index) {
+	try {
+		return g_audio->getVolume(index);
+	} catch (...) {
+		return -1.0f;
+	}
+}
+
 uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
 	TRY(g_audio->setVolume(index, volume));
 }
