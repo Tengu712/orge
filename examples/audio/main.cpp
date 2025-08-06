@@ -21,6 +21,7 @@
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
 	TRY(orgeLoadWaveFromFile("cdefgabc", "cdefgabc.wav", 58100));
+	TRY(orgeLoadWaveFromFile("music", "music.ogg", 0));
 
 	while (orgeUpdate()) {
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_RETURN)) == 1) {
@@ -41,6 +42,9 @@ int main() {
 
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_Q)) == 1) {
 			LOG(orgePlayWave("cdefgabc", 0, 1));
+		}
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_W)) == 1) {
+			LOG(orgePlayWave("music", 0, 1));
 		}
 
 		CHECK(orgeBeginRender());
