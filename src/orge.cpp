@@ -309,8 +309,8 @@ int32_t orgeGetKeyState(uint32_t scancode) {
 //     Audio                                                                                                          //
 // ================================================================================================================== //
 
-int32_t orgeLoadWaveFromFile(const char *id, const char *path) {
-	TRY(g_audio->loadWaveFromFile(id, path));
+int32_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
+	TRY(g_audio->loadWaveFromFile(id, path, startPosition));
 }
 
 void orgeDestroyWave(const char *id) {

@@ -15,11 +15,13 @@ struct Wave {
 	const SDL_AudioSpec spec;
 	const Buffer buffer;
 	const Uint32 length;
+	const uint32_t startPosition;
 
-	Wave(const SDL_AudioSpec &spec, Uint8 *buffer, Uint32 length):
+	Wave(const SDL_AudioSpec &spec, Uint8 *buffer, Uint32 length, uint32_t startPosition):
 		spec(spec),
 		buffer(Buffer(buffer, SDL_free)),
-		length(length)
+		length(length),
+		startPosition(startPosition)
 	{}
 };
 
@@ -56,14 +58,14 @@ public:
 
 	void update();
 
-	void loadWaveFromFile(const std::string &id, const std::string &path) {
+	void loadWaveFromFile(const std::string &id, const std::string &path, uint32_t startPosition) {
 		SDL_AudioSpec spec;
 		Uint8 *buffer;
 		Uint32 length;
 		if (!SDL_LoadWAV(path.c_str(), &spec, &buffer, &length)) {
 			throw "failed to load a WAV.";
 		}
-		_waves.emplace(id, std::make_shared<Wave>(spec, buffer, length));
+		_waves.emplace(id, std::make_shared<Wave>(spec, buffer, length, startPosition));
 	}
 
 	void destroyWave(const std::string &id) noexcept {

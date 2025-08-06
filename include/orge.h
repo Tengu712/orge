@@ -305,7 +305,8 @@ API_EXPORT int32_t orgeGetKeyState(uint32_t scancode);
 ///
 /// - id: WAVEID
 /// - path: WAVEファイルのパス
-API_EXPORT int32_t orgeLoadWaveFromFile(const char *id, const char *path);
+/// - startPosition: ループ開始位置
+API_EXPORT int32_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition);
 
 /// WAVEを破棄する関数
 API_EXPORT void orgeDestroyWave(const char *id);

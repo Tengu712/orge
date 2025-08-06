@@ -23,10 +23,12 @@ void Audio::update() {
 		if (!n || !n->loop || !n->binding) {
 			continue;
 		}
-		if (SDL_GetAudioStreamQueued(n->stream.get()) >= static_cast<int>(n->binding->length)) {
+		const auto length = n->binding->length - n->binding->startPosition;
+		if (SDL_GetAudioStreamQueued(n->stream.get()) >= static_cast<int>(length)) {
 			continue;
 		}
-		if (!SDL_PutAudioStreamData(n->stream.get(), n->binding->buffer.get(), n->binding->length)) {
+		const auto buffer = n->binding->buffer.get() + n->binding->startPosition;
+		if (!SDL_PutAudioStreamData(n->stream.get(), static_cast<const void *>(buffer), static_cast<int>(length))) {
 			throw "failed to put a wave data to the stream.";
 		}
 	}
