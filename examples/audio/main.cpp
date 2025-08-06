@@ -13,20 +13,32 @@
 		continue; \
 	}
 
+#define LOG(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+	}
+
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
 	TRY(orgeLoadWaveFromFile("cdefgabc", "cdefgabc.wav", 58100));
 
 	while (orgeUpdate()) {
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_RETURN)) == 1) {
+			LOG(orgeSetAudioChannelVolume(0, 0.25f));
+		}
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_SPACE)) == 1) {
+			LOG(orgeSetAudioChannelVolume(0, 0.75f));
+		}
+
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_1)) == 1) {
-			CHECK(orgePlayWave("cdefgabc", 0, 0));
+			LOG(orgePlayWave("cdefgabc", 0, 0));
 		}
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_2)) == 1) {
-			CHECK(orgePlayWave("cdefgabc", 1, 0));
+			LOG(orgePlayWave("cdefgabc", 1, 0));
 		}
 
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_Q)) == 1) {
-			CHECK(orgePlayWave("cdefgabc", 0, 1));
+			LOG(orgePlayWave("cdefgabc", 0, 1));
 		}
 
 		CHECK(orgeBeginRender());

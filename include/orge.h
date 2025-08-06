@@ -301,12 +301,18 @@ API_EXPORT int32_t orgeGetKeyState(uint32_t scancode);
 //     Audio                                                                                                          //
 // ================================================================================================================== //
 
+/// 音声チャンネルの音量を設定する関数
+///
+/// - index: 音声チャンネルのインデックス
+/// - volume: 音量 ([0.0, 1.0])
+API_EXPORT uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume);
+ 
 /// orgeにWAVEを追加する関数 (ファイル指定)
 ///
 /// - id: WAVEID
 /// - path: WAVEファイルのパス
 /// - startPosition: ループ開始位置
-API_EXPORT int32_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition);
+API_EXPORT uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition);
 
 /// WAVEを破棄する関数
 API_EXPORT void orgeDestroyWave(const char *id);
@@ -320,4 +326,4 @@ API_EXPORT void orgeDestroyWave(const char *id);
 /// 初めてindex番目の音声チャンネルで音声が再生されるとき、音声ストリームが作成される。
 /// index番目の音声チャンネルとidのWAVEの音声互換性がない場合、音声ストリームが再作成される。
 /// index番目の音声チャンネルが音声を再生している場合、その音声を中断してidのWAVEを再生する。
-API_EXPORT int32_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);
+API_EXPORT uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);

@@ -34,6 +34,19 @@ void Audio::update() {
 	}
 }
 
+void Audio::setVolume(uint32_t index, float volume) {
+	if (volume < 0.0f || volume > 1.0f) {
+		throw std::format("the audio channel volume must be between 0 and 1 but passed {}.", volume);
+	}
+	auto &channel = error::at(_channels, index, "channels");
+	if (!channel || !channel->stream) {
+		throw std::format("the {} th audio channel is uninitialized.", index);
+	}
+	if (!SDL_SetAudioStreamGain(channel->stream.get(), volume)) {
+		throw "failed to set the volume of an audio stream.";
+	}
+}
+
 void Audio::play(const std::string &id, uint32_t index, bool loop) {
 	if (index >= _channels.size()) {
 		throw std::format("the number of audio channels is {} but tried to use {} th.", _channels.size(), index);

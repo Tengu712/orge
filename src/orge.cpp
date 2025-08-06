@@ -309,7 +309,11 @@ int32_t orgeGetKeyState(uint32_t scancode) {
 //     Audio                                                                                                          //
 // ================================================================================================================== //
 
-int32_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
+uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
+	TRY(g_audio->setVolume(index, volume));
+}
+
+uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
 	TRY(g_audio->loadWaveFromFile(id, path, startPosition));
 }
 
@@ -317,6 +321,6 @@ void orgeDestroyWave(const char *id) {
 	g_audio->destroyWave(id);
 }
 
-int32_t orgePlayWave(const char *id, uint32_t index, uint8_t loop) {
+uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop) {
 	TRY(g_audio->play(id, index, static_cast<bool>(loop)));
 }
