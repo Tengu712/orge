@@ -129,6 +129,14 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 
 # 追加のコンパイラフラグを生成
 cpp_args = []
+
+# vcpkgのstbをシステムインクルードとして追加
+cmake_prefix_path = get_option('cmake_prefix_path')
+if cmake_prefix_path != []
+  stb_include_dir = cmake_prefix_path[0] / 'include'
+  cpp_args += ['-isystem', stb_include_dir]
+endif
+
 if get_option('enable_vvl')
   cpp_args += ['-DENABLE_VVL']
 endif
