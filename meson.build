@@ -109,6 +109,7 @@ endif
 # ソースファイルを列挙
 sources = [
   'src/audio/audio.cpp',
+  'src/audio/wave.cpp',
   'src/config/config.cpp',
   'src/error/error.cpp',
   'src/graphics/descpool.cpp',
