@@ -19,10 +19,14 @@ int main() {
 
 	while (orgeUpdate()) {
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_1)) == 1) {
-			CHECK(orgePlayWave("cdefgabc", 0));
+			CHECK(orgePlayWave("cdefgabc", 0, 0));
 		}
 		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_2)) == 1) {
-			CHECK(orgePlayWave("cdefgabc", 1));
+			CHECK(orgePlayWave("cdefgabc", 1, 0));
+		}
+
+		if (orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_Q)) == 1) {
+			CHECK(orgePlayWave("cdefgabc", 0, 1));
 		}
 
 		CHECK(orgeBeginRender());

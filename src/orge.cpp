@@ -154,10 +154,13 @@ uint8_t orgeUpdate(void) {
 				&& (event.key.mod & MODKEY)
 		) {
 			const auto isFullscreen = g_graphics->isFullscreen();
+			// TODO: 例外どうしよう。
 			g_graphics->setFullscreen(!isFullscreen);
 		}
 	}
 	input::update();
+	// TODO: 例外どうしよう。
+	g_audio->update();
 	return 1;
 }
 
@@ -314,6 +317,6 @@ void orgeDestroyWave(const char *id) {
 	g_audio->destroyWave(id);
 }
 
-int32_t orgePlayWave(const char *id, uint32_t index) {
-	TRY(g_audio->play(id, index));
+int32_t orgePlayWave(const char *id, uint32_t index, uint8_t loop) {
+	TRY(g_audio->play(id, index, static_cast<bool>(loop)));
 }

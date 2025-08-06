@@ -314,8 +314,9 @@ API_EXPORT void orgeDestroyWave(const char *id);
 ///
 /// - id: WAVEID
 /// - index: 音声チャンネルのインデックス
+/// - loop: ループ再生するか
 ///
 /// 初めてindex番目の音声チャンネルで音声が再生されるとき、音声ストリームが作成される。
 /// index番目の音声チャンネルとidのWAVEの音声互換性がない場合、音声ストリームが再作成される。
 /// index番目の音声チャンネルが音声を再生している場合、その音声を中断してidのWAVEを再生する。
-API_EXPORT int32_t orgePlayWave(const char *id, uint32_t index);
+API_EXPORT int32_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);
