@@ -81,4 +81,29 @@ Image Image::fromFile(
 	return Image(memoryProps, device, queue, width, height, pixels.get(), false);
 }
 
+void Image::upload(
+	const vk::PhysicalDeviceMemoryProperties &memoryProps,
+	const vk::Device &device,
+	const vk::Queue &queue,
+	uint32_t width,
+	uint32_t height,
+	uint32_t offsetX,
+	uint32_t offsetY,
+	const uint8_t *src,
+	bool charAtlus
+) {
+	uploadImage(
+		memoryProps,
+		device,
+		queue,
+		_image,
+		width,
+		height,
+		charAtlus ? 1 : 4,
+		offsetX,
+		offsetY,
+		src
+	);
+}
+
 } // namespace graphics

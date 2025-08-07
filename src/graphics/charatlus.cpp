@@ -22,7 +22,11 @@ CharAtlus::CharAtlus(
 		std::vector<uint8_t>(_colCount * config::config().charSize * _rowCount * config::config().charSize).data(),
 		true
 	)
-{}
+{
+	// DEBUG:
+	std::vector<uint8_t> foo(16 * 24, 255);
+	_image.upload(memoryProps, device, queue, 16, 24, 20, 10, foo.data(), true);
+}
 
 std::unique_ptr<CharAtlus> CharAtlus::create(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,

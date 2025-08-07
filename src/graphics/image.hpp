@@ -39,6 +39,18 @@ public:
 	const vk::ImageView &get() const noexcept {
 		return _view;
 	}
+
+	void upload(
+		const vk::PhysicalDeviceMemoryProperties &memoryProps,
+		const vk::Device &device,
+		const vk::Queue &queue,
+		uint32_t width,
+		uint32_t height,
+		uint32_t offsetX,
+		uint32_t offsetY,
+		const uint8_t *src,
+		bool charAtlus
+	);
 };
 
 } // namespace graphics
