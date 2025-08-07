@@ -1,9 +1,9 @@
 #include "wave.hpp"
 
+#include "_stb_vorbis.h"
+
 #include <charconv>
 #include <format>
-#define STB_VORBIS_IMPLEMENTATION
-#include <stb_vorbis.c>
 #include <string_view>
 
 namespace audio {
