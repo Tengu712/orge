@@ -119,13 +119,16 @@ void uploadImage(
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,
+	uint32_t channels,
+	uint32_t offsetX,
+	uint32_t offsetY,
 	const uint8_t *src
 ) {
 	const auto extent = vk::Extent3D(width, height, 1);
 	const auto subresRange = vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 
 	// ステージングバッファ作成
-	const auto bufferSize = width * height * 4;
+	const auto bufferSize = width * height * channels;
 	const auto bci = vk::BufferCreateInfo()
 		.setSize(bufferSize)
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
@@ -165,6 +168,7 @@ void uploadImage(
 	// アップロード
 	const auto cr = vk::BufferImageCopy()
 		.setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+		.setImageOffset(vk::Offset3D(offsetX, offsetY, 0))
 		.setImageExtent(extent);
 	g_commandBuffer.copyBufferToImage(buffer, dst, vk::ImageLayout::eTransferDstOptimal, {cr});
 

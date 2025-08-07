@@ -53,7 +53,7 @@ Image::Image(
 	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eDeviceLocal)),
 	_view(createImageView(device, _image, charAtlus))
 {
-	uploadImage(memoryProps, device, queue, _image, width, height, pixels);
+	uploadImage(memoryProps, device, queue, _image, width, height, charAtlus ? 1 : 4, 0, 0, pixels);
 }
 
 Image Image::fromFile(
