@@ -93,6 +93,7 @@ Graphics::Graphics() :
 	_renderer(_instance, _physicalDevice, _device, _commandPool)
 {
 	initializeUtils(_device, _commandPool);
+	_charAtlus = CharAtlus::create(_physicalDevice.getMemoryProperties(), _device, _queue);
 }
 
 } // namespace graphics

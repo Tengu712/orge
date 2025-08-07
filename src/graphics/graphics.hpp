@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../error/error.hpp"
+#include "charatlus.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
@@ -20,6 +21,7 @@ private:
 	const vk::Queue _queue;
 	const vk::CommandPool _commandPool;
 	Renderer _renderer;
+	std::unique_ptr<CharAtlus> _charAtlus;
 	std::unordered_map<std::string, Buffer> _buffers;
 	std::unordered_map<std::string, Image> _images;
 	std::unordered_map<std::string, vk::Sampler> _samplers;
@@ -36,6 +38,9 @@ public:
 	~Graphics() {
 		_device.waitIdle();
 		terminateUtils(_device);
+		if (_charAtlus) {
+			_charAtlus->destroy(_device);
+		}
 		for (const auto &n: _meshes) {
 			n.second.destroy(_device);
 		}

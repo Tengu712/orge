@@ -29,20 +29,12 @@ vk::ImageView createImageView(const vk::Device &device, const vk::Image &image, 
 		image,
 		vk::ImageViewType::e2D,
 		charAtlus ? vk::Format::eR8Unorm : vk::Format::eR8G8B8A8Srgb,
-		charAtlus
-			? vk::ComponentMapping(
-				vk::ComponentSwizzle::eOne,
-				vk::ComponentSwizzle::eOne,
-				vk::ComponentSwizzle::eOne,
-				vk::ComponentSwizzle::eR
-			)
-			: vk::ComponentMapping(
-				vk::ComponentSwizzle::eR,
-				vk::ComponentSwizzle::eG,
-				vk::ComponentSwizzle::eB,
-				vk::ComponentSwizzle::eA
-			)
-		,
+		vk::ComponentMapping(
+			vk::ComponentSwizzle::eR,
+			vk::ComponentSwizzle::eG,
+			vk::ComponentSwizzle::eB,
+			vk::ComponentSwizzle::eA
+		),
 		vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1)
 	);
 	return device.createImageView(vci);

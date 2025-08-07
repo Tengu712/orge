@@ -112,6 +112,7 @@ sources = [
   'src/audio/wave.cpp',
   'src/config/config.cpp',
   'src/error/error.cpp',
+  'src/graphics/charatlus.cpp',
   'src/graphics/descpool.cpp',
   'src/graphics/framebuffer.cpp',
   'src/graphics/graphics.cpp',

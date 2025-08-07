@@ -15,5 +15,6 @@ pipelines:
     vertex-input-attributes: [3, 2]
     color-blends: [false]
     subpass: SP
-font-size: 24
-character-count: 40
+char-size: 24
+char-atlus-col: 12
+char-atlus-row: 12

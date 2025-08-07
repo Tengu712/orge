@@ -97,8 +97,9 @@ struct Config {
 	const std::vector<AttachmentConfig> attachments;
 	const std::vector<SubpassConfig> subpasses;
 	const std::vector<PipelineConfig> pipelines;
-	const uint32_t fontSize;
-	const uint32_t characterCount;
+	const uint32_t charSize;
+	const uint32_t charAtlusCol;
+	const uint32_t charAtlusRow;
 
 	const std::unordered_map<std::string, uint32_t> attachmentMap;
 	const std::unordered_map<std::string, uint32_t> subpassMap;

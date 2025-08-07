@@ -145,10 +145,11 @@ pipelines: []
 # 1文字の幅および高さの最大値 (px)
 # 省略された場合、0とみなされる
 # orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
-font-size: unsigned int
+char-size: unsigned int
 
-# ロードする文字数の最大個数
+# テクスチャアトラスにロードする文字の列・行数
 # 省略された場合、0とみなされる
 # orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
-character-count: unsigned int
+char-atlus-col: unsigned int
+char-atlus-row: unsigned int
 ```
