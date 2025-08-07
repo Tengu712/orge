@@ -9,10 +9,10 @@
 
 namespace graphics {
 
-vk::Image createImage(const vk::Device &device, uint32_t width, uint32_t height) {
+vk::Image createImage(const vk::Device &device, uint32_t width, uint32_t height, bool charAtlus) {
 	const auto ci = vk::ImageCreateInfo()
 		.setImageType(vk::ImageType::e2D)
-		.setFormat(vk::Format::eR8G8B8A8Srgb)
+		.setFormat(charAtlus ? vk::Format::eR8Unorm : vk::Format::eR8G8B8A8Srgb)
 		.setExtent(vk::Extent3D(width, height, 1))
 		.setMipLevels(1)
 		.setArrayLayers(1)
@@ -23,18 +23,26 @@ vk::Image createImage(const vk::Device &device, uint32_t width, uint32_t height)
 	return device.createImage(ci);
 }
 
-vk::ImageView createImageView(const vk::Device &device, const vk::Image &image) {
+vk::ImageView createImageView(const vk::Device &device, const vk::Image &image, bool charAtlus) {
 	const auto vci = vk::ImageViewCreateInfo(
 		vk::ImageViewCreateFlags(),
 		image,
 		vk::ImageViewType::e2D,
-		vk::Format::eR8G8B8A8Srgb,
-		vk::ComponentMapping(
-			vk::ComponentSwizzle::eR,
-			vk::ComponentSwizzle::eG,
-			vk::ComponentSwizzle::eB,
-			vk::ComponentSwizzle::eA
-		),
+		charAtlus ? vk::Format::eR8Unorm : vk::Format::eR8G8B8A8Srgb,
+		charAtlus
+			? vk::ComponentMapping(
+				vk::ComponentSwizzle::eOne,
+				vk::ComponentSwizzle::eOne,
+				vk::ComponentSwizzle::eOne,
+				vk::ComponentSwizzle::eR
+			)
+			: vk::ComponentMapping(
+				vk::ComponentSwizzle::eR,
+				vk::ComponentSwizzle::eG,
+				vk::ComponentSwizzle::eB,
+				vk::ComponentSwizzle::eA
+			)
+		,
 		vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1)
 	);
 	return device.createImageView(vci);
@@ -46,11 +54,12 @@ Image::Image(
 	const vk::Queue &queue,
 	uint32_t width,
 	uint32_t height,
-	const uint8_t *pixels
+	const uint8_t *pixels,
+	bool charAtlus
 ) :
-	_image(createImage(device, width, height)),
+	_image(createImage(device, width, height, charAtlus)),
 	_memory(allocateImageMemory(memoryProps, device, _image, vk::MemoryPropertyFlagBits::eDeviceLocal)),
-	_view(createImageView(device, _image))
+	_view(createImageView(device, _image, charAtlus))
 {
 	uploadImage(memoryProps, device, queue, _image, width, height, pixels);
 }
@@ -77,7 +86,7 @@ Image Image::fromFile(
 		throw std::format("'{}' is not RGBA.", path);
 	}
 
-	return Image(memoryProps, device, queue, width, height, pixels.get());
+	return Image(memoryProps, device, queue, width, height, pixels.get(), false);
 }
 
 } // namespace graphics

@@ -83,10 +83,16 @@ public:
 	}
 
 	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
+		if (id == "@char-atlus") {
+			throw "you cannot create image whose id is '@char-atlus'.";
+		}
+		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels, false));
 	}
 
 	void createImage(const std::string &id, const std::string &path) {
+		if (id == "@char-atlus") {
+			throw "you cannot create image whose id is '@char-atlus'.";
+		}
 		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, path));
 	}
 
