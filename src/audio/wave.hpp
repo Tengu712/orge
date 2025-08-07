@@ -20,7 +20,7 @@ inline uint32_t calcLoopStartByte(const SDL_AudioSpec &spec, uint32_t startPosit
 	case SDL_AUDIO_F32LE:
 	case SDL_AUDIO_F32BE:
 		return startPosition * spec.channels * 4;
-	case SDL_AUDIO_UNKNOWN:
+	default:
 		return startPosition * spec.channels;
 	}
 }
