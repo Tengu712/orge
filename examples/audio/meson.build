@@ -17,3 +17,9 @@ configure_file(
   copy: true,
   install: false
 )
+configure_file(
+  input: 'music.ogg',
+  output: 'music.ogg',
+  copy: true,
+  install: false
+)
