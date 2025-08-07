@@ -214,6 +214,8 @@ Config::Config(YAML::Node node):
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
 	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
+	fontSize(u(node, "font-size", 0)),
+	characterCount(u(node, "character-count", 0)),
 	attachmentMap(collectMap(attachments)),
 	subpassMap(collectMap(subpasses))
 {
@@ -229,6 +231,8 @@ Config::Config(YAML::Node node):
 			"attachments",
 			"subpasses",
 			"pipelines",
+			"font-size",
+			"character-count",
 		}
 	);
 

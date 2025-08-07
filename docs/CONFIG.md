@@ -139,4 +139,16 @@ pipelines: []
 
     # 対応づけるサブパスID
     subpass: string
+
+# ========== Text Rendering Settings =========== #
+
+# 1文字の幅および高さの最大値 (px)
+# 省略された場合、0とみなされる
+# orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
+font-size: unsigned int
+
+# ロードする文字数の最大個数
+# 省略された場合、0とみなされる
+# orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
+character-count: unsigned int
 ```
