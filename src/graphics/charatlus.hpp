@@ -18,6 +18,13 @@ private:
 		const vk::Queue &queue
 	);
 
+	void _put(
+		uint32_t codepoint,
+		const vk::PhysicalDeviceMemoryProperties &memoryProps,
+		const vk::Device &device,
+		const vk::Queue &queue
+	);
+
 public:
 	CharAtlus() = delete;
 	CharAtlus(const CharAtlus &) = delete;
