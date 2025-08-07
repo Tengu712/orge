@@ -329,6 +329,7 @@ if get_option('build_examples')
     'examples/sampler',
     'examples/multipass',
     'examples/audio',
+    'examples/text',
   ]
 else
   if get_option('build_example_simple')
@@ -354,6 +355,9 @@ else
   endif
   if get_option('build_example_audio')
     example_dirs += ['examples/audio']
+  endif
+  if get_option('build_example_text')
+    example_dirs += ['examples/text']
   endif
 endif
 
