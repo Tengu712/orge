@@ -3,6 +3,9 @@
 #include "image.hpp"
 
 #include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace graphics {
 
@@ -11,15 +14,9 @@ private:
 	const uint32_t _colCount;
 	const uint32_t _rowCount;
 	Image _image;
+	std::unordered_map<std::string, std::vector<unsigned char>> _fonts;
 
 	CharAtlus(
-		const vk::PhysicalDeviceMemoryProperties &memoryProps,
-		const vk::Device &device,
-		const vk::Queue &queue
-	);
-
-	void _put(
-		uint32_t codepoint,
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue
@@ -44,6 +41,14 @@ public:
 
 	const Image &get() const noexcept {
 		return _image;
+	}
+
+	void loadFontFromFile(const std::string &id, const std::string &path);
+
+	void destroyFont(const std::string &id) noexcept {
+		if (_fonts.contains(id)) {
+			_fonts.erase(id);
+		}
 	}
 };
 
