@@ -35,8 +35,8 @@ public:
 		_image.destroy(device);
 	}
 
-	const vk::ImageView &get() const noexcept {
-		return _image.get();
+	const Image &get() const noexcept {
+		return _image;
 	}
 };
 

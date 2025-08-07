@@ -12,6 +12,13 @@ pipelines:
   - id: PL
     vertex-shader: shader.vert.spv
     fragment-shader: shader.frag.spv
+    desc-sets:
+      - count: 1
+        bindings:
+          - type: texture
+            stage: fragment
+          - type: sampler
+            stage: fragment
     vertex-input-attributes: [3, 2]
     color-blends: [false]
     subpass: SP

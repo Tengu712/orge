@@ -25,6 +25,7 @@ const std::vector<float> VERTICES{
 	1.0f, 1.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
+const std::vector<uint32_t> SET_INDICES{0};
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
@@ -36,8 +37,14 @@ int main() {
 		INDICES.data())
 	);
 
+	TRY(orgeCreateSampler("sampler", 1, 1, 0));
+
 	while (orgeUpdate()) {
+		CHECK(orgeUpdateImageDescriptor("@char-atlus", "PL", 0, 0, 0, 0));
+		CHECK(orgeUpdateSamplerDescriptor("sampler", "PL", 0, 0, 1, 0));
+
 		CHECK(orgeBeginRender());
+		CHECK(orgeBindDescriptorSets("PL", SET_INDICES.data()));
 		CHECK(orgeDraw("PL", "square", 1, 0));
 		CHECK(orgeEndRender());
 	}

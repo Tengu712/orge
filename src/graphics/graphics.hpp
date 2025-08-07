@@ -116,9 +116,12 @@ public:
 		uint32_t binding,
 		uint32_t offset
 	) const {
+		const auto &image = imageId == "@char-atlus"
+			? (_charAtlus ? _charAtlus->get() : throw "@char-atlus is unavailable.")
+			: error::at(_images, imageId, "images");
 		_renderer
 			.getPipeline(pipelineId)
-			.updateImageDescriptor(_device, error::at(_images, imageId, "images"), set, index, binding, offset);
+			.updateImageDescriptor(_device, image, set, index, binding, offset);
 	}
 
 	void createSampler(const std::string &id, bool linearMagFilter, bool linearMinFilter, bool repeat) {
