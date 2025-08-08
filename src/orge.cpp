@@ -277,6 +277,10 @@ void orgeDisactivateFont(const char *id) {
 	g_graphics->disactivateFont(id);
 }
 
+uint8_t orgePutString(const char *id, const char *s) {
+	TRY(g_graphics->putString(id, s));
+}
+
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
 // ================================================================================================================== //

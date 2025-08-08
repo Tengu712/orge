@@ -31,6 +31,13 @@ public:
 	const Image &get() const noexcept {
 		return _image;
 	}
+
+	void putString(
+		const vk::PhysicalDeviceMemoryProperties &memoryProps,
+		const vk::Device &device,
+		const vk::Queue &queue,
+		const std::string &s
+	);
 };
 
 } // namespace graphics

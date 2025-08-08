@@ -36,9 +36,9 @@ int main() {
 		static_cast<uint32_t>(INDICES.size()),
 		INDICES.data())
 	);
-	TRY(orgeActivateFont("font"));
-
 	TRY(orgeCreateSampler("sampler", 1, 1, 0));
+	TRY(orgeActivateFont("font"));
+	TRY(orgePutString("font", "歓迎しますorge"));
 
 	while (orgeUpdate()) {
 		CHECK(orgeUpdateImageDescriptor("font", "PL", 0, 0, 0, 0));
