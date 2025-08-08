@@ -5,21 +5,21 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace graphics {
 
 class CharAtlus {
 private:
+	const std::vector<unsigned char> _font;
 	Image _image;
 	CharLru _chars;
-	std::unordered_map<std::string, std::vector<unsigned char>> _fonts;
 
 	CharAtlus(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
-		const vk::Queue &queue
+		const vk::Queue &queue,
+		const std::string &path
 	);
 
 public:
@@ -32,7 +32,8 @@ public:
 	static std::unique_ptr<CharAtlus> create(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
-		const vk::Queue &queue
+		const vk::Queue &queue,
+		const std::string &path
 	);
 
 	void destroy(const vk::Device &device) const noexcept {
@@ -42,8 +43,6 @@ public:
 	const Image &get() const noexcept {
 		return _image;
 	}
-
-	void loadFontFromFile(const std::string &id, const std::string &path);
 };
 
 } // namespace graphics

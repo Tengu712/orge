@@ -1,14 +1,30 @@
 #include "charatlus.hpp"
 
-#include "../error/error.hpp"
 #include "../config/config.hpp"
 
+#include <format>
 #include <fstream>
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 #include <utf8cpp/utf8.h>
 
 namespace graphics {
+
+std::vector<unsigned char> loadFontFromFile(const std::string &path) {
+	std::ifstream file(path, std::ios::binary);
+	if (!file) {
+		throw std::format("failed to load '{}'.", path);
+	}
+
+	file.seekg(0, std::ios::end);
+	const auto size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	std::vector<unsigned char> buffer(size);
+	file.read(reinterpret_cast<char *>(buffer.data()), size);
+
+	return buffer;
+}
 
 void freeBitmap(unsigned char *p) {
     stbtt_FreeBitmap(p, nullptr);
@@ -60,8 +76,10 @@ void putCharacter(
 CharAtlus::CharAtlus(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::Queue &queue
+	const vk::Queue &queue,
+	const std::string &path
 ) :
+	_font(loadFontFromFile(path)),
 	_image(
 		memoryProps,
 		device,
@@ -77,10 +95,9 @@ CharAtlus::CharAtlus(
 	_chars(config::config().charAtlusCol * config::config().charAtlusRow)
 {
 	// DEBUG:
-	loadFontFromFile("font", "MPLUS1p-Regular.ttf");
 	stbtt_fontinfo info;
-	if (!stbtt_InitFont(&info, _fonts.at("font").data(), 0)) {
-		throw std::format("failed to get the information of '{}'.", "font");
+	if (!stbtt_InitFont(&info, _font.data(), 0)) {
+		throw "failed to get a font information.";
 	}
 	const std::string s = "あいあう";
 	auto itr = s.cbegin();
@@ -96,29 +113,14 @@ CharAtlus::CharAtlus(
 std::unique_ptr<CharAtlus> CharAtlus::create(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
-	const vk::Queue &queue
+	const vk::Queue &queue,
+	const std::string &path
 ) {
 	if (config::config().charSize > 0 && config::config().charAtlusCol > 0 && config::config().charAtlusRow > 0) {
-		return std::unique_ptr<CharAtlus>(new CharAtlus(memoryProps, device, queue));
+		return std::unique_ptr<CharAtlus>(new CharAtlus(memoryProps, device, queue, path));
 	} else {
 		return nullptr;
 	}
-}
-
-void CharAtlus::loadFontFromFile(const std::string &id, const std::string &path) {
-	std::ifstream file(path, std::ios::binary);
-	if (!file) {
-		throw std::format("failed to load '{}'.", path);
-	}
-
-	file.seekg(0, std::ios::end);
-	const auto size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
-	std::vector<unsigned char> buffer(size);
-	file.read(reinterpret_cast<char *>(buffer.data()), size);
-
-	_fonts.emplace(id, buffer);
 }
 
 } // namespace graphics
