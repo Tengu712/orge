@@ -19,41 +19,42 @@ void putCharacter(
 	const vk::Device &device,
 	const vk::Queue &queue,
 	Image &dst,
+	CharLru &chars,
 	const stbtt_fontinfo &fontinfo,
 	uint32_t codepoint
 ) {
 	using Pixels = std::unique_ptr<unsigned char, decltype(&freeBitmap)>;
 
-	int width, height, offsetX, offsetY;
+	int w, h, x, y;
 	const auto scale = stbtt_ScaleForPixelHeight(&fontinfo, static_cast<float>(config::config().charSize));
 	const auto bitmap = Pixels(
-		stbtt_GetCodepointBitmap(
-			&fontinfo,
-			scale,
-			scale,
-			static_cast<int>(codepoint),
-			&width,
-			&height,
-			&offsetX,
-			&offsetY
-		),
+		stbtt_GetCodepointBitmap(&fontinfo, scale, scale, static_cast<int>(codepoint), &w, &h, &x, &y),
 		freeBitmap
 	);
-	if (width <= 0 || height <= 0) {
+	if (w <= 0 || h <= 0) {
 		throw std::format("failed to rasterize the character whose codepoint is {}.", codepoint);
+	}
+
+	uint32_t offsetX, offsetY;
+	if (!chars.popOldestIfSaturated(offsetX, offsetY)) {
+		const auto n = chars.size();
+		offsetX = n % config::config().charAtlusCol * config::config().charSize;
+		offsetY = n / config::config().charAtlusRow * config::config().charSize;
 	}
 
 	dst.upload(
 		memoryProps,
 		device,
 		queue,
-		static_cast<uint32_t>(width),
-		static_cast<uint32_t>(height),
-		0,
-		0,
+		static_cast<uint32_t>(w),
+		static_cast<uint32_t>(h),
+		offsetX,
+		offsetY,
 		reinterpret_cast<uint8_t *>(bitmap.get()),
 		true
 	);
+
+	chars.put(codepoint, Character(offsetX, offsetY));
 }
 
 CharAtlus::CharAtlus(
@@ -61,17 +62,19 @@ CharAtlus::CharAtlus(
 	const vk::Device &device,
 	const vk::Queue &queue
 ) :
-	_colCount(config::config().charAtlusCol),
-	_rowCount(config::config().charAtlusRow),
 	_image(
 		memoryProps,
 		device,
 		queue,
-		_colCount * config::config().charSize,
-		_rowCount * config::config().charSize,
-		std::vector<uint8_t>(_colCount * config::config().charSize * _rowCount * config::config().charSize).data(),
+		config::config().charAtlusCol * config::config().charSize,
+		config::config().charAtlusRow * config::config().charSize,
+		std::vector<uint8_t>(
+			config::config().charAtlusCol * config::config().charSize
+				* config::config().charAtlusRow * config::config().charSize
+		).data(),
 		true
-	)
+	),
+	_chars(config::config().charAtlusCol * config::config().charAtlusRow)
 {
 	// DEBUG:
 	loadFontFromFile("font", "MPLUS1p-Regular.ttf");
@@ -79,13 +82,14 @@ CharAtlus::CharAtlus(
 	if (!stbtt_InitFont(&info, _fonts.at("font").data(), 0)) {
 		throw std::format("failed to get the information of '{}'.", "font");
 	}
-	const std::string s = "あいう";
+	const std::string s = "あいあう";
 	auto itr = s.cbegin();
 	auto end = s.cend();
 	while (itr != end) {
 		const auto codepoint = utf8::next(itr, end);
-		putCharacter(memoryProps, device, queue, _image, info, codepoint);
-		break;
+		if (!_chars.has(codepoint)) {
+			putCharacter(memoryProps, device, queue, _image, _chars, info, codepoint);
+		}
 	}
 }
 

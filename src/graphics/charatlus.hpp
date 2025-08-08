@@ -1,5 +1,6 @@
 #pragma once
 
+#include "charlru.hpp"
 #include "image.hpp"
 
 #include <memory>
@@ -11,9 +12,8 @@ namespace graphics {
 
 class CharAtlus {
 private:
-	const uint32_t _colCount;
-	const uint32_t _rowCount;
 	Image _image;
+	CharLru _chars;
 	std::unordered_map<std::string, std::vector<unsigned char>> _fonts;
 
 	CharAtlus(
@@ -44,12 +44,6 @@ public:
 	}
 
 	void loadFontFromFile(const std::string &id, const std::string &path);
-
-	void destroyFont(const std::string &id) noexcept {
-		if (_fonts.contains(id)) {
-			_fonts.erase(id);
-		}
-	}
 };
 
 } // namespace graphics
