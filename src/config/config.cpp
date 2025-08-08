@@ -195,6 +195,26 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	}
 }
 
+FontConfig::FontConfig(const YAML::Node &node):
+	id(s(node, "id")),
+	path(node["path"] ? std::make_optional(s(node, "path")) : std::nullopt),
+	charSize(u(node, "char-size")),
+	charAtlusCol(u(node, "char-atlus-col")),
+	charAtlusRow(u(node, "char-atlus-row"))
+{
+	checkUnexpectedKeys(node, {"id", "path", "char-size", "char-atlus-col", "char-atlus-row"});
+
+	if (charSize == 0) {
+		throw "config error: 'char-size' must be greater than 0.";
+	}
+	if (charAtlusCol == 0) {
+		throw "config error: 'char-atlus-col' must be greater than 0.";
+	}
+	if (charAtlusRow == 0) {
+		throw "config error: 'char-atlus-row' must be greater than 0.";
+	}
+}
+
 template<typename T>
 std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 	std::unordered_map<std::string, uint32_t> map;
@@ -214,9 +234,7 @@ Config::Config(YAML::Node node):
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
 	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
-	charSize(u(node, "char-size", 0)),
-	charAtlusCol(u(node, "char-atlus-col", 0)),
-	charAtlusRow(u(node, "char-atlus-row", 0)),
+	fonts(parseConfigs<FontConfig>(node, "fonts")),
 	attachmentMap(collectMap(attachments)),
 	subpassMap(collectMap(subpasses))
 {
@@ -232,9 +250,7 @@ Config::Config(YAML::Node node):
 			"attachments",
 			"subpasses",
 			"pipelines",
-			"char-size",
-			"char-atlus-col",
-			"char-atlus-row",
+			"fonts",
 		}
 	);
 

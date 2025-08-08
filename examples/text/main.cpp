@@ -36,11 +36,12 @@ int main() {
 		static_cast<uint32_t>(INDICES.size()),
 		INDICES.data())
 	);
+	TRY(orgeActivateFont("font"));
 
 	TRY(orgeCreateSampler("sampler", 1, 1, 0));
 
 	while (orgeUpdate()) {
-		CHECK(orgeUpdateImageDescriptor("@char-atlus", "PL", 0, 0, 0, 0));
+		CHECK(orgeUpdateImageDescriptor("font", "PL", 0, 0, 0, 0));
 		CHECK(orgeUpdateSamplerDescriptor("sampler", "PL", 0, 0, 1, 0));
 
 		CHECK(orgeBeginRender());

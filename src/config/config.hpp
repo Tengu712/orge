@@ -87,6 +87,16 @@ struct PipelineConfig {
 	PipelineConfig(const YAML::Node &node);
 };
 
+struct FontConfig {
+	const std::string id;
+	const std::optional<std::string> path;
+	const uint32_t charSize;
+	const uint32_t charAtlusCol;
+	const uint32_t charAtlusRow;
+
+	FontConfig(const YAML::Node &node);
+};
+
 struct Config {
 	const std::string title;
 	const uint32_t width;
@@ -97,9 +107,7 @@ struct Config {
 	const std::vector<AttachmentConfig> attachments;
 	const std::vector<SubpassConfig> subpasses;
 	const std::vector<PipelineConfig> pipelines;
-	const uint32_t charSize;
-	const uint32_t charAtlusCol;
-	const uint32_t charAtlusRow;
+	const std::vector<FontConfig> fonts;
 
 	const std::unordered_map<std::string, uint32_t> attachmentMap;
 	const std::unordered_map<std::string, uint32_t> subpassMap;

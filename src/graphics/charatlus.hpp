@@ -1,39 +1,27 @@
 #pragma once
 
+#include "../config/config.hpp"
 #include "charlru.hpp"
 #include "image.hpp"
 
-#include <memory>
-#include <string>
 #include <vector>
 
 namespace graphics {
 
 class CharAtlus {
 private:
+	const config::FontConfig &_config;
 	const std::vector<unsigned char> _font;
 	Image _image;
 	CharLru _chars;
 
+public:
+	CharAtlus() = delete;
 	CharAtlus(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue,
-		const std::string &path
-	);
-
-public:
-	CharAtlus() = delete;
-	CharAtlus(const CharAtlus &) = delete;
-	CharAtlus(const CharAtlus &&) = delete;
-	CharAtlus &operator =(const CharAtlus &) = delete;
-	CharAtlus &operator =(const CharAtlus &&) = delete;
-
-	static std::unique_ptr<CharAtlus> create(
-		const vk::PhysicalDeviceMemoryProperties &memoryProps,
-		const vk::Device &device,
-		const vk::Queue &queue,
-		const std::string &path
+		const config::FontConfig &config
 	);
 
 	void destroy(const vk::Device &device) const noexcept {

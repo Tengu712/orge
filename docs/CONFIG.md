@@ -142,14 +142,23 @@ pipelines: []
 
 # ========== Text Rendering Settings =========== #
 
-# 1文字の幅および高さの最大値 (px)
-# 省略された場合、0とみなされる
-# orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
-char-size: unsigned int
+# 省略可能
+fonts:
+    # ID
+    # アクティベート時やテクスチャアトラスバインド時に用いる
+  - id: string
 
-# テクスチャアトラスにロードする文字の列・行数
-# 省略された場合、0とみなされる
-# orgeによるテキストレンダリングを有効化するためには正の整数を指定すること
-char-atlus-col: unsigned int
-char-atlus-row: unsigned int
+    # .ttfファイルのパス
+    # 省略可能
+    # 省略した場合はフォントのアクティベート時にフォントデータを渡すこと
+    path: string
+
+    # 1文字の幅および高さの最大値 (px)
+    # 0より大きい整数であること
+    char-size: unsigned int
+
+    # テクスチャアトラスにロードする文字の列・行数
+    # 0より大きい整数であること
+    char-atlus-col: unsigned int
+    char-atlus-row: unsigned int
 ```

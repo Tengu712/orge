@@ -4,6 +4,7 @@
 
 #include <format>
 #include <fstream>
+#include <memory>
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 #include <utf8cpp/utf8.h>
@@ -34,6 +35,7 @@ void putCharacter(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,
+	const config::FontConfig &config,
 	Image &dst,
 	CharLru &chars,
 	const stbtt_fontinfo &fontinfo,
@@ -42,7 +44,7 @@ void putCharacter(
 	using Pixels = std::unique_ptr<unsigned char, decltype(&freeBitmap)>;
 
 	int w, h, x, y;
-	const auto scale = stbtt_ScaleForPixelHeight(&fontinfo, static_cast<float>(config::config().charSize));
+	const auto scale = stbtt_ScaleForPixelHeight(&fontinfo, static_cast<float>(config.charSize));
 	const auto bitmap = Pixels(
 		stbtt_GetCodepointBitmap(&fontinfo, scale, scale, static_cast<int>(codepoint), &w, &h, &x, &y),
 		freeBitmap
@@ -54,8 +56,8 @@ void putCharacter(
 	uint32_t offsetX, offsetY;
 	if (!chars.popOldestIfSaturated(offsetX, offsetY)) {
 		const auto n = chars.size();
-		offsetX = n % config::config().charAtlusCol * config::config().charSize;
-		offsetY = n / config::config().charAtlusRow * config::config().charSize;
+		offsetX = n % config.charAtlusCol * config.charSize;
+		offsetY = n / config.charAtlusRow * config.charSize;
 	}
 
 	dst.upload(
@@ -77,50 +79,21 @@ CharAtlus::CharAtlus(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,
-	const std::string &path
+	const config::FontConfig &config
 ) :
-	_font(loadFontFromFile(path)),
+	_config(config),
+	// TODO: フォントデータからも作成できるように
+	_font(loadFontFromFile(config.path.value())),
 	_image(
 		memoryProps,
 		device,
 		queue,
-		config::config().charAtlusCol * config::config().charSize,
-		config::config().charAtlusRow * config::config().charSize,
-		std::vector<uint8_t>(
-			config::config().charAtlusCol * config::config().charSize
-				* config::config().charAtlusRow * config::config().charSize
-		).data(),
+		_config.charAtlusCol * _config.charSize,
+		_config.charAtlusRow * _config.charSize,
+		std::vector<uint8_t>(_config.charAtlusCol * _config.charSize * _config.charAtlusRow * _config.charSize).data(),
 		true
 	),
-	_chars(config::config().charAtlusCol * config::config().charAtlusRow)
-{
-	// DEBUG:
-	stbtt_fontinfo info;
-	if (!stbtt_InitFont(&info, _font.data(), 0)) {
-		throw "failed to get a font information.";
-	}
-	const std::string s = "あいあう";
-	auto itr = s.cbegin();
-	auto end = s.cend();
-	while (itr != end) {
-		const auto codepoint = utf8::next(itr, end);
-		if (!_chars.has(codepoint)) {
-			putCharacter(memoryProps, device, queue, _image, _chars, info, codepoint);
-		}
-	}
-}
-
-std::unique_ptr<CharAtlus> CharAtlus::create(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Queue &queue,
-	const std::string &path
-) {
-	if (config::config().charSize > 0 && config::config().charAtlusCol > 0 && config::config().charAtlusRow > 0) {
-		return std::unique_ptr<CharAtlus>(new CharAtlus(memoryProps, device, queue, path));
-	} else {
-		return nullptr;
-	}
-}
+	_chars(_config.charAtlusCol * _config.charAtlusRow)
+{}
 
 } // namespace graphics

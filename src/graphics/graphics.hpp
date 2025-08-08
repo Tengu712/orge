@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "charatlus.hpp"
 #include "buffer.hpp"
@@ -21,11 +22,11 @@ private:
 	const vk::Queue _queue;
 	const vk::CommandPool _commandPool;
 	Renderer _renderer;
-	std::unique_ptr<CharAtlus> _charAtlus;
 	std::unordered_map<std::string, Buffer> _buffers;
 	std::unordered_map<std::string, Image> _images;
 	std::unordered_map<std::string, vk::Sampler> _samplers;
 	std::unordered_map<std::string, Mesh> _meshes;
+	std::unordered_map<std::string, CharAtlus> _charAtluss;
 
 public:
 	Graphics(const Graphics &)  = delete;
@@ -38,8 +39,8 @@ public:
 	~Graphics() {
 		_device.waitIdle();
 		terminateUtils(_device);
-		if (_charAtlus) {
-			_charAtlus->destroy(_device);
+		for (const auto &n: _charAtluss) {
+			n.second.destroy(_device);
 		}
 		for (const auto &n: _meshes) {
 			n.second.destroy(_device);
@@ -88,16 +89,10 @@ public:
 	}
 
 	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-		if (id == "@char-atlus") {
-			throw "you cannot create image whose id is '@char-atlus'.";
-		}
 		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels, false));
 	}
 
 	void createImage(const std::string &id, const std::string &path) {
-		if (id == "@char-atlus") {
-			throw "you cannot create image whose id is '@char-atlus'.";
-		}
 		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, path));
 	}
 
@@ -116,8 +111,8 @@ public:
 		uint32_t binding,
 		uint32_t offset
 	) const {
-		const auto &image = imageId == "@char-atlus"
-			? (_charAtlus ? _charAtlus->get() : throw "@char-atlus is unavailable.")
+		const auto &image = _charAtluss.contains(imageId)
+			? _charAtluss.at(imageId).get()
 			: error::at(_images, imageId, "images");
 		_renderer
 			.getPipeline(pipelineId)
@@ -178,6 +173,26 @@ public:
 		if (_meshes.contains(id)) {
 			_meshes.at(id).destroy(_device);
 			_meshes.erase(id);
+		}
+	}
+
+	void activateFont(const std::string &id) {
+		if (_charAtluss.contains(id)) {
+			return;
+		}
+		for (const auto &n: config::config().fonts) {
+			if (n.id == id) {
+				_charAtluss.emplace(id, CharAtlus(_physicalDevice.getMemoryProperties(), _device, _queue, n));
+				return;
+			}
+		}
+		throw std::format("the font id '{}' is not defined.", id);
+	}
+
+	void disactivateFont(const std::string &id) noexcept {
+		if (_charAtluss.contains(id)) {
+			_charAtluss.at(id).destroy(_device);
+			_charAtluss.erase(id);
 		}
 	}
 
