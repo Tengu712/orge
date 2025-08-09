@@ -113,10 +113,21 @@ Graphics::Graphics() :
 			continue;
 		}
 		_buffers.emplace(
-			"@tr@" + n.id,
+			"@buffer@" + n.id,
 			Buffer(_physicalDevice.getMemoryProperties(), _device, sizeof(TextRenderingInstance) * n.charCount, false)
 		);
 	}
+
+	// テキストレンダリングパイプライン用のサンプラ作成
+	_samplers.emplace("@sampler@", _device.createSampler(
+		vk::SamplerCreateInfo()
+			.setMagFilter(vk::Filter::eLinear)
+			.setMinFilter(vk::Filter::eLinear)
+			.setMipmapMode(vk::SamplerMipmapMode::eLinear)
+			.setAddressModeU(vk::SamplerAddressMode::eClampToEdge)
+			.setAddressModeV(vk::SamplerAddressMode::eClampToEdge)
+			.setMaxLod(vk::LodClampNone)
+	));
 }
 
 void Graphics::beginRender() {
@@ -124,15 +135,12 @@ void Graphics::beginRender() {
 		if (!n.textRendering) {
 			continue;
 		}
-		_renderer
-			.getPipeline(n.id)
-			.updateBufferDescriptor(_device, error::at(_buffers, "@tr@" + n.id, "buffers"), 0, 0, 0, 0);
+		const auto &pipeline = _renderer.getPipeline(n.id);
+		pipeline.updateBufferDescriptor(_device, error::at(_buffers, "@buffer@" + n.id, "buffers"), 0, 0, 0, 0);
 		for (const auto &[k, v]: _charAtluss) {
-			_renderer
-				.getPipeline(n.id)
-				.updateImageDescriptor(_device, v.get(), 1, 0, 0, error::at(config::config().fontMap, k, "fonts"));
+			pipeline.updateImageDescriptor(_device, v.get(), 1, 0, 0, error::at(config::config().fontMap, k, "fonts"));
 		}
-		// TODO: sampler
+		pipeline.updateSamplerDescriptor(_device, error::at(_samplers, "@sampler@", "samplers"), 1, 0, 1, 0);
 	}
 
 	_renderer.beginRender(_device);
