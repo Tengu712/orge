@@ -90,6 +90,7 @@ void CharAtlus::putString(
 		// 文字送り幅取得
 		int advance;
 		stbtt_GetCodepointHMetrics(&info, codepoint, &advance, nullptr);
+		advance *= scale;
 
 		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
 		uint32_t x, y;

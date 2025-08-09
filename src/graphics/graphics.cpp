@@ -9,8 +9,8 @@ namespace graphics {
 
 struct TextRenderingInstance {
 	alignas(16) float transform[16];
-	//alignas(16) float uv[4];
-	//alignas(16) uint32_t texId[4];
+	alignas(16) float uv[4];
+	alignas(16) uint32_t texId[4];
 };
 
 std::vector<const char *> getInstanceExtensions() {
@@ -142,7 +142,7 @@ void Graphics::putText(
 ) {
 	// 必要な情報を取得
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
-	//const auto texId = error::at(config::config().fontMap, fontId, "fonts");
+	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
 	const auto scale = charAtlus.calcScale(height);
 	const auto &extent = _renderer.getExtent();
 	const auto extentW = static_cast<float>(extent.width);
@@ -169,14 +169,14 @@ void Graphics::putText(
 		n.transform[12] = x + c->ox;
 		n.transform[13] = y + c->oy;
 		n.transform[15] = 1.0f;
-		//n.uv[0] = c->u;
-		//n.uv[1] = c->v;
-		//n.uv[2] = c->ru;
-		//n.uv[3] = c->rv;
-		//n.texId[0] = texId;
-		//n.texId[1] = texId;
-		//n.texId[2] = texId;
-		//n.texId[3] = texId;
+		n.uv[0] = c->u;
+		n.uv[1] = c->v;
+		n.uv[2] = c->ru;
+		n.uv[3] = c->rv;
+		n.texId[0] = texId;
+		n.texId[1] = texId;
+		n.texId[2] = texId;
+		n.texId[3] = texId;
 		x += c->advance;
 		count += 1;
 	}
