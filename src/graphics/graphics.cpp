@@ -6,6 +6,12 @@
 
 namespace graphics {
 
+struct TextRenderingInstance {
+	float transform[16];
+	float uv[4];
+	uint32_t texId;
+};
+
 std::vector<const char *> getInstanceExtensions() {
 	Uint32 count = 0;
 	const auto extensions_ = SDL_Vulkan_GetInstanceExtensions(&count);
@@ -95,8 +101,21 @@ Graphics::Graphics() :
 	_renderer(_instance, _physicalDevice, _device, _commandPool)
 {
 	initializeUtils(_device, _commandPool);
+
+	// すべてのフォントの文字テクスチャアトラスを作成
 	for (const auto &n: config::config().fonts) {
 		_charAtluss.emplace(n.id, CharAtlus(_physicalDevice.getMemoryProperties(), _device, _queue, n));
+	}
+
+	// すべてのテキストレンダリングパイプラインのインスタンスバッファを作成
+	for (const auto &n: config::config().pipelines) {
+		if (!n.textRendering) {
+			continue;
+		}
+		_buffers.emplace(
+			"@tr@" + n.id,
+			Buffer(_physicalDevice.getMemoryProperties(), _device, sizeof(TextRenderingInstance) * n.charCount, false)
+		);
 	}
 }
 
@@ -105,11 +124,15 @@ void Graphics::beginRender() {
 		if (!n.textRendering) {
 			continue;
 		}
+		_renderer
+			.getPipeline(n.id)
+			.updateBufferDescriptor(_device, error::at(_buffers, "@tr@" + n.id, "buffers"), 0, 0, 0, 0);
 		for (const auto &[k, v]: _charAtluss) {
 			_renderer
 				.getPipeline(n.id)
 				.updateImageDescriptor(_device, v.get(), 1, 0, 0, error::at(config::config().fontMap, k, "fonts"));
 		}
+		// TODO: sampler
 	}
 
 	_renderer.beginRender(_device);
