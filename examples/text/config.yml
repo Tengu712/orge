@@ -15,7 +15,7 @@ pipelines:
     char-count: 128
 fonts:
   - id: font
-    path: MPLUS1p-Regular.ttf
-    char-size: 24
+    path: MPLUS1p-Light.ttf
+    char-size: 32
     char-atlus-col: 12
     char-atlus-row: 12
