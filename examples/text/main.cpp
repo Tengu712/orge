@@ -18,7 +18,7 @@ int main() {
 	TRY(orgePutString("font", "歓迎しますorge"));
 
 	while (orgeUpdate()) {
-		CHECK(orgePutText("PL", "font", "歓", 0.0f, 0.0f, 32.0f, 0));
+		CHECK(orgePutText("PL", "font", "歓", 320.0f, 240.0f, 32.0f, 0));
 		CHECK(orgeBeginRender());
 		CHECK(orgeDrawTexts("PL"));
 		CHECK(orgeEndRender());

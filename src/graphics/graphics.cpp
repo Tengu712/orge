@@ -140,6 +140,7 @@ void Graphics::putText(
 	float height,
 	OrgeTextLocation location
 ) {
+	// 必要な情報を取得
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
 	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
 	const auto scale = charAtlus.calcScale(height);
@@ -147,6 +148,7 @@ void Graphics::putText(
 	const auto extentW = static_cast<float>(extent.width);
 	const auto extentH = static_cast<float>(extent.height);
 
+	// すべての文字に対してとりあえず構築
 	auto itr = text.begin();
 	auto end = text.end();
 	std::vector<TextRenderingInstance> instances;
@@ -171,8 +173,8 @@ void Graphics::putText(
 		n.transform[9] = 0.0f;
 		n.transform[10] = 1.0f;
 		n.transform[11] = 0.0f;
-		n.transform[12] = 0.0f; // TODO: x
-		n.transform[13] = 0.0f; // TODO: y
+		n.transform[12] = x + c->ox;
+		n.transform[13] = y + c->oy;
 		n.transform[14] = 0.0f;
 		n.transform[15] = 1.0f;
 		n.uv[0] = c->u;
@@ -183,6 +185,16 @@ void Graphics::putText(
 		x += c->advance;
 	}
 
+	// 座標修正
+	for (auto &n: instances) {
+		// クリッピング座標系へ
+		n.transform[12] -= extentW / 2.0f;
+		n.transform[12] /= extentW;
+		n.transform[13] -= extentH / 2.0f;
+		n.transform[13] /= extentH;
+	}
+
+	// アップロード
 	// TODO: offset
 	error::at(_buffers, "@buffer@" + pipelineId, "buffers")
 		.update(
@@ -192,8 +204,6 @@ void Graphics::putText(
 			0
 		);
 
-	(void)x;
-	(void)y;
 	(void)location;
 }
 
