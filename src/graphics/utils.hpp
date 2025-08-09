@@ -64,7 +64,7 @@ inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &d
 
 template<typename T>
 inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &dst, const T *src, size_t size, size_t offset) {
-	const auto p = static_cast<T *>(device.mapMemory(dst, 0, size));
+	const auto p = static_cast<uint8_t *>(device.mapMemory(dst, 0, offset + size));
 	memcpy(p + offset, src, size);
 	device.unmapMemory(dst);
 }

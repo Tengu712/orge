@@ -8,9 +8,9 @@
 namespace graphics {
 
 struct TextRenderingInstance {
-	float transform[16];
-	float uv[4];
-	uint32_t texId;
+	alignas(16) float transform[16];
+	//alignas(16) float uv[4];
+	//alignas(16) uint32_t texId[4];
 };
 
 std::vector<const char *> getInstanceExtensions() {
@@ -142,7 +142,7 @@ void Graphics::putText(
 ) {
 	// 必要な情報を取得
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
-	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
+	//const auto texId = error::at(config::config().fontMap, fontId, "fonts");
 	const auto scale = charAtlus.calcScale(height);
 	const auto &extent = _renderer.getExtent();
 	const auto extentW = static_cast<float>(extent.width);
@@ -152,6 +152,7 @@ void Graphics::putText(
 	auto itr = text.begin();
 	auto end = text.end();
 	std::vector<TextRenderingInstance> instances;
+	uint32_t count = 0;
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
 		const auto c = charAtlus.getCharacter(codepoint);
@@ -161,28 +162,23 @@ void Graphics::putText(
 		}
 		instances.push_back({});
 		auto &n = instances.back();
+		std::fill_n(n.transform, 16, 0.0f);
 		n.transform[0] = scale * c->w / extentW;
-		n.transform[1] = 0.0f;
-		n.transform[2] = 0.0f;
-		n.transform[3] = 0.0f;
-		n.transform[4] = 0.0f;
 		n.transform[5] = scale * c->h / extentH;
-		n.transform[6] = 0.0f;
-		n.transform[7] = 0.0f;
-		n.transform[8] = 0.0f;
-		n.transform[9] = 0.0f;
 		n.transform[10] = 1.0f;
-		n.transform[11] = 0.0f;
 		n.transform[12] = x + c->ox;
 		n.transform[13] = y + c->oy;
-		n.transform[14] = 0.0f;
 		n.transform[15] = 1.0f;
-		n.uv[0] = c->u;
-		n.uv[1] = c->v;
-		n.uv[2] = c->ru;
-		n.uv[3] = c->rv;
-		n.texId = texId;
+		//n.uv[0] = c->u;
+		//n.uv[1] = c->v;
+		//n.uv[2] = c->ru;
+		//n.uv[3] = c->rv;
+		//n.texId[0] = texId;
+		//n.texId[1] = texId;
+		//n.texId[2] = texId;
+		//n.texId[3] = texId;
 		x += c->advance;
+		count += 1;
 	}
 
 	// 座標修正
@@ -195,14 +191,20 @@ void Graphics::putText(
 	}
 
 	// アップロード
-	// TODO: offset
 	error::at(_buffers, "@buffer@" + pipelineId, "buffers")
 		.update(
 			_device,
 			instances.data(),
 			instances.size() * sizeof(TextRenderingInstance),
-			0
+			_textOffset.contains(pipelineId) ? static_cast<size_t>(_textOffset[pipelineId]) : 0
 		);
+
+	// offsetを進める
+	if (_textOffset.contains(pipelineId)) {
+		_textOffset[pipelineId] += count;
+	} else {
+		_textOffset.emplace(pipelineId, count);
+	}
 
 	(void)location;
 }
@@ -219,8 +221,6 @@ void Graphics::beginRender() {
 		}
 		pipeline.updateSamplerDescriptor(_device, error::at(_samplers, "@sampler@", "samplers"), 1, 0, 1, 0);
 	}
-
-	_textOffset.clear();
 
 	_renderer.beginRender(_device);
 }

@@ -189,11 +189,13 @@ public:
 	);
 
 	void drawTexts(const std::string &pipelineId) {
+		if (!_textOffset.contains(pipelineId)) {
+			return;
+		}
 		const uint32_t indices[] = {0, 0};
 		_renderer.bindDescriptorSets(pipelineId, indices);
 		_renderer.bindPipeline(_device, pipelineId);
-		// TODO: instance
-		_renderer.drawDirectly(4, 1, 0);
+		_renderer.drawDirectly(4, _textOffset[pipelineId], 0);
 	}
 
 	void beginRender();
@@ -214,6 +216,7 @@ public:
 
 	void endRender() {
 		_renderer.endRender(_device, _queue);
+		_textOffset.clear();
 	}
 
 	void resetRendering() {
