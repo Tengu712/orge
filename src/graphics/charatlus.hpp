@@ -12,6 +12,8 @@ class CharAtlus {
 private:
 	const config::FontConfig &_config;
 	const std::vector<unsigned char> _font;
+	const float _width;
+	const float _height;
 	Image _image;
 	CharLru _chars;
 

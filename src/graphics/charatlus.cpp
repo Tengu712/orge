@@ -40,6 +40,8 @@ CharAtlus::CharAtlus(
 	_config(config),
 	// TODO: フォントデータからも作成できるように
 	_font(loadFontFromFile(config.path.value())),
+	_width(static_cast<float>(_config.charAtlusCol * _config.charSize)),
+	_height(static_cast<float>(_config.charAtlusRow * _config.charSize)),
 	_image(
 		memoryProps,
 		device,
@@ -74,15 +76,20 @@ void CharAtlus::putString(
 		}
 
 		// ラスタライズ
-		int w, h, x, y;
+		int w, h, ox, oy;
 		const auto scale = stbtt_ScaleForPixelHeight(&info, static_cast<float>(_config.charSize));
 		const auto bitmap = Pixels(
-			stbtt_GetCodepointBitmap(&info, scale, scale, static_cast<int>(codepoint), &w, &h, &x, &y),
+			stbtt_GetCodepointBitmap(&info, scale, scale, static_cast<int>(codepoint), &w, &h, &ox, &oy),
 			freeBitmap
 		);
 		if (w <= 0 || h <= 0) {
+			// TODO: 無効字は空白にする
 			throw std::format("failed to rasterize the character whose codepoint is {}.", codepoint);
 		}
+
+		// 文字送り幅取得
+		int advance;
+		stbtt_GetCodepointHMetrics(&info, codepoint, &advance, nullptr);
 
 		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
 		uint32_t offsetX, offsetY;
@@ -106,7 +113,17 @@ void CharAtlus::putString(
 		);
 
 		// 登録
-		_chars.put(codepoint, Character(offsetX, offsetY));
+		_chars.put(codepoint, Character(
+			offsetX,
+			offsetY,
+			static_cast<float>(offsetX) / _width,
+			static_cast<float>(offsetY) / _height,
+			static_cast<float>(w) / _width,
+			static_cast<float>(h) / _height,
+			static_cast<float>(ox),
+			static_cast<float>(oy),
+			static_cast<float>(advance)
+		));
 	}
 }
 

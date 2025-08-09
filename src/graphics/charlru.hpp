@@ -87,8 +87,8 @@ public:
 		}
 
 		const auto deleting = _oldest;
-		offsetX = deleting->character.offsetX;
-		offsetY = deleting->character.offsetY;
+		offsetX = deleting->character.x;
+		offsetY = deleting->character.y;
 
 		_oldest->prev->next = nullptr;
 		_oldest = _oldest->prev;
