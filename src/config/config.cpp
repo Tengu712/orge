@@ -268,7 +268,8 @@ Config::Config(YAML::Node node):
 	pipelines(parsePipelineConfigs(node)),
 	fonts(parseConfigs<FontConfig>(node, "fonts")),
 	attachmentMap(collectMap(attachments)),
-	subpassMap(collectMap(subpasses))
+	subpassMap(collectMap(subpasses)),
+	fontMap(collectMap(fonts))
 {
 	checkUnexpectedKeys(
 		node,
