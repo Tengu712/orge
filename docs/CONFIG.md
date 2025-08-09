@@ -84,6 +84,7 @@ subpasses: []
 
 # 省略可能
 pipelines: []
+  # 通常のレンダリングパイプライン
   - id: string
 
     # シェーダのファイル名
@@ -139,6 +140,15 @@ pipelines: []
 
     # 対応づけるサブパスID
     subpass: string
+
+  # テキストレンダリングパイプライン
+  - text-rendering: true
+
+    # 対応づけるサブパスID
+    subpass: string
+
+    # 最大文字数
+    char-count: unsigned int
 
 # ========== Text Rendering Settings =========== #
 

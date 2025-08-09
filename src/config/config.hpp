@@ -83,8 +83,12 @@ struct PipelineConfig {
 	const bool depthTest;
 	const std::vector<bool> colorBlends;
 	const std::string subpass;
+	const bool textRendering;
+	const uint32_t charCount;
 
 	PipelineConfig(const YAML::Node &node);
+	PipelineConfig(const YAML::Node &node, const std::string &id);
+	PipelineConfig(const YAML::Node &node, bool textRendering);
 };
 
 struct FontConfig {
