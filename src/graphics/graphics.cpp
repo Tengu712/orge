@@ -147,6 +147,8 @@ void Graphics::putText(
 	const auto &extent = _renderer.getExtent();
 	const auto extentW = static_cast<float>(extent.width);
 	const auto extentH = static_cast<float>(extent.height);
+	float size, ru, rv;
+	charAtlus.getCharacterCommonInfo(size, ru, rv);
 
 	// すべての文字に対してとりあえず構築
 	auto itr = text.begin();
@@ -163,16 +165,16 @@ void Graphics::putText(
 		instances.push_back({});
 		auto &n = instances.back();
 		std::fill_n(n.transform, 16, 0.0f);
-		n.transform[0] = scale * c->w / extentW;
-		n.transform[5] = scale * c->h / extentH;
+		n.transform[0] = size * scale / extentW;
+		n.transform[5] = size * scale / extentH;
 		n.transform[10] = 1.0f;
 		n.transform[12] = x + c->ox;
 		n.transform[13] = y + c->oy;
 		n.transform[15] = 1.0f;
 		n.uv[0] = c->u;
 		n.uv[1] = c->v;
-		n.uv[2] = c->ru;
-		n.uv[3] = c->rv;
+		n.uv[2] = ru;
+		n.uv[3] = rv;
 		n.texId[0] = texId;
 		n.texId[1] = texId;
 		n.texId[2] = texId;

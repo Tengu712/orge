@@ -42,6 +42,12 @@ public:
 		}
 	}
 
+	void getCharacterCommonInfo(float &size, float &ru, float &rv) const noexcept {
+		size = static_cast<float>(_config.charSize);
+		ru = static_cast<float>(_config.charSize) / _width;
+		rv = static_cast<float>(_config.charSize) / _height;
+	}
+
 	float calcScale(float height) const noexcept {
 		return height / static_cast<float>(_config.charSize);
 	}

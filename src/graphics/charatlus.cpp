@@ -117,15 +117,11 @@ void CharAtlus::putString(
 		_chars.put(codepoint, Character(
 			x,
 			y,
-			static_cast<float>(w),
-			static_cast<float>(h),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
 			static_cast<float>(advance),
 			static_cast<float>(x) / _width,
-			static_cast<float>(y) / _height,
-			static_cast<float>(w) / _width,
-			static_cast<float>(h) / _height
+			static_cast<float>(y) / _height
 		));
 	}
 }
