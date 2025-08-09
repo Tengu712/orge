@@ -100,4 +100,19 @@ Graphics::Graphics() :
 	}
 }
 
+void Graphics::beginRender() {
+	for (const auto &n: config::config().pipelines) {
+		if (!n.textRendering) {
+			continue;
+		}
+		for (const auto &[k, v]: _charAtluss) {
+			_renderer
+				.getPipeline(n.id)
+				.updateImageDescriptor(_device, v.get(), 1, 0, 0, error::at(config::config().fontMap, k, "fonts"));
+		}
+	}
+
+	_renderer.beginRender(_device);
+}
+
 } // namespace graphics

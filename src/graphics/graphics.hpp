@@ -176,9 +176,7 @@ public:
 		error::atMut(_charAtluss, id, "fonts").putString(_physicalDevice.getMemoryProperties(), _device, _queue, s);
 	}
 
-	void beginRender() {
-		_renderer.beginRender(_device);
-	}
+	void beginRender();
 
 	void bindDescriptorSets(const std::string &pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);
