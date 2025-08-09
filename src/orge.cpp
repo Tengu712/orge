@@ -273,6 +273,22 @@ uint8_t orgePutString(const char *id, const char *s) {
 	TRY(g_graphics->putString(id, s));
 }
 
+uint8_t orgePutText(
+	const char *pipelineId,
+	const char *fontId,
+	const char *text,
+	float x,
+	float y,
+	float height,
+	uint32_t location
+) {
+	TRY(g_graphics->putText(pipelineId, fontId, text, x, y, height, static_cast<OrgeTextLocation>(location)));
+}
+
+uint8_t orgeDrawTexts(const char *pipelineId) {
+	TRY(g_graphics->drawTexts(pipelineId));
+}
+
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
 // ================================================================================================================== //

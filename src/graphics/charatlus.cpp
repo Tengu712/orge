@@ -92,11 +92,11 @@ void CharAtlus::putString(
 		stbtt_GetCodepointHMetrics(&info, codepoint, &advance, nullptr);
 
 		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
-		uint32_t offsetX, offsetY;
-		if (!_chars.popOldestIfSaturated(offsetX, offsetY)) {
+		uint32_t x, y;
+		if (!_chars.popOldestIfSaturated(x, y)) {
 			const auto n = _chars.size();
-			offsetX = n % _config.charAtlusCol * _config.charSize;
-			offsetY = n / _config.charAtlusRow * _config.charSize;
+			x = n % _config.charAtlusCol * _config.charSize;
+			y = n / _config.charAtlusRow * _config.charSize;
 		}
 
 		// アップロード
@@ -106,23 +106,25 @@ void CharAtlus::putString(
 			queue,
 			static_cast<uint32_t>(w),
 			static_cast<uint32_t>(h),
-			offsetX,
-			offsetY,
+			x,
+			y,
 			reinterpret_cast<uint8_t *>(bitmap.get()),
 			true
 		);
 
 		// 登録
 		_chars.put(codepoint, Character(
-			offsetX,
-			offsetY,
-			static_cast<float>(offsetX) / _width,
-			static_cast<float>(offsetY) / _height,
-			static_cast<float>(w) / _width,
-			static_cast<float>(h) / _height,
+			x,
+			y,
+			static_cast<float>(w),
+			static_cast<float>(h),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
-			static_cast<float>(advance)
+			static_cast<float>(advance),
+			static_cast<float>(x) / _width,
+			static_cast<float>(y) / _height,
+			static_cast<float>(w) / _width,
+			static_cast<float>(h) / _height
 		));
 	}
 }

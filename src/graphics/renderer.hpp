@@ -98,6 +98,10 @@ public:
 		return error::at(_pipelines, id, "pipelines");
 	}
 
+	const vk::Extent2D &getExtent() const noexcept {
+		return _swapchain.getExtent();
+	}
+
 	void beginRender(const vk::Device &device);
 
 	void endRender(const vk::Device &device, const vk::Queue &queue);
@@ -134,6 +138,11 @@ public:
 	void draw(uint32_t instanceCount, uint32_t instanceOffset) const {
 		_ensureWhileRendering("try to draw before starting rendering.");
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
+	}
+
+	void drawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset) const {
+		_ensureWhileRendering("try to draw before starting rendering.");
+		_commandBuffer.draw(vertexCount, instanceCount, 0, instanceOffset);
 	}
 
 	void resetRendering(const vk::Device &device) {

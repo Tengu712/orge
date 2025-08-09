@@ -45,13 +45,14 @@ public:
 	}
 
 	/// codepointで示される文字が登録されているか確認する関数
-	bool has(uint32_t codepoint) {
+	bool has(uint32_t codepoint) const noexcept {
 		return _map.contains(codepoint);
 	}
 
 	/// codepointで示される文字を利用する関数
 	///
 	/// 利用された文字は最新の文字として更新される。
+	/// 文字が存在しない場合、例外が発生する。
 	const Character &use(uint32_t codepoint) {
 		auto &node = error::at(_map, codepoint, "rasterized chars");
 		// 既に最新のノードなら早期リターン

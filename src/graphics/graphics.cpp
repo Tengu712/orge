@@ -3,6 +3,7 @@
 #include "../config/config.hpp"
 
 #include <SDL3/SDL_vulkan.h>
+#include <utf8cpp/utf8.h>
 
 namespace graphics {
 
@@ -114,7 +115,7 @@ Graphics::Graphics() :
 		}
 		_buffers.emplace(
 			"@buffer@" + n.id,
-			Buffer(_physicalDevice.getMemoryProperties(), _device, sizeof(TextRenderingInstance) * n.charCount, false)
+			Buffer(_physicalDevice.getMemoryProperties(), _device, sizeof(TextRenderingInstance) * n.charCount, true)
 		);
 	}
 
@@ -130,6 +131,72 @@ Graphics::Graphics() :
 	));
 }
 
+void Graphics::putText(
+	const std::string &pipelineId,
+	const std::string &fontId,
+	const std::string &text,
+	float x,
+	float y,
+	float height,
+	OrgeTextLocation location
+) {
+	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
+	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
+	const auto scale = charAtlus.calcScale(height);
+	const auto &extent = _renderer.getExtent();
+	const auto extentW = static_cast<float>(extent.width);
+	const auto extentH = static_cast<float>(extent.height);
+
+	auto itr = text.begin();
+	auto end = text.end();
+	std::vector<TextRenderingInstance> instances;
+	while (itr != end) {
+		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
+		const auto c = charAtlus.getCharacter(codepoint);
+		// NOTE: 文字が存在しない場合はスキップする
+		if (!c) {
+			continue;
+		}
+		instances.push_back({});
+		auto &n = instances.back();
+		n.transform[0] = scale * c->w / extentW;
+		n.transform[1] = 0.0f;
+		n.transform[2] = 0.0f;
+		n.transform[3] = 0.0f;
+		n.transform[4] = 0.0f;
+		n.transform[5] = scale * c->h / extentH;
+		n.transform[6] = 0.0f;
+		n.transform[7] = 0.0f;
+		n.transform[8] = 0.0f;
+		n.transform[9] = 0.0f;
+		n.transform[10] = 1.0f;
+		n.transform[11] = 0.0f;
+		n.transform[12] = 0.0f; // TODO: x
+		n.transform[13] = 0.0f; // TODO: y
+		n.transform[14] = 0.0f;
+		n.transform[15] = 1.0f;
+		n.uv[0] = c->u;
+		n.uv[1] = c->v;
+		n.uv[2] = c->ru;
+		n.uv[3] = c->rv;
+		n.texId = texId;
+		x += c->advance;
+	}
+
+	// TODO: offset
+	error::at(_buffers, "@buffer@" + pipelineId, "buffers")
+		.update(
+			_device,
+			instances.data(),
+			instances.size() * sizeof(TextRenderingInstance),
+			0
+		);
+
+	(void)x;
+	(void)y;
+	(void)location;
+}
+
 void Graphics::beginRender() {
 	for (const auto &n: config::config().pipelines) {
 		if (!n.textRendering) {
@@ -142,6 +209,8 @@ void Graphics::beginRender() {
 		}
 		pipeline.updateSamplerDescriptor(_device, error::at(_samplers, "@sampler@", "samplers"), 1, 0, 1, 0);
 	}
+
+	_textOffset.clear();
 
 	_renderer.beginRender(_device);
 }

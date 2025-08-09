@@ -7,6 +7,7 @@
 #include "mesh.hpp"
 #include "renderer.hpp"
 
+#include <orge.h>
 #include <string>
 #include <unordered_map>
 
@@ -26,6 +27,7 @@ private:
 	std::unordered_map<std::string, vk::Sampler> _samplers;
 	std::unordered_map<std::string, Mesh> _meshes;
 	std::unordered_map<std::string, CharAtlus> _charAtluss;
+	std::unordered_map<std::string, uint32_t> _textOffset;
 
 public:
 	Graphics(const Graphics &)  = delete;
@@ -174,6 +176,24 @@ public:
 
 	void putString(const std::string &id, const std::string &s) {
 		error::atMut(_charAtluss, id, "fonts").putString(_physicalDevice.getMemoryProperties(), _device, _queue, s);
+	}
+
+	void putText(
+		const std::string &pipelineId,
+		const std::string &fontId,
+		const std::string &text,
+		float x,
+		float y,
+		float height,
+		OrgeTextLocation location
+	);
+
+	void drawTexts(const std::string &pipelineId) {
+		const uint32_t indices[] = {0, 0};
+		_renderer.bindDescriptorSets(pipelineId, indices);
+		_renderer.bindPipeline(_device, pipelineId);
+		// TODO: instance
+		_renderer.drawDirectly(4, 1, 0);
 	}
 
 	void beginRender();

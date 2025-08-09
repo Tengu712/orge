@@ -197,13 +197,27 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, const std::string &id):
 	}
 }
 
-PipelineConfig::PipelineConfig(const YAML::Node &node, bool textRendering):
+std::vector<DescriptorSetConfig> createTextRenderingPipelineDescSets(uint32_t texCount) {
+	std::vector<DescriptorSetConfig> descSets;
+
+	std::vector<DescriptorBindingConfig> bindings1;
+	bindings1.emplace_back(DescriptorType::StorageBuffer, 1, ShaderStages::Vertex);
+	descSets.emplace_back(1, std::move(bindings1));
+
+	std::vector<DescriptorBindingConfig> bindings2;
+	bindings2.emplace_back(DescriptorType::Texture, texCount, ShaderStages::Fragment);
+	bindings2.emplace_back(DescriptorType::Sampler, 1, ShaderStages::Fragment);
+	descSets.emplace_back(1, std::move(bindings2));
+
+	return descSets;
+}
+
+PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
 	id(s(node, "id")),
 	vertexShader(""),
 	fragmentShader(""),
-	// TODO:
-	descSets(),
-	vertexInputAttributes{3, 2},
+	descSets(createTextRenderingPipelineDescSets(texCount)),
+	vertexInputAttributes(),
 	culling(false),
 	depthTest(false),
 	colorBlends{false},
@@ -211,8 +225,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, bool textRendering):
 	textRendering(true),
 	charCount(u(node, "char-count"))
 {
-	(void)textRendering;
-	checkUnexpectedKeys(node, {"text-rendering", "subpass", "char-count"});
+	checkUnexpectedKeys(node, {"id", "text-rendering", "subpass", "char-count"});
 }
 
 FontConfig::FontConfig(const YAML::Node &node):
@@ -244,11 +257,11 @@ std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 	return map;
 }
 
-std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node) {
+std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_t texCount) {
 	std::vector<PipelineConfig> results;
 	for (const auto &n: node["pipelines"]) {
 		if (b(n, "text-rendering", false)) {
-			results.emplace_back(n, true);
+			results.emplace_back(n, texCount);
 		} else {
 			results.emplace_back(n, s(n, "id"));
 		}
@@ -263,10 +276,10 @@ Config::Config(YAML::Node node):
 	fullscreen(b(node, "fullscreen", false)),
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	audioChannelCount(u(node, "audio-channel-count", 16)),
+	fonts(parseConfigs<FontConfig>(node, "fonts")),
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
-	pipelines(parsePipelineConfigs(node)),
-	fonts(parseConfigs<FontConfig>(node, "fonts")),
+	pipelines(parsePipelineConfigs(node, static_cast<uint32_t>(fonts.size()))),
 	attachmentMap(collectMap(attachments)),
 	subpassMap(collectMap(subpasses)),
 	fontMap(collectMap(fonts))

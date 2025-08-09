@@ -34,6 +34,18 @@ public:
 		return _image;
 	}
 
+	const Character *getCharacter(uint32_t codepoint) noexcept {
+		if (_chars.has(codepoint)) {
+			return &_chars.use(codepoint);
+		} else {
+			return nullptr;
+		}
+	}
+
+	float calcScale(float height) const noexcept {
+		return height / static_cast<float>(_config.charSize);
+	}
+
 	void putString(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,

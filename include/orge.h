@@ -196,6 +196,18 @@ API_EXPORT void orgeDestroyMesh(const char *id);
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
+enum OrgeTextLocation {
+	ORGE_TEXT_LOCATION_LEFT_UP = 0,
+	ORGE_TEXT_LOCATION_CENTER_UP,
+	ORGE_TEXT_LOCATION_RIGHT_UP,
+	ORGE_TEXT_LOCATION_LEFT,
+	ORGE_TEXT_LOCATION_CENTER,
+	ORGE_TEXT_LOCATION_RIGHT,
+	ORGE_TEXT_LOCATION_LEFT_DOWN,
+	ORGE_TEXT_LOCATION_CENTER_DOWN,
+	ORGE_TEXT_LOCATION_RIGHT_DOWN,
+};
+
 /// テクスチャアトラスに文字を追加する関数
 ///
 /// - id: フォントID
@@ -204,6 +216,24 @@ API_EXPORT void orgeDestroyMesh(const char *id);
 /// sの各文字が追加される。
 /// 結合文字は結合されず、別々の文字として扱われる。
 API_EXPORT uint8_t orgePutString(const char *id, const char *s);
+
+/// このフレームで描画する文字列を追加する関数
+///
+/// 毎フレームorgeBeginRender()の前に呼ぶこと。
+///
+/// 存在しない文字はスキップされる。
+API_EXPORT uint8_t orgePutText(
+	const char *pipelineId,
+	const char *fontId,
+	const char *text,
+	float x,
+	float y,
+	float height,
+	uint32_t location
+);
+
+/// orgePutText()で追加された文字列をすべて描画する関数
+API_EXPORT uint8_t orgeDrawTexts(const char *pipelineId);
 
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
