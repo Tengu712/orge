@@ -142,7 +142,10 @@ pipelines: []
     subpass: string
 
   # テキストレンダリングパイプライン
-  - text-rendering: true
+  - id: string
+
+    # テキストレンダリングパイプラインであることを示すフラグ
+    text-rendering: true
 
     # 対応づけるサブパスID
     subpass: string

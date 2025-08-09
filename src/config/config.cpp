@@ -198,10 +198,11 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, const std::string &id):
 }
 
 PipelineConfig::PipelineConfig(const YAML::Node &node, bool textRendering):
-	id("@tr@" + s(node, "subpass")),
+	id(s(node, "id")),
 	vertexShader(""),
 	fragmentShader(""),
-	descSets(parseConfigs<DescriptorSetConfig>(node, "desc-sets")),
+	// TODO:
+	descSets(),
 	vertexInputAttributes{3, 2},
 	culling(false),
 	depthTest(false),
@@ -246,12 +247,10 @@ std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node) {
 	std::vector<PipelineConfig> results;
 	for (const auto &n: node["pipelines"]) {
-		if (n["id"]) {
-			results.emplace_back(n, s(n, "id"));
-		} else if (b(n, "text-rendering")) {
+		if (b(n, "text-rendering", false)) {
 			results.emplace_back(n, true);
 		} else {
-			throw "config error: either 'id' must be defined or 'text-rendering' must be true.";
+			results.emplace_back(n, s(n, "id"));
 		}
 	}
 	return results;

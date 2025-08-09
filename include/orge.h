@@ -196,16 +196,6 @@ API_EXPORT void orgeDestroyMesh(const char *id);
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
-/// フォントをアクティベートする関数
-///
-/// この関数を呼ぶとorgeUpdateImageDescriptor()でテクスチャアトラスをバインドできるようになる。
-API_EXPORT uint8_t orgeActivateFont(const char *id);
-
-/// フォントをディスアクティベートする関数
-///
-/// 内部的に保持しているフォントデータおよびテクスチャアトラスを破棄する。
-API_EXPORT void orgeDisactivateFont(const char *id);
-
 /// テクスチャアトラスに文字を追加する関数
 ///
 /// - id: フォントID

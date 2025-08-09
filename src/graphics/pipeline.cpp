@@ -12,8 +12,11 @@ struct PipelineCreateTemporaryInfos {
 	// シェーダステージ
 	vk::ShaderModule vertexShader;
 	vk::ShaderModule fragmentShader;
-	vk::SpecializationMapEntry spme;
-	vk::SpecializationInfo spi;
+	uint32_t texCount;
+	vk::SpecializationMapEntry vspme;
+	vk::SpecializationInfo vspi;
+	vk::SpecializationMapEntry fspme;
+	vk::SpecializationInfo fspi;
 	std::vector<vk::PipelineShaderStageCreateInfo> sscis;
 
 	// 頂点入力
@@ -139,13 +142,18 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 				reinterpret_cast<uint32_t *>(text_shader_frag_spv),
 				reinterpret_cast<uint32_t *>(text_shader_frag_spv + text_shader_frag_spv_len)
 			));
-			cti.spme = vk::SpecializationMapEntry(0, 0, sizeof(uint32_t));
-			cti.spi = vk::SpecializationInfo(1, &cti.spme, sizeof(uint32_t), &n.charCount);
+			cti.texCount = static_cast<uint32_t>(config::config().fonts.size());
+			cti.vspme = vk::SpecializationMapEntry(0, 0, sizeof(uint32_t));
+			cti.vspi = vk::SpecializationInfo(1, &cti.vspme, sizeof(uint32_t), &n.charCount);
+			cti.fspme = vk::SpecializationMapEntry(1, 0, sizeof(uint32_t));
+			cti.fspi = vk::SpecializationInfo(1, &cti.fspme, sizeof(uint32_t), &cti.texCount);
 		} else {
 			cti.vertexShader = createShaderModuleFromFile(device, n.vertexShader);
 			cti.fragmentShader = createShaderModuleFromFile(device, n.fragmentShader);
-			cti.spme = vk::SpecializationMapEntry();
-			cti.spi = vk::SpecializationInfo();
+			cti.vspme = vk::SpecializationMapEntry();
+			cti.vspi = vk::SpecializationInfo();
+			cti.fspme = vk::SpecializationMapEntry();
+			cti.fspi = vk::SpecializationInfo();
 		}
 		if (!cti.vertexShader || !cti.fragmentShader) {
 			throw "failed to create shader modules.";
@@ -155,13 +163,14 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 			vk::ShaderStageFlagBits::eVertex,
 			cti.vertexShader,
 			"main",
-			&cti.spi
+			&cti.vspi
 		);
 		cti.sscis.emplace_back(
 			vk::PipelineShaderStageCreateFlags(),
 			vk::ShaderStageFlagBits::eFragment,
 			cti.fragmentShader,
-			"main"
+			"main",
+			&cti.fspi
 		);
 
 		// 頂点入力

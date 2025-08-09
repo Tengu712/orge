@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../config/config.hpp"
 #include "../error/error.hpp"
 #include "charatlus.hpp"
 #include "buffer.hpp"
@@ -173,26 +172,6 @@ public:
 		if (_meshes.contains(id)) {
 			_meshes.at(id).destroy(_device);
 			_meshes.erase(id);
-		}
-	}
-
-	void activateFont(const std::string &id) {
-		if (_charAtluss.contains(id)) {
-			return;
-		}
-		for (const auto &n: config::config().fonts) {
-			if (n.id == id) {
-				_charAtluss.emplace(id, CharAtlus(_physicalDevice.getMemoryProperties(), _device, _queue, n));
-				return;
-			}
-		}
-		throw std::format("the font id '{}' is not defined.", id);
-	}
-
-	void disactivateFont(const std::string &id) noexcept {
-		if (_charAtluss.contains(id)) {
-			_charAtluss.at(id).destroy(_device);
-			_charAtluss.erase(id);
 		}
 	}
 

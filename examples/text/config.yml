@@ -10,18 +10,9 @@ subpasses:
     outputs: [RT]
 pipelines:
   - id: PL
-    vertex-shader: shader.vert.spv
-    fragment-shader: shader.frag.spv
-    desc-sets:
-      - count: 1
-        bindings:
-          - type: texture
-            stage: fragment
-          - type: sampler
-            stage: fragment
-    vertex-input-attributes: [3, 2]
-    color-blends: [false]
+    text-rendering: true
     subpass: SP
+    char-count: 128
 fonts:
   - id: font
     path: MPLUS1p-Regular.ttf

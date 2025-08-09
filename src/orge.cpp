@@ -269,14 +269,6 @@ void orgeDestroyMesh(const char *id) {
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
-uint8_t orgeActivateFont(const char *id) {
-	TRY(g_graphics->activateFont(id));
-}
-
-void orgeDisactivateFont(const char *id) {
-	g_graphics->disactivateFont(id);
-}
-
 uint8_t orgePutString(const char *id, const char *s) {
 	TRY(g_graphics->putString(id, s));
 }
