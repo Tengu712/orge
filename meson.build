@@ -112,6 +112,7 @@ sources = [
   'src/audio/wave.cpp',
   'src/config/config.cpp',
   'src/error/error.cpp',
+  'src/graphics/charatlus.cpp',
   'src/graphics/descpool.cpp',
   'src/graphics/framebuffer.cpp',
   'src/graphics/graphics.cpp',
@@ -126,6 +127,9 @@ sources = [
 
 # includeを追加
 add_project_arguments('-I' + meson.current_source_dir() / 'include', language: 'cpp')
+
+# include-internalを追加
+add_project_arguments('-I' + meson.current_source_dir() / 'include-internal', language: 'cpp')
 
 # 追加のコンパイラフラグを生成
 cpp_args = []
@@ -329,6 +333,7 @@ if get_option('build_examples')
     'examples/sampler',
     'examples/multipass',
     'examples/audio',
+    'examples/text',
   ]
 else
   if get_option('build_example_simple')
@@ -354,6 +359,9 @@ else
   endif
   if get_option('build_example_audio')
     example_dirs += ['examples/audio']
+  endif
+  if get_option('build_example_text')
+    example_dirs += ['examples/text']
   endif
 endif
 

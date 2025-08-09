@@ -3,6 +3,8 @@
 #include "../config/config.hpp"
 
 #include <fstream>
+#include <text-shader-frag-spv.cpp>
+#include <text-shader-vert-spv.cpp>
 
 namespace graphics {
 
@@ -10,6 +12,11 @@ struct PipelineCreateTemporaryInfos {
 	// シェーダステージ
 	vk::ShaderModule vertexShader;
 	vk::ShaderModule fragmentShader;
+	uint32_t texCount;
+	vk::SpecializationMapEntry vspme;
+	vk::SpecializationInfo vspi;
+	vk::SpecializationMapEntry fspme;
+	vk::SpecializationInfo fspi;
 	std::vector<vk::PipelineShaderStageCreateInfo> sscis;
 
 	// 頂点入力
@@ -43,8 +50,13 @@ struct PipelineCreateTemporaryInfos {
 	std::vector<InputAttachment> inputs;
 };
 
+vk::ShaderModule createShaderModule(const vk::Device &device, const std::vector<uint32_t> &code) {
+	const auto ci = vk::ShaderModuleCreateInfo()
+		.setCode(code);
+	return device.createShaderModule(ci);
+}
 
-vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
+vk::ShaderModule createShaderModuleFromFile(const vk::Device &device, const std::string &path) {
 	std::fstream file(path, std::ios::in | std::ios::binary);
 	if (!file) {
 		return nullptr;
@@ -65,9 +77,7 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 		return nullptr;
 	}
 
-	const auto ci = vk::ShaderModuleCreateInfo()
-		.setCode(code);
-	return device.createShaderModule(ci);
+	return createShaderModule(device, code);
 }
 
 vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent) {
@@ -123,8 +133,28 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		auto &cti = ctis.back();
 
 		// シェーダステージ
-		cti.vertexShader = createShaderModule(device, n.vertexShader);
-		cti.fragmentShader = createShaderModule(device, n.fragmentShader);
+		if (n.textRendering) {
+			cti.vertexShader = createShaderModule(device, std::vector<uint32_t>(
+				reinterpret_cast<uint32_t *>(text_shader_vert_spv),
+				reinterpret_cast<uint32_t *>(text_shader_vert_spv + text_shader_vert_spv_len)
+			));
+			cti.fragmentShader = createShaderModule(device, std::vector<uint32_t>(
+				reinterpret_cast<uint32_t *>(text_shader_frag_spv),
+				reinterpret_cast<uint32_t *>(text_shader_frag_spv + text_shader_frag_spv_len)
+			));
+			cti.texCount = static_cast<uint32_t>(config::config().fonts.size());
+			cti.vspme = vk::SpecializationMapEntry(0, 0, sizeof(uint32_t));
+			cti.vspi = vk::SpecializationInfo(1, &cti.vspme, sizeof(uint32_t), &n.charCount);
+			cti.fspme = vk::SpecializationMapEntry(1, 0, sizeof(uint32_t));
+			cti.fspi = vk::SpecializationInfo(1, &cti.fspme, sizeof(uint32_t), &cti.texCount);
+		} else {
+			cti.vertexShader = createShaderModuleFromFile(device, n.vertexShader);
+			cti.fragmentShader = createShaderModuleFromFile(device, n.fragmentShader);
+			cti.vspme = vk::SpecializationMapEntry();
+			cti.vspi = vk::SpecializationInfo();
+			cti.fspme = vk::SpecializationMapEntry();
+			cti.fspi = vk::SpecializationInfo();
+		}
 		if (!cti.vertexShader || !cti.fragmentShader) {
 			throw "failed to create shader modules.";
 		}
@@ -132,13 +162,15 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 			vk::PipelineShaderStageCreateFlags(),
 			vk::ShaderStageFlagBits::eVertex,
 			cti.vertexShader,
-			"main"
+			"main",
+			&cti.vspi
 		);
 		cti.sscis.emplace_back(
 			vk::PipelineShaderStageCreateFlags(),
 			vk::ShaderStageFlagBits::eFragment,
 			cti.fragmentShader,
-			"main"
+			"main",
+			&cti.fspi
 		);
 
 		// 頂点入力

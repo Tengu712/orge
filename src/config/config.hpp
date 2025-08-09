@@ -83,8 +83,22 @@ struct PipelineConfig {
 	const bool depthTest;
 	const std::vector<bool> colorBlends;
 	const std::string subpass;
+	const bool textRendering;
+	const uint32_t charCount;
 
 	PipelineConfig(const YAML::Node &node);
+	PipelineConfig(const YAML::Node &node, const std::string &id);
+	PipelineConfig(const YAML::Node &node, bool textRendering);
+};
+
+struct FontConfig {
+	const std::string id;
+	const std::optional<std::string> path;
+	const uint32_t charSize;
+	const uint32_t charAtlusCol;
+	const uint32_t charAtlusRow;
+
+	FontConfig(const YAML::Node &node);
 };
 
 struct Config {
@@ -97,6 +111,7 @@ struct Config {
 	const std::vector<AttachmentConfig> attachments;
 	const std::vector<SubpassConfig> subpasses;
 	const std::vector<PipelineConfig> pipelines;
+	const std::vector<FontConfig> fonts;
 
 	const std::unordered_map<std::string, uint32_t> attachmentMap;
 	const std::unordered_map<std::string, uint32_t> subpassMap;

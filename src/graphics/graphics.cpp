@@ -1,5 +1,7 @@
 #include "graphics.hpp"
 
+#include "../config/config.hpp"
+
 #include <SDL3/SDL_vulkan.h>
 
 namespace graphics {
@@ -93,6 +95,9 @@ Graphics::Graphics() :
 	_renderer(_instance, _physicalDevice, _device, _commandPool)
 {
 	initializeUtils(_device, _commandPool);
+	for (const auto &n: config::config().fonts) {
+		_charAtluss.emplace(n.id, CharAtlus(_physicalDevice.getMemoryProperties(), _device, _queue, n));
+	}
 }
 
 } // namespace graphics

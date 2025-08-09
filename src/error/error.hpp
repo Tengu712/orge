@@ -23,6 +23,15 @@ const auto &at(const T &container, const U &key, const std::string &subject) {
 	}
 }
 
+template<typename T, typename U>
+auto &atMut(T &container, const U &key, const std::string &subject) {
+	try {
+		return container.at(key);
+	} catch (const std::out_of_range &) {
+		throw std::out_of_range(std::format("the key '{}' is invalid for {}.", enumToInt64String(key), subject));
+	}
+}
+
 void setMessage(const std::string &e);
 
 const std::string &getMessage();

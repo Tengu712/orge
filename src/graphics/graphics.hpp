@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../error/error.hpp"
+#include "charatlus.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
@@ -24,6 +25,7 @@ private:
 	std::unordered_map<std::string, Image> _images;
 	std::unordered_map<std::string, vk::Sampler> _samplers;
 	std::unordered_map<std::string, Mesh> _meshes;
+	std::unordered_map<std::string, CharAtlus> _charAtluss;
 
 public:
 	Graphics(const Graphics &)  = delete;
@@ -36,6 +38,9 @@ public:
 	~Graphics() {
 		_device.waitIdle();
 		terminateUtils(_device);
+		for (const auto &n: _charAtluss) {
+			n.second.destroy(_device);
+		}
 		for (const auto &n: _meshes) {
 			n.second.destroy(_device);
 		}
@@ -83,7 +88,7 @@ public:
 	}
 
 	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
+		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels, false));
 	}
 
 	void createImage(const std::string &id, const std::string &path) {
@@ -165,6 +170,10 @@ public:
 			_meshes.at(id).destroy(_device);
 			_meshes.erase(id);
 		}
+	}
+
+	void putString(const std::string &id, const std::string &s) {
+		error::atMut(_charAtluss, id, "fonts").putString(_physicalDevice.getMemoryProperties(), _device, _queue, s);
 	}
 
 	void beginRender() {
