@@ -96,7 +96,7 @@ void CharAtlus::putString(
 		if (!_chars.popOldestIfSaturated(x, y)) {
 			const auto n = _chars.size();
 			x = n % _config.charAtlusCol * _config.charSize;
-			y = n / _config.charAtlusRow * _config.charSize;
+			y = n / _config.charAtlusCol * _config.charSize;
 		}
 
 		// アップロード
