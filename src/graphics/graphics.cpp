@@ -189,9 +189,9 @@ void Graphics::putText(
 	for (auto &n: instances) {
 		// クリッピング座標系へ
 		n.transform[12] -= extentW / 2.0f;
-		n.transform[12] /= extentW;
+		n.transform[12] /= extentW / 2.0f;
 		n.transform[13] -= extentH / 2.0f;
-		n.transform[13] /= extentH;
+		n.transform[13] /= extentH / 2.0f;
 	}
 
 	// アップロード
