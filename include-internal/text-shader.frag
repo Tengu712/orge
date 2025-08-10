@@ -1,6 +1,6 @@
 #version 450
 
-layout(constant_id = 1) const int TEX_COUNT = 1;
+layout(constant_id = 0) const int TEX_COUNT = 1;
 
 layout(set = 1, binding = 0) uniform texture2D tex[TEX_COUNT];
 layout(set = 1, binding = 1) uniform sampler smplr;
