@@ -136,6 +136,11 @@ public:
 		_commandBuffer.drawIndexed(_frameInfo->meshIndexCount, instanceCount, 0, 0, instanceOffset);
 	}
 
+	void drawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset) const {
+		_ensureWhileRendering("try to draw before starting rendering.");
+		_commandBuffer.draw(vertexCount, instanceCount, 0, instanceOffset);
+	}
+
 	void resetRendering(const vk::Device &device) {
 		_commandBuffer.reset();
 		for (auto &n : _semaphoreForRenderFinisheds) {

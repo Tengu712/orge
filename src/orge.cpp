@@ -266,6 +266,40 @@ void orgeDestroyMesh(const char *id) {
 }
 
 // ================================================================================================================== //
+//     Text Rendering                                                                                                 //
+// ================================================================================================================== //
+
+uint8_t orgeRasterizeCharacters(const char *id, const char *s) {
+	TRY(g_graphics->rasterizeCharacters(id, s));
+}
+
+uint8_t orgePutText(
+	const char *pipelineId,
+	const char *fontId,
+	const char *text,
+	float x,
+	float y,
+	float height,
+	uint32_t horizontal,
+	uint32_t vertical
+) {
+	TRY(g_graphics->putText(
+		pipelineId,
+		fontId,
+		text,
+		x,
+		y,
+		height,
+		static_cast<OrgeTextLocationHorizontal>(horizontal),
+		static_cast<OrgeTextLocationVertical>(vertical)
+	));
+}
+
+uint8_t orgeDrawTexts(const char *pipelineId) {
+	TRY(g_graphics->drawTexts(pipelineId));
+}
+
+// ================================================================================================================== //
 //     Rendering                                                                                                      //
 // ================================================================================================================== //
 

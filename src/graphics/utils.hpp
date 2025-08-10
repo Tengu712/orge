@@ -62,6 +62,13 @@ inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &d
 	device.unmapMemory(dst);
 }
 
+template<typename T>
+inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &dst, const T *src, size_t size, size_t offset) {
+	const auto p = static_cast<T *>(device.mapMemory(dst, sizeof(T) * offset, size));
+	memcpy(p, src, size);
+	device.unmapMemory(dst);
+}
+
 void uploadBuffer(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
@@ -79,6 +86,9 @@ void uploadImage(
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,
+	uint32_t channels,
+	uint32_t offsetX,
+	uint32_t offsetY,
 	const uint8_t *src
 );
 

@@ -1,0 +1,21 @@
+title: text
+width: 640
+height: 480
+attachments:
+  - id: RT
+    format: render-target
+    clear-value: [0.0, 0.0, 0.0, 1.0]
+subpasses:
+  - id: SP
+    outputs: [RT]
+pipelines:
+  - id: PL
+    text-rendering: true
+    subpass: SP
+    char-count: 128
+fonts:
+  - id: font
+    path: MPLUS1p-Regular.ttf
+    char-size: 28
+    char-atlus-col: 128
+    char-atlus-row: 128

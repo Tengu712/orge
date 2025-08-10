@@ -1,11 +1,13 @@
 #pragma once
 
 #include "../error/error.hpp"
+#include "charatlus.hpp"
 #include "buffer.hpp"
 #include "image.hpp"
 #include "mesh.hpp"
 #include "renderer.hpp"
 
+#include <orge.h>
 #include <string>
 #include <unordered_map>
 
@@ -24,6 +26,9 @@ private:
 	std::unordered_map<std::string, Image> _images;
 	std::unordered_map<std::string, vk::Sampler> _samplers;
 	std::unordered_map<std::string, Mesh> _meshes;
+	std::unordered_map<std::string, CharAtlus> _charAtluss;
+	std::unordered_map<std::string, uint32_t> _charCounts;
+	std::unordered_map<std::string, size_t> _textOffset;
 
 public:
 	Graphics(const Graphics &)  = delete;
@@ -36,6 +41,9 @@ public:
 	~Graphics() {
 		_device.waitIdle();
 		terminateUtils(_device);
+		for (const auto &n: _charAtluss) {
+			n.second.destroy(_device);
+		}
 		for (const auto &n: _meshes) {
 			n.second.destroy(_device);
 		}
@@ -83,7 +91,7 @@ public:
 	}
 
 	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels));
+		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels, false));
 	}
 
 	void createImage(const std::string &id, const std::string &path) {
@@ -167,9 +175,33 @@ public:
 		}
 	}
 
-	void beginRender() {
-		_renderer.beginRender(_device);
+	void rasterizeCharacters(const std::string &id, const std::string &s) {
+		error::atMut(_charAtluss, id, "fonts")
+			.rasterizeCharacters(_physicalDevice.getMemoryProperties(), _device, _queue, s);
 	}
+
+	void putText(
+		const std::string &pipelineId,
+		const std::string &fontId,
+		const std::string &text,
+		float x,
+		float y,
+		float height,
+		OrgeTextLocationHorizontal horizontal,
+		OrgeTextLocationVertical vertical
+	);
+
+	void drawTexts(const std::string &pipelineId) {
+		if (!_textOffset.contains(pipelineId)) {
+			return;
+		}
+		const uint32_t indices[] = {0, 0};
+		_renderer.bindDescriptorSets(pipelineId, indices);
+		_renderer.bindPipeline(_device, pipelineId);
+		_renderer.drawDirectly(4, static_cast<uint32_t>(_textOffset[pipelineId]), 0);
+	}
+
+	void beginRender();
 
 	void bindDescriptorSets(const std::string &pipelineId, uint32_t const *indices) const {
 		_renderer.bindDescriptorSets(pipelineId, indices);
@@ -187,10 +219,12 @@ public:
 
 	void endRender() {
 		_renderer.endRender(_device, _queue);
+		_textOffset.clear();
 	}
 
 	void resetRendering() {
 		_device.waitIdle();
+		_textOffset.clear();
 		_renderer.resetRendering(_device);
 	}
 

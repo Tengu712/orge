@@ -171,8 +171,8 @@ DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node):
 	checkUnexpectedKeys(node, {"count", "bindings"});
 }
 
-PipelineConfig::PipelineConfig(const YAML::Node &node):
-	id(s(node, "id")),
+PipelineConfig::PipelineConfig(const YAML::Node &node, const std::string &id):
+	id(id),
 	vertexShader(s(node, "vertex-shader")),
 	fragmentShader(s(node, "fragment-shader")),
 	descSets(parseConfigs<DescriptorSetConfig>(node, "desc-sets")),
@@ -180,7 +180,9 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	culling(b(node, "culling", false)),
 	depthTest(b(node, "depth-test", false)),
 	colorBlends(bs(node, "color-blends")),
-	subpass(s(node, "subpass"))
+	subpass(s(node, "subpass")),
+	textRendering(false),
+	charCount(0)
 {
 	checkUnexpectedKeys(
 		node,
@@ -195,6 +197,57 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	}
 }
 
+std::vector<DescriptorSetConfig> createTextRenderingPipelineDescSets(uint32_t texCount) {
+	std::vector<DescriptorSetConfig> descSets;
+
+	std::vector<DescriptorBindingConfig> bindings1;
+	bindings1.emplace_back(DescriptorType::StorageBuffer, 1, ShaderStages::Vertex);
+	descSets.emplace_back(1, std::move(bindings1));
+
+	std::vector<DescriptorBindingConfig> bindings2;
+	bindings2.emplace_back(DescriptorType::Texture, texCount, ShaderStages::Fragment);
+	bindings2.emplace_back(DescriptorType::Sampler, 1, ShaderStages::Fragment);
+	descSets.emplace_back(1, std::move(bindings2));
+
+	return descSets;
+}
+
+PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
+	id(s(node, "id")),
+	vertexShader(""),
+	fragmentShader(""),
+	descSets(createTextRenderingPipelineDescSets(texCount)),
+	vertexInputAttributes(),
+	culling(false),
+	depthTest(false),
+	colorBlends{true},
+	subpass(s(node, "subpass")),
+	textRendering(true),
+	charCount(u(node, "char-count"))
+{
+	checkUnexpectedKeys(node, {"id", "text-rendering", "subpass", "char-count"});
+}
+
+FontConfig::FontConfig(const YAML::Node &node):
+	id(s(node, "id")),
+	path(node["path"] ? std::make_optional(s(node, "path")) : std::nullopt),
+	charSize(u(node, "char-size")),
+	charAtlusCol(u(node, "char-atlus-col")),
+	charAtlusRow(u(node, "char-atlus-row"))
+{
+	checkUnexpectedKeys(node, {"id", "path", "char-size", "char-atlus-col", "char-atlus-row"});
+
+	if (charSize == 0) {
+		throw "config error: 'char-size' must be greater than 0.";
+	}
+	if (charAtlusCol == 0) {
+		throw "config error: 'char-atlus-col' must be greater than 0.";
+	}
+	if (charAtlusRow == 0) {
+		throw "config error: 'char-atlus-row' must be greater than 0.";
+	}
+}
+
 template<typename T>
 std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 	std::unordered_map<std::string, uint32_t> map;
@@ -204,6 +257,18 @@ std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 	return map;
 }
 
+std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_t texCount) {
+	std::vector<PipelineConfig> results;
+	for (const auto &n: node["pipelines"]) {
+		if (b(n, "text-rendering", false)) {
+			results.emplace_back(n, texCount);
+		} else {
+			results.emplace_back(n, s(n, "id"));
+		}
+	}
+	return results;
+}
+
 Config::Config(YAML::Node node):
 	title(s(node, "title")),
 	width(u(node, "width")),
@@ -211,11 +276,13 @@ Config::Config(YAML::Node node):
 	fullscreen(b(node, "fullscreen", false)),
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	audioChannelCount(u(node, "audio-channel-count", 16)),
+	fonts(parseConfigs<FontConfig>(node, "fonts")),
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
-	pipelines(parseConfigs<PipelineConfig>(node, "pipelines")),
+	pipelines(parsePipelineConfigs(node, static_cast<uint32_t>(fonts.size()))),
 	attachmentMap(collectMap(attachments)),
-	subpassMap(collectMap(subpasses))
+	subpassMap(collectMap(subpasses)),
+	fontMap(collectMap(fonts))
 {
 	checkUnexpectedKeys(
 		node,
@@ -229,6 +296,7 @@ Config::Config(YAML::Node node):
 			"attachments",
 			"subpasses",
 			"pipelines",
+			"fonts",
 		}
 	);
 
@@ -255,6 +323,7 @@ Config::Config(YAML::Node node):
 			}
 		}
 	}
+	std::set<std::string> textRenderingPipelineSubpasses;
 	for (const auto &n: pipelines) {
 		for (const auto &m: n.descSets) {
 			for (const auto &x: m.bindings) {
@@ -268,6 +337,12 @@ Config::Config(YAML::Node node):
 		}
 		if (!subpassMap.contains(n.subpass)) {
 			throw std::format("config error: subpass '{}' not defined.", n.subpass);
+		}
+		if (n.textRendering) {
+			if (textRenderingPipelineSubpasses.contains(n.subpass)) {
+				throw std::format("config error: Subpasses corresponding to the text rendering pipeline must be injective: {}", n.subpass);
+			}
+			textRenderingPipelineSubpasses.emplace(n.subpass);
 		}
 	}
 }

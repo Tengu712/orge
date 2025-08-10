@@ -38,8 +38,14 @@ public:
 		return _isStorage;
 	}
 
-	void update(const vk::Device &device, const void *data) const {
+	template<typename T>
+	void update(const vk::Device &device, const T *data) const {
 		copyDataToMemory(device, _memory, data, _size);
+	}
+
+	template<typename T>
+	void update(const vk::Device &device, const T *data, size_t size, size_t offset) const {
+		copyDataToMemory(device, _memory, data, size, offset);
 	}
 };
 

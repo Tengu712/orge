@@ -3,6 +3,8 @@
 #include "../config/config.hpp"
 
 #include <fstream>
+#include <text-shader-frag-spv.cpp>
+#include <text-shader-vert-spv.cpp>
 
 namespace graphics {
 
@@ -10,12 +12,18 @@ struct PipelineCreateTemporaryInfos {
 	// シェーダステージ
 	vk::ShaderModule vertexShader;
 	vk::ShaderModule fragmentShader;
+	uint32_t texCount;
+	vk::SpecializationMapEntry fspme;
+	vk::SpecializationInfo fspi;
 	std::vector<vk::PipelineShaderStageCreateInfo> sscis;
 
 	// 頂点入力
 	std::vector<vk::VertexInputAttributeDescription> viads;
 	std::vector<vk::VertexInputBindingDescription> vibds;
 	vk::PipelineVertexInputStateCreateInfo visci;
+
+	// 頂点アセンブリ
+	vk::PipelineInputAssemblyStateCreateInfo iasci;
 
 	// ラスタライゼーション
 	vk::PipelineRasterizationStateCreateInfo rsci;
@@ -43,8 +51,13 @@ struct PipelineCreateTemporaryInfos {
 	std::vector<InputAttachment> inputs;
 };
 
+vk::ShaderModule createShaderModule(const vk::Device &device, const std::vector<uint32_t> &code) {
+	const auto ci = vk::ShaderModuleCreateInfo()
+		.setCode(code);
+	return device.createShaderModule(ci);
+}
 
-vk::ShaderModule createShaderModule(const vk::Device &device, const std::string &path) {
+vk::ShaderModule createShaderModuleFromFile(const vk::Device &device, const std::string &path) {
 	std::fstream file(path, std::ios::in | std::ios::binary);
 	if (!file) {
 		return nullptr;
@@ -65,9 +78,7 @@ vk::ShaderModule createShaderModule(const vk::Device &device, const std::string 
 		return nullptr;
 	}
 
-	const auto ci = vk::ShaderModuleCreateInfo()
-		.setCode(code);
-	return device.createShaderModule(ci);
+	return createShaderModule(device, code);
 }
 
 vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent) {
@@ -96,10 +107,6 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		return {};
 	}
 
-	// 入力アセンブリ
-	const auto iasci = vk::PipelineInputAssemblyStateCreateInfo()
-		.setTopology(vk::PrimitiveTopology::eTriangleList);
-
 	// ビューポート
 	std::vector<vk::Viewport> viewports;
 	viewports.emplace_back(adjustViewport(config::config().width, config::config().height, extent));
@@ -123,8 +130,24 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		auto &cti = ctis.back();
 
 		// シェーダステージ
-		cti.vertexShader = createShaderModule(device, n.vertexShader);
-		cti.fragmentShader = createShaderModule(device, n.fragmentShader);
+		if (n.textRendering) {
+			cti.vertexShader = createShaderModule(device, std::vector<uint32_t>(
+				reinterpret_cast<uint32_t *>(text_shader_vert_spv),
+				reinterpret_cast<uint32_t *>(text_shader_vert_spv + text_shader_vert_spv_len)
+			));
+			cti.fragmentShader = createShaderModule(device, std::vector<uint32_t>(
+				reinterpret_cast<uint32_t *>(text_shader_frag_spv),
+				reinterpret_cast<uint32_t *>(text_shader_frag_spv + text_shader_frag_spv_len)
+			));
+			cti.texCount = static_cast<uint32_t>(config::config().fonts.size());
+			cti.fspme = vk::SpecializationMapEntry(0, 0, sizeof(uint32_t));
+			cti.fspi = vk::SpecializationInfo(1, &cti.fspme, sizeof(uint32_t), &cti.texCount);
+		} else {
+			cti.vertexShader = createShaderModuleFromFile(device, n.vertexShader);
+			cti.fragmentShader = createShaderModuleFromFile(device, n.fragmentShader);
+			cti.fspme = vk::SpecializationMapEntry();
+			cti.fspi = vk::SpecializationInfo();
+		}
 		if (!cti.vertexShader || !cti.fragmentShader) {
 			throw "failed to create shader modules.";
 		}
@@ -138,7 +161,8 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 			vk::PipelineShaderStageCreateFlags(),
 			vk::ShaderStageFlagBits::eFragment,
 			cti.fragmentShader,
-			"main"
+			"main",
+			&cti.fspi
 		);
 
 		// 頂点入力
@@ -160,6 +184,10 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 		cti.visci = vk::PipelineVertexInputStateCreateInfo()
 			.setVertexBindingDescriptions(cti.vibds)
 			.setVertexAttributeDescriptions(cti.viads);
+
+		// 頂点アセンブリ
+		cti.iasci = vk::PipelineInputAssemblyStateCreateInfo()
+			.setTopology(n.textRendering ? vk::PrimitiveTopology::eTriangleStrip : vk::PrimitiveTopology::eTriangleList);
 
 		// ラスタライゼーション
 		cti.rsci = vk::PipelineRasterizationStateCreateInfo()
@@ -272,7 +300,7 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 			vk::GraphicsPipelineCreateInfo()
 				.setStages(cti.sscis)
 				.setPVertexInputState(&cti.visci)
-				.setPInputAssemblyState(&iasci)
+				.setPInputAssemblyState(&cti.iasci)
 				.setPViewportState(&vsci)
 				.setPRasterizationState(&cti.rsci)
 				.setPMultisampleState(&msci)
