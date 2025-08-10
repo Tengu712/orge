@@ -224,6 +224,7 @@ public:
 
 	void resetRendering() {
 		_device.waitIdle();
+		_textOffset.clear();
 		_renderer.resetRendering(_device);
 	}
 
