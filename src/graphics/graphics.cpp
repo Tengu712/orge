@@ -204,8 +204,8 @@ void Graphics::putText(
 		n.transform[0] = meshSize;
 		n.transform[5] = meshSize;
 		n.transform[10] = 1.0f;
-		n.transform[12] = x + c->ox;
-		n.transform[13] = y + c->oy;
+		n.transform[12] = std::round(x + c->ox);
+		n.transform[13] = std::round(y + c->oy);
 		n.transform[15] = 1.0f;
 		n.uv[0] = c->u;
 		n.uv[1] = c->v;
@@ -254,6 +254,10 @@ void Graphics::putText(
 			n.transform[13] -= entireHeight;
 			break;
 		}
+
+		// XY座標を整数値に
+		n.transform[12] = std::round(n.transform[12]);
+		n.transform[13] = std::round(n.transform[13]);
 
 		// クリッピング座標系へ
 		n.transform[0] /= extentW;
