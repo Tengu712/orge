@@ -130,7 +130,6 @@ void CharAtlus::rasterizeCharacters(
 		// 無効な字なら安全のために情報をリセット
 		else {
 			w = 0;
-			h = 0;
 			ox = 0;
 			oy = 0;
 		}
@@ -140,7 +139,6 @@ void CharAtlus::rasterizeCharacters(
 			x,
 			y,
 			static_cast<float>(w),
-			static_cast<float>(h),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
 			static_cast<float>(advance) * _scale,

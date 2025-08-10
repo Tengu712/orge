@@ -9,7 +9,6 @@ struct Character {
 	const uint32_t y;
 
 	const float w;
-	const float h;
 	const float ox;
 	const float oy;
 	const float advance;
@@ -21,7 +20,6 @@ struct Character {
 		uint32_t x,
 		uint32_t y,
 		float w,
-		float h,
 		float ox,
 		float oy,
 		float advance,
@@ -31,7 +29,6 @@ struct Character {
 		x(x),
 		y(y),
 		w(w),
-		h(h),
 		ox(ox),
 		oy(oy),
 		advance(advance),
@@ -42,7 +39,6 @@ struct Character {
 
 struct ScaledCharacter {
 	const float w;
-	const float h;
 	const float ox;
 	const float oy;
 	const float advance;
@@ -50,8 +46,8 @@ struct ScaledCharacter {
 	const float u;
 	const float v;
 
-	ScaledCharacter(float w, float h, float ox, float oy, float advance, float u, float v):
-		w(w), h(h), ox(ox), oy(oy), advance(advance), u(u), v(v)
+	ScaledCharacter(float w, float ox, float oy, float advance, float u, float v):
+		w(w), ox(ox), oy(oy), advance(advance), u(u), v(v)
 	{}
 };
 

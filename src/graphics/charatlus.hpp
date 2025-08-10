@@ -49,7 +49,6 @@ public:
 			const auto &c = _chars.use(codepoint);
 			return std::make_optional<ScaledCharacter>(
 				_scaled(c.w, height),
-				_scaled(c.h, height),
 				_scaled(c.ox, height),
 				_scaled(c.oy, height),
 				_scaled(c.advance, height),
