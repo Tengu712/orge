@@ -129,10 +129,10 @@ void CharAtlus::putString(
 		}
 		// 無効な字なら安全のために情報をリセット
 		else {
-			w = 0.0f;
-			h = 0.0f;
-			ox = 0.0f;
-			oy = 0.0f;
+			w = 0;
+			h = 0;
+			ox = 0;
+			oy = 0;
 		}
 
 		// 登録
