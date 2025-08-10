@@ -20,6 +20,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ================================================================================================================== //
 //     Information                                                                                                    //
 // ================================================================================================================== //
@@ -387,3 +391,7 @@ API_EXPORT void orgeDestroyWave(const char *id);
 /// index番目の音声チャンネルとidのWAVEの音声互換性がない場合、音声ストリームが再作成される。
 /// index番目の音声チャンネルが音声を再生している場合、その音声を中断してidのWAVEを再生する。
 API_EXPORT uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);
+
+#ifdef __cplusplus
+}
+#endif
