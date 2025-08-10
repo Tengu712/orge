@@ -323,6 +323,7 @@ Config::Config(YAML::Node node):
 			}
 		}
 	}
+	std::set<std::string> subpasses;
 	for (const auto &n: pipelines) {
 		for (const auto &m: n.descSets) {
 			for (const auto &x: m.bindings) {
@@ -336,6 +337,12 @@ Config::Config(YAML::Node node):
 		}
 		if (!subpassMap.contains(n.subpass)) {
 			throw std::format("config error: subpass '{}' not defined.", n.subpass);
+		}
+		if (n.textRendering) {
+			if (subpasses.contains(n.subpass)) {
+				throw std::format("config error: Subpasses corresponding to the text rendering pipeline must be injective: {}", n.subpass);
+			}
+			subpasses.emplace(n.subpass);
 		}
 	}
 }
