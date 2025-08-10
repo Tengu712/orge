@@ -94,6 +94,8 @@ meson install -C build
 
 examples下のサンプルプログラムをビルドするためにはmeson setup時に`-Dbuild_examples=true`あるいは`-Dbuild_example_<EXAMPLE_NAME>=true`を与える。
 
+ただし、他言語での利用に関するサンプルプログラムに関しては、上記の方法ではビルドされないため、各サンプルのREADME.mdを参照すること。
+
 ## Enable Vulkan Validation Layer
 
 Vulkan Validation Layerを有効化するためには、orgeのCMake構成時に`-Denale_vvl=true`を与える。
