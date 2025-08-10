@@ -148,9 +148,8 @@ void Graphics::putText(
 	const auto meshSize = charAtlus.calcMeshSize(height);
 	const auto ru = charAtlus.getRangeOfU();
 	const auto rv = charAtlus.getRangeOfV();
-	const auto &extent = _renderer.getExtent();
-	const auto extentW = static_cast<float>(extent.width);
-	const auto extentH = static_cast<float>(extent.height);
+	const auto extentW = static_cast<float>(config::config().width);
+	const auto extentH = static_cast<float>(config::config().height);
 	const auto offset = _textOffset.contains(pipelineId) ? static_cast<size_t>(_textOffset[pipelineId]) : 0;
 	const auto charCount = error::at(_charCounts, pipelineId, "pipelines");
 

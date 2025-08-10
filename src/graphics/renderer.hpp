@@ -98,10 +98,6 @@ public:
 		return error::at(_pipelines, id, "pipelines");
 	}
 
-	const vk::Extent2D &getExtent() const noexcept {
-		return _swapchain.getExtent();
-	}
-
 	void beginRender(const vk::Device &device);
 
 	void endRender(const vk::Device &device, const vk::Queue &queue);
