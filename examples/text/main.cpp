@@ -15,7 +15,7 @@
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
-	TRY(orgePutString("font", "歓迎しますorge"));
+	TRY(orgePutString("font", "Text Rendering Sample歓迎しますorge"));
 
 	float x = 0.0f;
 	float y = 0.0f;
@@ -48,10 +48,20 @@ int main() {
 		CHECK(orgePutText(
 			"PL",
 			"font",
-			"歓迎しま\nすorge",
+			"Text Rendering Sample",
+			320.0f,
+			120.0f,
+			28.0f,
+			static_cast<uint32_t>(ORGE_TEXT_LOCATION_HORIZONTAL_CENTER),
+			static_cast<uint32_t>(ORGE_TEXT_LOCATION_VERTICAL_MIDDLE)
+		));
+		CHECK(orgePutText(
+			"PL",
+			"font",
+			"歓迎しま\nすorgeaaaaaaaaaaaaaaa\naaaaaaaaaaaaa\naaaaaaaaaaaa\naaaaaaaaaaaa\naaaaaaaaaaaaaaaaa\neeeeeeeeeeee\neeeeeeee\neeeeeeeeeeeeeee\naaaaaaaa",
 			x,
 			y,
-			32.0f,
+			28.0f,
 			static_cast<uint32_t>(horizontal),
 			static_cast<uint32_t>(vertical)
 		));

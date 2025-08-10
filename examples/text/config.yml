@@ -16,6 +16,6 @@ pipelines:
 fonts:
   - id: font
     path: MPLUS1p-Light.ttf
-    char-size: 32
-    char-atlus-col: 12
-    char-atlus-row: 12
+    char-size: 28
+    char-atlus-col: 128
+    char-atlus-row: 128

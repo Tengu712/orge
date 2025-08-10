@@ -27,6 +27,7 @@ private:
 	std::unordered_map<std::string, vk::Sampler> _samplers;
 	std::unordered_map<std::string, Mesh> _meshes;
 	std::unordered_map<std::string, CharAtlus> _charAtluss;
+	std::unordered_map<std::string, uint32_t> _charCounts;
 	std::unordered_map<std::string, uint32_t> _textOffset;
 
 public:

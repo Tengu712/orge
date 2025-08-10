@@ -117,6 +117,7 @@ Graphics::Graphics() :
 			"@buffer@" + n.id,
 			Buffer(_physicalDevice.getMemoryProperties(), _device, sizeof(TextRenderingInstance) * n.charCount, true)
 		);
+		_charCounts.emplace(n.id, n.charCount);
 	}
 
 	// テキストレンダリングパイプライン用のサンプラ作成
@@ -150,6 +151,8 @@ void Graphics::putText(
 	const auto &extent = _renderer.getExtent();
 	const auto extentW = static_cast<float>(extent.width);
 	const auto extentH = static_cast<float>(extent.height);
+	const auto offset = _textOffset.contains(pipelineId) ? static_cast<size_t>(_textOffset[pipelineId]) : 0;
+	const auto charCount = error::at(_charCounts, pipelineId, "pipelines");
 
 	// すべてのメッシュを左上原点にする
 	x += meshSize / 2.0f;
@@ -187,6 +190,11 @@ void Graphics::putText(
 		// NOTE: 文字が存在しない場合はスキップする。
 		if (!c) {
 			continue;
+		}
+
+		// 最大文字数に到達したら打ち切る
+		if (offset + count >= charCount) {
+			break;
 		}
 
 		instances.push_back({});
