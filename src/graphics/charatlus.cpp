@@ -91,7 +91,8 @@ void CharAtlus::putString(
 	auto end = s.end();
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
-		if (_chars.has(codepoint)) {
+		// NOTE: LFとCRもスキップする。
+		if (_chars.has(codepoint) || codepoint == 10 || codepoint == 13) {
 			continue;
 		}
 
@@ -109,7 +110,6 @@ void CharAtlus::putString(
 		// 文字送り幅取得
 		int advance;
 		stbtt_GetCodepointHMetrics(&_fontinfo, codepoint, &advance, nullptr);
-		advance *= _scale;
 
 		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
 		uint32_t x, y;
@@ -140,7 +140,7 @@ void CharAtlus::putString(
 			static_cast<float>(h),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
-			static_cast<float>(advance),
+			static_cast<float>(advance) * _scale,
 			static_cast<float>(x) / _width,
 			static_cast<float>(y) / _height
 		));

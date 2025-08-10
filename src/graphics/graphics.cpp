@@ -162,6 +162,7 @@ void Graphics::putText(
 	auto itr = text.begin();
 	auto end = text.end();
 	std::vector<TextRenderingInstance> instances;
+	const auto startX = x;
 	float minX = x;
 	float maxX = x;
 	uint32_t lfCount = 0;
@@ -169,7 +170,17 @@ void Graphics::putText(
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
 
-		// TODO: \rは無視、\nは改行
+		// LFは改行
+		if (codepoint == 10) {
+			x = startX;
+			y += charAtlus.calcLineAdvance(height);
+			lfCount += 1;
+			continue;
+		}
+		// CRはスキップ
+		if (codepoint == 13) {
+			continue;
+		}
 
 		const auto c = charAtlus.getScaledCharacter(codepoint, height);
 

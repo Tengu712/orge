@@ -48,7 +48,7 @@ int main() {
 		CHECK(orgePutText(
 			"PL",
 			"font",
-			"歓迎しますorge",
+			"歓迎しま\nすorge",
 			x,
 			y,
 			32.0f,
