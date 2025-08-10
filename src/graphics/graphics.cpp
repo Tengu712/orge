@@ -164,8 +164,7 @@ void Graphics::putText(
 	std::vector<TextRenderingInstance> instances;
 	float minX = x;
 	float maxX = x;
-	float minY = y;
-	float maxY = y;
+	uint32_t lfCount = 0;
 	uint32_t count = 0;
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
@@ -198,8 +197,6 @@ void Graphics::putText(
 
 		minX = std::min(minX, n.transform[12]);
 		maxX = std::max(maxX, n.transform[12] + c->w);
-		minY = std::min(minY, n.transform[13]);
-		maxY = std::max(maxY, n.transform[13] + c->h);
 
 		count += 1;
 	}
@@ -211,7 +208,7 @@ void Graphics::putText(
 
 	// 文字列全体のサイズを計算
 	const auto entireWidth  = maxX - minX;
-	const auto entireHeight = maxY - minY;
+	const auto entireHeight = meshSize + charAtlus.calcLineAdvance(height) * lfCount;
 
 	// 座標修正
 	for (auto &n: instances) {
