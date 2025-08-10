@@ -150,36 +150,56 @@ void Graphics::putText(
 	float size, ru, rv;
 	charAtlus.getCharacterCommonInfo(size, ru, rv);
 
+	// すべてのメッシュを左上原点にする
+	x += size * scale / 2.0f;
+	y += size * scale / 2.0f;
+
+	// Y座標をベースラインに移す
+	y += charAtlus.getAscent();
+
 	// すべての文字に対してとりあえず構築
 	auto itr = text.begin();
 	auto end = text.end();
 	std::vector<TextRenderingInstance> instances;
+	float entireWidth = 0.0f;
 	uint32_t count = 0;
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
+
+		// TODO: \rは無視、\nは改行
+
 		const auto c = charAtlus.getCharacter(codepoint);
-		// NOTE: 文字が存在しない場合はスキップする
+
+		// NOTE: 文字が存在しない場合はスキップする。
 		if (!c) {
 			continue;
 		}
+
 		instances.push_back({});
 		auto &n = instances.back();
 		std::fill_n(n.transform, 16, 0.0f);
+		std::fill_n(n.texId, 4, 0);
 		n.transform[0] = size * scale / extentW;
 		n.transform[5] = size * scale / extentH;
 		n.transform[10] = 1.0f;
-		n.transform[12] = x + c->ox;
-		n.transform[13] = y + c->oy;
+		n.transform[12] = x + c->ox * scale;
+		n.transform[13] = y + c->oy * scale;
 		n.transform[15] = 1.0f;
 		n.uv[0] = c->u;
 		n.uv[1] = c->v;
 		n.uv[2] = ru;
 		n.uv[3] = rv;
 		n.texId[0] = texId;
-		n.texId[1] = texId;
-		n.texId[2] = texId;
-		n.texId[3] = texId;
-		x += c->advance;
+		x += c->advance * scale;
+
+		// 最後の文字なら文字の幅を足す
+		if (itr == end) {
+			entireWidth += c->w;
+		}
+		// そうでないなら文字の送り幅を足す
+		else {
+			entireWidth += c->advance;
+		}
 		count += 1;
 	}
 
@@ -208,6 +228,7 @@ void Graphics::putText(
 		_textOffset.emplace(pipelineId, count);
 	}
 
+	(void)entireWidth;
 	(void)location;
 }
 

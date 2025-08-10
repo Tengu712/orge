@@ -4,6 +4,7 @@
 #include "charlru.hpp"
 #include "image.hpp"
 
+#include <stb_truetype.h>
 #include <vector>
 
 namespace graphics {
@@ -12,6 +13,10 @@ class CharAtlus {
 private:
 	const config::FontConfig &_config;
 	const std::vector<unsigned char> _font;
+	const stbtt_fontinfo _fontinfo;
+	const float _scale;
+	const float _ascent;
+	const float _lineAdvance;
 	const float _width;
 	const float _height;
 	Image _image;
@@ -46,6 +51,14 @@ public:
 		size = static_cast<float>(_config.charSize);
 		ru = static_cast<float>(_config.charSize) / _width;
 		rv = static_cast<float>(_config.charSize) / _height;
+	}
+
+	float getAscent() const noexcept {
+		return _ascent;
+	}
+
+	float getLineAdvance() const noexcept {
+		return _lineAdvance;
 	}
 
 	float calcScale(float height) const noexcept {

@@ -31,6 +31,27 @@ std::vector<unsigned char> loadFontFromFile(const std::string &path) {
 	return buffer;
 }
 
+stbtt_fontinfo createFontInfo(const std::vector<unsigned char> &font) {
+	stbtt_fontinfo info;
+	if (stbtt_InitFont(&info, font.data(), 0)) {
+		return info;
+	} else {
+		throw "failed to get a font information.";
+	}
+}
+
+float getAscentFrom(const stbtt_fontinfo &fontinfo, float scale) {
+	int ascent, decent, lineGap;
+	stbtt_GetFontVMetrics(&fontinfo, &ascent, &decent, &lineGap);
+	return static_cast<float>(ascent) * scale;
+}
+
+float getLineAdvanceFrom(const stbtt_fontinfo &fontinfo, float scale) {
+	int ascent, decent, lineGap;
+	stbtt_GetFontVMetrics(&fontinfo, &ascent, &decent, &lineGap);
+	return static_cast<float>(ascent - decent + lineGap) * scale;
+}
+
 CharAtlus::CharAtlus(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
@@ -40,6 +61,10 @@ CharAtlus::CharAtlus(
 	_config(config),
 	// TODO: フォントデータからも作成できるように
 	_font(loadFontFromFile(config.path.value())),
+	_fontinfo(createFontInfo(_font)),
+	_scale(stbtt_ScaleForPixelHeight(&_fontinfo, static_cast<float>(_config.charSize))),
+	_ascent(getAscentFrom(_fontinfo, _scale)),
+	_lineAdvance(getLineAdvanceFrom(_fontinfo, _scale)),
 	_width(static_cast<float>(_config.charAtlusCol * _config.charSize)),
 	_height(static_cast<float>(_config.charAtlusRow * _config.charSize)),
 	_image(
@@ -62,11 +87,6 @@ void CharAtlus::putString(
 ) {
 	using Pixels = std::unique_ptr<unsigned char, decltype(&freeBitmap)>;
 
-	stbtt_fontinfo info;
-	if (!stbtt_InitFont(&info, _font.data(), 0)) {
-		throw "failed to get a font information.";
-	}
-
 	auto itr = s.begin();
 	auto end = s.end();
 	while (itr != end) {
@@ -77,9 +97,8 @@ void CharAtlus::putString(
 
 		// ラスタライズ
 		int w, h, ox, oy;
-		const auto scale = stbtt_ScaleForPixelHeight(&info, static_cast<float>(_config.charSize));
 		const auto bitmap = Pixels(
-			stbtt_GetCodepointBitmap(&info, scale, scale, static_cast<int>(codepoint), &w, &h, &ox, &oy),
+			stbtt_GetCodepointBitmap(&_fontinfo, _scale, _scale, static_cast<int>(codepoint), &w, &h, &ox, &oy),
 			freeBitmap
 		);
 		if (w <= 0 || h <= 0) {
@@ -89,8 +108,8 @@ void CharAtlus::putString(
 
 		// 文字送り幅取得
 		int advance;
-		stbtt_GetCodepointHMetrics(&info, codepoint, &advance, nullptr);
-		advance *= scale;
+		stbtt_GetCodepointHMetrics(&_fontinfo, codepoint, &advance, nullptr);
+		advance *= _scale;
 
 		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
 		uint32_t x, y;
@@ -117,6 +136,7 @@ void CharAtlus::putString(
 		_chars.put(codepoint, Character(
 			x,
 			y,
+			static_cast<float>(w),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
 			static_cast<float>(advance),
