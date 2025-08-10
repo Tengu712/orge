@@ -47,14 +47,22 @@ public:
 		}
 	}
 
-	void getCharacterCommonInfo(float &size, float &ru, float &rv) const noexcept {
-		size = static_cast<float>(_config.charSize);
-		ru = static_cast<float>(_config.charSize) / _width;
-		rv = static_cast<float>(_config.charSize) / _height;
+	float getRangeOfU() const noexcept {
+		return static_cast<float>(_config.charSize) / _width;
 	}
 
-	float getAscent() const noexcept {
-		return _ascent;
+	float getRangeOfV() const noexcept {
+		return static_cast<float>(_config.charSize) / _height;
+	}
+
+	float calcMeshSize(float height) const noexcept {
+		const auto scale = height / static_cast<float>(_config.charSize);
+		return static_cast<float>(_config.charSize) * scale;
+	}
+
+	float calcAscent(float height) const noexcept {
+		const auto scale = height / static_cast<float>(_config.charSize);
+		return _ascent * scale;
 	}
 
 	float getLineAdvance() const noexcept {

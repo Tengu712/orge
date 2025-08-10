@@ -144,18 +144,19 @@ void Graphics::putText(
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
 	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
 	const auto scale = charAtlus.calcScale(height);
+	const auto meshSize = charAtlus.calcMeshSize(height);
+	const auto ru = charAtlus.getRangeOfU();
+	const auto rv = charAtlus.getRangeOfV();
 	const auto &extent = _renderer.getExtent();
 	const auto extentW = static_cast<float>(extent.width);
 	const auto extentH = static_cast<float>(extent.height);
-	float size, ru, rv;
-	charAtlus.getCharacterCommonInfo(size, ru, rv);
 
 	// すべてのメッシュを左上原点にする
-	x += size * scale / 2.0f;
-	y += size * scale / 2.0f;
+	x += meshSize / 2.0f;
+	y += meshSize / 2.0f;
 
 	// Y座標をベースラインに移す
-	y += charAtlus.getAscent() * scale;
+	y += charAtlus.calcAscent(height);
 
 	// すべての文字に対してとりあえず構築
 	auto itr = text.begin();
@@ -179,8 +180,8 @@ void Graphics::putText(
 		auto &n = instances.back();
 		std::fill_n(n.transform, 16, 0.0f);
 		std::fill_n(n.texId, 4, 0);
-		n.transform[0] = size * scale / extentW;
-		n.transform[5] = size * scale / extentH;
+		n.transform[0] = meshSize;
+		n.transform[5] = meshSize;
 		n.transform[10] = 1.0f;
 		n.transform[12] = x + c->ox * scale;
 		n.transform[13] = y + c->oy * scale;
@@ -206,6 +207,8 @@ void Graphics::putText(
 	// 座標修正
 	for (auto &n: instances) {
 		// クリッピング座標系へ
+		n.transform[0] /= extentW;
+		n.transform[5] /= extentH;
 		n.transform[12] -= extentW / 2.0f;
 		n.transform[12] /= extentW / 2.0f;
 		n.transform[13] -= extentH / 2.0f;
