@@ -155,7 +155,7 @@ void Graphics::putText(
 	y += size * scale / 2.0f;
 
 	// Y座標をベースラインに移す
-	y += charAtlus.getAscent();
+	y += charAtlus.getAscent() * scale;
 
 	// すべての文字に対してとりあえず構築
 	auto itr = text.begin();
