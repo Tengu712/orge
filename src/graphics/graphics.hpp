@@ -175,8 +175,9 @@ public:
 		}
 	}
 
-	void putString(const std::string &id, const std::string &s) {
-		error::atMut(_charAtluss, id, "fonts").putString(_physicalDevice.getMemoryProperties(), _device, _queue, s);
+	void rasterizeCharacters(const std::string &id, const std::string &s) {
+		error::atMut(_charAtluss, id, "fonts")
+			.rasterizeCharacters(_physicalDevice.getMemoryProperties(), _device, _queue, s);
 	}
 
 	void putText(

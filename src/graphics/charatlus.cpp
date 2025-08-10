@@ -81,7 +81,7 @@ CharAtlus::CharAtlus(
 	_chars(_config.charAtlusCol * _config.charAtlusRow)
 {}
 
-void CharAtlus::putString(
+void CharAtlus::rasterizeCharacters(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,

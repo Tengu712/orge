@@ -269,8 +269,8 @@ void orgeDestroyMesh(const char *id) {
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
-uint8_t orgePutString(const char *id, const char *s) {
-	TRY(g_graphics->putString(id, s));
+uint8_t orgeRasterizeCharacters(const char *id, const char *s) {
+	TRY(g_graphics->rasterizeCharacters(id, s));
 }
 
 uint8_t orgePutText(

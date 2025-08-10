@@ -81,7 +81,7 @@ public:
 		return _scaled(_lineAdvance, height);
 	}
 
-	void putString(
+	void rasterizeCharacters(
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue,

@@ -13,9 +13,12 @@
 		continue; \
 	}
 
+const std::string text = "Orgeのテキストレンダリングのサンプルです。\n改行や!-_|のような記号も描画できます。";
+
 int main() {
 	TRY(orgeInitializeWith("config.yml"));
-	TRY(orgePutString("font", "Text Rendering Sample歓迎しますorge"));
+	TRY(orgeRasterizeCharacters("font", "Text Rendering Sample"));
+	TRY(orgeRasterizeCharacters("font", text.c_str()));
 
 	float x = 0.0f;
 	float y = 0.0f;
@@ -58,7 +61,7 @@ int main() {
 		CHECK(orgePutText(
 			"PL",
 			"font",
-			"歓迎しま\nすorgeaaaaaaaaaaaaaaa\naaaaaaaaaaaaa\naaaaaaaaaaaa\naaaaaaaaaaaa\naaaaaaaaaaaaaaaaa\neeeeeeeeeeee\neeeeeeee\neeeeeeeeeeeeeee\naaaaaaaa",
+			text.c_str(),
 			x,
 			y,
 			28.0f,

@@ -208,14 +208,14 @@ enum OrgeTextLocationVertical {
 	ORGE_TEXT_LOCATION_VERTICAL_BOTTOM,
 };
 
-/// テクスチャアトラスに文字を追加する関数
+/// 文字をラスタライズする関数
 ///
 /// - id: フォントID
 /// - s: UTF-8文字列
 ///
-/// sの各文字が追加される。
+/// sの各文字がラスタライズされる。
 /// 結合文字は結合されず、別々の文字として扱われる。
-API_EXPORT uint8_t orgePutString(const char *id, const char *s);
+API_EXPORT uint8_t orgeRasterizeCharacters(const char *id, const char *s);
 
 /// このフレームで描画する文字列を追加する関数
 ///
