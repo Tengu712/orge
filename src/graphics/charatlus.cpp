@@ -102,35 +102,36 @@ void CharAtlus::putString(
 			stbtt_GetCodepointBitmap(&_fontinfo, _scale, _scale, static_cast<int>(codepoint), &w, &h, &ox, &oy),
 			freeBitmap
 		);
-		if (w <= 0 || h <= 0) {
-			// TODO: 無効字は空白にする
-			throw std::format("failed to rasterize the character whose codepoint is {}.", codepoint);
+
+		// ラスタライズ先の左上座標を取得
+		auto x = _chars.size() % _config.charAtlusCol * _config.charSize;
+		auto y = _chars.size() / _config.charAtlusCol * _config.charSize;
+		_chars.popOldestIfSaturated(x, y);
+
+		// 有効な字に限り、送り幅を取得、アップロード
+		int advance = _config.charSize;
+		if (bitmap && w > 0 && h > 0) {
+			stbtt_GetCodepointHMetrics(&_fontinfo, codepoint, &advance, nullptr);
+
+			_image.upload(
+				memoryProps,
+				device,
+				queue,
+				static_cast<uint32_t>(w),
+				static_cast<uint32_t>(h),
+				x,
+				y,
+				reinterpret_cast<uint8_t *>(bitmap.get()),
+				true
+			);
 		}
-
-		// 文字送り幅取得
-		int advance;
-		stbtt_GetCodepointHMetrics(&_fontinfo, codepoint, &advance, nullptr);
-
-		// 飽和状態なら最古を消してその位置へ・そうでないなら次の位置へ
-		uint32_t x, y;
-		if (!_chars.popOldestIfSaturated(x, y)) {
-			const auto n = _chars.size();
-			x = n % _config.charAtlusCol * _config.charSize;
-			y = n / _config.charAtlusCol * _config.charSize;
+		// 無効な字なら安全のために情報をリセット
+		else {
+			w = 0.0f;
+			h = 0.0f;
+			ox = 0.0f;
+			oy = 0.0f;
 		}
-
-		// アップロード
-		_image.upload(
-			memoryProps,
-			device,
-			queue,
-			static_cast<uint32_t>(w),
-			static_cast<uint32_t>(h),
-			x,
-			y,
-			reinterpret_cast<uint8_t *>(bitmap.get()),
-			true
-		);
 
 		// 登録
 		_chars.put(codepoint, Character(

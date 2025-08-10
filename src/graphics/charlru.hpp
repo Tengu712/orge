@@ -79,12 +79,11 @@ public:
 
 	/// 飽和状態である場合に限り最古の文字を削除する関数
 	///
-	/// 削除された場合、trueが返る。
 	/// 削除された場合、削除された文字の各情報が引数に格納される。
 	/// 飽和状態に達してからはこの情報を描画位置とすること。
-	bool popOldestIfSaturated(uint32_t &offsetX, uint32_t &offsetY) noexcept {
+	void popOldestIfSaturated(uint32_t &offsetX, uint32_t &offsetY) noexcept {
 		if (static_cast<uint32_t>(_map.size()) < _maxCount) {
-			return false;
+			return;
 		}
 
 		const auto deleting = _oldest;
@@ -96,7 +95,6 @@ public:
 
 		_map.erase(deleting->codepoint);
 		delete deleting;
-		return true;
 	}
 
 	/// 文字を登録する関数
