@@ -143,7 +143,6 @@ void Graphics::putText(
 	// 必要な情報を取得
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
 	const auto texId = error::at(config::config().fontMap, fontId, "fonts");
-	const auto scale = charAtlus.calcScale(height);
 	const auto meshSize = charAtlus.calcMeshSize(height);
 	const auto ru = charAtlus.getRangeOfU();
 	const auto rv = charAtlus.getRangeOfV();
@@ -169,7 +168,7 @@ void Graphics::putText(
 
 		// TODO: \rは無視、\nは改行
 
-		const auto c = charAtlus.getCharacter(codepoint);
+		const auto c = charAtlus.getScaledCharacter(codepoint, height);
 
 		// NOTE: 文字が存在しない場合はスキップする。
 		if (!c) {
@@ -183,16 +182,17 @@ void Graphics::putText(
 		n.transform[0] = meshSize;
 		n.transform[5] = meshSize;
 		n.transform[10] = 1.0f;
-		n.transform[12] = x + c->ox * scale;
-		n.transform[13] = y + c->oy * scale;
+		n.transform[12] = x + c->ox;
+		n.transform[13] = y + c->oy;
 		n.transform[15] = 1.0f;
 		n.uv[0] = c->u;
 		n.uv[1] = c->v;
 		n.uv[2] = ru;
 		n.uv[3] = rv;
 		n.texId[0] = texId;
-		x += c->advance * scale;
+		x += c->advance;
 
+		// TODO: 改行があると壊れそう。
 		// 最後の文字なら文字の幅を足す
 		if (itr == end) {
 			entireWidth += c->w;

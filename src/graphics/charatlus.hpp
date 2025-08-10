@@ -4,6 +4,7 @@
 #include "charlru.hpp"
 #include "image.hpp"
 
+#include <optional>
 #include <stb_truetype.h>
 #include <vector>
 
@@ -22,6 +23,10 @@ private:
 	Image _image;
 	CharLru _chars;
 
+	float _scaled(float n, float height) const noexcept {
+		return n * height / static_cast<float>(_config.charSize);
+	}
+
 public:
 	CharAtlus() = delete;
 	CharAtlus(
@@ -39,11 +44,19 @@ public:
 		return _image;
 	}
 
-	const Character *getCharacter(uint32_t codepoint) noexcept {
+	const std::optional<ScaledCharacter> getScaledCharacter(uint32_t codepoint, float height) noexcept {
 		if (_chars.has(codepoint)) {
-			return &_chars.use(codepoint);
+			const auto &c = _chars.use(codepoint);
+			return std::make_optional<ScaledCharacter>(
+				_scaled(c.w, height),
+				_scaled(c.ox, height),
+				_scaled(c.oy, height),
+				_scaled(c.advance, height),
+				c.u,
+				c.v
+			);
 		} else {
-			return nullptr;
+			return std::nullopt;
 		}
 	}
 
@@ -56,21 +69,15 @@ public:
 	}
 
 	float calcMeshSize(float height) const noexcept {
-		const auto scale = height / static_cast<float>(_config.charSize);
-		return static_cast<float>(_config.charSize) * scale;
+		return _scaled(static_cast<float>(_config.charSize), height);
 	}
 
 	float calcAscent(float height) const noexcept {
-		const auto scale = height / static_cast<float>(_config.charSize);
-		return _ascent * scale;
+		return _scaled(_ascent, height);
 	}
 
-	float getLineAdvance() const noexcept {
-		return _lineAdvance;
-	}
-
-	float calcScale(float height) const noexcept {
-		return height / static_cast<float>(_config.charSize);
+	float calcLineAdvance(float height) const noexcept {
+		return _scaled(_lineAdvance, height);
 	}
 
 	void putString(
