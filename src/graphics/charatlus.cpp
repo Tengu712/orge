@@ -65,15 +65,17 @@ CharAtlus::CharAtlus(
 	_scale(stbtt_ScaleForPixelHeight(&_fontinfo, static_cast<float>(_config.charSize))),
 	_ascent(getAscentFrom(_fontinfo, _scale)),
 	_lineAdvance(getLineAdvanceFrom(_fontinfo, _scale)),
-	_width(static_cast<float>(_config.charAtlusCol * _config.charSize)),
-	_height(static_cast<float>(_config.charAtlusRow * _config.charSize)),
+	_width(static_cast<float>(_config.charAtlusCol * (_config.charSize + 1))),
+	_height(static_cast<float>(_config.charAtlusRow * (_config.charSize + 1))),
 	_image(
 		memoryProps,
 		device,
 		queue,
-		_config.charAtlusCol * _config.charSize,
-		_config.charAtlusRow * _config.charSize,
-		std::vector<uint8_t>(_config.charAtlusCol * _config.charSize * _config.charAtlusRow * _config.charSize).data(),
+		_config.charAtlusCol * (_config.charSize + 1),
+		_config.charAtlusRow * (_config.charSize + 1),
+		std::vector<uint8_t>(
+			_config.charAtlusCol * (_config.charSize + 1) * _config.charAtlusRow * (_config.charSize + 1)
+		).data(),
 		true
 	),
 	_chars(_config.charAtlusCol * _config.charAtlusRow)
@@ -104,8 +106,8 @@ void CharAtlus::putString(
 		);
 
 		// ラスタライズ先の左上座標を取得
-		auto x = _chars.size() % _config.charAtlusCol * _config.charSize;
-		auto y = _chars.size() / _config.charAtlusCol * _config.charSize;
+		auto x = _chars.size() % _config.charAtlusCol * (_config.charSize + 1);
+		auto y = _chars.size() / _config.charAtlusCol * (_config.charSize + 1);
 		_chars.popOldestIfSaturated(x, y);
 
 		// 有効な字に限り、送り幅を取得、アップロード
