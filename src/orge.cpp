@@ -280,9 +280,19 @@ uint8_t orgePutText(
 	float x,
 	float y,
 	float height,
-	uint32_t location
+	uint32_t horizontal,
+	uint32_t vertical
 ) {
-	TRY(g_graphics->putText(pipelineId, fontId, text, x, y, height, static_cast<OrgeTextLocation>(location)));
+	TRY(g_graphics->putText(
+		pipelineId,
+		fontId,
+		text,
+		x,
+		y,
+		height,
+		static_cast<OrgeTextLocationHorizontal>(horizontal),
+		static_cast<OrgeTextLocationVertical>(vertical)
+	));
 }
 
 uint8_t orgeDrawTexts(const char *pipelineId) {

@@ -185,7 +185,8 @@ public:
 		float x,
 		float y,
 		float height,
-		OrgeTextLocation location
+		OrgeTextLocationHorizontal horizontal,
+		OrgeTextLocationVertical vertical
 	);
 
 	void drawTexts(const std::string &pipelineId) {

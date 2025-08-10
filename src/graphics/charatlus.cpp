@@ -137,6 +137,7 @@ void CharAtlus::putString(
 			x,
 			y,
 			static_cast<float>(w),
+			static_cast<float>(h),
 			static_cast<float>(ox),
 			static_cast<float>(oy),
 			static_cast<float>(advance),

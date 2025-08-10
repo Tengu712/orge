@@ -138,7 +138,8 @@ void Graphics::putText(
 	float x,
 	float y,
 	float height,
-	OrgeTextLocation location
+	OrgeTextLocationHorizontal horizontal,
+	OrgeTextLocationVertical vertical
 ) {
 	// 必要な情報を取得
 	auto &charAtlus = error::atMut(_charAtluss, fontId, "fonts");
@@ -161,7 +162,10 @@ void Graphics::putText(
 	auto itr = text.begin();
 	auto end = text.end();
 	std::vector<TextRenderingInstance> instances;
-	float entireWidth = 0.0f;
+	float minX = x;
+	float maxX = x;
+	float minY = y;
+	float maxY = y;
 	uint32_t count = 0;
 	while (itr != end) {
 		const auto codepoint = static_cast<uint32_t>(utf8::next(itr, end));
@@ -192,20 +196,49 @@ void Graphics::putText(
 		n.texId[0] = texId;
 		x += c->advance;
 
-		// TODO: 改行があると壊れそう。
-		// 最後の文字なら文字の幅を足す
-		if (itr == end) {
-			entireWidth += c->w;
-		}
-		// そうでないなら文字の送り幅を足す
-		else {
-			entireWidth += c->advance;
-		}
+		minX = std::min(minX, n.transform[12]);
+		maxX = std::max(maxX, n.transform[12] + c->w);
+		minY = std::min(minY, n.transform[13]);
+		maxY = std::max(maxY, n.transform[13] + c->h);
+
 		count += 1;
 	}
 
+	// 描画すべき文字がないなら終了
+	if (instances.empty()) {
+		return;
+	}
+
+	// 文字列全体のサイズを計算
+	const auto entireWidth  = maxX - minX;
+	const auto entireHeight = maxY - minY;
+
 	// 座標修正
 	for (auto &n: instances) {
+		// X座標を修正
+		switch (horizontal) {
+		case ORGE_TEXT_LOCATION_HORIZONTAL_LEFT:
+			break;
+		case ORGE_TEXT_LOCATION_HORIZONTAL_CENTER:
+			n.transform[12] -= entireWidth / 2.0f;
+			break;
+		case ORGE_TEXT_LOCATION_HORIZONTAL_RIGHT:
+			n.transform[12] -= entireWidth;
+			break;
+		}
+
+		// Y座標を修正
+		switch (vertical) {
+		case ORGE_TEXT_LOCATION_VERTICAL_TOP:
+			break;
+		case ORGE_TEXT_LOCATION_VERTICAL_MIDDLE:
+			n.transform[13] -= entireHeight / 2.0f;
+			break;
+		case ORGE_TEXT_LOCATION_VERTICAL_BOTTOM:
+			n.transform[13] -= entireHeight;
+			break;
+		}
+
 		// クリッピング座標系へ
 		n.transform[0] /= extentW;
 		n.transform[5] /= extentH;
@@ -230,9 +263,6 @@ void Graphics::putText(
 	} else {
 		_textOffset.emplace(pipelineId, count);
 	}
-
-	(void)entireWidth;
-	(void)location;
 }
 
 void Graphics::beginRender() {

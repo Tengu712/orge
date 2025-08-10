@@ -196,16 +196,16 @@ API_EXPORT void orgeDestroyMesh(const char *id);
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
-enum OrgeTextLocation {
-	ORGE_TEXT_LOCATION_LEFT_UP = 0,
-	ORGE_TEXT_LOCATION_CENTER_UP,
-	ORGE_TEXT_LOCATION_RIGHT_UP,
-	ORGE_TEXT_LOCATION_LEFT,
-	ORGE_TEXT_LOCATION_CENTER,
-	ORGE_TEXT_LOCATION_RIGHT,
-	ORGE_TEXT_LOCATION_LEFT_DOWN,
-	ORGE_TEXT_LOCATION_CENTER_DOWN,
-	ORGE_TEXT_LOCATION_RIGHT_DOWN,
+enum OrgeTextLocationHorizontal {
+	ORGE_TEXT_LOCATION_HORIZONTAL_LEFT = 0,
+	ORGE_TEXT_LOCATION_HORIZONTAL_CENTER,
+	ORGE_TEXT_LOCATION_HORIZONTAL_RIGHT,
+};
+
+enum OrgeTextLocationVertical {
+	ORGE_TEXT_LOCATION_VERTICAL_TOP = 0,
+	ORGE_TEXT_LOCATION_VERTICAL_MIDDLE,
+	ORGE_TEXT_LOCATION_VERTICAL_BOTTOM,
 };
 
 /// テクスチャアトラスに文字を追加する関数
@@ -219,6 +219,15 @@ API_EXPORT uint8_t orgePutString(const char *id, const char *s);
 
 /// このフレームで描画する文字列を追加する関数
 ///
+/// - pipelineId: この文字列を描画するテキストレンダリングパイプラインのID
+/// - fontId: フォントID
+/// - text: UTF-8文字列
+/// - x: 基準点X座標
+/// - y: 基準点Y座標
+/// - height: 文字の基準高
+/// - horizontal: 水平方向の配置位置 (OrgeTextLocationHorizontal)
+/// - vertical: 垂直方向の配置位置 (OrgeTextLocationVertical)
+///
 /// 毎フレームorgeBeginRender()の前に呼ぶこと。
 ///
 /// 存在しない文字はスキップされる。
@@ -229,7 +238,8 @@ API_EXPORT uint8_t orgePutText(
 	float x,
 	float y,
 	float height,
-	uint32_t location
+	uint32_t horizontal,
+	uint32_t vertical
 );
 
 /// orgePutText()で追加された文字列をすべて描画する関数
