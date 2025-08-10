@@ -12,8 +12,8 @@ configure_file(
   install: false
 )
 configure_file(
-  input: 'MPLUS1p-Light.ttf',
-  output: 'MPLUS1p-Light.ttf',
+  input: 'MPLUS1p-Regular.ttf',
+  output: 'MPLUS1p-Regular.ttf',
   copy: true,
   install: false
 )

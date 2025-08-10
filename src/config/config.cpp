@@ -220,7 +220,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
 	vertexInputAttributes(),
 	culling(false),
 	depthTest(false),
-	colorBlends{false},
+	colorBlends{true},
 	subpass(s(node, "subpass")),
 	textRendering(true),
 	charCount(u(node, "char-count"))
