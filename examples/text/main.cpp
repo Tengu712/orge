@@ -13,7 +13,7 @@
 		continue; \
 	}
 
-const std::string text = "Orgeのテキストレンダリングのサンプルです。\n改行や!-_|のような記号も描画できます。";
+const std::string text = "Orgeのテキストレンダリングのサンプルです\n改行や!-_|のような記号も描画できます";
 
 int main() {
 	TRY(orgeInitializeWith("config.yml"));

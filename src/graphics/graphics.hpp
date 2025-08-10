@@ -28,7 +28,7 @@ private:
 	std::unordered_map<std::string, Mesh> _meshes;
 	std::unordered_map<std::string, CharAtlus> _charAtluss;
 	std::unordered_map<std::string, uint32_t> _charCounts;
-	std::unordered_map<std::string, uint32_t> _textOffset;
+	std::unordered_map<std::string, size_t> _textOffset;
 
 public:
 	Graphics(const Graphics &)  = delete;
@@ -198,7 +198,7 @@ public:
 		const uint32_t indices[] = {0, 0};
 		_renderer.bindDescriptorSets(pipelineId, indices);
 		_renderer.bindPipeline(_device, pipelineId);
-		_renderer.drawDirectly(4, _textOffset[pipelineId], 0);
+		_renderer.drawDirectly(4, static_cast<uint32_t>(_textOffset[pipelineId]), 0);
 	}
 
 	void beginRender();
