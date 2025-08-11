@@ -55,8 +55,11 @@ std::vector<unsigned char> decryptDatFile(const std::vector<unsigned char> &dat,
 
 	std::vector<unsigned char> decrypted(body.size());
 
+	// NOTE: MSVCの警告を逃れるために。
+	const auto bodySize = static_cast<uint32_t>(body.size());
+
 	int len, lenadd;
-	EVP_DecryptUpdate(ctx.get(), decrypted.data(), &len, body.data(), static_cast<int>(body.size()));
+	EVP_DecryptUpdate(ctx.get(), decrypted.data(), &len, body.data(), static_cast<int>(bodySize));
 	EVP_DecryptFinal_ex(ctx.get(), decrypted.data() + len, &lenadd);
 
 	decrypted.resize(static_cast<size_t>(len + lenadd));
