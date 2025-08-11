@@ -35,13 +35,16 @@ std::vector<unsigned char> decryptDatFile(const std::vector<unsigned char> &dat,
 		throw ".dat is invalid.";
 	}
 
+	// NOTE: MSVCの警告を逃れるために。
+	const auto passphraseLength = static_cast<uint32_t>(passphrase.length());
+
 	std::vector<unsigned char> key(KEY_SIZE);
 	EVP_BytesToKey(
 		EVP_aes_256_cbc(),
 		EVP_sha256(),
 		nullptr,
 		reinterpret_cast<const unsigned char *>(passphrase.c_str()),
-		passphrase.length(),
+		static_cast<int>(passphraseLength),
 		1,
 		key.data(),
 		nullptr
