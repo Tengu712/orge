@@ -47,7 +47,7 @@ jobs:
           --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-arm64-osx \
           --default-library=static
         meson install -C build-static
-        tree installed-static
+        find installed-static -print
 
     - name: Build & install orge (shared)
       run: |
@@ -60,7 +60,7 @@ jobs:
           --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-arm64-osx \
           --default-library=shared
         meson install -C build-shared
-        tree installed-shared
+        find installed-shared -print
 
     - name: Upload orge artifacts
       uses: actions/upload-artifact@v4
