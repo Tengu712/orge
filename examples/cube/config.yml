@@ -1,6 +1,10 @@
 title: cube
 width: 640
 height: 480
+assets:
+  - shader.vert.spv
+  - shader.frag.spv
+  - image.png
 attachments:
   - id: RT
     format: render-target

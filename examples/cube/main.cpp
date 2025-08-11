@@ -94,7 +94,7 @@ std::array<float, 16> rotY(float ang) {
 }
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"cube",
 		static_cast<uint32_t>(VERTICES.size()),

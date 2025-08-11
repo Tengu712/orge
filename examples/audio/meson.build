@@ -6,20 +6,8 @@ executable('audio',
 )
 
 configure_file(
-  input: 'config.yml',
-  output: 'config.yml',
-  copy: true,
-  install: false
-)
-configure_file(
-  input: 'cdefgabc.wav',
-  output: 'cdefgabc.wav',
-  copy: true,
-  install: false
-)
-configure_file(
-  input: 'music.ogg',
-  output: 'music.ogg',
+  input: '.dat',
+  output: '.dat',
   copy: true,
   install: false
 )

@@ -1,5 +1,8 @@
 #include "image.hpp"
 
+#include "../asset/asset.hpp"
+#include "../config/config.hpp"
+#include "../error/error.hpp"
 #include "utils.hpp"
 
 #include <format>
@@ -64,11 +67,17 @@ Image Image::fromFile(
 ) {
 	using stbi_ptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
 
+	const auto assetId = error::at(config::config().assetMap, path, "assets");
+	const auto data = asset::getAsset(assetId);
+
+	// NOTE: MSVCの警告を逃れるため。
+	const auto dataSize = static_cast<int>(static_cast<uint32_t>(data.size()));
+
 	int width = 0;
 	int height = 0;
 	int channelCount = 0;
 	const auto pixels = stbi_ptr(
-		stbi_load(path.c_str(), &width, &height, &channelCount, 0),
+		stbi_load_from_memory(data.data(), dataSize, &width, &height, &channelCount, 0),
 		stbi_image_free
 	);
 	if (!pixels) {

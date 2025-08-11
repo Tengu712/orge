@@ -19,7 +19,7 @@
 	}
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeLoadWaveFromFile("cdefgabc", "cdefgabc.wav", 58100));
 	TRY(orgeLoadWaveFromFile("music", "music.ogg", 0));
 

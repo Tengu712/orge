@@ -25,7 +25,7 @@ const std::vector<float> GREEN{0.0f, 1.0f, 0.0f, 1.0f};
 const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"triangle",
 		static_cast<uint32_t>(VERTICES.size()),

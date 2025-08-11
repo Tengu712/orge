@@ -16,7 +16,7 @@
 const std::string text = "Orgeのテキストレンダリングのサンプルです\n改行や!-_|のような記号も描画できます";
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeRasterizeCharacters("font", "Text Rendering Sample"));
 	TRY(orgeRasterizeCharacters("font", text.c_str()));
 

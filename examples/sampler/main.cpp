@@ -37,7 +37,7 @@ const std::vector<uint8_t> PIXELS{
 const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"square",
 		static_cast<uint32_t>(VERTICES.size()),

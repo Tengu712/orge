@@ -1,6 +1,13 @@
 title: multipass
 width: 640
 height: 480
+assets:
+  - mesh.vert.spv
+  - mesh.frag.spv
+  - pattern.vert.spv
+  - pattern.frag.spv
+  - integration.vert.spv
+  - integration.frag.spv
 attachments:
   - id: mesh-rt
     format: share-color-attachment

@@ -10,12 +10,16 @@
 std::vector<std::string> parseAssetFileNames(const std::string &yamlFilePath) {
 	const auto node = YAML::LoadFile(yamlFilePath);
 
-	if (!node["assets"] || !node["assets"].IsSequence()) {
+	std::vector<std::string> paths;
+	paths.push_back(yamlFilePath);
+
+	if (!node["assets"]) {
+		return paths;
+	}
+	if (!node["assets"].IsSequence()) {
 		throw std::runtime_error("YAML must contain 'assets' as a sequence.");
 	}
 
-	std::vector<std::string> paths;
-	paths.push_back(yamlFilePath);
 	for (const auto &n: node["assets"]) {
 		paths.push_back(n.as<std::string>());
 	}

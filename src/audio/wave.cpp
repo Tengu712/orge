@@ -1,5 +1,7 @@
 #include "wave.hpp"
 
+#include "../asset/asset.hpp"
+#include "../config/config.hpp"
 #include "_stb_vorbis.h"
 
 #include <charconv>
@@ -8,11 +10,28 @@
 
 namespace audio {
 
+// NOTE: stb_vorbis.cにerrorというシグネチャが含まれているせいでerror.hppをincludeできないため。
+uint32_t getAssetId(const std::string &s) {
+	if (config::config().assetMap.contains(s)) {
+		return config::config().assetMap.at(s);
+	} else {
+		throw std::out_of_range(std::format("the key '{}' is invalid for assets.", s));
+	}
+}
+
 std::shared_ptr<Wave> createFromWaveFile(const std::string &path, uint32_t startPosition) {
+	const auto assetId = getAssetId(path);
+	const auto data = asset::getAsset(assetId);
+
+	const auto io = SDL_IOFromConstMem(data.data(), data.size());
+	if (!io) {
+		throw std::format("failed to load '{}'.", path);
+	}
+
 	SDL_AudioSpec spec;
 	Uint8 *buffer;
 	Uint32 length;
-	if (!SDL_LoadWAV(path.c_str(), &spec, &buffer, &length)) {
+	if (!SDL_LoadWAV_IO(io, true, &spec, &buffer, &length)) {
 		throw std::format("failed to load '{}'.", path);
 	}
 	return std::make_shared<Wave>(spec, buffer, length, startPosition);
@@ -21,9 +40,15 @@ std::shared_ptr<Wave> createFromWaveFile(const std::string &path, uint32_t start
 std::shared_ptr<Wave> createFromOggFile(const std::string &path, uint32_t startPosition) {
 	using Vorbis = std::unique_ptr<stb_vorbis, decltype(&stb_vorbis_close)>;
 
+	const auto assetId = getAssetId(path);
+	const auto ogg = asset::getAsset(assetId);
+
+	// NOTE: MSVCの警告を逃れるため。
+	const auto oggSize = static_cast<int>(static_cast<uint32_t>(ogg.size()));
+
 	// ファイルオープン
 	int error;
-	const auto v = Vorbis(stb_vorbis_open_filename(path.c_str(), &error, nullptr), stb_vorbis_close);
+	const auto v = Vorbis(stb_vorbis_open_memory(ogg.data(), oggSize, &error, nullptr), stb_vorbis_close);
 	if (!v) {
 		throw std::format("failed to open '{}': {}", path, error);
 	}
