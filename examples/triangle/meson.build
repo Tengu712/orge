@@ -12,14 +12,8 @@ configure_file(
   install: false
 )
 configure_file(
-  input: 'shader.vert.spv',
-  output: 'shader.vert.spv',
-  copy: true,
-  install: false
-)
-configure_file(
-  input: 'shader.frag.spv',
-  output: 'shader.frag.spv',
+  input: '.dat',
+  output: '.dat',
   copy: true,
   install: false
 )

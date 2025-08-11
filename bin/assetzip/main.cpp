@@ -1,8 +1,11 @@
 #include <fstream>
 #include <format>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 struct AssetHeader {
 	const uint32_t count;
@@ -15,6 +18,28 @@ struct AssetEntry {
 
 	AssetEntry(uint32_t id, uint32_t offset, uint32_t size): id(id), offset(offset), size(size) {}
 };
+
+YAML::Node parseYaml(const std::optional<std::string> &yamlFile) {
+	if (yamlFile) {
+		return YAML::LoadFile(yamlFile.value());
+	} else {
+		std::ostringstream buffer;
+		buffer << std::cin.rdbuf();
+		return YAML::Load(buffer.str());
+	}
+}
+
+std::vector<std::string> parseAssetFileNames(const YAML::Node &node) {
+	if (!node["assets"] || !node["assets"].IsSequence()) {
+		throw std::runtime_error("YAML must contain 'assets' as a sequence.");
+	}
+
+	std::vector<std::string> paths;
+	for (const auto &n: node["assets"]) {
+		paths.push_back(n.as<std::string>());
+	}
+	return paths;
+}
 
 std::vector<unsigned char> loadFile(const std::string &path) {
 	std::ifstream file(path, std::ios::binary);
@@ -32,13 +57,17 @@ std::vector<unsigned char> loadFile(const std::string &path) {
 	return data;
 }
 
-void run(const std::vector<std::string> &paths) {
+void run(const std::optional<std::string> &yamlFile) {
+	const auto fileNames = parseAssetFileNames(parseYaml(yamlFile));
+	if (fileNames.empty()) {
+		throw std::runtime_error("no asset files specified in config.");
+	}
+
 	// TODO: 総アセットファイルサイズが大きすぎるとやばいのでどうにかする。
 	// アセットファイルをすべて読み込み
 	std::unordered_map<uint32_t, std::vector<unsigned char>> assets;
-	for (const auto &n: paths) {
-		// TODO: config.ymlからIDを読み取る。
-		assets.emplace(0, loadFile(n));
+	for (size_t i = 0; i < fileNames.size(); ++i) {
+		assets.emplace(static_cast<uint32_t>(i), loadFile(fileNames[i]));
 	}
 
 	// ヘッダー構築
@@ -63,19 +92,26 @@ void run(const std::vector<std::string> &paths) {
 		const auto &data = assets[n.id];
 		out.write(reinterpret_cast<const char *>(data.data()), data.size());
 	}
+
+	std::cout << "successfully zipped " << assets.size() << " assets." << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-	if (argc < 2) {
-		std::cerr << "no asset file passed." << std::endl;
+	if (argc > 2) {
+		std::cerr << "usage: assetzip [<config-yaml-file-path>]" << std::endl;
 		return 1;
 	}
 
 	try {
-		run(std::vector<std::string>(argv + 1, argv + argc));
+		run((argc == 2) ? std::make_optional(argv[1]) : std::nullopt);
+	} catch (const YAML::Exception &e) {
+		std::cerr << e.what() << std::endl;
+		std::cerr << "failed to zip asset files." << std::endl;
+		return 1;
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << "failed to zip asset files." << std::endl;
+		return 1;
 	}
 
 	return 0;

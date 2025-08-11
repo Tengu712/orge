@@ -36,6 +36,11 @@ alt-return-toggle-fullscreen: bool
 # 省略された場合、16とみなされる
 audio-channel-count: unsigned int
 
+# ========== Assets Definition ================= #
+
+# アセットファイル名
+assets: string[]
+
 # ========== Attachment Definition ============= #
 
 attachments: []

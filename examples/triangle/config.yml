@@ -15,3 +15,6 @@ pipelines:
     vertex-input-attributes: [3, 4]
     color-blends: [false]
     subpass: SP
+assets:
+  - shader.vert.spv
+  - shader.frag.spv

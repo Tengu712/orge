@@ -10,6 +10,7 @@ endif
 
 executable('assetzip',
   'main.cpp',
+  dependencies: [yaml_cpp_dep],
   cpp_args: cpp_args,
   install: true
 )
