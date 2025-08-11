@@ -26,14 +26,6 @@ const std::vector<float> VERTICES{
 	1.0f, 1.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
-
-const std::vector<uint8_t> PIXELS{
-	255, 0, 0, 255,
-	0, 255, 0, 255,
-	0, 255, 0, 255,
-	255, 0, 0, 255,
-};
-
 const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
