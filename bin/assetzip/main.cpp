@@ -3,7 +3,6 @@
 #include <format>
 #include <iostream>
 #include <set>
-#include <unordered_map>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -57,37 +56,38 @@ void run(const std::string &yamlFilePath) {
 		throw std::runtime_error("no asset files specified in config.");
 	}
 
-	// TODO: 総アセットファイルサイズが大きすぎるとやばいのでどうにかする。
-	// アセットファイルをすべて読み込み
-	std::unordered_map<uint32_t, std::vector<unsigned char>> assets;
-	for (size_t i = 0; i < fileNames.size(); ++i) {
-		assets.emplace(static_cast<uint32_t>(i), loadFile(fileNames[i]));
-	}
-
-	// ヘッダー構築
-	const AssetHeader header{static_cast<uint32_t>(assets.size())};
-
-	// エントリー構築
-	auto offset = sizeof(AssetHeader) + sizeof(AssetEntry) * assets.size();
-	std::vector<AssetEntry> entries;
-	for (const auto &[id, data]: assets) {
-		entries.emplace_back(id, static_cast<uint32_t>(offset), static_cast<uint32_t>(data.size()));
-		offset += static_cast<uint32_t>(data.size());
-	}
-
-	// .dat出力
+	// .dat出力開始
 	std::ofstream out(".dat", std::ios::binary);
 	if (!out) {
 		throw std::runtime_error("failed to create '.dat'.");
 	}
+
+	// ヘッダー書込み
+	const AssetHeader header{static_cast<uint32_t>(fileNames.size())};
 	out.write(reinterpret_cast<const char *>(&header), sizeof(AssetHeader));
-	out.write(reinterpret_cast<const char *>(entries.data()), sizeof(AssetEntry) * entries.size());
-	for (const auto &n: entries) {
-		const auto &data = assets[n.id];
+
+	// エントリーは後回し
+	const auto entriesPos = out.tellp();
+	std::vector<char> placeholder(sizeof(AssetEntry) * fileNames.size(), 0);
+	out.write(placeholder.data(), placeholder.size());
+
+	// データ書込み & エントリー構築
+	std::vector<AssetEntry> entries;
+	for (size_t i = 0; i < fileNames.size(); ++i) {
+		const auto data = loadFile(fileNames[i]);
+		entries.emplace_back(
+			static_cast<uint32_t>(i),
+			static_cast<uint32_t>(out.tellp()),
+			static_cast<uint32_t>(data.size())
+		);
 		out.write(reinterpret_cast<const char *>(data.data()), data.size());
 	}
 
-	std::cout << "successfully zipped " << assets.size() - 1 << " assets." << std::endl;
+	// エントリー書込み
+	out.seekp(entriesPos);
+	out.write(reinterpret_cast<const char *>(entries.data()), sizeof(AssetEntry) * entries.size());
+
+	std::cout << "successfully zipped " << fileNames.size() - 1 << " assets." << std::endl;
 }
 
 int main(int argc, char *argv[]) {
