@@ -168,7 +168,7 @@ fonts:
   - id: string
 
     # .ttfファイル名
-    path: string
+    file: string
 
     # 1文字の幅および高さの最大値 (px)
     # 0より大きい整数であること
