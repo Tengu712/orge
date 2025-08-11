@@ -1,3 +1,4 @@
+#include <assetdef.hpp>
 #include <fstream>
 #include <format>
 #include <iostream>
@@ -9,18 +10,6 @@
 #include <unordered_map>
 #include <vector>
 #include <yaml-cpp/yaml.h>
-
-struct AssetHeader {
-	const uint32_t count;
-};
-
-struct AssetEntry {
-	const uint32_t id;
-	const uint32_t offset;
-	const uint32_t size;
-
-	AssetEntry(uint32_t id, uint32_t offset, uint32_t size): id(id), offset(offset), size(size) {}
-};
 
 YAML::Node parseYaml(const std::optional<std::string> &yamlFile) {
 	if (yamlFile) {
@@ -70,9 +59,6 @@ std::vector<unsigned char> loadFile(const std::string &path) {
 
 std::vector<unsigned char> encryptData(const std::vector<unsigned char> &data, const std::string &passphrase) {
 	using CipherContext = std::unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>;
-
-	constexpr size_t KEY_SIZE = 32;
-	constexpr size_t IV_SIZE = 16;
 
 	std::vector<unsigned char> key(KEY_SIZE);
 	std::vector<unsigned char> iv(IV_SIZE);

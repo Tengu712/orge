@@ -1,5 +1,6 @@
 #include "asset.hpp"
 
+#include <assetdef.hpp>
 #include <fstream>
 #include <memory>
 #include <openssl/evp.h>
@@ -7,19 +8,6 @@
 #include <vector>
 
 namespace asset {
-
-struct AssetHeader {
-	const uint32_t count;
-};
-
-struct AssetEntry {
-	uint32_t id;
-	uint32_t offset;
-	uint32_t size;
-};
-
-constexpr size_t KEY_SIZE = 32;
-constexpr size_t IV_SIZE = 16;
 
 std::vector<unsigned char> g_dat;
 std::unordered_map<uint32_t, AssetEntry> g_assetMap;
