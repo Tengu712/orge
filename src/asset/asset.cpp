@@ -6,7 +6,7 @@
 
 namespace asset {
 
-constexpr size_t IV_SIZE = 128;
+constexpr size_t IV_SIZE = 16;
 
 std::vector<unsigned char> loadDatFile() {
 	std::ifstream file(".dat", std::ios::binary);
