@@ -1,8 +1,8 @@
 #include "pipeline.hpp"
 
+#include "../asset/asset.hpp"
 #include "../config/config.hpp"
 
-#include <fstream>
 #include <text-shader-frag-spv.cpp>
 #include <text-shader-vert-spv.cpp>
 
@@ -51,34 +51,14 @@ struct PipelineCreateTemporaryInfos {
 	std::vector<InputAttachment> inputs;
 };
 
-vk::ShaderModule createShaderModule(const vk::Device &device, const std::vector<uint32_t> &code) {
+vk::ShaderModule createShaderModule(const vk::Device &device, const unsigned char *data, size_t length) {
+	const auto code = std::vector<uint32_t>(
+		reinterpret_cast<const uint32_t *>(data),
+		reinterpret_cast<const uint32_t *>(data + length)
+	);
 	const auto ci = vk::ShaderModuleCreateInfo()
 		.setCode(code);
 	return device.createShaderModule(ci);
-}
-
-vk::ShaderModule createShaderModuleFromFile(const vk::Device &device, const std::string &path) {
-	std::fstream file(path, std::ios::in | std::ios::binary);
-	if (!file) {
-		return nullptr;
-	}
-
-	file.seekg(0, std::ios::end);
-	const auto size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
-	if (size <= 0 || size % sizeof(uint32_t) != 0) {
-		return nullptr;
-	}
-
-	std::vector<uint32_t> code(size / sizeof(uint32_t));
-	file.read(reinterpret_cast<char *>(code.data()), size);
-
-	if (!file || file.gcount() != size) {
-		return nullptr;
-	}
-
-	return createShaderModule(device, code);
 }
 
 vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent) {
@@ -131,20 +111,18 @@ std::unordered_map<std::string, Pipeline> createPipelines(
 
 		// シェーダステージ
 		if (n.textRendering) {
-			cti.vertexShader = createShaderModule(device, std::vector<uint32_t>(
-				reinterpret_cast<uint32_t *>(text_shader_vert_spv),
-				reinterpret_cast<uint32_t *>(text_shader_vert_spv + text_shader_vert_spv_len)
-			));
-			cti.fragmentShader = createShaderModule(device, std::vector<uint32_t>(
-				reinterpret_cast<uint32_t *>(text_shader_frag_spv),
-				reinterpret_cast<uint32_t *>(text_shader_frag_spv + text_shader_frag_spv_len)
-			));
+			cti.vertexShader   = createShaderModule(device, text_shader_vert_spv, text_shader_vert_spv_len);
+			cti.fragmentShader = createShaderModule(device, text_shader_frag_spv, text_shader_frag_spv_len);
 			cti.texCount = static_cast<uint32_t>(config::config().fonts.size());
 			cti.fspme = vk::SpecializationMapEntry(0, 0, sizeof(uint32_t));
 			cti.fspi = vk::SpecializationInfo(1, &cti.fspme, sizeof(uint32_t), &cti.texCount);
 		} else {
-			cti.vertexShader = createShaderModuleFromFile(device, n.vertexShader);
-			cti.fragmentShader = createShaderModuleFromFile(device, n.fragmentShader);
+			const auto vsAId = error::at(config::config().assetMap, n.vertexShader,   "assets");
+			const auto fsAId = error::at(config::config().assetMap, n.fragmentShader, "assets");
+			const auto vs = asset::getAsset(vsAId);
+			const auto fs = asset::getAsset(fsAId);
+			cti.vertexShader   = createShaderModule(device, vs.data(), vs.size());
+			cti.fragmentShader = createShaderModule(device, fs.data(), fs.size());
 			cti.fspme = vk::SpecializationMapEntry();
 			cti.fspi = vk::SpecializationInfo();
 		}

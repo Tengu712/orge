@@ -1,9 +1,8 @@
 #include "charatlus.hpp"
 
+#include "../asset/asset.hpp"
 #include "../config/config.hpp"
 
-#include <format>
-#include <fstream>
 #include <memory>
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
@@ -15,23 +14,9 @@ void freeBitmap(unsigned char *p) {
     stbtt_FreeBitmap(p, nullptr);
 }
 
-std::vector<unsigned char> loadFontFromFile(const std::string &path) {
-	std::ifstream file(path, std::ios::binary);
-	if (!file) {
-		throw std::format("failed to load '{}'.", path);
-	}
-
-	file.seekg(0, std::ios::end);
-	const auto size = file.tellg();
-	file.seekg(0, std::ios::beg);
-
-	std::vector<unsigned char> buffer(size);
-	file.read(reinterpret_cast<char *>(buffer.data()), size);
-
-	return buffer;
-}
-
-stbtt_fontinfo createFontInfo(const std::vector<unsigned char> &font) {
+stbtt_fontinfo createFontInfo(const std::string &file) {
+	const auto assetId = error::at(config::config().assetMap, file, "assets");
+	const auto font = asset::getAsset(assetId);
 	stbtt_fontinfo info;
 	if (stbtt_InitFont(&info, font.data(), 0)) {
 		return info;
@@ -59,9 +44,7 @@ CharAtlus::CharAtlus(
 	const config::FontConfig &config
 ) :
 	_config(config),
-	// TODO: フォントデータからも作成できるように
-	_font(loadFontFromFile(config.path.value())),
-	_fontinfo(createFontInfo(_font)),
+	_fontinfo(createFontInfo(config.file)),
 	_scale(stbtt_ScaleForPixelHeight(&_fontinfo, static_cast<float>(_config.charSize))),
 	_ascent(getAscentFrom(_fontinfo, _scale)),
 	_lineAdvance(getLineAdvanceFrom(_fontinfo, _scale)),

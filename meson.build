@@ -49,6 +49,7 @@ endif
 sdl3_dep = dependency('SDL3', method: 'cmake', static: true, required: true)
 vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
 yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
+openssl_dep = dependency('openssl', method: 'cmake', required: true)
 
 # SDL3の依存するシステムライブラリを取得
 sdl3_sysdep_names = []
@@ -108,6 +109,7 @@ endif
 
 # ソースファイルを列挙
 sources = [
+  'src/asset/asset.cpp',
   'src/audio/audio.cpp',
   'src/audio/wave.cpp',
   'src/config/config.cpp',
@@ -185,7 +187,7 @@ endif
 orge = library('orge',
   sources,
   cpp_args: cpp_args,
-  dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
+  dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep, openssl_dep],
   pic: true,
   install: true,
   name_prefix: prefix,

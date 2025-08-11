@@ -4,6 +4,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
@@ -39,6 +40,14 @@ std::vector<std::string> parseAssetFileNames(const YAML::Node &node) {
 	std::vector<std::string> paths;
 	for (const auto &n: node["assets"]) {
 		paths.push_back(n.as<std::string>());
+	}
+
+	std::set<std::string> pathSet;
+	for (const auto &n: paths) {
+		if (pathSet.contains(n)) {
+			throw std::runtime_error(std::format("'{}' duplicated.", n));
+		}
+		pathSet.emplace(n);
 	}
 	return paths;
 }

@@ -6,14 +6,12 @@
 
 #include <optional>
 #include <stb_truetype.h>
-#include <vector>
 
 namespace graphics {
 
 class CharAtlus {
 private:
 	const config::FontConfig &_config;
-	const std::vector<unsigned char> _font;
 	const stbtt_fontinfo _fontinfo;
 	const float _scale;
 	const float _ascent;

@@ -1,5 +1,6 @@
 #include <orge.h>
 
+#include "asset/asset.hpp"
 #include "audio/audio.hpp"
 #include "config/config.hpp"
 #include "error/error.hpp"
@@ -51,6 +52,8 @@ void initialize() {
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw "failed to load Vulkan.";
 	}
+	// TODO: クライアントから受け取る。
+	asset::initialize("orge");
 	g_graphics.emplace();
 	g_audio.emplace();
 }
