@@ -127,9 +127,7 @@ struct Config {
 	Config(YAML::Node node);
 };
 
-void initializeConfig(const std::string &yaml);
-
-void initializeConfigFromFile(const std::string &yamlFilePath);
+void initialize();
 
 const Config &config();
 

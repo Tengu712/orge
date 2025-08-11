@@ -39,7 +39,7 @@ audio-channel-count: unsigned int
 # ========== Assets Definition ================= #
 
 # アセットファイル名
-# 必ず'config.yml'を含むこと
+# 必ず最初の要素としてこのYAMLファイル自身を含むこと
 assets: string[]
 
 # ========== Attachment Definition ============= #

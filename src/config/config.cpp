@@ -1,5 +1,7 @@
 #include "config.hpp"
 
+#include "../asset/asset.hpp"
+
 #include <format>
 #include <set>
 
@@ -371,16 +373,10 @@ Config::Config(YAML::Node node):
 	}
 }
 
-void initializeConfig(const std::string &yaml) {
+void initialize() {
+	const auto data = asset::getAsset(0);
+	const auto yaml = std::string(data.cbegin(), data.cend());
 	g_config.emplace(YAML::Load(yaml));
-}
-
-void initializeConfigFromFile(const std::string &yamlFilePath) {
-	try {
-		g_config.emplace(YAML::LoadFile(yamlFilePath));
-	} catch (const YAML::BadFile &) {
-		throw std::format("config error: config file '{}' not found.", yamlFilePath);
-	}
 }
 
 const Config &config() {

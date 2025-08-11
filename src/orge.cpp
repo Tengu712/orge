@@ -45,19 +45,6 @@ namespace {
 std::optional<graphics::Graphics> g_graphics;
 std::optional<audio::Audio> g_audio;
 
-void initialize() {
-	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
-		throw "failed to prepare for creating a window.";
-	}
-	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
-		throw "failed to load Vulkan.";
-	}
-	// TODO: クライアントから受け取る。
-	asset::initialize();
-	g_graphics.emplace();
-	g_audio.emplace();
-}
-
 void handleVkResult(const vk::Result &e) {
 	switch (e) {
 	case vk::Result::eErrorInitializationFailed:
@@ -125,17 +112,18 @@ const char *orgeGetErrorMessage(void) {
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
 
-uint8_t orgeInitialize(const char *yaml) {
+uint8_t orgeInitialize(void) {
 	TRY(
-		config::initializeConfig(yaml);
-		initialize();
-	)
-}
-
-uint8_t orgeInitializeWith(const char *yamlFilePath) {
-	TRY(
-		config::initializeConfigFromFile(yamlFilePath);
-		initialize();
+		if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
+			throw "failed to prepare for creating a window.";
+		}
+		if (!SDL_Vulkan_LoadLibrary(nullptr)) {
+			throw "failed to load Vulkan.";
+		}
+		asset::initialize();
+		config::initialize();
+		g_graphics.emplace();
+		g_audio.emplace();
 	)
 }
 

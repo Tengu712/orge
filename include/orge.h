@@ -50,11 +50,8 @@ API_EXPORT const char *orgeGetErrorMessage(void);
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
 
-/// orgeを初期化する関数 (yaml文字列指定)
-API_EXPORT uint8_t orgeInitialize(const char *yaml);
-
-/// orgeを初期化する関数 (yamlファイル指定)
-API_EXPORT uint8_t orgeInitializeWith(const char *yamlFilePath);
+/// orgeを初期化する関数
+API_EXPORT uint8_t orgeInitialize(void);
 
 /// orgeを終了する関数
 API_EXPORT void orgeTerminate(void);
