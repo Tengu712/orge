@@ -24,6 +24,7 @@ if default_library == 'static':
 	install(srcdir + '/libSDL3.a', dstdir)
 	install(srcdir + '/libyaml-cpp.a', dstdir)
 	install(srcdir + '/libssl.a', dstdir)
+	install(srcdir + '/libcrypto.a', dstdir)
 
 print('Change libvulkan.so ID to libvulkan.so')
 subprocess.run(['patchelf', '--set-soname', 'libvulkan.so', dstdir + '/libvulkan.so'])

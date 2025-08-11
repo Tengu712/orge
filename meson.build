@@ -255,7 +255,7 @@ endif
 
 # pkgconfig用の値を作成
 libraries = ['-lorge']
-libraries_private = ['-lyaml-cpp', '-lssl']
+libraries_private = ['-lyaml-cpp', '-lssl', '-lcrypto']
 cflags = ['-std=c++20']
 if host_system == 'windows'
   libraries += ['-lvulkan-1']

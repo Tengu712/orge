@@ -23,3 +23,4 @@ if default_library == 'static':
 	install(srclibdir + '/SDL3-static.lib', dstlibdir + '/SDL3-static.lib')
 	install(srclibdir + '/yaml-cpp.lib', dstlibdir + '/yaml-cpp.lib')
 	install(srclibdir + '/ssl.lib', dstlibdir + '/yaml-cpp.lib')
+	install(srclibdir + '/crypto.lib', dstlibdir + '/yaml-cpp.lib')
