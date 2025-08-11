@@ -1,6 +1,10 @@
 title: triangle
 width: 640
 height: 480
+assets:
+  - config.yml
+  - shader.vert.spv
+  - shader.frag.spv
 attachments:
   - id: RT
     format: render-target
@@ -15,6 +19,3 @@ pipelines:
     vertex-input-attributes: [3, 4]
     color-blends: [false]
     subpass: SP
-assets:
-  - shader.vert.spv
-  - shader.frag.spv

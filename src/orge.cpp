@@ -53,7 +53,7 @@ void initialize() {
 		throw "failed to load Vulkan.";
 	}
 	// TODO: クライアントから受け取る。
-	asset::initialize("orge");
+	asset::initialize();
 	g_graphics.emplace();
 	g_audio.emplace();
 }

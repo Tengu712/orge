@@ -7,7 +7,6 @@
     "vulkan-loader",
     "yaml-cpp",
     "stb",
-    "utfcpp",
-    "openssl"
+    "utfcpp"
   ]
 }

@@ -1,10 +1,6 @@
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-
-constexpr size_t KEY_SIZE = 32;
-constexpr size_t IV_SIZE = 16;
 
 struct AssetHeader {
 	uint32_t count;

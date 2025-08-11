@@ -21,8 +21,6 @@ install(srcdir + '/libvulkan.' + vulkan_version + '.dylib', dstdir)
 if default_library == 'static':
 	install(srcdir + '/libSDL3.a', dstdir)
 	install(srcdir + '/libyaml-cpp.a', dstdir)
-	install(srcdir + '/libssl.a', dstdir)
-	install(srcdir + '/libcrypto.a', dstdir)
 
 if default_library == 'shared':
 	print('Change liborge.dylib ID to @rpath/liborge.dylib')

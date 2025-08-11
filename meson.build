@@ -49,7 +49,6 @@ endif
 sdl3_dep = dependency('SDL3', method: 'cmake', static: true, required: true)
 vulkan_dep = dependency('VulkanLoader', method: 'cmake', required: true)
 yaml_cpp_dep = dependency('yaml-cpp', method: 'cmake', required: true)
-openssl_dep = dependency('openssl', method: 'cmake', required: true)
 
 # SDL3の依存するシステムライブラリを取得
 sdl3_sysdep_names = []
@@ -187,7 +186,7 @@ endif
 orge = library('orge',
   sources,
   cpp_args: cpp_args,
-  dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep, openssl_dep],
+  dependencies : [sdl3_ful_dep, vulkan_dep, yaml_cpp_dep],
   pic: true,
   install: true,
   name_prefix: prefix,
@@ -255,7 +254,7 @@ endif
 
 # pkgconfig用の値を作成
 libraries = ['-lorge']
-libraries_private = ['-lyaml-cpp', '-lssl', '-lcrypto']
+libraries_private = ['-lyaml-cpp']
 cflags = ['-std=c++20']
 if host_system == 'windows'
   libraries += ['-lvulkan-1']
