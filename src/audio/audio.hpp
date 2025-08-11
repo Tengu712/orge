@@ -44,8 +44,8 @@ public:
 
 	void setVolume(uint32_t index, float volume);
 
-	void loadWaveFromFile(const std::string &id, const std::string &path, uint32_t startPosition) {
-		_waves.emplace(id, Wave::fromFile(path, startPosition));
+	void loadWaveFromFile(const std::string &id, const std::string &file, uint32_t startPosition) {
+		_waves.emplace(id, Wave::fromFile(file, startPosition));
 	}
 
 	void destroyWave(const std::string &id) noexcept {

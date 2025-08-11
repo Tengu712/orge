@@ -90,12 +90,8 @@ public:
 			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
-	void createImage(const std::string &id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-		_images.emplace(id, Image(_physicalDevice.getMemoryProperties(), _device, _queue, width, height, pixels, false));
-	}
-
-	void createImage(const std::string &id, const std::string &path) {
-		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, path));
+	void createImage(const std::string &id, const std::string &file) {
+		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, file));
 	}
 
 	void destroyImage(const std::string &id) noexcept {

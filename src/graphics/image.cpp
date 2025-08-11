@@ -63,11 +63,11 @@ Image Image::fromFile(
 	const vk::PhysicalDeviceMemoryProperties &memoryProps,
 	const vk::Device &device,
 	const vk::Queue &queue,
-	const std::string &path
+	const std::string &file
 ) {
 	using stbi_ptr = std::unique_ptr<stbi_uc, decltype(&stbi_image_free)>;
 
-	const auto assetId = error::at(config::config().assetMap, path, "assets");
+	const auto assetId = error::at(config::config().assetMap, file, "assets");
 	const auto data = asset::getAsset(assetId);
 
 	// NOTE: MSVCの警告を逃れるため。
@@ -81,10 +81,10 @@ Image Image::fromFile(
 		stbi_image_free
 	);
 	if (!pixels) {
-		throw std::format("failed to load '{}'.", path);
+		throw std::format("failed to load '{}'.", file);
 	}
 	if (channelCount != 4) {
-		throw std::format("'{}' is not RGBA.", path);
+		throw std::format("'{}' is not RGBA.", file);
 	}
 
 	return Image(memoryProps, device, queue, width, height, pixels.get(), false);

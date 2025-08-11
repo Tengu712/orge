@@ -109,17 +109,11 @@ API_EXPORT uint8_t orgeUpdateBufferDescriptor(
 	uint32_t offset
 );
 
-/// orgeにイメージを追加する関数 (ビットマップデータ指定)
-///
-/// pixelsはビットマップデータ。
-/// 必ずRGBAで並んでいること。
-API_EXPORT uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels);
-
-/// orgeにイメージを追加する関数 (pngファイル指定)
+/// orgeにイメージを追加する関数
 ///
 /// - id: イメージID
-/// - path: pngファイルパス
-API_EXPORT uint8_t orgeCreateImageFromFile(const char *id, const char *path);
+/// - file: アセットファイル名
+API_EXPORT uint8_t orgeCreateImage(const char *id, const char *file);
 
 /// イメージを破棄する関数
 API_EXPORT void orgeDestroyImage(const char *id);
@@ -368,12 +362,12 @@ API_EXPORT float orgeGetAudioChannelVolume(uint32_t index);
 /// - volume: 音量 ([0.0, 1.0])
 API_EXPORT uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume);
  
-/// orgeにWAVEを追加する関数 (ファイル指定)
+/// orgeにWAVEを追加する関数
 ///
 /// - id: WAVEID
-/// - path: WAVEファイルのパス
+/// - file: アセットファイル名
 /// - startPosition: ループ開始位置
-API_EXPORT uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition);
+API_EXPORT uint8_t orgeLoadWave(const char *id, const char *file, uint32_t startPosition);
 
 /// WAVEを破棄する関数
 API_EXPORT void orgeDestroyWave(const char *id);

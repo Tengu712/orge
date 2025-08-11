@@ -195,12 +195,8 @@ uint8_t orgeUpdateBufferDescriptor(
 	TRY(g_graphics->updateBufferDescriptor(bufferId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-	TRY(g_graphics->createImage(id, width, height, pixels));
-}
-
-uint8_t orgeCreateImageFromFile(const char *id, const char *path) {
-	TRY(g_graphics->createImage(id, path));
+uint8_t orgeCreateImage(const char *id, const char *file) {
+	TRY(g_graphics->createImage(id, file));
 }
 
 void orgeDestroyImage(const char *id) {
@@ -346,8 +342,8 @@ uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
 	TRY(g_audio->setVolume(index, volume));
 }
 
-uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
-	TRY(g_audio->loadWaveFromFile(id, path, startPosition));
+uint8_t orgeLoadWave(const char *id, const char *file, uint32_t startPosition) {
+	TRY(g_audio->loadWaveFromFile(id, file, startPosition));
 }
 
 void orgeDestroyWave(const char *id) {
