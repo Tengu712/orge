@@ -2,7 +2,6 @@ title: triangle
 width: 640
 height: 480
 assets:
-  - config.yml
   - shader.vert.spv
   - shader.frag.spv
 attachments:

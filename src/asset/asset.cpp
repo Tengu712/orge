@@ -58,8 +58,15 @@ void initialize() {
 	analyzeDat();
 }
 
+std::vector<unsigned char> getConfigData() {
+	const auto &entry = g_assetMap[0];
+	const unsigned char *data = g_dat.data() + entry.offset;
+	return std::vector<unsigned char>(data, data + entry.size);
+}
+
 std::vector<unsigned char> getAsset(uint32_t id) {
-	const auto &entry = g_assetMap[id];
+	// NOTE: 0はconfigファイルに予約されているので+1する。
+	const auto &entry = g_assetMap[id + 1];
 	const unsigned char *data = g_dat.data() + entry.offset;
 	return std::vector<unsigned char>(data, data + entry.size);
 }

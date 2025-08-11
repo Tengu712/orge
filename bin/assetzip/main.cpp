@@ -7,12 +7,15 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
-std::vector<std::string> parseAssetFileNames(const YAML::Node &node) {
+std::vector<std::string> parseAssetFileNames(const std::string &yamlFilePath) {
+	const auto node = YAML::LoadFile(yamlFilePath);
+
 	if (!node["assets"] || !node["assets"].IsSequence()) {
 		throw std::runtime_error("YAML must contain 'assets' as a sequence.");
 	}
 
 	std::vector<std::string> paths;
+	paths.push_back(yamlFilePath);
 	for (const auto &n: node["assets"]) {
 		paths.push_back(n.as<std::string>());
 	}
@@ -44,8 +47,8 @@ std::vector<unsigned char> loadFile(const std::string &path) {
 	return data;
 }
 
-void run() {
-	const auto fileNames = parseAssetFileNames(YAML::LoadFile("config.yml"));
+void run(const std::string &yamlFilePath) {
+	const auto fileNames = parseAssetFileNames(yamlFilePath);
 	if (fileNames.empty()) {
 		throw std::runtime_error("no asset files specified in config.");
 	}
@@ -80,12 +83,17 @@ void run() {
 		out.write(reinterpret_cast<const char *>(data.data()), data.size());
 	}
 
-	std::cout << "successfully zipped " << assets.size() << " assets." << std::endl;
+	std::cout << "successfully zipped " << assets.size() - 1 << " assets." << std::endl;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+	if (argc != 2) {
+		std::cerr << "usage: assetzip <config-file-path>" << std::endl;
+		return 1;
+	}
+
 	try {
-		run();
+		run(argv[1]);
 	} catch (const YAML::Exception &e) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << "failed to zip asset files." << std::endl;

@@ -374,7 +374,7 @@ Config::Config(YAML::Node node):
 }
 
 void initialize() {
-	const auto data = asset::getAsset(0);
+	const auto data = asset::getConfigData();
 	const auto yaml = std::string(data.cbegin(), data.cend());
 	g_config.emplace(YAML::Load(yaml));
 }
