@@ -1,14 +1,14 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
+#include <span>
 
 namespace asset {
 
 void initialize();
 
-std::vector<unsigned char> getConfigData();
+std::span<const unsigned char> getConfigData();
 
-std::vector<unsigned char> getAsset(uint32_t id);
+std::span<const unsigned char> getAsset(uint32_t id);
 
 } // namespace asset

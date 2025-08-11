@@ -10,7 +10,7 @@ namespace asset {
 std::vector<unsigned char> g_dat;
 std::unordered_map<uint32_t, AssetEntry> g_assetMap;
 
-std::vector<unsigned char> loadDatFile() {
+void loadDatFile() {
 	std::ifstream file(".dat", std::ios::binary);
 	if (!file) {
 		throw ".dat not found.";
@@ -20,10 +20,9 @@ std::vector<unsigned char> loadDatFile() {
 	const auto size = file.tellg();
 	file.seekg(0, std::ios::beg);
 
-	std::vector<unsigned char> buffer(size);
-	file.read(reinterpret_cast<char *>(buffer.data()), size);
-
-	return buffer;
+	g_dat.clear();
+	g_dat.resize(size);
+	file.read(reinterpret_cast<char *>(g_dat.data()), size);
 }
 
 void analyzeDat() {
@@ -42,7 +41,6 @@ void analyzeDat() {
 	}
 	const AssetEntry *entries = reinterpret_cast<const AssetEntry *>(g_dat.data() + offset);
 
-
 	// エントリ取得
 	for (uint32_t i = 0; i < header->count; ++i) {
 		const auto &entry = entries[i];
@@ -54,21 +52,21 @@ void analyzeDat() {
 }
 
 void initialize() {
-	g_dat = loadDatFile();
+	loadDatFile();
 	analyzeDat();
 }
 
-std::vector<unsigned char> getConfigData() {
+std::span<const unsigned char> getConfigData() {
 	const auto &entry = g_assetMap[0];
 	const unsigned char *data = g_dat.data() + entry.offset;
-	return std::vector<unsigned char>(data, data + entry.size);
+	return std::span<const unsigned char>(data, entry.size);
 }
 
-std::vector<unsigned char> getAsset(uint32_t id) {
+std::span<const unsigned char> getAsset(uint32_t id) {
 	// NOTE: 0はconfigファイルに予約されているので+1する。
 	const auto &entry = g_assetMap[id + 1];
 	const unsigned char *data = g_dat.data() + entry.offset;
-	return std::vector<unsigned char>(data, data + entry.size);
+	return std::span<const unsigned char>(data, entry.size);
 }
 
 } // namespace asset
