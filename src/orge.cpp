@@ -1,5 +1,6 @@
 #include <orge.h>
 
+#include "asset/asset.hpp"
 #include "audio/audio.hpp"
 #include "config/config.hpp"
 #include "error/error.hpp"
@@ -43,17 +44,6 @@ namespace {
 
 std::optional<graphics::Graphics> g_graphics;
 std::optional<audio::Audio> g_audio;
-
-void initialize() {
-	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
-		throw "failed to prepare for creating a window.";
-	}
-	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
-		throw "failed to load Vulkan.";
-	}
-	g_graphics.emplace();
-	g_audio.emplace();
-}
 
 void handleVkResult(const vk::Result &e) {
 	switch (e) {
@@ -122,17 +112,18 @@ const char *orgeGetErrorMessage(void) {
 //     Lifetime Managiment                                                                                            //
 // ================================================================================================================== //
 
-uint8_t orgeInitialize(const char *yaml) {
+uint8_t orgeInitialize(void) {
 	TRY(
-		config::initializeConfig(yaml);
-		initialize();
-	)
-}
-
-uint8_t orgeInitializeWith(const char *yamlFilePath) {
-	TRY(
-		config::initializeConfigFromFile(yamlFilePath);
-		initialize();
+		if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
+			throw "failed to prepare for creating a window.";
+		}
+		if (!SDL_Vulkan_LoadLibrary(nullptr)) {
+			throw "failed to load Vulkan.";
+		}
+		asset::initialize();
+		config::initialize();
+		g_graphics.emplace();
+		g_audio.emplace();
 	)
 }
 
@@ -204,12 +195,8 @@ uint8_t orgeUpdateBufferDescriptor(
 	TRY(g_graphics->updateBufferDescriptor(bufferId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateImage(const char *id, uint32_t width, uint32_t height, const uint8_t *pixels) {
-	TRY(g_graphics->createImage(id, width, height, pixels));
-}
-
-uint8_t orgeCreateImageFromFile(const char *id, const char *path) {
-	TRY(g_graphics->createImage(id, path));
+uint8_t orgeCreateImage(const char *id, const char *file) {
+	TRY(g_graphics->createImage(id, file));
 }
 
 void orgeDestroyImage(const char *id) {
@@ -355,8 +342,8 @@ uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
 	TRY(g_audio->setVolume(index, volume));
 }
 
-uint8_t orgeLoadWaveFromFile(const char *id, const char *path, uint32_t startPosition) {
-	TRY(g_audio->loadWaveFromFile(id, path, startPosition));
+uint8_t orgeLoadWave(const char *id, const char *file, uint32_t startPosition) {
+	TRY(g_audio->loadWaveFromFile(id, file, startPosition));
 }
 
 void orgeDestroyWave(const char *id) {

@@ -1,5 +1,7 @@
 #include "config.hpp"
 
+#include "../asset/asset.hpp"
+
 #include <format>
 #include <set>
 
@@ -230,12 +232,12 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
 
 FontConfig::FontConfig(const YAML::Node &node):
 	id(s(node, "id")),
-	path(node["path"] ? std::make_optional(s(node, "path")) : std::nullopt),
+	file(s(node, "file")),
 	charSize(u(node, "char-size")),
 	charAtlusCol(u(node, "char-atlus-col")),
 	charAtlusRow(u(node, "char-atlus-row"))
 {
-	checkUnexpectedKeys(node, {"id", "path", "char-size", "char-atlus-col", "char-atlus-row"});
+	checkUnexpectedKeys(node, {"id", "file", "char-size", "char-atlus-col", "char-atlus-row"});
 
 	if (charSize == 0) {
 		throw "config error: 'char-size' must be greater than 0.";
@@ -269,6 +271,28 @@ std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_
 	return results;
 }
 
+std::unordered_map<std::string, uint32_t> collectAssetMap(const YAML::Node &node) {
+	if (!node["assets"]) {
+		return {};
+	}
+	if (!node["assets"].IsSequence()) {
+		throw "config error: assets must be a string sequence.";
+	}
+
+	const auto assets = ss(node, "assets");
+
+	std::unordered_map<std::string, uint32_t> assetMap;
+	for (const auto &n: assets) {
+		if (assetMap.contains(n)) {
+			throw std::format("config error: asset '{}' is duplicated.", n);
+		}
+		const auto size = assetMap.size();
+		assetMap.emplace(n, static_cast<uint32_t>(size));
+	}
+
+	return assetMap;
+}
+
 Config::Config(YAML::Node node):
 	title(s(node, "title")),
 	width(u(node, "width")),
@@ -282,7 +306,8 @@ Config::Config(YAML::Node node):
 	pipelines(parsePipelineConfigs(node, static_cast<uint32_t>(fonts.size()))),
 	attachmentMap(collectMap(attachments)),
 	subpassMap(collectMap(subpasses)),
-	fontMap(collectMap(fonts))
+	fontMap(collectMap(fonts)),
+	assetMap(collectAssetMap(node))
 {
 	checkUnexpectedKeys(
 		node,
@@ -297,6 +322,7 @@ Config::Config(YAML::Node node):
 			"subpasses",
 			"pipelines",
 			"fonts",
+			"assets",
 		}
 	);
 
@@ -347,16 +373,10 @@ Config::Config(YAML::Node node):
 	}
 }
 
-void initializeConfig(const std::string &yaml) {
+void initialize() {
+	const auto data = asset::getConfigData();
+	const auto yaml = std::string(reinterpret_cast<const char *>(data.data()), data.size());
 	g_config.emplace(YAML::Load(yaml));
-}
-
-void initializeConfigFromFile(const std::string &yamlFilePath) {
-	try {
-		g_config.emplace(YAML::LoadFile(yamlFilePath));
-	} catch (const YAML::BadFile &) {
-		throw std::format("config error: config file '{}' not found.", yamlFilePath);
-	}
 }
 
 const Config &config() {

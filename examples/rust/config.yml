@@ -1,6 +1,9 @@
 title: triangle in Rust
 width: 640
 height: 480
+assets:
+  - shader.vert.spv
+  - shader.frag.spv
 attachments:
   - id: RT
     format: render-target

@@ -27,7 +27,7 @@ public:
 		const vk::PhysicalDeviceMemoryProperties &memoryProps,
 		const vk::Device &device,
 		const vk::Queue &queue,
-		const std::string &path
+		const std::string &file
 	);
 
 	void destroy(const vk::Device &device) const noexcept {

@@ -99,7 +99,7 @@ struct PipelineConfig {
 
 struct FontConfig {
 	const std::string id;
-	const std::optional<std::string> path;
+	const std::string file;
 	const uint32_t charSize;
 	const uint32_t charAtlusCol;
 	const uint32_t charAtlusRow;
@@ -122,13 +122,12 @@ struct Config {
 	const std::unordered_map<std::string, uint32_t> attachmentMap;
 	const std::unordered_map<std::string, uint32_t> subpassMap;
 	const std::unordered_map<std::string, uint32_t> fontMap;
+	const std::unordered_map<std::string, uint32_t> assetMap;
 
 	Config(YAML::Node node);
 };
 
-void initializeConfig(const std::string &yaml);
-
-void initializeConfigFromFile(const std::string &yamlFilePath);
+void initialize();
 
 const Config &config();
 

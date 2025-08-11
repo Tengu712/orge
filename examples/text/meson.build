@@ -6,14 +6,8 @@ executable('text',
 )
 
 configure_file(
-  input: 'config.yml',
-  output: 'config.yml',
-  copy: true,
-  install: false
-)
-configure_file(
-  input: 'MPLUS1p-Regular.ttf',
-  output: 'MPLUS1p-Regular.ttf',
+  input: '.dat',
+  output: '.dat',
   copy: true,
   install: false
 )

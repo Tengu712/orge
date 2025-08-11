@@ -94,7 +94,7 @@ std::array<float, 16> rotY(float ang) {
 }
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"cube",
 		static_cast<uint32_t>(VERTICES.size()),
@@ -110,7 +110,7 @@ int main() {
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
 	TRY(orgeUpdateBuffer("scl", reinterpret_cast<const uint8_t *>(SCL.data())));
 
-	TRY(orgeCreateImageFromFile("image", "image.png"));
+	TRY(orgeCreateImage("image", "image.png"));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
 
 	float ang = 0.0f;

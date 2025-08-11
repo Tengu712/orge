@@ -22,7 +22,7 @@ const std::vector<float> VERTICES{
 const std::vector<uint32_t> INDICES{0, 1, 2};
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"triangle",
 		static_cast<uint32_t>(VERTICES.size()),

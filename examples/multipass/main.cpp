@@ -48,7 +48,7 @@ const std::vector<uint32_t> PATTERN_PL_SET_INDICES{0};
 const std::vector<uint32_t> INTEGRATION_PL_SET_INDICES{0};
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 
 	TRY(orgeCreateMesh(
 		"triangle",

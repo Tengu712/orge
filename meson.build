@@ -108,6 +108,7 @@ endif
 
 # ソースファイルを列挙
 sources = [
+  'src/asset/asset.cpp',
   'src/audio/audio.cpp',
   'src/audio/wave.cpp',
   'src/config/config.cpp',
@@ -368,3 +369,9 @@ endif
 foreach n: example_dirs
   subdir(n)
 endforeach
+
+# =================================================================================================================== #
+#     Bins                                                                                                            #
+# =================================================================================================================== #
+
+subdir('bin/assetzip')

@@ -26,18 +26,10 @@ const std::vector<float> VERTICES{
 	1.0f, 1.0f,
 };
 const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
-
-const std::vector<uint8_t> PIXELS{
-	255, 0, 0, 255,
-	0, 255, 0, 255,
-	0, 255, 0, 255,
-	255, 0, 0, 255,
-};
-
 const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
-	TRY(orgeInitializeWith("config.yml"));
+	TRY(orgeInitialize());
 	TRY(orgeCreateMesh(
 		"square",
 		static_cast<uint32_t>(VERTICES.size()),
@@ -48,7 +40,7 @@ int main() {
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
 	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));
-	TRY(orgeCreateImage("texture", 2, 2, PIXELS.data()));
+	TRY(orgeCreateImage("texture", "image.png"));
 	TRY(orgeCreateSampler("nearest", 0, 0, 0));
 	TRY(orgeCreateSampler("linear",  1, 1, 0));
 

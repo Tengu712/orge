@@ -36,6 +36,12 @@ alt-return-toggle-fullscreen: bool
 # 省略された場合、16とみなされる
 audio-channel-count: unsigned int
 
+# ========== Assets Definition ================= #
+
+# アセットファイル名
+# 省略可能
+assets: string[]
+
 # ========== Attachment Definition ============= #
 
 attachments: []
@@ -161,10 +167,8 @@ fonts:
     # アクティベート時やテクスチャアトラスバインド時に用いる
   - id: string
 
-    # .ttfファイルのパス
-    # 省略可能
-    # 省略した場合はフォントのアクティベート時にフォントデータを渡すこと
-    path: string
+    # .ttfファイル名
+    file: string
 
     # 1文字の幅および高さの最大値 (px)
     # 0より大きい整数であること

@@ -40,7 +40,7 @@ struct Wave {
 		startByte(calcLoopStartByte(spec, startPosition))
 	{}
 
-	static std::shared_ptr<Wave> fromFile(const std::string &path, uint32_t startPosition);
+	static std::shared_ptr<Wave> fromFile(const std::string &file, uint32_t startPosition);
 };
 
 } // namespace audio

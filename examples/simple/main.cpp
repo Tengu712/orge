@@ -1,21 +1,8 @@
 #include <iostream>
 #include <orge.h>
 
-constexpr const char *CONFIG = "\
-title: simple\n\
-width: 640\n\
-height: 480\n\
-attachments:\n\
-  - id: RT\n\
-    format: render-target\n\
-    clear-value: [0.894, 0.619, 0.38, 1.0]\n\
-subpasses:\n\
-  - id: SP\n\
-    outputs: [RT]\n\
-";
-
 int main() {
-	if (!orgeInitialize(CONFIG)) {
+	if (!orgeInitialize()) {
 		std::cout << orgeGetErrorMessage() << std::endl;
 		return 1;
 	}
