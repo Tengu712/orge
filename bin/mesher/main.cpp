@@ -76,6 +76,8 @@ void dispatch(const std::string &path) {
 	} else {
 		throw std::runtime_error(std::format("the extension '{}' is not supported.", extension));
 	}
+
+	std::cout << "successfully create " << filename << ".mesh.v and " << filename << ".mesh.i." << std::endl;
 }
 
 int main(int argc, char *argv[]) {
