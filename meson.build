@@ -118,6 +118,7 @@ sources = [
   'src/graphics/framebuffer.cpp',
   'src/graphics/graphics.cpp',
   'src/graphics/image.cpp',
+  'src/graphics/mesh.cpp',
   'src/graphics/pipeline.cpp',
   'src/graphics/renderer.cpp',
   'src/graphics/swapchain.cpp',
@@ -375,3 +376,4 @@ endforeach
 # =================================================================================================================== #
 
 subdir('bin/assetzip')
+subdir('bin/mesher')

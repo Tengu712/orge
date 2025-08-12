@@ -2,9 +2,15 @@ title: cube
 width: 640
 height: 480
 assets:
+  - cube.mesh.v
+  - cube.mesh.i
   - shader.vert.spv
   - shader.frag.spv
   - image.png
+meshes:
+  - id: cube
+    vertices: cube.mesh.v
+    indices: cube.mesh.i
 attachments:
   - id: RT
     format: render-target

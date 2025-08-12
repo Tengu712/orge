@@ -14,25 +14,13 @@
 		continue; \
 	}
 
-const std::vector<float> VERTICES{
-	-1.0f, 1.0f, 0.0f,
-	0.0f, -1.0f, 0.0f,
-	1.0f, 1.0f, 0.0f,
-};
-const std::vector<uint32_t> INDICES{0, 1, 2};
 const std::vector<float> RED  {1.0f, 0.0f, 0.0f, 1.0f};
 const std::vector<float> GREEN{0.0f, 1.0f, 0.0f, 1.0f};
 const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh(
-		"triangle",
-		static_cast<uint32_t>(VERTICES.size()),
-		VERTICES.data(),
-		static_cast<uint32_t>(INDICES.size()),
-		INDICES.data())
-	);
+	TRY(orgeCreateMesh("triangle"));
 
 	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0));
 	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0));

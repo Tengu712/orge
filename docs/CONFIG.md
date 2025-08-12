@@ -42,6 +42,14 @@ audio-channel-count: unsigned int
 # 省略可能
 assets: string[]
 
+# ========== Meshes Definition ================= #
+
+# メッシュアセット名
+# 省略可能
+meshes: []
+  - vertices: string
+    indices: string
+
 # ========== Attachment Definition ============= #
 
 attachments: []
@@ -93,7 +101,7 @@ pipelines: []
   # 通常のレンダリングパイプライン
   - id: string
 
-    # シェーダのファイル名
+    # シェーダアセット名
     vertex-shader: string
     fragment-shader: string
 
@@ -167,7 +175,7 @@ fonts:
     # アクティベート時やテクスチャアトラスバインド時に用いる
   - id: string
 
-    # .ttfファイル名
+    # .ttfアセット名
     file: string
 
     # 1文字の幅および高さの最大値 (px)

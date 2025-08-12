@@ -15,28 +15,11 @@
 		continue; \
 	}
 
-const std::vector<float> VERTICES{
-	-1.0f, 1.0f, 0.0f,
-	0.0f, 1.0f,
-	-1.0f, -1.0f, 0.0f,
-	0.0f, 0.0f,
-	1.0f, -1.0f, 0.0f,
-	1.0f, 0.0f,
-	1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f,
-};
-const std::vector<uint32_t> INDICES{0, 1, 2, 0, 2, 3};
 const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh(
-		"square",
-		static_cast<uint32_t>(VERTICES.size()),
-		VERTICES.data(),
-		static_cast<uint32_t>(INDICES.size()),
-		INDICES.data())
-	);
+	TRY(orgeCreateMesh("square"));
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
 	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));

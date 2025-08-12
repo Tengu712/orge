@@ -2,9 +2,15 @@ title: sampler
 width: 640
 height: 480
 assets:
+  - square.mesh.v
+  - square.mesh.i
   - shader.vert.spv
   - shader.frag.spv
   - image.png
+meshes:
+  - id: square
+    vertices: square.mesh.v
+    indices: square.mesh.i
 attachments:
   - id: RT
     format: render-target

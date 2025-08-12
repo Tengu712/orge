@@ -146,22 +146,8 @@ public:
 			.updateSamplerDescriptor(_device, error::at(_samplers, samplerId, "samplers"), set, index, binding, offset);
 	}
 
-	void createMesh(
-		const std::string &id,
-		const uint32_t vertexCount,
-		const float *vertices,
-		const uint32_t indexCount,
-		const uint32_t *indices
-	) {
-		_meshes.emplace(id, Mesh(
-			_physicalDevice.getMemoryProperties(),
-			_device,
-			_queue,
-			vertexCount,
-			vertices,
-			indexCount,
-			indices
-		));
+	void createMesh(const std::string &id) {
+		_meshes.emplace(id, Mesh(_physicalDevice.getMemoryProperties(), _device, _queue, id));
 	}
 
 	void destroyMesh(const std::string &id) noexcept {

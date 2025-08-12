@@ -2,12 +2,23 @@ title: multipass
 width: 640
 height: 480
 assets:
+  - colored-triangle.mesh.v
+  - colored-triangle.mesh.i
+  - square.mesh.v
+  - square.mesh.i
   - mesh.vert.spv
   - mesh.frag.spv
   - pattern.vert.spv
   - pattern.frag.spv
   - integration.vert.spv
   - integration.frag.spv
+meshes:
+  - id: triangle
+    vertices: colored-triangle.mesh.v
+    indices: colored-triangle.mesh.i
+  - id: square
+    vertices: square.mesh.v
+    indices: square.mesh.i
 attachments:
   - id: mesh-rt
     format: share-color-attachment

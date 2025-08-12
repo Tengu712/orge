@@ -16,46 +16,6 @@
 		continue; \
 	}
 
-const std::vector<float> VERTICES{
-	// 前
-	-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-	-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-	// 後
-	 0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-	-0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-	// 左
-	-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-	-0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-	// 右
-	 0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-	 0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-	// 上
-	-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-	 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-	 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-	// 下
-	-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-	-0.5f,  0.5f, -0.5f, 0.0f, 0.0f,
-	 0.5f,  0.5f, -0.5f, 1.0f, 0.0f,
-	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-};
-const std::vector<uint32_t> INDICES{
-	0, 1, 2, 0, 2, 3,
-	4, 5, 6, 4, 6, 7,
-	8, 9, 10, 8, 10, 11,
-	12, 13, 14, 12, 14, 15,
-	16, 17, 18, 16, 18, 19,
-	20, 21, 22, 20, 22, 23,
-};
 struct Camera {
 	float proj[16];
 	float view[16];
@@ -95,13 +55,7 @@ std::array<float, 16> rotY(float ang) {
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh(
-		"cube",
-		static_cast<uint32_t>(VERTICES.size()),
-		VERTICES.data(),
-		static_cast<uint32_t>(INDICES.size()),
-		INDICES.data())
-	);
+	TRY(orgeCreateMesh("cube"));
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
 	TRY(orgeUpdateBuffer("camera", reinterpret_cast<const uint8_t *>(&CAMERA)));

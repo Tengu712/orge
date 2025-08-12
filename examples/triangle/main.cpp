@@ -1,6 +1,5 @@
 #include <iostream>
 #include <orge.h>
-#include <vector>
 
 #define TRY(n) \
 	if (!(n)) { \
@@ -8,28 +7,9 @@
 		return 1; \
 	}
 
-const std::vector<float> VERTICES{
-	// 左下
-	-1.0f, 1.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	// 上
-	0.0f, -1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	// 右下
-	1.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-};
-const std::vector<uint32_t> INDICES{0, 1, 2};
-
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh(
-		"triangle",
-		static_cast<uint32_t>(VERTICES.size()),
-		VERTICES.data(),
-		static_cast<uint32_t>(INDICES.size()),
-		INDICES.data())
-	);
+	TRY(orgeCreateMesh("triangle"));
 
 	while (orgeUpdate()) {
 		const auto result =
