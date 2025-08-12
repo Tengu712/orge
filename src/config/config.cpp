@@ -250,6 +250,10 @@ FontConfig::FontConfig(const YAML::Node &node):
 	}
 }
 
+MeshConfig::MeshConfig(const YAML::Node &node): vertices(s(node, "vertices")), indices(s(node, "indices")) {
+	checkUnexpectedKeys(node, {"id", "vertices", "indices"});
+}
+
 template<typename T>
 std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 	std::unordered_map<std::string, uint32_t> map;
@@ -257,6 +261,14 @@ std::unordered_map<std::string, uint32_t> collectMap(const std::vector<T> &v) {
 		map.emplace(n.id, static_cast<uint32_t>(map.size()));
 	}
 	return map;
+}
+
+std::unordered_map<std::string, MeshConfig> parseMeshConfigs(const YAML::Node &node) {
+	std::unordered_map<std::string, MeshConfig> meshes;
+	for (const auto &n: node["meshes"]) {
+		meshes.emplace(s(n, "id"), MeshConfig(n));
+	}
+	return meshes;
 }
 
 std::vector<PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_t texCount) {
@@ -300,6 +312,7 @@ Config::Config(YAML::Node node):
 	fullscreen(b(node, "fullscreen", false)),
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	audioChannelCount(u(node, "audio-channel-count", 16)),
+	meshes(parseMeshConfigs(node)),
 	fonts(parseConfigs<FontConfig>(node, "fonts")),
 	attachments(parseConfigs<AttachmentConfig>(node, "attachments")),
 	subpasses(parseConfigs<SubpassConfig>(node, "subpasses")),
@@ -318,6 +331,7 @@ Config::Config(YAML::Node node):
 			"fullscreen",
 			"alt-return-toggle-fullscreen",
 			"audio-channel-count",
+			"meshes",
 			"attachments",
 			"subpasses",
 			"pipelines",

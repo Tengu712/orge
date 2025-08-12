@@ -238,14 +238,8 @@ uint8_t orgeUpdateSamplerDescriptor(
 	TRY(g_graphics->updateSamplerDescriptor(samplerId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateMesh(
-	const char *id,
-	const uint32_t vertexCount,
-	const float *vertices,
-	const uint32_t indexCount,
-	const uint32_t *indices
-) {
-	TRY(g_graphics->createMesh(id, vertexCount, vertices, indexCount, indices));
+uint8_t orgeCreateMesh(const char *id) {
+	TRY(g_graphics->createMesh(id));
 }
 
 void orgeDestroyMesh(const char *id) {

@@ -1,0 +1,12 @@
+vertices:
+  - position: [-1, 1, 0]
+    uv: [0, 1]
+  - position: [1, 1, 0]
+    uv: [1, 1]
+  - position: [1, -1, 0]
+    uv: [1, 0]
+  - position: [-1, -1, 0]
+    uv: [0, 0]
+indices:
+  - face: [0, 1, 2]
+  - face: [0, 2, 3]

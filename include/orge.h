@@ -172,17 +172,7 @@ API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
 /// orgeにメッシュを追加する関数
 ///
 /// - id: メッシュID
-/// - vertexCount: verticesの要素数
-/// - vertices: 頂点データ
-/// - indexCount: indicesの要素数
-/// - indices: インデックスデータ
-API_EXPORT uint8_t orgeCreateMesh(
-	const char *id,
-	const uint32_t vertexCount,
-	const float *vertices,
-	const uint32_t indexCount,
-	const uint32_t *indices
-);
+API_EXPORT uint8_t orgeCreateMesh(const char *id);
 
 /// メッシュを破棄する関数
 API_EXPORT void orgeDestroyMesh(const char *id);

@@ -23,13 +23,7 @@ const std::vector<uint32_t> INDICES{0, 1, 2};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh(
-		"triangle",
-		static_cast<uint32_t>(VERTICES.size()),
-		VERTICES.data(),
-		static_cast<uint32_t>(INDICES.size()),
-		INDICES.data())
-	);
+	TRY(orgeCreateMesh("triangle"));
 
 	while (orgeUpdate()) {
 		const auto result =

@@ -2,8 +2,14 @@ title: input
 width: 640
 height: 480
 assets:
+  - triangle.mesh.v
+  - triangle.mesh.i
   - shader.vert.spv
   - shader.frag.spv
+meshes:
+  - id: triangle
+    vertices: triangle.mesh.v
+    indices: triangle.mesh.i
 attachments:
   - id: RT
     format: render-target

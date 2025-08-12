@@ -107,6 +107,13 @@ struct FontConfig {
 	FontConfig(const YAML::Node &node);
 };
 
+struct MeshConfig {
+	const std::string vertices;
+	const std::string indices;
+
+	MeshConfig(const YAML::Node &node);
+};
+
 struct Config {
 	const std::string title;
 	const uint32_t width;
@@ -114,6 +121,7 @@ struct Config {
 	const bool fullscreen;
 	const bool altReturnToggleFullscreen;
 	const uint32_t audioChannelCount;
+	const std::unordered_map<std::string, MeshConfig> meshes;
 	const std::vector<FontConfig> fonts;
 	const std::vector<AttachmentConfig> attachments;
 	const std::vector<SubpassConfig> subpasses;

@@ -2,8 +2,14 @@ title: triangle
 width: 640
 height: 480
 assets:
+  - colored-triangle.mesh.v
+  - colored-triangle.mesh.i
   - shader.vert.spv
   - shader.frag.spv
+meshes:
+  - id: triangle
+    vertices: colored-triangle.mesh.v
+    indices: colored-triangle.mesh.i
 attachments:
   - id: RT
     format: render-target

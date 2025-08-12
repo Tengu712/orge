@@ -15,55 +15,14 @@
 		continue; \
 	}
 
-const std::vector<float> TRIANGLE_VERTICES{
-	// 左下
-	-1.0f, 1.0f, 0.0f,
-	1.0f, 0.0f, 0.0f, 1.0f,
-	// 上
-	0.0f, -1.0f, 0.0f,
-	0.0f, 1.0f, 0.0f, 1.0f,
-	// 右下
-	1.0f, 1.0f, 0.0f,
-	0.0f, 0.0f, 1.0f, 1.0f,
-};
-const std::vector<uint32_t> TRIANGLE_INDICES{0, 1, 2};
-
-const std::vector<float> SQUARE_VERTICES{
-	// 左下
-	-1.0f, 1.0f, 0.0f,
-	0.0f, 1.0f,
-	// 左上
-	-1.0f, -1.0f, 0.0f,
-	0.0f, 0.0f,
-	// 右上
-	1.0f, -1.0f, 0.0f,
-	1.0f, 0.0f,
-	// 右下
-	1.0f, 1.0f, 0.0f,
-	1.0f, 1.0f,
-};
-const std::vector<uint32_t> SQUARE_INDICES{0, 1, 2, 0, 2, 3};
-
 const std::vector<uint32_t> PATTERN_PL_SET_INDICES{0};
 const std::vector<uint32_t> INTEGRATION_PL_SET_INDICES{0};
 
 int main() {
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateMesh(
-		"triangle",
-		static_cast<uint32_t>(TRIANGLE_VERTICES.size()),
-		TRIANGLE_VERTICES.data(),
-		static_cast<uint32_t>(TRIANGLE_INDICES.size()),
-		TRIANGLE_INDICES.data())
-	);
-	TRY(orgeCreateMesh(
-		"square",
-		static_cast<uint32_t>(SQUARE_VERTICES.size()),
-		SQUARE_VERTICES.data(),
-		static_cast<uint32_t>(SQUARE_INDICES.size()),
-		SQUARE_INDICES.data())
-	);
+	TRY(orgeCreateMesh("triangle"));
+	TRY(orgeCreateMesh("square"));
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));

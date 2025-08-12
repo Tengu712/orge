@@ -8,13 +8,7 @@ unsafe extern "C" {
     fn orgeInitialize() -> u8;
     fn orgeTerminate();
     fn orgeUpdate() -> u8;
-    fn orgeCreateMesh(
-        id: *const c_char,
-        vertexCount: u32,
-        vertices: *const f32,
-        indexCount: u32,
-        indices: *const u32,
-    ) -> u8;
+    fn orgeCreateMesh(id: *const c_char) -> u8;
     fn orgeBeginRender() -> u8;
     fn orgeDraw(
         pipelineId: *const c_char,
@@ -24,13 +18,6 @@ unsafe extern "C" {
     ) -> u8;
     fn orgeEndRender() -> u8;
 }
-
-const VERTICES: &[f32] = &[
-    -1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, // 左下
-    1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, // 右下
-    0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 1.0, // 上
-];
-const INDICES: &[u32] = &[0, 1, 2];
 
 fn show_error_dialog() {
     unsafe {
@@ -47,15 +34,7 @@ fn main() {
         show_error_dialog();
         panic!("failed to initialize orge.");
     }
-    if unsafe {
-        orgeCreateMesh(
-            CString::new("triangle").unwrap().as_ptr(),
-            VERTICES.len() as u32,
-            VERTICES.as_ptr(),
-            INDICES.len() as u32,
-            INDICES.as_ptr(),
-        ) == 0
-    } {
+    if unsafe { orgeCreateMesh(CString::new("triangle").unwrap().as_ptr()) == 0 } {
         show_error_dialog();
         panic!("failed to create a triangle.");
     }
