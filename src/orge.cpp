@@ -195,23 +195,23 @@ uint8_t orgeUpdateBufferDescriptor(
 	TRY(g_graphics->updateBufferDescriptor(bufferId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateImage(const char *id, const char *file) {
-	TRY(g_graphics->createImage(id, file));
+uint8_t orgeCreateImage(const char *file) {
+	TRY(g_graphics->createImage(file));
 }
 
-void orgeDestroyImage(const char *id) {
-	g_graphics->destroyImage(id);
+void orgeDestroyImage(const char *file) {
+	g_graphics->destroyImage(file);
 }
 
 uint8_t orgeUpdateImageDescriptor(
-	const char *imageId,
+	const char *imageFile,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,
 	uint32_t binding,
 	uint32_t offset
 ) {
-	TRY(g_graphics->updateImageDescriptor(imageId, pipelineId, set, index, binding, offset));
+	TRY(g_graphics->updateImageDescriptor(imageFile, pipelineId, set, index, binding, offset));
 }
 
 uint8_t orgeCreateSampler(const char *id, uint8_t linearMagFilter, uint8_t linearMinFilter, uint8_t repeat) {

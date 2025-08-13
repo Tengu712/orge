@@ -111,23 +111,22 @@ API_EXPORT uint8_t orgeUpdateBufferDescriptor(
 
 /// orgeにイメージを追加する関数
 ///
-/// - id: イメージID
 /// - file: アセットファイル名
-API_EXPORT uint8_t orgeCreateImage(const char *id, const char *file);
+API_EXPORT uint8_t orgeCreateImage(const char *file);
 
 /// イメージを破棄する関数
-API_EXPORT void orgeDestroyImage(const char *id);
+API_EXPORT void orgeDestroyImage(const char *file);
 
 /// イメージディスクリプタを更新する関数
 ///
-/// - imageId: イメージID
+/// - imageFile: アセットファイル名
 /// - pipelineId: パイプラインID
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateImageDescriptor(
-	const char *imageId,
+	const char *imageFile,
 	const char *pipelineId,
 	uint32_t set,
 	uint32_t index,

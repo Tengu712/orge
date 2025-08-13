@@ -23,7 +23,7 @@ int main() {
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
 	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));
-	TRY(orgeCreateImage("texture", "image.png"));
+	TRY(orgeCreateImage("image.png"));
 	TRY(orgeCreateSampler("nearest", 0, 0, 0));
 	TRY(orgeCreateSampler("linear",  1, 1, 0));
 
@@ -59,7 +59,7 @@ int main() {
 
 		CHECK(orgeUpdateBufferDescriptor("transform", "PL", 0, 0, 0, 0));
 		CHECK(orgeUpdateBufferDescriptor("sampler-index", "PL", 1, 0, 0, 0));
-		CHECK(orgeUpdateImageDescriptor("texture", "PL", 1, 0, 1, 0));
+		CHECK(orgeUpdateImageDescriptor("image.png", "PL", 1, 0, 1, 0));
 		CHECK(orgeUpdateSamplerDescriptor("nearest", "PL", 1, 0, 2, 0));
 		CHECK(orgeUpdateSamplerDescriptor("linear",  "PL", 1, 0, 2, 1));
 
