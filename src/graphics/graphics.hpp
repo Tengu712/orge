@@ -90,7 +90,7 @@ public:
 			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
-	void createImage(const std::string &file) {
+	void loadImage(const std::string &file) {
 		_images.emplace(file, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, file));
 	}
 

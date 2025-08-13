@@ -195,8 +195,8 @@ uint8_t orgeUpdateBufferDescriptor(
 	TRY(g_graphics->updateBufferDescriptor(bufferId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateImage(const char *file) {
-	TRY(g_graphics->createImage(file));
+uint8_t orgeloadImage(const char *file) {
+	TRY(g_graphics->loadImage(file));
 }
 
 void orgeDestroyImage(const char *file) {

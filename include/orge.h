@@ -112,7 +112,7 @@ API_EXPORT uint8_t orgeUpdateBufferDescriptor(
 /// orgeにイメージを追加する関数
 ///
 /// - file: アセットファイル名
-API_EXPORT uint8_t orgeCreateImage(const char *file);
+API_EXPORT uint8_t orgeloadImage(const char *file);
 
 /// イメージを破棄する関数
 API_EXPORT void orgeDestroyImage(const char *file);
