@@ -55,7 +55,7 @@ std::array<float, 16> rotY(float ang) {
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh("cube"));
+	TRY(orgeLoadMesh("cube"));
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
 	TRY(orgeUpdateBuffer("camera", reinterpret_cast<const uint8_t *>(&CAMERA)));
@@ -64,7 +64,7 @@ int main() {
 	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
 	TRY(orgeUpdateBuffer("scl", reinterpret_cast<const uint8_t *>(SCL.data())));
 
-	TRY(orgeCreateImage("image", "image.png"));
+	TRY(orgeLoadImage("image.png"));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
 
 	float ang = 0.0f;
@@ -76,7 +76,7 @@ int main() {
 		CHECK(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
 		CHECK(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
 		CHECK(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1, 0));
-		CHECK(orgeUpdateImageDescriptor("image", "PL", 2, 0, 0, 0));
+		CHECK(orgeUpdateImageDescriptor("image.png", "PL", 2, 0, 0, 0));
 		CHECK(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1, 0));
 
 		CHECK(orgeBeginRender());

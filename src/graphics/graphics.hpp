@@ -90,19 +90,19 @@ public:
 			.updateBufferDescriptor(_device, error::at(_buffers, bufferId, "buffers"), set, index, binding, offset);
 	}
 
-	void createImage(const std::string &id, const std::string &file) {
-		_images.emplace(id, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, file));
+	void loadImage(const std::string &file) {
+		_images.emplace(file, Image::fromFile(_physicalDevice.getMemoryProperties(), _device, _queue, file));
 	}
 
-	void destroyImage(const std::string &id) noexcept {
-		if (_images.contains(id)) {
-			_images.at(id).destroy(_device);
-			_images.erase(id);
+	void destroyImage(const std::string &file) noexcept {
+		if (_images.contains(file)) {
+			_images.at(file).destroy(_device);
+			_images.erase(file);
 		}
 	}
 
 	void updateImageDescriptor(
-		const std::string &imageId,
+		const std::string &imageFile,
 		const std::string &pipelineId,
 		uint32_t set,
 		uint32_t index,
@@ -111,7 +111,7 @@ public:
 	) const {
 		_renderer
 			.getPipeline(pipelineId)
-			.updateImageDescriptor(_device, error::at(_images, imageId, "images"), set, index, binding, offset);
+			.updateImageDescriptor(_device, error::at(_images, imageFile, "images"), set, index, binding, offset);
 	}
 
 	void createSampler(const std::string &id, bool linearMagFilter, bool linearMinFilter, bool repeat) {
@@ -146,7 +146,7 @@ public:
 			.updateSamplerDescriptor(_device, error::at(_samplers, samplerId, "samplers"), set, index, binding, offset);
 	}
 
-	void createMesh(const std::string &id) {
+	void loadMesh(const std::string &id) {
 		_meshes.emplace(id, Mesh(_physicalDevice.getMemoryProperties(), _device, _queue, id));
 	}
 

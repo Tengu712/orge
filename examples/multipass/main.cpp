@@ -21,8 +21,8 @@ const std::vector<uint32_t> INTEGRATION_PL_SET_INDICES{0};
 int main() {
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateMesh("triangle"));
-	TRY(orgeCreateMesh("square"));
+	TRY(orgeLoadMesh("triangle"));
+	TRY(orgeLoadMesh("square"));
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
 	TRY(orgeCreateSampler("sampler", 0, 0, 0));
