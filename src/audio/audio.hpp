@@ -44,17 +44,17 @@ public:
 
 	void setVolume(uint32_t index, float volume);
 
-	void loadWaveFromFile(const std::string &id, const std::string &file, uint32_t startPosition) {
-		_waves.emplace(id, Wave::fromFile(file, startPosition));
+	void loadWaveFromFile(const std::string &file, uint32_t startPosition) {
+		_waves.emplace(file, Wave::fromFile(file, startPosition));
 	}
 
-	void destroyWave(const std::string &id) noexcept {
-		if (_waves.contains(id)) {
-			_waves.erase(id);
+	void destroyWave(const std::string &file) noexcept {
+		if (_waves.contains(file)) {
+			_waves.erase(file);
 		}
 	}
 
-	void play(const std::string &id, uint32_t index, bool loop);
+	void play(const std::string &file, uint32_t index, bool loop);
 };
 
 } // namespace audio

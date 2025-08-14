@@ -55,8 +55,8 @@ void Audio::setVolume(uint32_t index, float volume) {
 	}
 }
 
-void Audio::play(const std::string &id, uint32_t index, bool loop) {
-	auto &wave = error::at(_waves, id, "waves");
+void Audio::play(const std::string &file, uint32_t index, bool loop) {
+	auto &wave = error::at(_waves, file, "waves");
 	auto &channel = error::at(_channels, index, "channels");
 
 	if (!channel || !channel->binding || !isSameSpec(channel->binding->spec, wave->spec)) {

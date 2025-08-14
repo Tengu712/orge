@@ -332,14 +332,14 @@ uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume) {
 	TRY(g_audio->setVolume(index, volume));
 }
 
-uint8_t orgeLoadWave(const char *id, const char *file, uint32_t startPosition) {
-	TRY(g_audio->loadWaveFromFile(id, file, startPosition));
+uint8_t orgeLoadWave(const char *file, uint32_t startPosition) {
+	TRY(g_audio->loadWaveFromFile(file, startPosition));
 }
 
-void orgeDestroyWave(const char *id) {
-	g_audio->destroyWave(id);
+void orgeDestroyWave(const char *file) {
+	g_audio->destroyWave(file);
 }
 
-uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop) {
-	TRY(g_audio->play(id, index, static_cast<bool>(loop)));
+uint8_t orgePlayWave(const char *file, uint32_t index, uint8_t loop) {
+	TRY(g_audio->play(file, index, static_cast<bool>(loop)));
 }

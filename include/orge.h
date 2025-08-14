@@ -353,23 +353,22 @@ API_EXPORT uint8_t orgeSetAudioChannelVolume(uint32_t index, float volume);
  
 /// orgeにWAVEを追加する関数
 ///
-/// - id: WAVEID
 /// - file: アセットファイル名
 /// - startPosition: ループ開始位置
-API_EXPORT uint8_t orgeLoadWave(const char *id, const char *file, uint32_t startPosition);
+API_EXPORT uint8_t orgeLoadWave(const char *file, uint32_t startPosition);
 
 /// WAVEを破棄する関数
-API_EXPORT void orgeDestroyWave(const char *id);
+API_EXPORT void orgeDestroyWave(const char *file);
 
 /// WAVEを再生する関数
 ///
-/// - id: WAVEID
+/// - file: アセットファイル名
 /// - index: 音声チャンネルのインデックス
 /// - loop: ループ再生するか
 ///
 /// 初めてindex番目の音声チャンネルで音声が再生されるとき、音声ストリームが作成される。
-/// index番目の音声チャンネルとidのWAVEの音声互換性がない場合、音声ストリームが再作成される。
-/// index番目の音声チャンネルが音声を再生している場合、その音声を中断してidのWAVEを再生する。
+/// index番目の音声チャンネルとfileのWAVEの音声互換性がない場合、音声ストリームが再作成される。
+/// index番目の音声チャンネルが音声を再生している場合、その音声を中断してfileのWAVEを再生する。
 API_EXPORT uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);
 
 #ifdef __cplusplus
