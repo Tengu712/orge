@@ -20,7 +20,7 @@ const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh("triangle"));
+	TRY(orgeLoadMesh("triangle"));
 
 	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0));
 	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0));

@@ -171,7 +171,7 @@ API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
 /// orgeにメッシュを追加する関数
 ///
 /// - id: メッシュID
-API_EXPORT uint8_t orgeCreateMesh(const char *id);
+API_EXPORT uint8_t orgeLoadMesh(const char *id);
 
 /// メッシュを破棄する関数
 API_EXPORT void orgeDestroyMesh(const char *id);

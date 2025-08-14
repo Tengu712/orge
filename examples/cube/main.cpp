@@ -55,7 +55,7 @@ std::array<float, 16> rotY(float ang) {
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh("cube"));
+	TRY(orgeLoadMesh("cube"));
 
 	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
 	TRY(orgeUpdateBuffer("camera", reinterpret_cast<const uint8_t *>(&CAMERA)));

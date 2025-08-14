@@ -19,7 +19,7 @@ const std::vector<uint32_t> SET_INDICES{0, 0};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh("square"));
+	TRY(orgeLoadMesh("square"));
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
 	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));

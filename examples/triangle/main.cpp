@@ -9,7 +9,7 @@
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeCreateMesh("triangle"));
+	TRY(orgeLoadMesh("triangle"));
 
 	while (orgeUpdate()) {
 		const auto result =

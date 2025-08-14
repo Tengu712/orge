@@ -146,7 +146,7 @@ public:
 			.updateSamplerDescriptor(_device, error::at(_samplers, samplerId, "samplers"), set, index, binding, offset);
 	}
 
-	void createMesh(const std::string &id) {
+	void loadMesh(const std::string &id) {
 		_meshes.emplace(id, Mesh(_physicalDevice.getMemoryProperties(), _device, _queue, id));
 	}
 

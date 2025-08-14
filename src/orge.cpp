@@ -238,12 +238,8 @@ uint8_t orgeUpdateSamplerDescriptor(
 	TRY(g_graphics->updateSamplerDescriptor(samplerId, pipelineId, set, index, binding, offset));
 }
 
-uint8_t orgeCreateMesh(const char *id) {
-	TRY(g_graphics->createMesh(id));
-}
-
-void orgeDestroyMesh(const char *id) {
-	g_graphics->destroyMesh(id);
+uint8_t orgeLoadMesh(const char *id) {
+	TRY(g_graphics->loadMesh(id));
 }
 
 // ================================================================================================================== //

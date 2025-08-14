@@ -8,7 +8,7 @@ unsafe extern "C" {
     fn orgeInitialize() -> u8;
     fn orgeTerminate();
     fn orgeUpdate() -> u8;
-    fn orgeCreateMesh(id: *const c_char) -> u8;
+    fn orgeLoadMesh(id: *const c_char) -> u8;
     fn orgeBeginRender() -> u8;
     fn orgeDraw(
         pipelineId: *const c_char,
@@ -34,7 +34,7 @@ fn main() {
         show_error_dialog();
         panic!("failed to initialize orge.");
     }
-    if unsafe { orgeCreateMesh(CString::new("triangle").unwrap().as_ptr()) == 0 } {
+    if unsafe { orgeLoadMesh(CString::new("triangle").unwrap().as_ptr()) == 0 } {
         show_error_dialog();
         panic!("failed to create a triangle.");
     }
