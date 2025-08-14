@@ -369,7 +369,7 @@ API_EXPORT void orgeDestroyWave(const char *file);
 /// 初めてindex番目の音声チャンネルで音声が再生されるとき、音声ストリームが作成される。
 /// index番目の音声チャンネルとfileのWAVEの音声互換性がない場合、音声ストリームが再作成される。
 /// index番目の音声チャンネルが音声を再生している場合、その音声を中断してfileのWAVEを再生する。
-API_EXPORT uint8_t orgePlayWave(const char *id, uint32_t index, uint8_t loop);
+API_EXPORT uint8_t orgePlayWave(const char *file, uint32_t index, uint8_t loop);
 
 #ifdef __cplusplus
 }
