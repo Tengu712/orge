@@ -90,8 +90,10 @@ jobs:
     - name: Prepare uploading orge artifacts (for release)
       if: startsWith(github.head_ref, 'release')
       run: |
-        xcopy licenses D:\orge\installed-static /E /I
-        xcopy licenses D:\orge\installed-shared /E /I
+        mkdir D:\orge\installed-static\licenses
+        mkdir D:\orge\installed-shared\licenses
+        xcopy licenses D:\orge\installed-static\licenses /E /I
+        xcopy licenses D:\orge\installed-shared\licenses /E /I
 
     - name: Upload orge artifacts (for release) (static)
       if: startsWith(github.head_ref, 'release')
