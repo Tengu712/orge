@@ -88,20 +88,20 @@ jobs:
         path: D:\orge
 
     - name: Prepare uploading orge artifacts (for release)
-      if: startsWith(github.ref, 'refs/heads/release')
+      if: startsWith(github.head_ref, 'release')
       run: |
         copy licenses D:\orge\installed-static
         copy licenses D:\orge\installed-shared
 
     - name: Upload orge artifacts (for release) (static)
-      if: startsWith(github.ref, 'refs/heads/release')
+      if: startsWith(github.head_ref, 'release')
       uses: actions/upload-artifact@v4
       with:
         name: orge-x64-windows-static
         path: D:\orge\installed-static
 
     - name: Upload orge artifacts (for release) (shared)
-      if: startsWith(github.ref, 'refs/heads/release')
+      if: startsWith(github.head_ref, 'release')
       uses: actions/upload-artifact@v4
       with:
         name: orge-x64-windows-shared
