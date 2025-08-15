@@ -71,6 +71,26 @@ jobs:
           ./installed-shared
           ./examples/simple/main.cpp
 
+    - name: Prepare uploading orge artifacts (for release)
+      if: startsWith(github.ref, 'refs/heads/release')
+      run: |
+        cp -r licenses installed-static
+        cp -r licenses installed-shared
+
+    - name: Upload orge artifacts (for release) (static)
+      if: startsWith(github.ref, 'refs/heads/release')
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-arm64-osx-static
+        path: installed-static
+
+    - name: Upload orge artifacts (for release) (shared)
+      if: startsWith(github.ref, 'refs/heads/release')
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-arm64-osx-shared
+        path: installed-shared
+
   test-standalone:
     runs-on: macos-latest
     needs: build
