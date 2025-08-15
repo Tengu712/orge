@@ -45,11 +45,11 @@ meson install -C build
 git clone --recursive https://github.com/Tengu712/orge.git
 
 ./vcpkg/bootstrap-vcpkg.sh
-./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-x64-linux
+./vcpkg/vcpkg install --overlay-triplets=./triplets --triplet=custom-arm64-osx
 
 meson setup build \
   -Dbuildtype=(release|debug) \
-  --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-x64-linux \
+  --cmake-prefix-path=$(pwd)/vcpkg_installed/custom-arm64-osx \
   --default-library=(static|shared) \
   --prefix=インストール先パス
 
