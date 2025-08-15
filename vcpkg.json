@@ -1,6 +1,6 @@
 {
   "name": "orge",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Ore ore game engine.",
   "dependencies": [
     { "name": "sdl3", "features": ["vulkan"] },

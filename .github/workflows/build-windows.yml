@@ -87,6 +87,28 @@ jobs:
         name: orge-lib
         path: D:\orge
 
+    - name: Prepare uploading orge artifacts (for release)
+      if: startsWith(github.head_ref, 'release')
+      run: |
+        mkdir D:\orge\installed-static\licenses
+        mkdir D:\orge\installed-shared\licenses
+        xcopy licenses D:\orge\installed-static\licenses /E /I
+        xcopy licenses D:\orge\installed-shared\licenses /E /I
+
+    - name: Upload orge artifacts (for release) (static)
+      if: startsWith(github.head_ref, 'release')
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-x64-windows-static
+        path: D:\orge\installed-static
+
+    - name: Upload orge artifacts (for release) (shared)
+      if: startsWith(github.head_ref, 'release')
+      uses: actions/upload-artifact@v4
+      with:
+        name: orge-x64-windows-shared
+        path: D:\orge\installed-shared
+
   test-standalone:
     runs-on: windows-latest
     needs: build
