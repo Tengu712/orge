@@ -1,8 +1,5 @@
 #include "input.hpp"
 
-#include "../error/error.hpp"
-
-#include <unordered_map>
 #include <SDL3/SDL.h>
 
 namespace input {
@@ -67,44 +64,46 @@ const std::unordered_map<OrgeScancode, SDL_Scancode> ORGE_SDL_MAP{
 	{ORGE_SCANCODE_UP,           SDL_SCANCODE_UP},
 };
 
-std::unordered_map<OrgeScancode, int32_t> g_states;
+void Input::update() {
+	std::lock_guard lk(_mutex);
 
-void update() {
 	int numKeys = 0;
 	const auto states = SDL_GetKeyboardState(&numKeys);
 	for (const auto &n: ORGE_SDL_MAP) {
 		if (numKeys <= static_cast<int>(n.second)) {
 			continue;
 		}
-		const auto state = getState(n.first);
+		const auto state = _states.contains(n.first) ? _states[n.first] : 0;
 		// 押下
 		if (states[n.second]) {
 			// 押下中ならインクリメント
 			if (state > 0) {
-				g_states[n.first] = state + 1;
+				_states[n.first] = state + 1;
 			}
 			// そうでないなら1に設定
 			else {
-				g_states[n.first] = 1;
+				_states[n.first] = 1;
 			}
 		}
 		// 非押下
 		else {
 			// 押下中なら-1に設定
 			if (state > 0) {
-				g_states[n.first] = -1;
+				_states[n.first] = -1;
 			}
 			// そうでないなら0に設定
 			else {
-				g_states[n.first] = 0;
+				_states[n.first] = 0;
 			}
 		}
 	}
 }
 
-int32_t getState(OrgeScancode scancode) {
-	if (input::g_states.contains(scancode)) {
-		return error::at(input::g_states, scancode, "inputs");
+int32_t Input::getState(OrgeScancode scancode) const {
+	std::lock_guard lk(_mutex);
+
+	if (_states.contains(scancode)) {
+		return _states.at(scancode);
 	} else {
 		return 0;
 	}
