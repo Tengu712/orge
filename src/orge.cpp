@@ -44,6 +44,7 @@ namespace {
 
 std::optional<graphics::Graphics> g_graphics;
 std::optional<audio::Audio> g_audio;
+std::optional<input::Input> g_input;
 
 void handleVkResult(const vk::Result &e) {
 	switch (e) {
@@ -124,12 +125,14 @@ uint8_t orgeInitialize(void) {
 		config::initialize();
 		g_graphics.emplace();
 		g_audio.emplace();
+		g_input.emplace();
 	)
 }
 
 void orgeTerminate(void) {
 	g_graphics.reset();
 	g_audio.reset();
+	g_input.reset();
 }
 
 uint8_t orgeUpdate(void) {
@@ -149,7 +152,7 @@ uint8_t orgeUpdate(void) {
 			g_graphics->setFullscreen(!isFullscreen);
 		}
 	}
-	input::update();
+	g_input->update();
 	// TODO: 例外どうしよう。
 	g_audio->update();
 	return 1;
@@ -313,7 +316,7 @@ uint8_t orgeEndRender(void) {
 // ================================================================================================================== //
 
 int32_t orgeGetKeyState(uint32_t scancode) {
-	return input::getState(static_cast<OrgeScancode>(scancode));
+	return g_input->getState(static_cast<OrgeScancode>(scancode));
 }
 
 // ================================================================================================================== //
