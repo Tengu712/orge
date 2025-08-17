@@ -119,6 +119,7 @@ struct Config {
 	const uint32_t width;
 	const uint32_t height;
 	const bool fullscreen;
+	const bool disableVsync;
 	const bool altReturnToggleFullscreen;
 	const uint32_t audioChannelCount;
 	const std::unordered_map<std::string, MeshConfig> meshes;

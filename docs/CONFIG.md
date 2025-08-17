@@ -28,6 +28,10 @@ height: unsigned int
 # 省略された場合、falseとみなされる
 fullscreen: bool
 
+# 垂直同期を有効化するか
+# 省略された場合、falseとみなされる
+disable-vsync: bool
+
 # Alt+ReturnあるいはCmd+Returnでのフルスクリーン・非フルスクリーンを許可するか
 # 省略された場合、trueとみなされる
 alt-return-toggle-fullscreen: bool

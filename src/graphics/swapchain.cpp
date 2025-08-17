@@ -1,5 +1,7 @@
 #include "swapchain.hpp"
 
+#include "../config/config.hpp"
+
 #include <SDL3/SDL_vulkan.h>
 
 namespace graphics {
@@ -71,7 +73,7 @@ vk::SwapchainKHR createSwapchain(
 		.setImageSharingMode(vk::SharingMode::eExclusive)
 		.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity)
 		.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque)
-		.setPresentMode(vk::PresentModeKHR::eFifo)
+		.setPresentMode(config::config().disableVsync ? vk::PresentModeKHR::eImmediate : vk::PresentModeKHR::eFifo)
 		.setClipped(vk::True)
 		.setOldSwapchain(oldSwapchain);
 	return device.createSwapchainKHR(ci);
