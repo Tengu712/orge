@@ -319,6 +319,18 @@ int32_t orgeGetKeyState(uint32_t scancode) {
 	return g_input->getState(static_cast<OrgeScancode>(scancode));
 }
 
+uint32_t orgeGetCursorX(void) {
+	return g_input->getCursorX();
+}
+
+uint32_t orgeGetCursorY(void) {
+	return g_input->getCursorY();
+}
+
+int32_t orgeGetMouseButtonState(uint32_t button) {
+	return g_input->getMouseButtonState(static_cast<OrgeMouseButton>(button));
+}
+
 // ================================================================================================================== //
 //     Audio                                                                                                          //
 // ================================================================================================================== //

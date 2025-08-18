@@ -30,6 +30,8 @@ int main() {
 	TRY(orgeUpdateBuffer("blue",  reinterpret_cast<const uint8_t *>(BLUE.data())));
 
 	uint32_t state = 0;
+	uint32_t cursorX = 0;
+	uint32_t cursorY = 0;
 	while (orgeUpdate()) {
 		const auto keyState = orgeGetKeyState(ORGE_SCANCODE_RETURN);
 		if (keyState == 1) {
@@ -41,6 +43,25 @@ int main() {
 		}
 		if (keyState == -1) {
 			std::cout << "return key released" << std::endl;
+		}
+
+		const auto newCursorX = orgeGetCursorX();
+		const auto newCursorY = orgeGetCursorY();
+		if (cursorX != newCursorX || cursorY != newCursorY) {
+			std::cout << "cursor: (" << newCursorX << ", " << newCursorY << ")" << std::endl;
+			cursorX = newCursorX;
+			cursorY = newCursorY;
+		}
+
+		const auto mouseState = orgeGetMouseButtonState(static_cast<uint32_t>(ORGE_MOUSE_BUTTON_LEFT));
+		if (mouseState == 1) {
+			std::cout << "left mouse button pressed" << std::endl;
+		}
+		if (mouseState > 0) {
+			std::cout << "left mouse button down" << std::endl;
+		}
+		if (mouseState == -1) {
+			std::cout << "left mouse button released" << std::endl;
 		}
 
 		CHECK(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0, 0));
