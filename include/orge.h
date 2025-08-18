@@ -326,13 +326,41 @@ enum OrgeScancode {
 	ORGE_SCANCODE_UP,
 };
 
+enum OrgeMouseButton {
+	ORGE_MOUSE_BUTTON_LEFT = 0,
+	ORGE_MOUSE_BUTTON_MIDDLE,
+	ORGE_MOUSE_BUTTON_RIGHT,
+};
+
 /// キー入力状態を取得する関数
 ///
-/// 返戻眙:
+/// 返戻値:
 /// - = -1: キーアップ
 /// - = 0: ニュートラル
 /// - > 0: キーダウン (押されているフレーム数)
 API_EXPORT int32_t orgeGetKeyState(uint32_t scancode);
+
+/// マウスカーソルのX座標を取得する関数
+///
+/// 座標系はウィンドウの左上が0、右端が幅。
+/// ウィンドウ外の場合は最後に記録されたウィンドウ内の座標を返す。
+API_EXPORT uint32_t orgeGetCursorX(void);
+
+/// マウスカーソルのY座標を取得する関数
+///
+/// 座標系はウィンドウの上端が0、下端が高さ。
+/// ウィンドウ外の場合は最後に記録されたウィンドウ内の座標を返す。
+API_EXPORT uint32_t orgeGetCursorY(void);
+
+/// マウスボタンの押下状態を取得する関数
+///
+/// - button: マウスボタン (OrgeMouseButton)
+///
+/// 返戻値:
+/// - = -1: ボタンアップ
+/// - = 0: ニュートラル
+/// - > 0: ボタンダウン (押されているフレーム数)
+API_EXPORT int32_t orgeGetMouseButtonState(uint32_t button);
 
 // ================================================================================================================== //
 //     Audio                                                                                                          //

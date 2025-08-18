@@ -1,5 +1,7 @@
 #include "input.hpp"
 
+#include "../config/config.hpp"
+
 #include <SDL3/SDL.h>
 
 namespace input {
@@ -64,6 +66,37 @@ const std::unordered_map<OrgeScancode, SDL_Scancode> ORGE_SDL_MAP{
 	{ORGE_SCANCODE_UP,           SDL_SCANCODE_UP},
 };
 
+const std::unordered_map<OrgeMouseButton, unsigned int> ORGE_SDL_MOUSE_MAP{
+	{ORGE_MOUSE_BUTTON_LEFT,   SDL_BUTTON_LMASK},
+	{ORGE_MOUSE_BUTTON_MIDDLE, SDL_BUTTON_MMASK},
+	{ORGE_MOUSE_BUTTON_RIGHT,  SDL_BUTTON_RMASK},
+};
+
+int32_t calcNextState(bool down, int32_t prev) {
+	// 押下
+	if (down) {
+		// 押下中ならインクリメント
+		if (prev > 0) {
+			return prev + 1;
+		}
+		// そうでないなら1に設定
+		else {
+			return 1;
+		}
+	}
+	// 非押下
+	else {
+		// 押下中なら-1に設定
+		if (prev > 0) {
+			return -1;
+		}
+		// そうでないなら0に設定
+		else {
+			return 0;
+		}
+	}
+}
+
 void Input::update() {
 	std::lock_guard lk(_mutex);
 
@@ -74,38 +107,22 @@ void Input::update() {
 			continue;
 		}
 		const auto state = _states.contains(n.first) ? _states[n.first] : 0;
-		// 押下
-		if (states[n.second]) {
-			// 押下中ならインクリメント
-			if (state > 0) {
-				_states[n.first] = state + 1;
-			}
-			// そうでないなら1に設定
-			else {
-				_states[n.first] = 1;
-			}
-		}
-		// 非押下
-		else {
-			// 押下中なら-1に設定
-			if (state > 0) {
-				_states[n.first] = -1;
-			}
-			// そうでないなら0に設定
-			else {
-				_states[n.first] = 0;
-			}
-		}
+		_states[n.first] = calcNextState(states[n.second], state);
 	}
-}
 
-int32_t Input::getState(OrgeScancode scancode) const {
-	std::lock_guard lk(_mutex);
+	float mouseX, mouseY;
+	const auto mouseState = SDL_GetMouseState(&mouseX, &mouseY);
+	const auto maxX = static_cast<float>(config::config().width - 1);
+	const auto maxY = static_cast<float>(config::config().height - 1);
+	if (mouseX >= 0.0f && mouseY >= 0.0f && mouseX <= maxX && mouseY <= maxY) {
+		_cursorX = static_cast<uint32_t>(mouseX);
+		_cursorY = static_cast<uint32_t>(mouseY);
+	}
 
-	if (_states.contains(scancode)) {
-		return _states.at(scancode);
-	} else {
-		return 0;
+	for (const auto &n: ORGE_SDL_MOUSE_MAP) {
+		const auto pressed = static_cast<bool>(mouseState & n.second);
+		const auto state = _mouseButtonStates.contains(n.first) ? _mouseButtonStates[n.first] : 0;
+		_mouseButtonStates[n.first] = calcNextState(pressed, state);
 	}
 }
 
