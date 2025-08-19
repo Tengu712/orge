@@ -25,3 +25,5 @@ if default_library == 'static':
 if default_library == 'shared':
 	print('Change liborge.dylib ID to @rpath/liborge.dylib')
 	subprocess.run(['install_name_tool', '-id', '@rpath/liborge.dylib', dstdir + '/liborge.dylib'])
+	print('Add liborge.dylib @rpath @loader_path')
+	subprocess.run(['install_name_tool', '-add_rpath', '@loader_path', dstdir + '/liborge.dylib'])
