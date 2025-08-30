@@ -112,6 +112,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get remove --purge man-db
+        sudo apt-get install -y --no-install-recommends libvulkan1
+
     - name: Download orge artifacts
       uses: actions/download-artifact@v4
       with:
@@ -123,7 +129,7 @@ jobs:
         export PKG_CONFIG_PATH=$(pwd)/orge/installed-static/lib/pkgconfig
         mkdir ./static
         cd ./static
-        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static)
+        g++ ../orge/examples/simple/main.cpp $(pkg-config orge --cflags --libs --static) /lib/x86_64-linux-gnu/libvulkan.so.1
 
     - name: Test build with shared
       run: |
