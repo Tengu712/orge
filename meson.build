@@ -133,6 +133,21 @@ add_project_arguments('-I' + meson.current_source_dir() / 'include', language: '
 # include-internalを追加
 add_project_arguments('-I' + meson.current_source_dir() / 'include-internal', language: 'cpp')
 
+# macOSでは_LIBCPP_ENABLE_ASSERTIONSを無効化
+#
+# NOTE: Apple ClangとMesonの齟齬によるもの。
+#       https://github.com/mesonbuild/meson/issues/13812 はまだ治らなそう。
+#       https://github.com/mesonbuild/meson/pull/14548 がマージされているので、そのうち治るはず。
+if host_system == 'darwin'
+  add_project_arguments('-U_LIBCPP_HARDENING_MODE', language: 'cpp')
+  add_project_arguments('-U_LIBCPP_ENABLE_ASSERTIONS', language: 'cpp')
+  if get_option('buildtype') == 'debug'
+    add_project_arguments('-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE', language: 'cpp')
+  else
+    add_project_arguments('-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE', language: 'cpp')
+  endif
+endif
+
 # 追加のコンパイラフラグを生成
 cpp_args = []
 if get_option('enable_vvl')
@@ -151,19 +166,6 @@ if host_system == 'windows'
     else
       cpp_args += ['/MDd', '-DORGE_BUILD_SHARED']
     endif
-  endif
-endif
-
-# macOSでは_LIBCPP_ENABLE_ASSERTIONSを無効化
-#
-# NOTE: Apple ClangとMesonの齟齬によるもの。
-#       https://github.com/mesonbuild/meson/pull/14548 がマージされているので、そのうち治るはず。
-if host_system == 'darwin'
-  cpp_args += ['-U_LIBCPP_ENABLE_ASSERTIONS']
-  if get_option('buildtype') == 'debug'
-    cpp_args += ['-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE']
-  else
-    cpp_args += ['-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE']
   endif
 endif
 
