@@ -246,8 +246,7 @@ else
     meson.current_source_dir() / 'scripts' / 'install_linux.py',
     vcpkg_libdir,
     get_option('prefix') / get_option('libdir'),
-    get_option('default_library'),
-    vulkan_dep.version()
+    get_option('default_library')
   )
 endif
 
@@ -277,7 +276,6 @@ elif host_system == 'darwin'
   endforeach
   cflags += ['-lpthread', '-lm']
 else
-  libraries += ['-lvulkan']
   libraries_private += ['-lSDL3']
 endif
 
