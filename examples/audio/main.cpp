@@ -48,6 +48,8 @@ int main() {
 		}
 
 		CHECK(orgeBeginRender());
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}
 
