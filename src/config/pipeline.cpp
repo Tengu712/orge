@@ -31,17 +31,9 @@ inline ShaderStages parseShaderStages(const std::string& s) {
 DescriptorBindingConfig::DescriptorBindingConfig(const YAML::Node &node):
 	type(parseDescriptorType(s(node, "type"))),
 	count(u(node, "count", 1)),
-	stage(parseShaderStages(s(node, "stage"))),
-	attachment(node["attachment"] ? std::make_optional(s(node, "attachment")) : std::nullopt)
+	stage(parseShaderStages(s(node, "stage")))
 {
-	checkUnexpectedKeys(node, {"type", "count", "stage", "attachment"});
-
-	if (type == DescriptorType::InputAttachment && !attachment.has_value()) {
-		throw "config error: 'attachment' must be set if descriptor type is 'input-attachment'.";
-	}
-	if (attachment.has_value() && type != DescriptorType::InputAttachment && type != DescriptorType::Texture) {
-		throw "config error: 'type' must be 'input-attachment' or 'texture' if 'attachment' is defined.";
-	}
+	checkUnexpectedKeys(node, {"type", "count", "stage"});
 }
 
 DescriptorSetConfig::DescriptorSetConfig(const YAML::Node &node):

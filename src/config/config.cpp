@@ -64,20 +64,6 @@ Config::Config(const YAML::Node &node):
 		}
 	);
 
-	for (const auto &[_, n]: pipelines) {
-		// アタッチメントバインディングの存在確認
-		for (const auto &m: n.descSets) {
-			for (const auto &x: m.bindings) {
-				if (x.attachment.has_value()) {
-					const auto &id = x.attachment.value();
-					if (!attachments.contains(id)) {
-						throw std::format("config error: attachment '{}' not defined.", id);
-					}
-				}
-			}
-		}
-	}
-
 	std::set<std::string> renderPassIds;
 	for (const auto &[_, r]: renderPasses) {
 		for (const auto &n: r.subpasses) {
