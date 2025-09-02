@@ -67,7 +67,7 @@ void addMesh(const std::string &id) {
 	if (g_meshes.contains(id)) {
 		throw std::format("mesh '{}' already created.", id);
 	}
-	g_meshes.emplace(id, Mesh(id));
+	g_meshes.emplace(id, id);
 }
 
 void destroyMesh(const std::string &id) noexcept {

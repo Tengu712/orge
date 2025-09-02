@@ -76,7 +76,9 @@ public:
 		if (!_pipeline || _pipeline->id() != pipelineId) {
 			const auto &pipeline = _currentRenderPass().getPipeline(pipelineId);
 			pipeline.bind(_commandBuffer);
-			pipeline.bindDescriptorSets(_commandBuffer, indices);
+			if (indices) {
+				pipeline.bindDescriptorSets(_commandBuffer, indices);
+			}
 			_pipeline = &pipeline;
 		}
 	}

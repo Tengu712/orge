@@ -7,18 +7,24 @@
 		return 1; \
 	}
 
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
+	}
+
 int main() {
 	TRY(orgeInitialize());
 	TRY(orgeLoadMesh("triangle"));
 
 	while (orgeUpdate()) {
-		const auto result =
-			orgeBeginRender()
-			&& orgeDraw("PL", "triangle", 1, 0)
-			&& orgeEndRender();
-		if (!result) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+		CHECK(orgeBeginRender());
+		CHECK(orgeBindMesh("triangle"));
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeBindPipeline("PL", nullptr));
+		CHECK(orgeDraw(0, 1, 0));
+		CHECK(orgeEndRenderPass());
+		CHECK(orgeEndRender());
 	}
 
 	orgeTerminate();

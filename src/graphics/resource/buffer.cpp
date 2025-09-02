@@ -34,7 +34,7 @@ void addBuffer(const std::string &id, uint64_t size, bool isStorage) {
 	if (g_buffers.contains(id)) {
 		throw std::format("buffer '{}' already created.", id);
 	}
-	g_buffers.emplace(id, Buffer(size, isStorage));
+	g_buffers.try_emplace(id, size, isStorage);
 }
 
 void destroyBuffer(const std::string &id) noexcept {
