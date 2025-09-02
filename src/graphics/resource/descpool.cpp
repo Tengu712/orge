@@ -1,14 +1,22 @@
 #include "descpool.hpp"
 
-#include "../config/config.hpp"
+#include "../../config/config.hpp"
+#include "../../config/enumconvert.hpp"
+#include "../core/core.hpp"
 
-namespace graphics {
+namespace graphics::resource {
 
-vk::DescriptorPool createDescriptorPool(const vk::Device &device) {
+std::optional<vk::DescriptorPool> g_descpool;
+
+void initializeDescriptorPool() {
+	if (g_descpool) {
+		throw "descriptor pool already initialized.";
+	}
+
 	// 集計
 	uint32_t maxSets = 0;
 	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
-	for (const auto &n: config::config().pipelines) {
+	for (const auto &[_, n]: config::config().pipelines) {
 		for (const auto &m: n.descSets) {
 			maxSets += m.count;
 
@@ -28,26 +36,13 @@ vk::DescriptorPool createDescriptorPool(const vk::Device &device) {
 
 	// ディスクリプタセットが不要ならディスクリプタプールも不要
 	if (maxSets == 0) {
-		return nullptr;
+		return;
 	}
 
 	// マップからベクタへ
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	for (const auto &[k, v]: sizesMap) {
-		poolSizes.emplace_back(
-			k == config::DescriptorType::Texture
-				? vk::DescriptorType::eSampledImage
-				: k == config::DescriptorType::Sampler
-				? vk::DescriptorType::eSampler
-				: k == config::DescriptorType::UniformBuffer
-				? vk::DescriptorType::eUniformBuffer
-				: k == config::DescriptorType::StorageBuffer
-				? vk::DescriptorType::eStorageBuffer
-				: k == config::DescriptorType::InputAttachment
-				? vk::DescriptorType::eInputAttachment
-				: throw,
-			v
-		);
+		poolSizes.emplace_back(config::convertDescriptorType(k), v);
 	}
 
 	// 作成
@@ -55,7 +50,22 @@ vk::DescriptorPool createDescriptorPool(const vk::Device &device) {
 		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
 		.setMaxSets(maxSets)
 		.setPoolSizes(poolSizes);
-	return device.createDescriptorPool(ci);
+	g_descpool = core::device().createDescriptorPool(ci);
 }
 
-} // namespace graphics
+void destroyDescriptorPool() noexcept {
+	if (g_descpool) {
+		core::device().destroy(g_descpool.value());
+		g_descpool = std::nullopt;
+	}
+}
+
+const vk::DescriptorPool &descpool() {
+	if (g_descpool) {
+		return g_descpool.value();
+	} else {
+		throw "descriptor pool not initialized.";
+	}
+}
+
+} // namespace graphics::resource

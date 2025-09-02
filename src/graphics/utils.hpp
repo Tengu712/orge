@@ -1,18 +1,15 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include "core/core.hpp"
 
 namespace graphics {
 
-void terminateUtils(const vk::Device &device);
+void terminateUtils();
 
-void initializeUtils(const vk::Device &device, const vk::CommandPool &commandPool);
+void initializeUtils();
 
-inline uint32_t findMemoryType(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	uint32_t typeBits,
-	vk::MemoryPropertyFlags mask
-) {
+inline uint32_t findMemoryType(uint32_t typeBits, vk::MemoryPropertyFlags mask) {
+	const auto memoryProps = core::physicalDevice().getMemoryProperties();
 	uint32_t result = UINT32_MAX;
 
 	for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
@@ -29,60 +26,43 @@ inline uint32_t findMemoryType(
 	return result;
 }
 
-inline vk::DeviceMemory allocateBufferMemory(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Buffer &buffer,
-	vk::MemoryPropertyFlags mask
-) {
+inline vk::DeviceMemory allocateBufferMemory(const vk::Buffer &buffer, vk::MemoryPropertyFlags mask) {
+	const auto &device = core::device();
 	const auto reqs = device.getBufferMemoryRequirements(buffer);
-	const auto type = findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
+	const auto type = findMemoryType(reqs.memoryTypeBits, mask);
 	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
 	device.bindBufferMemory(buffer, memory, 0);
 	return memory;
 }
 
-inline vk::DeviceMemory allocateImageMemory(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Image &image,
-	vk::MemoryPropertyFlags mask
-) {
+inline vk::DeviceMemory allocateImageMemory(const vk::Image &image, vk::MemoryPropertyFlags mask) {
+	const auto &device = core::device();
 	const auto reqs = device.getImageMemoryRequirements(image);
-	const auto type = findMemoryType(memoryProps, reqs.memoryTypeBits, mask);
+	const auto type = findMemoryType(reqs.memoryTypeBits, mask);
 	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
 	device.bindImageMemory(image, memory, 0);
 	return memory;
 }
 
 template<typename T>
-inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &dst, const T *src, size_t size) {
+inline void copyDataToMemory(const vk::DeviceMemory &dst, const T *src, size_t size) {
+	const auto &device = core::device();
 	const auto p = static_cast<T *>(device.mapMemory(dst, 0, size));
 	memcpy(p, src, size);
 	device.unmapMemory(dst);
 }
 
 template<typename T>
-inline void copyDataToMemory(const vk::Device &device, const vk::DeviceMemory &dst, const T *src, size_t size, size_t offset) {
+inline void copyDataToMemory(const vk::DeviceMemory &dst, const T *src, size_t size, size_t offset) {
+	const auto &device = core::device();
 	const auto p = static_cast<T *>(device.mapMemory(dst, sizeof(T) * offset, size));
 	memcpy(p, src, size);
 	device.unmapMemory(dst);
 }
 
-void uploadBuffer(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Queue &queue,
-	const vk::Buffer &dst,
-	const void *src,
-	size_t size,
-	vk::PipelineStageFlags visibleStages
-);
+void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::PipelineStageFlags visibleStages);
 
 void uploadImage(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Queue &queue,
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,

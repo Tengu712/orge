@@ -46,4 +46,10 @@ public:
 	}
 };
 
+void initialize();
+
+void destroy() noexcept;
+
+Input &input();
+
 } // namespace input

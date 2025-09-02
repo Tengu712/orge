@@ -1,17 +1,27 @@
 #include <iostream>
 #include <orge.h>
 
-int main() {
-	if (!orgeInitialize()) {
-		std::cout << orgeGetErrorMessage() << std::endl;
-		return 1;
+#define TRY(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		return 1; \
 	}
+
+#define CHECK(n) \
+	if (!(n)) { \
+		std::cout << orgeGetErrorMessage() << std::endl; \
+		continue; \
+	}
+
+int main() {
+	TRY(orgeInitialize());
 
 	int count = 0;
 	while (orgeUpdate()) {
-		if (!orgeBeginRender() || !orgeEndRender()) {
-			std::cout << orgeGetErrorMessage() << std::endl;
-		}
+		CHECK(orgeBeginRender());
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeEndRenderPass());
+		CHECK(orgeEndRender());
 
 		if (count % 60 == 0) {
 			std::cout << count / 60 << std::endl;

@@ -2,10 +2,11 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace graphics {
+namespace graphics::resource {
 
 class Mesh {
 private:
+	const std::string &_id;
 	const uint32_t _iCount;
 	const vk::Buffer _vb;
 	const vk::Buffer _ib;
@@ -14,21 +15,14 @@ private:
 
 public:
 	Mesh() = delete;
-	Mesh(
-		const vk::PhysicalDeviceMemoryProperties &memoryProps,
-		const vk::Device &device,
-		const vk::Queue &queue,
-		const std::string &id
-	);
+	Mesh(const std::string &id);
+	~Mesh();
 
-	void destroy(const vk::Device &device) const noexcept {
-		device.freeMemory(_ibMemory);
-		device.freeMemory(_vbMemory);
-		device.destroyBuffer(_ib);
-		device.destroyBuffer(_vb);
+	const std::string &id() const noexcept {
+		return _id;
 	}
 
-	uint32_t getIndexCount() const noexcept {
+	uint32_t indexCount() const noexcept {
 		return _iCount;
 	}
 
@@ -39,4 +33,12 @@ public:
 	}
 };
 
-} // namespace graphics
+void destroyAllMeshes() noexcept;
+
+void addMesh(const std::string &id);
+
+void destroyMesh(const std::string &id) noexcept;
+
+const Mesh &getMesh(const std::string &id);
+
+} // namespace graphics::resource

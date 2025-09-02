@@ -107,25 +107,7 @@ endif
 # =================================================================================================================== #
 
 # ソースファイルを列挙
-sources = [
-  'src/asset/asset.cpp',
-  'src/audio/audio.cpp',
-  'src/audio/wave.cpp',
-  'src/config/config.cpp',
-  'src/error/error.cpp',
-  'src/graphics/charatlus.cpp',
-  'src/graphics/descpool.cpp',
-  'src/graphics/framebuffer.cpp',
-  'src/graphics/graphics.cpp',
-  'src/graphics/image.cpp',
-  'src/graphics/mesh.cpp',
-  'src/graphics/pipeline.cpp',
-  'src/graphics/renderer.cpp',
-  'src/graphics/swapchain.cpp',
-  'src/graphics/utils.cpp',
-  'src/input/input.cpp',
-  'src/orge.cpp',
-]
+sources = run_command(find_program('python3'), 'scripts/list_sources.py', capture: true, check: true).stdout().strip().split('\n')
 
 # includeを追加
 add_project_arguments('-I' + meson.current_source_dir() / 'include', language: 'cpp')

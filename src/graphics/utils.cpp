@@ -7,9 +7,9 @@ namespace graphics {
 vk::CommandBuffer g_commandBuffer;
 vk::Fence g_fence;
 
-void terminateUtils(const vk::Device &device) {
+void terminateUtils() {
 	if (g_fence) {
-		device.destroyFence(g_fence);
+		core::device().destroyFence(g_fence);
 		g_fence = nullptr;
 	}
 
@@ -17,35 +17,29 @@ void terminateUtils(const vk::Device &device) {
 	g_commandBuffer = nullptr;
 }
 
-void initializeUtils(const vk::Device &device, const vk::CommandPool &commandPool) {
+void initializeUtils() {
 	const auto ai = vk::CommandBufferAllocateInfo()
-		.setCommandPool(commandPool)
+		.setCommandPool(core::commandPool())
 		.setLevel(vk::CommandBufferLevel::ePrimary)
 		.setCommandBufferCount(1);
-	g_commandBuffer = error::at(device.allocateCommandBuffers(ai), 0, "command buffers allocated");
+	g_commandBuffer = error::at(core::device().allocateCommandBuffers(ai), 0, "command buffers allocated");
 
-	g_fence = device.createFence({});
+	g_fence = core::device().createFence({});
 }
 
-void uploadBuffer(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Queue &queue,
-	const vk::Buffer &dst,
-	const void *src,
-	size_t size,
-	vk::PipelineStageFlags visibleStages
-) {
+void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::PipelineStageFlags visibleStages) {
+	const auto &device = core::device();
+
 	// ステージングバッファ作成
 	const auto bci = vk::BufferCreateInfo()
 		.setSize(static_cast<vk::DeviceSize>(size))
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(memoryProps, device, buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+	const auto bufferMemory = allocateBufferMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
-	copyDataToMemory(device, bufferMemory, src, size);
+	copyDataToMemory(bufferMemory, src, size);
 
 	// アップロード準備
 	g_commandBuffer.reset();
@@ -100,7 +94,7 @@ void uploadBuffer(
 	device.resetFences({g_fence});
 	const auto si = vk::SubmitInfo()
 		.setCommandBuffers({g_commandBuffer});
-	queue.submit(si, g_fence);
+	core::queue().submit(si, g_fence);
 
 	// 完了まで待機
 	if (device.waitForFences({g_fence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
@@ -108,14 +102,11 @@ void uploadBuffer(
 	}
 
 	// ステージングバッファ削除
-	device.freeMemory(bufferMemory);
-	device.destroyBuffer(buffer);
+	device.free(bufferMemory);
+	device.destroy(buffer);
 }
 
 void uploadImage(
-	const vk::PhysicalDeviceMemoryProperties &memoryProps,
-	const vk::Device &device,
-	const vk::Queue &queue,
 	const vk::Image &dst,
 	uint32_t width,
 	uint32_t height,
@@ -124,6 +115,7 @@ void uploadImage(
 	uint32_t offsetY,
 	const uint8_t *src
 ) {
+	const auto &device = core::device();
 	const auto extent = vk::Extent3D(width, height, 1);
 	const auto subresRange = vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 
@@ -134,10 +126,10 @@ void uploadImage(
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(memoryProps, device, buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+	const auto bufferMemory = allocateBufferMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
-	copyDataToMemory(device, bufferMemory, src, bufferSize);
+	copyDataToMemory(bufferMemory, src, bufferSize);
 
 	// アップロード準備
 	g_commandBuffer.reset();
@@ -197,7 +189,7 @@ void uploadImage(
 	device.resetFences({g_fence});
 	const auto si = vk::SubmitInfo()
 		.setCommandBuffers({g_commandBuffer});
-	queue.submit(si, g_fence);
+	core::queue().submit(si, g_fence);
 
 	// 完了まで待機
 	if (device.waitForFences({g_fence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
@@ -205,8 +197,8 @@ void uploadImage(
 	}
 
 	// ステージングバッファ削除
-	device.freeMemory(bufferMemory);
-	device.destroyBuffer(buffer);
+	device.free(bufferMemory);
+	device.destroy(buffer);
 }
 
 } // namespace graphics
