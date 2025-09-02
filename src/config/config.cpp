@@ -81,22 +81,32 @@ Config::Config(const YAML::Node &node):
 	std::set<std::string> renderPassIds;
 	for (const auto &[_, r]: renderPasses) {
 		for (const auto &n: r.subpasses) {
-			// 各アタッチメントの存在確認
+			// 各アタッチメントの確認
 			for (const auto &m: n.inputs) {
 				if (!attachments.contains(m)) {
 					throw std::format("config error: attachment '{}' not defined.", m);
 				}
+				switch (attachments.at(m).format) {
+				case Format::DepthBuffer:
+				case Format::ShareColorAttachment:
+				case Format::SignedShareColorAttachment:
+					break;
+				default:
+					throw "config error: the attachment format of a subpass input must be 'depth-buffer', 'share-color-attachment' or 'signed-share-color-attachment'.";
+				};
 			}
 			for (const auto &m: n.outputs) {
 				if (!attachments.contains(m)) {
 					throw std::format("config error: attachment '{}' not defined.", m);
 				}
+				// TODO: ヴァリデーション。
 			}
 			if (n.depth.has_value()) {
 				const auto &id = n.depth->id;
 				if (!attachments.contains(id)) {
 					throw std::format("config error: attachment '{}' not defined.", id);
 				}
+				// TODO: ヴァリデーション。
 			}
 			// パイプラインの存在確認
 			for (const auto &m: n.pipelines) {

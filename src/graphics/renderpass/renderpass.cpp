@@ -6,50 +6,9 @@
 #include "../core/core.hpp"
 #include "../window/swapchain.hpp"
 #include "framebuffer.hpp"
+#include "subpass.hpp"
 
 namespace graphics::renderpass {
-
-struct Subpass {
-	std::vector<vk::AttachmentReference> inputs;
-	std::vector<vk::AttachmentReference> outputs;
-	std::optional<vk::AttachmentReference> depth;
-
-	Subpass(const config::RenderPassConfig &rpconfig, const config::SubpassConfig &spconfig) {
-		for (const auto &m: spconfig.inputs) {
-			const auto &attachment = config::config().attachments.at(m);
-			switch (attachment.format) {
-			case config::Format::DepthBuffer:
-			case config::Format::ShareColorAttachment:
-			case config::Format::SignedShareColorAttachment:
-				break;
-			default:
-				throw "the attachment format of a subpass input must be 'depth-buffer' or 'share-color-attachment'.";
-			};
-			inputs.emplace_back(rpconfig.attachmentMap.at(m), config::getImageLayoutFromFormat(attachment.format));
-		}
-
-		for (const auto &m: spconfig.outputs) {
-			outputs.emplace_back(rpconfig.attachmentMap.at(m), vk::ImageLayout::eColorAttachmentOptimal);
-		}
-
-		if (spconfig.depth) {
-			depth.emplace(
-				rpconfig.attachmentMap.at(spconfig.depth->id),
-				spconfig.depth->readOnly
-					? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-					: vk::ImageLayout::eDepthStencilAttachmentOptimal
-			);
-		}
-	}
-
-	vk::SubpassDescription build() const {
-		return vk::SubpassDescription()
-			.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-			.setInputAttachments(inputs)
-			.setColorAttachments(outputs)
-			.setPDepthStencilAttachment(depth ? &depth.value() : nullptr);
-	}
-};
 
 vk::RenderPass createRenderPass(const std::string &id) {
 	const auto &rpconfig = config::config().renderPasses.at(id);
@@ -79,6 +38,8 @@ vk::RenderPass createRenderPass(const std::string &id) {
 	std::vector<Subpass> tempSubpasses;
 	std::vector<vk::SubpassDescription> subpasses;
 	std::vector<vk::SubpassDependency> dependencies;
+	tempSubpasses.reserve(rpconfig.subpasses.size());
+	subpasses.reserve(rpconfig.subpasses.size());
 	for (const auto &n: rpconfig.subpasses) {
 		tempSubpasses.emplace_back(rpconfig, n);
 		subpasses.push_back(tempSubpasses.back().build());
