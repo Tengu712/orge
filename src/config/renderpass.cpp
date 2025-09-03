@@ -20,19 +20,22 @@ SubpassConfig::SubpassConfig(const YAML::Node &node):
 }
 
 std::vector<std::string> collectAttachments(const std::vector<SubpassConfig> &subpasses) {
-	std::vector<std::string> attachments;
+	std::unordered_set<std::string> attachments;
 	for (const auto &n: subpasses) {
 		for (const auto &m: n.inputs) {
-			attachments.push_back(m);
+			attachments.emplace(m);
 		}
 		for (const auto &m: n.outputs) {
-			attachments.push_back(m);
+			attachments.emplace(m);
 		}
 		if (n.depth) {
-			attachments.push_back(n.depth.value().id);
+			attachments.emplace(n.depth.value().id);
 		}
 	}
-	return attachments;
+	std::vector<std::string> result;
+	result.reserve(attachments.size());
+	result.assign(std::make_move_iterator(attachments.begin()), std::make_move_iterator(attachments.end()));
+	return result;
 }
 
 RenderPassConfig::RenderPassConfig(const YAML::Node &node):

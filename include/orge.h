@@ -186,6 +186,8 @@ API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
 ///
 /// 更新先のディスクリプタがtexture2DでもsubpassInputでも構わない。
 /// アタッチメントをディスクリプタに関連づけるときにこの関数を用いる。
+///
+/// WARN: 描画が開始されていること。
 API_EXPORT uint8_t orgeUpdateInputAttachmentDescriptor(
 	const char *renderPassId,
 	const char *pipelineId,

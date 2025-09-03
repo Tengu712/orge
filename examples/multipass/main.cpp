@@ -45,17 +45,30 @@ int main() {
 		transform[13] += ud * k * 0.01f;
 		CHECK(orgeUpdateBuffer("transform", reinterpret_cast<const uint8_t *>(transform.data())));
 
-		CHECK(orgeUpdateBufferDescriptor("transform", "pattern-pl", 0, 0, 0, 0));
-		CHECK(orgeUpdateSamplerDescriptor("sampler", "integration-pl", 0, 0, 2, 0));
-
 		CHECK(orgeBeginRender());
-		CHECK(orgeDraw("mesh-pl", "triangle", 1, 0));
+		CHECK(orgeBeginRenderPass("RP"));
+
+		CHECK(orgeUpdateBufferDescriptor(         "RP", "pattern-pl",     "transform",  0, 0, 0, 0));
+		CHECK(orgeUpdateInputAttachmentDescriptor("RP", "integration-pl", "mesh-rt",    0, 0, 0, 0));
+		CHECK(orgeUpdateInputAttachmentDescriptor("RP", "integration-pl", "pattern-rt", 0, 0, 1, 0));
+		CHECK(orgeUpdateSamplerDescriptor(        "RP", "integration-pl", "sampler",    0, 0, 2, 0));
+
+		CHECK(orgeBindMesh("triangle"));
+		CHECK(orgeBindPipeline("mesh-pl", nullptr));
+		CHECK(orgeDraw(1, 0));
+
 		CHECK(orgeNextSubpass());
-		CHECK(orgeBindDescriptorSets("pattern-pl", PATTERN_PL_SET_INDICES.data()));
-		CHECK(orgeDraw("pattern-pl", "square", 1, 0));
+
+		CHECK(orgeBindMesh("square"));
+		CHECK(orgeBindPipeline("pattern-pl", PATTERN_PL_SET_INDICES.data()));
+		CHECK(orgeDraw(1, 0));
+
 		CHECK(orgeNextSubpass());
-		CHECK(orgeBindDescriptorSets("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
-		CHECK(orgeDraw("integration-pl", "square", 1, 0));
+
+		CHECK(orgeBindPipeline("integration-pl", INTEGRATION_PL_SET_INDICES.data()));
+		CHECK(orgeDraw(1, 0));
+
+		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}
 
