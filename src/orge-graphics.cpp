@@ -9,7 +9,7 @@
 #include "graphics/window/swapchain.hpp"
 #include "orge-private.hpp"
 
-#define DEFINE_UPDATE_DESC_FUNC(n, m) \
+#define DECLARE_UPDATE_DESC_FUNC(n) \
 	uint8_t orgeUpdate##n##Descriptor( \
 		const char *renderPassId, \
 		const char *pipelineId, \
@@ -18,7 +18,9 @@
 		uint32_t index, \
 		uint32_t binding, \
 		uint32_t offset \
-	) { \
+	)
+#define DEFINE_UPDATE_DESC_FUNC(n, m) \
+	DECLARE_UPDATE_DESC_FUNC(n) { \
 		TRY( \
 			graphics::renderpass::getRenderPass(renderPassId) \
 				.getPipeline(pipelineId) \
@@ -87,15 +89,7 @@ void orgeDestroySampler(const char *id) {
 
 DEFINE_UPDATE_DESC_FUNC(Sampler, Sampler)
 
-uint8_t orgeUpdateInputAttachmentDescriptor(
-	const char *renderPassId,
-	const char *pipelineId,
-	const char *id,
-	uint32_t set,
-	uint32_t index,
-	uint32_t binding,
-	uint32_t offset
-) {
+DECLARE_UPDATE_DESC_FUNC(InputAttachment) {
 	TRY(
 		const auto &context = graphics::renderer::renderer().getContext();
 		graphics::renderpass::getRenderPass(renderPassId)

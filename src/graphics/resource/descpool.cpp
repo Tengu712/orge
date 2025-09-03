@@ -56,7 +56,7 @@ void initializeDescriptorPool() {
 void destroyDescriptorPool() noexcept {
 	if (g_descpool) {
 		core::device().destroy(g_descpool.value());
-		g_descpool = std::nullopt;
+		g_descpool.reset();
 	}
 }
 
