@@ -43,7 +43,7 @@ void addUserImageFromFile(const std::string &file) {
 		throw std::format("'{}' is not RGBA.", file);
 	}
 
-	g_userImages.emplace(file, Image(
+	g_userImages.try_emplace(file,
 		width,
 		height,
 		pixels.get(),
@@ -51,7 +51,7 @@ void addUserImageFromFile(const std::string &file) {
 		vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
 		vk::ImageAspectFlagBits::eColor,
 		4
-	));
+	);
 }
 
 void destroyUserImage(const std::string &id) noexcept {

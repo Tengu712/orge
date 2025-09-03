@@ -15,6 +15,9 @@ private:
 
 public:
 	Mesh() = delete;
+	Mesh(const Mesh &) = delete;
+	Mesh &operator =(const Mesh &) = delete;
+
 	Mesh(const std::string &id);
 	~Mesh();
 

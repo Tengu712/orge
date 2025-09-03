@@ -13,6 +13,9 @@ private:
 
 public:
 	Buffer() = delete;
+	Buffer(const Buffer &) = delete;
+	Buffer &operator =(const Buffer &) = delete;
+
 	Buffer(uint64_t size, bool isStorage);
 	~Buffer();
 
