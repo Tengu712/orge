@@ -2,22 +2,13 @@ title: sampler
 width: 640
 height: 480
 assets:
-  - square.mesh.v
-  - square.mesh.i
   - shader.vert.spv
   - shader.frag.spv
   - image.png
-meshes:
-  - id: square
-    vertices: square.mesh.v
-    indices: square.mesh.i
 attachments:
   - id: RT
     format: render-target
     clear-value: [0.0, 0.0, 0.0, 1.0]
-subpasses:
-  - id: SP
-    outputs: [RT]
 pipelines:
   - id: PL
     vertex-shader: shader.vert.spv
@@ -36,6 +27,11 @@ pipelines:
           - type: sampler
             count: 2
             stage: fragment
-    vertex-input-attributes: [3, 2]
+    mesh-in-shader: true
     color-blends: [false]
-    subpass: SP
+render-passes:
+  - id: RP
+    subpasses:
+      - id: SP
+        outputs: [RT]
+        pipelines: [PL]
