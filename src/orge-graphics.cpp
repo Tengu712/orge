@@ -168,6 +168,10 @@ uint8_t orgeBindPipeline(const char *pipelineId, uint32_t const *indices) {
 	TRY_OR(graphics::renderer::renderer().getContext().bindPipeline(pipelineId, indices));
 }
 
-uint8_t orgeDraw(uint32_t indexCount, uint32_t instanceCount, uint32_t instanceOffset) {
-	TRY_OR(graphics::renderer::renderer().getContext().draw(indexCount, instanceCount, instanceOffset));
+uint8_t orgeDraw(uint32_t instanceCount, uint32_t instanceOffset) {
+	TRY_OR(graphics::renderer::renderer().getContext().draw(instanceCount, instanceOffset));
+}
+
+uint8_t orgeDrawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset) {
+	TRY_OR(graphics::renderer::renderer().getContext().drawDirectly(vertexCount, instanceCount, instanceOffset));
 }

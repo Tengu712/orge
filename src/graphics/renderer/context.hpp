@@ -83,13 +83,20 @@ public:
 		}
 	}
 
-	void draw(uint32_t indexCount, uint32_t instanceCount, uint32_t instanceOffset) const {
+	void draw(uint32_t instanceCount, uint32_t instanceOffset) const {
 		// NOTE: パイプラインがバインドされていないならレンダーパスも始まっていない。
 		if (!_pipeline) {
 			throw "no pipeline bound.";
 		}
-		const auto ic = indexCount == 0 ? _currentMesh().indexCount() : indexCount;
-		_commandBuffer.drawIndexed(ic, instanceCount, 0, 0, instanceOffset);
+		_commandBuffer.drawIndexed(_currentMesh().indexCount(), instanceCount, 0, 0, instanceOffset);
+	}
+
+	void drawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset) const {
+		// NOTE: パイプラインがバインドされていないならレンダーパスも始まっていない。
+		if (!_pipeline) {
+			throw "no pipeline bound.";
+		}
+		_commandBuffer.draw(vertexCount, instanceCount, 0, instanceOffset);
 	}
 };
 

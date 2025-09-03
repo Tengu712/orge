@@ -22,7 +22,7 @@ int main() {
 		CHECK(orgeBindMesh("triangle"));
 		CHECK(orgeBeginRenderPass("RP"));
 		CHECK(orgeBindPipeline("PL", nullptr));
-		CHECK(orgeDraw(0, 1, 0));
+		CHECK(orgeDraw(1, 0));
 		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}

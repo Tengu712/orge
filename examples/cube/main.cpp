@@ -83,7 +83,7 @@ int main() {
 		CHECK(orgeBindMesh("cube"));
 		CHECK(orgeBeginRenderPass("RP"));
 		CHECK(orgeBindPipeline("PL", SET_INDICES.data()));
-		CHECK(orgeDraw(0, 1, 0));
+		CHECK(orgeDraw(1, 0));
 		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}

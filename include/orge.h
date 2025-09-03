@@ -307,13 +307,21 @@ API_EXPORT uint8_t orgeBindPipeline(const char *pipelineId, uint32_t const *indi
 
 /// 描画関数
 ///
-/// - indexCount: メッシュのインデックス数。
-///               0が指定された場合、バインドされているメッシュのインデックス数を参照する。
 /// - instanceCount: 描画するインスタンスの個数
 /// - instanceOffset: 参照するインスタンスバッファのオフセット
 ///
 /// WARN: パイプラインがバインドされていること。
-API_EXPORT uint8_t orgeDraw(uint32_t indexCount, uint32_t instanceCount, uint32_t instanceOffset);
+/// WARN: メッシュがバインドされていること。
+API_EXPORT uint8_t orgeDraw(uint32_t instanceCount, uint32_t instanceOffset);
+
+/// 描画関数 (メッシュをシェーダ内で構築する場合)
+///
+/// - vertexCount: メッシュの頂点数
+/// - instanceCount: 描画するインスタンスの個数
+/// - instanceOffset: 参照するインスタンスバッファのオフセット
+///
+/// WARN: パイプラインがバインドされていること。
+API_EXPORT uint8_t orgeDrawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset);
 
 // ================================================================================================================== //
 //     Input                                                                                                          //
