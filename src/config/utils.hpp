@@ -58,8 +58,12 @@ inline std::vector<bool> bs(const YAML::Node &n, const std::string &k) {
 	return get<std::vector<bool>>(n, k, "bool[]");
 }
 
-inline std::vector<uint32_t> us(const YAML::Node &n, const std::string &k) {
-	return get<std::vector<uint32_t>>(n, k, "unsigned int[]");
+inline std::vector<uint32_t> us(
+	const YAML::Node &n,
+	const std::string &k,
+	std::optional<std::vector<std::uint32_t>> d = std::nullopt
+) {
+	return get<std::vector<uint32_t>>(n, k, "unsigned int[]", d);
 }
 
 inline std::vector<std::string> ss(

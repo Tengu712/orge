@@ -90,7 +90,8 @@ attachments: []
     discard: bool
 
     # アタッチメントのクリア値
-    # カラーアタッチメントであればfloat[4]を、深度アタッチメントであればfloatを指定する
+    # - カラーアタッチメントであればfloat[4]を、
+    # - 深度アタッチメントであればfloatを指定する
     clear-value: float[4] | float
 
 # ========== Pipeline Definition =============== #
@@ -134,7 +135,12 @@ pipelines: []
 
     # 各頂点入力属性のサイズの配列
     # 各値は1から4まで
+    # 省略された場合、空配列とみなされる
     vertex-input-attributes: unsigned int[]
+
+    # シェーダ内でメッシュを構築するか
+    # 省略された場合、falseとみなされる
+    mesh-in-shader: bool
 
     # カリングを行うか
     # 省略された場合、falseとみなされる

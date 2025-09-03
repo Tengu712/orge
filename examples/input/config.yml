@@ -17,7 +17,7 @@ pipelines:
         bindings:
           - type: uniform-buffer
             stage: fragment
-    vertex-input-attributes: []
+    mesh-in-shader: true
     color-blends: [false]
 render-passes:
   - id: RP

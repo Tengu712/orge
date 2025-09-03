@@ -85,7 +85,7 @@ PipelineCreateTemporaryInfos::PipelineCreateTemporaryInfos(
 
 	// 頂点アセンブリ
 	iasci = vk::PipelineInputAssemblyStateCreateInfo()
-		.setTopology(n.textRendering ? vk::PrimitiveTopology::eTriangleStrip : vk::PrimitiveTopology::eTriangleList);
+		.setTopology(n.meshInShader ? vk::PrimitiveTopology::eTriangleStrip : vk::PrimitiveTopology::eTriangleList);
 
 	// ラスタライゼーション
 	rsci = vk::PipelineRasterizationStateCreateInfo()

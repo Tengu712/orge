@@ -44,6 +44,7 @@ struct PipelineConfig {
 	const std::string fragmentShader;
 	const std::vector<DescriptorSetConfig> descSets;
 	const std::vector<uint32_t> vertexInputAttributes;
+	const bool meshInShader;
 	const bool culling;
 	const bool depthTest;
 	const std::vector<bool> colorBlends;

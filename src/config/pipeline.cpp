@@ -47,7 +47,8 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	vertexShader(s(node, "vertex-shader")),
 	fragmentShader(s(node, "fragment-shader")),
 	descSets(parseConfigs<DescriptorSetConfig>(node, "desc-sets")),
-	vertexInputAttributes(us(node, "vertex-input-attributes")),
+	vertexInputAttributes(us(node, "vertex-input-attributes", std::vector<uint32_t>{})),
+	meshInShader(b(node, "mesh-in-shader", false)),
 	culling(b(node, "culling", false)),
 	depthTest(b(node, "depth-test", false)),
 	colorBlends(bs(node, "color-blends")),
@@ -58,7 +59,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 		node,
 		{
 			"id", "vertex-shader", "fragment-shader", "desc-sets", "vertex-input-attributes",
-			"culling", "depth-test", "color-blends"
+			"mesh-in-shader", "culling", "depth-test", "color-blends"
 		}
 	);
 
@@ -87,6 +88,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
 	fragmentShader(""),
 	descSets(createTextRenderingPipelineDescSets(texCount)),
 	vertexInputAttributes(),
+	meshInShader(true),
 	culling(false),
 	depthTest(false),
 	colorBlends{true},
