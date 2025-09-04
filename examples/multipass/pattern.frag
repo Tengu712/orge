@@ -1,25 +1,21 @@
 #version 450
 
 layout(location = 0) in vec2 bridgeUV;
+layout(location = 1) in vec2 bridgeWH;
 
 layout(location = 0) out vec4 outColor;
 
 void main() {
-	const float R = 0.4;
-	const float D = 0.025;
+	const float R = 0.49;
+	const float dW = bridgeWH.x * 2.0;
+	const float dH = bridgeWH.y * 2.0;
 
-	vec2 pos = bridgeUV - 0.5;
-	float dis = length(pos);
+	vec2 centerPos = bridgeUV - 0.5;
+	float dis = length(centerPos);
 
 	if (dis < R) {
-		float curve1 = smoothstep(0.0, 1.0, dis / R);
-		float curve2 = smoothstep(0.0, 1.0, curve1);
-		float depth = (1.0 - curve2) * D;
-
-		vec2 dir = dis > 0.0 ? pos / dis : vec2(0.0);
-		vec2 res = dir * depth;
-
-		outColor = vec4(res, 0.0, 0.0);
+		vec2 o = -2.0 * centerPos * bridgeWH;
+		outColor = vec4(o, 0.0, 0.0);
 	} else {
 		outColor = vec4(0.0);
 	}

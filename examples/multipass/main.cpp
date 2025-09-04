@@ -25,11 +25,11 @@ int main() {
 	TRY(orgeLoadMesh("square"));
 
 	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
-	TRY(orgeCreateSampler("sampler", 0, 0, 0));
+	TRY(orgeCreateSampler("sampler", 1, 1, 0));
 
 	std::array<float, 16> transform{
-		0.7f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.7f, 0.0f, 0.0f,
+		0.3f, 0.0f, 0.0f, 0.0f,
+		0.0f, 0.4f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
