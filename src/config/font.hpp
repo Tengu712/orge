@@ -5,7 +5,6 @@
 namespace config {
 
 struct FontConfig {
-	const std::string id;
 	const std::string file;
 	const uint32_t charSize;
 	const uint32_t charAtlusCol;
@@ -13,5 +12,7 @@ struct FontConfig {
 
 	FontConfig(const YAML::Node &node);
 };
+
+std::unordered_map<std::string, FontConfig> parseFontConfigs(const YAML::Node &node);
 
 } // namespace config

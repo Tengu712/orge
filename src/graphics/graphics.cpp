@@ -4,6 +4,7 @@
 #include "renderer/renderer.hpp"
 #include "renderpass/renderpass.hpp"
 #include "resource/buffer.hpp"
+#include "resource/charatlus.hpp"
 #include "resource/descpool.hpp"
 #include "resource/image-attachment.hpp"
 #include "resource/image-user.hpp"
@@ -20,6 +21,7 @@ void initialize() {
 	window::initializeSwapchain();
 	resource::initializeDescriptorPool();
 	resource::initializeAllAttachmentImages();
+	resource::initializeAllCharAtluses();
 	renderpass::initializeRenderPasses();
 	renderer::initializeRenderer();
 }
@@ -31,6 +33,7 @@ void terminate() noexcept {
 	resource::destroyAllSamplers();
 	resource::destroyAllMeshes();
 	resource::destroyAllUserImages();
+	resource::destroyAllCharAtluses();
 	resource::destroyAllAttachmentImages();
 	resource::destroyDescriptorPool();
 	resource::destroyAllBuffers();

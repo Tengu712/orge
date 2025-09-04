@@ -38,12 +38,11 @@ Config::Config(const YAML::Node &node):
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	audioChannelCount(u(node, "audio-channel-count", 16)),
 	meshes(parseMeshConfigs(node)),
-	fonts(parseConfigs<FontConfig>(node, "fonts")),
+	fonts(parseFontConfigs(node)),
 	attachments(parseAttachmentConfigs(node)),
 	pipelines(parsePipelineConfigs(node, static_cast<uint32_t>(fonts.size()))),
 	renderPasses(parseRenderPassConfigs(node)),
-	assetMap(collectAssetMap(node)),
-	fontMap(collectMap(fonts))
+	assetMap(collectAssetMap(node))
 {
 	checkUnexpectedKeys(
 		node,

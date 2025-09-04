@@ -17,13 +17,12 @@ struct Config {
 	const bool altReturnToggleFullscreen;
 	const uint32_t audioChannelCount;
 	const std::unordered_map<std::string, MeshConfig> meshes;
-	const std::vector<FontConfig> fonts;
+	const std::unordered_map<std::string, FontConfig> fonts;
 	const std::unordered_map<std::string, AttachmentConfig> attachments;
 	const std::unordered_map<std::string, PipelineConfig> pipelines;
 	const std::unordered_map<std::string, RenderPassConfig> renderPasses;
 
 	const std::unordered_map<std::string, uint32_t> assetMap;
-	const std::unordered_map<std::string, uint32_t> fontMap;
 
 	Config(const YAML::Node &node);
 };

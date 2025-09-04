@@ -31,7 +31,7 @@ public:
 		vk::ImageAspectFlags aspect,
 		uint32_t chCount
 	);
-	~Image();
+	virtual ~Image();
 
 	const vk::ImageView &get() const noexcept {
 		return _view;
