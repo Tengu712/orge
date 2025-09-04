@@ -3,6 +3,7 @@
 #include "graphics/core/core.hpp"
 #include "graphics/renderpass/renderpass.hpp"
 #include "graphics/renderer/renderer.hpp"
+#include "graphics/resource/descpool.hpp"
 #include "graphics/resource/image-attachment.hpp"
 #include "graphics/window/swapchain.hpp"
 
@@ -16,7 +17,9 @@
 	graphics::renderer::renderer().recreateSemaphoreForImageEnabled(); \
 	graphics::renderpass::destroyAllFramebuffersAndPipelines(); \
 	graphics::resource::destroyAllAttachmentImages(); \
+	graphics::resource::destroyDescriptorPool(); \
 	graphics::window::swapchain().recreate##which(); \
+	graphics::resource::initializeDescriptorPool(); \
 	graphics::resource::initializeAllAttachmentImages(); \
 	graphics::renderpass::createAllFramebuffersAndPipelines()
 

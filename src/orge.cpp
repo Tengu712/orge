@@ -4,6 +4,7 @@
 #include "audio/audio.hpp"
 #include "config/config.hpp"
 #include "error/error.hpp"
+#include "graphics/core/core.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/window/swapchain.hpp"
 #include "input/input.hpp"
@@ -82,6 +83,7 @@ uint8_t orgeUpdate(void) {
 		) {
 			// TODO: 例外どうしよう。
 			const auto &swapchain = graphics::window::swapchain();
+			graphics::core::device().waitIdle();
 			swapchain.setFullscreen(!swapchain.isFullscreen());
 		}
 	}
