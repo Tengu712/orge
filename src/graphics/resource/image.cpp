@@ -58,7 +58,7 @@ Image::Image(
 	uint32_t chCount
 ):
 	_image(createImage(width, height, format, usage)),
-	_memory(allocateImageMemory(_image, vk::MemoryPropertyFlagBits::eDeviceLocal)),
+	_memory(allocateMemory(_image, vk::MemoryPropertyFlagBits::eDeviceLocal)),
 	_view(createImageView(_image, format, aspect)),
 	_chCount(chCount)
 {

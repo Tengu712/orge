@@ -91,6 +91,11 @@ struct Core {
 	const vk::Queue queue;
 	const vk::CommandPool commandPool;
 
+	Core(const Core &) = delete;
+	Core(const Core &&) = delete;
+	Core &operator =(const Core &) = delete;
+	Core &operator =(const Core &&) = delete;
+
 	Core():
 		instance(createInstance()),
 		physicalDevice(selectPhysicalDevice(instance)),
@@ -128,7 +133,7 @@ void initializeCore() {
 }
 
 void destroyCore() noexcept {
-	g_core = std::nullopt;
+	g_core.reset();
 }
 
 const vk::Instance &instance() {

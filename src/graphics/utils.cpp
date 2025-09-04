@@ -36,7 +36,7 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+	const auto bufferMemory = allocateMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
 	copyDataToMemory(bufferMemory, src, size);
@@ -126,7 +126,7 @@ void uploadImage(
 		.setUsage(vk::BufferUsageFlagBits::eTransferSrc)
 		.setSharingMode(vk::SharingMode::eExclusive);
 	const auto buffer = device.createBuffer(bci);
-	const auto bufferMemory = allocateBufferMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
+	const auto bufferMemory = allocateMemory(buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 	// ステージングバッファへアップロード
 	copyDataToMemory(bufferMemory, src, bufferSize);

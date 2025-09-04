@@ -121,15 +121,26 @@ vk::Viewport adjustViewport(uint32_t ow, uint32_t oh, const vk::Extent2D &extent
 
 std::unordered_map<std::string, Pipeline> createPipelines(
 	const vk::RenderPass &renderPass,
-	const std::vector<PipelineIdAndSubpassIndex> &pss
+	const std::string &renderPassId
 ) {
 	if (config::config().pipelines.empty()) {
 		return {};
 	}
-	if (config::config().pipelines.size() != pss.size()) {
+
+	const auto &rpconfig = config::config().renderPasses.at(renderPassId);
+	const auto &extent = window::swapchain().getExtent();
+
+	// パイプラインIdとサブパスインデックス収集
+	std::vector<PipelineIdAndSubpassIndex> pss;
+	pss.reserve(rpconfig.subpasses.size());
+	for (const auto &n: rpconfig.subpasses) {
+		for (const auto &m: n.pipelines) {
+			pss.emplace_back(m, rpconfig.subpassMap.at(n.id));
+		}
+	}
+	if (pss.size() != config::config().pipelines.size()) {
 		throw "unexpected error: pipeline count is inconsistent.";
 	}
-	const auto &extent = window::swapchain().getExtent();
 
 	// ビューポート
 	std::vector<vk::Viewport> viewports;

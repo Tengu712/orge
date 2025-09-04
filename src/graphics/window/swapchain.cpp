@@ -156,7 +156,7 @@ void initializeSwapchain() {
 }
 
 void destroySwapchain() noexcept {
-	g_swapchain = std::nullopt;
+	g_swapchain.reset();
 }
 
 Swapchain &swapchain() {

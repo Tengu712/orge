@@ -16,7 +16,7 @@ Buffer::Buffer(uint64_t size, bool isStorage):
 			.setUsage(_isStorage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 			.setSharingMode(vk::SharingMode::eExclusive)
 	)),
-	_memory(allocateBufferMemory(_buffer, vk::MemoryPropertyFlagBits::eHostVisible))
+	_memory(allocateMemory(_buffer, vk::MemoryPropertyFlagBits::eHostVisible))
 {}
 
 Buffer::~Buffer() {

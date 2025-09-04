@@ -33,8 +33,8 @@ Mesh::Mesh(const std::string &id):
 			.setSize(static_cast<uint32_t>(getIndicesData(id).size()))
 			.setUsage(vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 	)),
-	_vbMemory(allocateBufferMemory(_vb, vk::MemoryPropertyFlagBits::eDeviceLocal)),
-	_ibMemory(allocateBufferMemory(_ib, vk::MemoryPropertyFlagBits::eDeviceLocal))
+	_vbMemory(allocateMemory(_vb, vk::MemoryPropertyFlagBits::eDeviceLocal)),
+	_ibMemory(allocateMemory(_ib, vk::MemoryPropertyFlagBits::eDeviceLocal))
 {
 	uploadBuffer(
 		_vb,

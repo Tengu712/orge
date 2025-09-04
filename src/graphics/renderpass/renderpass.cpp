@@ -78,25 +78,12 @@ std::vector<vk::ClearValue> collectClearValues(const std::string &id) {
 	return clearValues;
 }
 
-// TODO: pipeline側に移動したい。
-std::vector<PipelineIdAndSubpassIndex> collectPipelineIdAndSubpassIndexs(const std::string &id) {
-	const auto &rpconfig = config::config().renderPasses.at(id);
-	std::vector<PipelineIdAndSubpassIndex> results;
-	results.reserve(rpconfig.subpasses.size());
-	for (const auto &n: rpconfig.subpasses) {
-		for (const auto &m: n.pipelines) {
-			results.emplace_back(m, rpconfig.subpassMap.at(n.id));
-		}
-	}
-	return results;
-}
-
 RenderPass::RenderPass(const std::string &id):
 	_id(id),
 	_renderPass(createRenderPass(id)),
 	_clearValues(collectClearValues(id)),
 	_framebuffers(createFramebuffers(_renderPass, id)),
-	_pipelines(createPipelines(_renderPass, collectPipelineIdAndSubpassIndexs(_id)))
+	_pipelines(createPipelines(_renderPass, _id))
 {}
 
 RenderPass::~RenderPass() {
@@ -127,7 +114,7 @@ void RenderPass::destroyFramebuffersAndPipelines() noexcept {
 
 void RenderPass::createFramebuffersAndPipelines() {
 	_framebuffers = createFramebuffers(_renderPass, _id);
-	_pipelines = createPipelines(_renderPass, collectPipelineIdAndSubpassIndexs(_id));
+	_pipelines = createPipelines(_renderPass, _id);
 }
 
 std::unordered_map<std::string, RenderPass> g_renderPasses;

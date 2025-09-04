@@ -15,6 +15,10 @@ private:
 	std::unordered_map<std::string, Pipeline> _pipelines;
 
 public:
+	RenderPass() = delete;
+	RenderPass(const RenderPass &) = delete;
+	RenderPass &operator =(const RenderPass &) = delete;
+
 	RenderPass(const std::string &id);
 	~RenderPass();
 

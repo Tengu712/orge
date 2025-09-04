@@ -16,6 +16,9 @@ private:
 
 public:
 	Pipeline() = delete;
+	Pipeline(const Pipeline &) = delete;
+	Pipeline &operator =(const Pipeline &) = delete;
+
 	Pipeline(
 		const std::string id,
 		const vk::Pipeline &pipeline,
@@ -95,7 +98,7 @@ struct PipelineIdAndSubpassIndex {
 
 std::unordered_map<std::string, Pipeline> createPipelines(
 	const vk::RenderPass &renderPass,
-	const std::vector<PipelineIdAndSubpassIndex> &pss
+	const std::string &renderPassId
 );
 
 } // namespace graphics::renderpass

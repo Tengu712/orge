@@ -49,10 +49,10 @@ const char *orgeGetErrorMessage(void) {
 uint8_t orgeInitialize(void) {
 	TRY(
 		if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
-			throw "failed to prepare for creating a window.";
+			throw std::format("failed to prepare for creating a window: {}", SDL_GetError());
 		}
 		if (!SDL_Vulkan_LoadLibrary(nullptr)) {
-			throw "failed to load Vulkan.";
+			throw std::format("failed to load Vulkan: {}", SDL_GetError());
 		}
 		asset::initialize();
 		config::initialize();
@@ -80,9 +80,9 @@ uint8_t orgeUpdate(void) {
 				&& event.key.key == SDLK_RETURN
 				&& (event.key.mod & MODKEY)
 		) {
-			const auto isFullscreen = graphics::window::swapchain().isFullscreen();
 			// TODO: 例外どうしよう。
-			graphics::window::swapchain().setFullscreen(!isFullscreen);
+			const auto &swapchain = graphics::window::swapchain();
+			swapchain.setFullscreen(!swapchain.isFullscreen());
 		}
 	}
 	// TODO: 例外どうしよう。

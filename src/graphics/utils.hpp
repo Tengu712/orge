@@ -26,7 +26,7 @@ inline uint32_t findMemoryType(uint32_t typeBits, vk::MemoryPropertyFlags mask) 
 	return result;
 }
 
-inline vk::DeviceMemory allocateBufferMemory(const vk::Buffer &buffer, vk::MemoryPropertyFlags mask) {
+inline vk::DeviceMemory allocateMemory(const vk::Buffer &buffer, vk::MemoryPropertyFlags mask) {
 	const auto &device = core::device();
 	const auto reqs = device.getBufferMemoryRequirements(buffer);
 	const auto type = findMemoryType(reqs.memoryTypeBits, mask);
@@ -35,7 +35,7 @@ inline vk::DeviceMemory allocateBufferMemory(const vk::Buffer &buffer, vk::Memor
 	return memory;
 }
 
-inline vk::DeviceMemory allocateImageMemory(const vk::Image &image, vk::MemoryPropertyFlags mask) {
+inline vk::DeviceMemory allocateMemory(const vk::Image &image, vk::MemoryPropertyFlags mask) {
 	const auto &device = core::device();
 	const auto reqs = device.getImageMemoryRequirements(image);
 	const auto type = findMemoryType(reqs.memoryTypeBits, mask);
