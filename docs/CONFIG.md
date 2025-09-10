@@ -153,15 +153,6 @@ pipelines: []
     # 各カラーアタッチメントのカラーブレンドを行うかの配列
     color-blends: bool[]
 
-  # テキストレンダリングパイプライン
-  - id: string
-
-    # テキストレンダリングパイプラインであることを示すフラグ
-    text-rendering: true
-
-    # 最大文字数
-    char-count: unsigned int
-
 # ========== Render Pass Definition ================ #
 
 render-passes: []

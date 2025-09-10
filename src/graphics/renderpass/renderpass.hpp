@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../error/error.hpp"
 #include "pipeline.hpp"
 
 #include <vulkan/vulkan.hpp>
@@ -12,7 +13,7 @@ private:
 	const vk::RenderPass _renderPass;
 	const std::vector<vk::ClearValue> _clearValues;
 	std::vector<vk::Framebuffer> _framebuffers;
-	std::unordered_map<std::string, Pipeline> _pipelines;
+	std::unordered_map<std::string, GraphicsPipeline> _pipelines;
 
 public:
 	RenderPass() = delete;
@@ -28,7 +29,7 @@ public:
 
 	// NOTE: プロキシメソッドがしんどいので、
 	//       デメテルの法則ガン無視でPipelineインスタンスにアクセスさせる。
-	const Pipeline &getPipeline(const std::string &id) const {
+	const GraphicsPipeline &getPipeline(const std::string &id) const {
 		return error::at(_pipelines, id, "pipelines");
 	}
 

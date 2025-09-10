@@ -13,7 +13,7 @@ private:
 	const vk::CommandBuffer &_commandBuffer;
 	const resource::Mesh *_mesh;
 	const renderpass::RenderPass *_renderPass;
-	const renderpass::Pipeline *_pipeline;
+	const renderpass::GraphicsPipeline *_pipeline;
 
 	const resource::Mesh &_currentMesh() const {
 		if (_mesh) {

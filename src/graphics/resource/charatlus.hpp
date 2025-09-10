@@ -32,7 +32,7 @@ public:
 	CharAtlus &operator =(const CharAtlus &) = delete;
 
 	CharAtlus(const std::string &id);
-	~CharAtlus();
+	~CharAtlus() {}
 
 	std::optional<ScaledCharacter> getScaledCharacter(uint32_t codepoint, float height) noexcept {
 		if (_chars.has(codepoint)) {
