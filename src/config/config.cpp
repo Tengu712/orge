@@ -37,10 +37,11 @@ Config::Config(const YAML::Node &node):
 	disableVsync(b(node, "disable-vsync", false)),
 	altReturnToggleFullscreen(b(node, "alt-return-toggle-fullscreen", true)),
 	audioChannelCount(u(node, "audio-channel-count", 16)),
+	charCount(u(node, "char-count", 256)),
 	meshes(parseMeshConfigs(node)),
 	fonts(parseFontConfigs(node)),
 	attachments(parseAttachmentConfigs(node)),
-	pipelines(parsePipelineConfigs(node, static_cast<uint32_t>(fonts.size()))),
+	pipelines(parsePipelineConfigs(node)),
 	renderPasses(parseRenderPassConfigs(node)),
 	assetMap(collectAssetMap(node))
 {
@@ -54,6 +55,7 @@ Config::Config(const YAML::Node &node):
 			"disable-vsync",
 			"alt-return-toggle-fullscreen",
 			"audio-channel-count",
+			"char-count",
 			"assets",
 			"meshes",
 			"fonts",

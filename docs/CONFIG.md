@@ -72,6 +72,10 @@ fonts:
     char-atlus-col: unsigned int
     char-atlus-row: unsigned int
 
+# 最大文字数
+# 省略された場合、256とみなされる
+char-count: unsgined int
+
 # ========== Attachment Definition ============= #
 
 attachments: []

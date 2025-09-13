@@ -27,21 +27,7 @@ void destroyTextRenderingResources() {
 void initializeTextRenderingResources() {
 	resource::initializeAllCharAtluses();
 	resource::addSampler("@sampler-tr@", true, true, false);
-	for (const auto &[renderPassId, n]: config::config().renderPasses) {
-		for (size_t subpassIndex = 0; subpassIndex < n.subpasses.size(); ++subpassIndex) {
-			for (const auto &pipelineId: n.subpasses[subpassIndex].pipelines) {
-				const auto &m = config::config().pipelines.at(pipelineId);
-				if (!m.textRendering) {
-					continue;
-				}
-				resource::addBuffer(
-					formatBufferId(renderPassId, subpassIndex, pipelineId),
-					sizeof(TextRenderingInstance) * m.charCount,
-					true
-				);
-			}
-		}
-	}
+	resource::addBuffer("@buffer-tr@", sizeof(TextRenderingInstance) * config::config().charCount, true);
 }
 
 void rasterizeText(const std::string &fontId, const std::string &text) {

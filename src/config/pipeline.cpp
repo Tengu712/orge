@@ -51,9 +51,7 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	meshInShader(b(node, "mesh-in-shader", false)),
 	culling(b(node, "culling", false)),
 	depthTest(b(node, "depth-test", false)),
-	colorBlends(bs(node, "color-blends")),
-	textRendering(false),
-	charCount(0)
+	colorBlends(bs(node, "color-blends"))
 {
 	checkUnexpectedKeys(
 		node,
@@ -68,48 +66,14 @@ PipelineConfig::PipelineConfig(const YAML::Node &node):
 	}
 }
 
-std::vector<DescriptorSetConfig> createTextRenderingPipelineDescSets(uint32_t texCount) {
-	std::vector<DescriptorSetConfig> descSets;
-
-	std::vector<DescriptorBindingConfig> bindings1;
-	bindings1.emplace_back(DescriptorType::StorageBuffer, 1, ShaderStages::Vertex);
-	descSets.emplace_back(1, std::move(bindings1));
-
-	std::vector<DescriptorBindingConfig> bindings2;
-	bindings2.emplace_back(DescriptorType::Texture, texCount, ShaderStages::Fragment);
-	bindings2.emplace_back(DescriptorType::Sampler, 1, ShaderStages::Fragment);
-	descSets.emplace_back(1, std::move(bindings2));
-
-	return descSets;
-}
-
-PipelineConfig::PipelineConfig(const YAML::Node &node, uint32_t texCount):
-	vertexShader(""),
-	fragmentShader(""),
-	descSets(createTextRenderingPipelineDescSets(texCount)),
-	vertexInputAttributes(),
-	meshInShader(true),
-	culling(false),
-	depthTest(false),
-	colorBlends{true},
-	textRendering(true),
-	charCount(u(node, "char-count"))
-{
-	checkUnexpectedKeys(node, {"id", "text-rendering", "subpass", "render-passes", "char-count"});
-}
-
-std::unordered_map<std::string, PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_t texCount) {
+std::unordered_map<std::string, PipelineConfig> parsePipelineConfigs(const YAML::Node &node) {
 	std::unordered_map<std::string, PipelineConfig> pipelines;
 	for (const auto &n: node["pipelines"]) {
 		const auto id = s(n, "id");
 		if (pipelines.contains(id)) {
 			throw std::format("config error: pipeline '{}' duplicated.", id);
 		}
-		if (b(n, "text-rendering", false)) {
-			pipelines.emplace(id, PipelineConfig(n, texCount));
-		} else {
-			pipelines.emplace(id, PipelineConfig(n));
-		}
+		pipelines.emplace(id, n);
 	}
 	return pipelines;
 }

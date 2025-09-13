@@ -16,6 +16,7 @@ struct Config {
 	const bool disableVsync;
 	const bool altReturnToggleFullscreen;
 	const uint32_t audioChannelCount;
+	const uint32_t charCount;
 	const std::unordered_map<std::string, MeshConfig> meshes;
 	const std::unordered_map<std::string, FontConfig> fonts;
 	const std::unordered_map<std::string, AttachmentConfig> attachments;

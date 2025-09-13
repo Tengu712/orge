@@ -48,13 +48,10 @@ struct PipelineConfig {
 	const bool culling;
 	const bool depthTest;
 	const std::vector<bool> colorBlends;
-	const bool textRendering;
-	const uint32_t charCount;
 
 	PipelineConfig(const YAML::Node &node);
-	PipelineConfig(const YAML::Node &node, uint32_t texCount);
 };
 
-std::unordered_map<std::string, PipelineConfig> parsePipelineConfigs(const YAML::Node &node, uint32_t texCount);
+std::unordered_map<std::string, PipelineConfig> parsePipelineConfigs(const YAML::Node &node);
 
 } // namespace config
