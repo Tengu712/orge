@@ -1,7 +1,8 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
+#include <optional>
 #include <unordered_set>
+#include <yaml-cpp/yaml.h>
 
 namespace config {
 

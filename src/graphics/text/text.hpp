@@ -2,6 +2,7 @@
 
 #include <orge.h>
 #include <string>
+#include <vector>
 
 namespace graphics::text {
 
