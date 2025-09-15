@@ -91,7 +91,7 @@ void createTextRenderingPipeline(
 	bindings.emplace_back(
 		0,
 		vk::DescriptorType::eSampledImage,
-		fontCount,
+		static_cast<uint32_t>(fontCount),
 		vk::ShaderStageFlagBits::eFragment,
 		nullptr
 	);

@@ -1,6 +1,7 @@
 #include "core.hpp"
 
 #include <SDL3/SDL_vulkan.h>
+#include <optional>
 
 namespace {
 
