@@ -6,11 +6,13 @@
 // NOTE: 本来resourceはcoreにのみ依存したいが、attachmentだけは例外的にwindowを知って良いとする。
 #include "../window/swapchain.hpp"
 
+#include <memory>
 #include <unordered_map>
 
 namespace graphics::resource {
 
-std::vector<std::unordered_map<std::string, Image>> g_attachmentImages;
+// NOTE: MSVCだと謎のコンパイルエラーが発生するので、unique_ptrで管理する。
+std::vector<std::unordered_map<std::string, std::unique_ptr<Image>>> g_attachmentImages;
 
 void destroyAllAttachmentImages() noexcept {
 	g_attachmentImages.clear();
@@ -25,15 +27,15 @@ void initializeAllAttachmentImages() {
 	const auto &extent = swapchain.getExtent();
 	g_attachmentImages.reserve(images.size());
 	for (size_t i = 0; i < images.size(); ++i) {
-		std::unordered_map<std::string, Image> m;
+		std::unordered_map<std::string, std::unique_ptr<Image>> m;
 		for (const auto &[id, n]: config::config().attachments) {
 			const auto format = config::convertFormat(n.format, swapchain.getFormat());
 			const auto aspect = config::getImageAspectFromFormat(n.format);
 			if (n.format == config::Format::RenderTarget) {
-				m.try_emplace(id, images[i], format, aspect, 4);
+				m.emplace(id, std::make_unique<Image>(images[i], format, aspect, 4));
 			} else {
 				const auto usage = config::getImageUsageFromFormat(n.format);
-				m.try_emplace(id, extent.width, extent.height, nullptr, format, usage, aspect, 4);
+				m.emplace(id, std::make_unique<Image>(extent.width, extent.height, nullptr, format, usage, aspect, 4));
 			}
 		}
 		g_attachmentImages.emplace_back(std::move(m));
@@ -43,7 +45,7 @@ void initializeAllAttachmentImages() {
 const Image &getAttachmentImage(uint32_t index, const std::string &id) {
 	const auto &images = error::at(g_attachmentImages, index, "attachments");
 	const auto &image = error::at(images, id, "attachments");
-	return image;
+	return *image;
 }
 
 } // namespace graphics::resource
