@@ -54,6 +54,28 @@ meshes: []
   - vertices: string
     indices: string
 
+# ========== Text Rendering Settings =========== #
+
+# 省略可能
+fonts:
+  - id: string
+
+    # フォントアセット名
+    file: string
+
+    # 1文字の幅および高さの最大値 (px)
+    # 0より大きい整数であること
+    char-size: unsigned int
+
+    # テクスチャアトラスにロードする文字の列・行数
+    # 0より大きい整数であること
+    char-atlus-col: unsigned int
+    char-atlus-row: unsigned int
+
+# 最大文字数
+# 省略された場合、256とみなされる
+char-count: unsgined int
+
 # ========== Attachment Definition ============= #
 
 attachments: []
@@ -72,31 +94,9 @@ attachments: []
     discard: bool
 
     # アタッチメントのクリア値
-    # カラーアタッチメントであればfloat[4]を、深度アタッチメントであればfloatを指定する
+    # - カラーアタッチメントであればfloat[4]を、
+    # - 深度アタッチメントであればfloatを指定する
     clear-value: float[4] | float
-
-# ========== Subpass Definition ================ #
-
-subpasses: []
-  - id: string
-
-    # 入力となるアタッチメントのIDの配列
-    # 省略可能
-    inputs: string[]
-
-    # 出力となるカラーアタッチメントのIDの配列
-    outputs: string[]
-
-    # 関連付ける深度アタッチメント
-    # 省略可能
-    depth:
-        id: string
-        read-only: bool
-
-    # 依存するサブパスのIDの配列
-    # 既に定義されているサブパスのIDであること
-    # 省略可能
-    depends: string[]
 
 # ========== Pipeline Definition =============== #
 
@@ -137,13 +137,14 @@ pipelines: []
             #   - vertex-and-fragment
             stage: string
 
-            # バインドするアタッチメントのID
-            # 省略可能
-            attachment: string
-
     # 各頂点入力属性のサイズの配列
     # 各値は1から4まで
+    # 省略された場合、空配列とみなされる
     vertex-input-attributes: unsigned int[]
+
+    # シェーダ内でメッシュを構築するか
+    # 省略された場合、falseとみなされる
+    mesh-in-shader: bool
 
     # カリングを行うか
     # 省略された場合、falseとみなされる
@@ -156,38 +157,33 @@ pipelines: []
     # 各カラーアタッチメントのカラーブレンドを行うかの配列
     color-blends: bool[]
 
-    # 対応づけるサブパスID
-    subpass: string
+# ========== Render Pass Definition ================ #
 
-  # テキストレンダリングパイプライン
+render-passes: []
   - id: string
 
-    # テキストレンダリングパイプラインであることを示すフラグ
-    text-rendering: true
+    subpasses: []
+      - id: string
 
-    # 対応づけるサブパスID
-    subpass: string
+        # 入力となるアタッチメントのIDの配列
+        # 省略可能
+        inputs: string[]
 
-    # 最大文字数
-    char-count: unsigned int
+        # 出力となるカラーアタッチメントのIDの配列
+        outputs: string[]
 
-# ========== Text Rendering Settings =========== #
+        # 関連付ける深度アタッチメント
+        # 省略可能
+        depth:
+            id: string
+            read-only: bool
 
-# 省略可能
-fonts:
-    # ID
-    # アクティベート時やテクスチャアトラスバインド時に用いる
-  - id: string
+        # 依存するサブパスのIDの配列
+        # 既に定義されているサブパスのIDであること
+        # 省略可能
+        depends: string[]
 
-    # .ttfアセット名
-    file: string
-
-    # 1文字の幅および高さの最大値 (px)
-    # 0より大きい整数であること
-    char-size: unsigned int
-
-    # テクスチャアトラスにロードする文字の列・行数
-    # 0より大きい整数であること
-    char-atlus-col: unsigned int
-    char-atlus-row: unsigned int
+        # 対応するすべてパイプラインID
+        # テキストレンダリングパイプラインを使う場合は @text@ を指定する
+        pipelines: string[]
 ```

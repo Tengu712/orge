@@ -8,6 +8,9 @@ attachments:
   - id: RT
     format: render-target
     clear-value: [0.0, 0.0, 0.0, 1.0]
-subpasses:
-  - id: SP
-    outputs: [RT]
+render-passes:
+  - id: RP
+    subpasses:
+      - id: SP
+        outputs: [RT]
+        pipelines: []

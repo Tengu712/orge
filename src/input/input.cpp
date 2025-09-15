@@ -126,4 +126,25 @@ void Input::update() {
 	}
 }
 
+std::optional<input::Input> g_input;
+
+void initialize() {
+	if (g_input) {
+		throw "input already initialized.";
+	}
+	g_input.emplace();
+}
+
+void destroy() noexcept {
+	g_input.reset();
+}
+
+Input &input() {
+	if (g_input) {
+		return g_input.value();
+	} else {
+		throw "input not initialized.";
+	}
+}
+
 } // namespace input

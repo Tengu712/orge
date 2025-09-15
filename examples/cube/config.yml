@@ -18,12 +18,6 @@ attachments:
   - id: DB
     format: depth-buffer
     clear-value: 1.0
-subpasses:
-  - id: SP
-    outputs: [RT]
-    depth:
-      id: DB
-      read-only: false
 pipelines:
   - id: PL
     vertex-shader: shader.vert.spv
@@ -48,4 +42,12 @@ pipelines:
     vertex-input-attributes: [3, 2]
     depth-test: true
     color-blends: [false]
-    subpass: SP
+render-passes:
+  - id: RP
+    subpasses:
+      - id: SP
+        outputs: [RT]
+        depth:
+          id: DB
+          read-only: false
+        pipelines: [PL]

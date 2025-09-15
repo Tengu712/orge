@@ -65,7 +65,7 @@ int main() {
 	TRY(orgeUpdateBuffer("scl", reinterpret_cast<const uint8_t *>(SCL.data())));
 
 	TRY(orgeLoadImage("image.png"));
-	TRY(orgeCreateSampler("sampler", 0, 0, 0));
+	TRY(orgeCreateSampler("sampler", 1, 1, 0));
 
 	float ang = 0.0f;
 	while (orgeUpdate()) {
@@ -73,15 +73,18 @@ int main() {
 		const auto rot = rotY(ang);
 		CHECK(orgeUpdateBuffer("rot", reinterpret_cast<const uint8_t *>(rot.data())));
 
-		CHECK(orgeUpdateBufferDescriptor("camera", "PL", 0, 0, 0, 0));
-		CHECK(orgeUpdateBufferDescriptor("scl", "PL", 1, 0, 0, 0));
-		CHECK(orgeUpdateBufferDescriptor("rot", "PL", 1, 0, 1, 0));
-		CHECK(orgeUpdateImageDescriptor("image.png", "PL", 2, 0, 0, 0));
-		CHECK(orgeUpdateSamplerDescriptor("sampler", "PL", 2, 0, 1, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "camera", 0, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "scl", 1, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "rot", 1, 0, 1, 0));
+		CHECK(orgeUpdateImageDescriptor("RP", "PL", "image.png", 2, 0, 0, 0));
+		CHECK(orgeUpdateSamplerDescriptor("RP", "PL", "sampler", 2, 0, 1, 0));
 
 		CHECK(orgeBeginRender());
-		CHECK(orgeBindDescriptorSets("PL", SET_INDICES.data()));
-		CHECK(orgeDraw("PL", "cube", 1, 0));
+		CHECK(orgeBindMesh("cube"));
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeBindPipeline("PL", SET_INDICES.data()));
+		CHECK(orgeDraw(1, 0));
+		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}
 

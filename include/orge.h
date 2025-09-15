@@ -94,15 +94,17 @@ API_EXPORT uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
 
 /// バッファディスクリプタを更新する関数
 ///
-/// - bufferId: バッファID
+/// - renderPassId: レンダーパスID
 /// - pipelineId: パイプラインID
+/// - id: バッファID
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateBufferDescriptor(
-	const char *bufferId,
+	const char *renderPassId,
 	const char *pipelineId,
+	const char *id,
 	uint32_t set,
 	uint32_t index,
 	uint32_t binding,
@@ -119,15 +121,17 @@ API_EXPORT void orgeDestroyImage(const char *file);
 
 /// イメージディスクリプタを更新する関数
 ///
-/// - imageFile: アセットファイル名
+/// - renderPassId: レンダーパスID
 /// - pipelineId: パイプラインID
+/// - id: イメージID (アセットファイル名)
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateImageDescriptor(
-	const char *imageFile,
+	const char *renderPassId,
 	const char *pipelineId,
+	const char *id,
 	uint32_t set,
 	uint32_t index,
 	uint32_t binding,
@@ -153,15 +157,41 @@ API_EXPORT void orgeDestroySampler(const char *id);
 
 /// サンプラディスクリプタを更新する関数
 ///
-/// - samplerId: サンプラID
+/// - renderPassId: レンダーパスID
 /// - pipelineId: パイプラインID
+/// - id: サンプラID
 /// - set: ディスクリプタセット番号
 /// - index: 何個目のディスクリプタセットか
 /// - binding: バインディング番号
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
-	const char *samplerId,
+	const char *renderPassId,
 	const char *pipelineId,
+	const char *id,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding,
+	uint32_t offset
+);
+
+/// アタッチメントディスクリプタを更新する関数
+///
+/// - renderPassId: レンダーパスID
+/// - pipelineId: パイプラインID
+/// - id: アタッチメントID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
+///
+/// 更新先のディスクリプタがtexture2DでもsubpassInputでも構わない。
+/// アタッチメントをディスクリプタに関連づけるときにこの関数を用いる。
+///
+/// WARN: 描画が開始されていること。
+API_EXPORT uint8_t orgeUpdateInputAttachmentDescriptor(
+	const char *renderPassId,
+	const char *pipelineId,
+	const char *id,
 	uint32_t set,
 	uint32_t index,
 	uint32_t binding,
@@ -203,7 +233,8 @@ API_EXPORT uint8_t orgeRasterizeCharacters(const char *id, const char *s);
 
 /// このフレームで描画する文字列を追加する関数
 ///
-/// - pipelineId: この文字列を描画するテキストレンダリングパイプラインのID
+/// - renderPassId: この文字列を描画するレンダーパスのID
+/// - subpassId: この文字列を描画するサブパスのID
 /// - fontId: フォントID
 /// - text: UTF-8文字列
 /// - x: 基準点X座標
@@ -212,11 +243,12 @@ API_EXPORT uint8_t orgeRasterizeCharacters(const char *id, const char *s);
 /// - horizontal: 水平方向の配置位置 (OrgeTextLocationHorizontal)
 /// - vertical: 垂直方向の配置位置 (OrgeTextLocationVertical)
 ///
-/// 毎フレームorgeBeginRender()の前に呼ぶこと。
-///
 /// 存在しない文字はスキップされる。
-API_EXPORT uint8_t orgePutText(
-	const char *pipelineId,
+///
+/// WARN: 毎フレームorgeBeginRender()の前に呼ぶこと。
+API_EXPORT uint8_t orgeLayoutText(
+	const char *renderPassId,
+	const char *subpassId,
 	const char *fontId,
 	const char *text,
 	float x,
@@ -226,8 +258,11 @@ API_EXPORT uint8_t orgePutText(
 	uint32_t vertical
 );
 
-/// orgePutText()で追加された文字列をすべて描画する関数
-API_EXPORT uint8_t orgeDrawTexts(const char *pipelineId);
+/// orgeLayoutText()で追加された文字列をすべて描画する関数
+///
+/// WARN: レンダーパスが開始されていること。
+/// WARN: 正しいサブパスに移動されていること。
+API_EXPORT uint8_t orgeDrawTexts();
 
 // ================================================================================================================== //
 //     Rendering                                                                                                      //
@@ -236,31 +271,64 @@ API_EXPORT uint8_t orgeDrawTexts(const char *pipelineId);
 /// orgeの描画を開始する関数
 API_EXPORT uint8_t orgeBeginRender(void);
 
-/// ディスクリプタセットをバインドする関数
+/// orgeの描画を終了する関数
+API_EXPORT uint8_t orgeEndRender(void);
+
+/// メッシュをバインドする関数
+///
+/// 既に同一のメッシュがバインドされている場合、処理はスキップされる。
+///
+/// WARN: 描画が開始されていること。
+API_EXPORT uint8_t orgeBindMesh(const char *meshId);
+
+/// レンダーパスを開始する関数
+///
+/// WARN: 描画が開始されていること。
+/// WARN: レンダーパスがまだ開始されていない・あるいは既に終了されていること。
+API_EXPORT uint8_t orgeBeginRenderPass(const char *renderPassId);
+
+/// レンダーパスを開始する関数
+///
+/// レンダーパスが開始されていない場合、処理はスキップされる。
+///
+/// WARN: 描画が開始されていること。
+API_EXPORT uint8_t orgeEndRenderPass(void);
+
+/// 次のサブパスへ移るための関数
+///
+/// WARN: レンダーパスが開始されていること。
+/// WARN: orgeはサブパスを移行できるかを検証しない。
+///       実際のレンダーパスに即して呼ぶこと。
+API_EXPORT uint8_t orgeNextSubpass(void);
+
+/// パイプラインをバインドする関数
 ///
 /// - pipelineId: パイプラインID
-/// - indices: 各セットにおいて何個目のセットを使うか
+/// - indices: 各ディスクリプタセットにおいて何個目のセットを使うか。
+///            ディスクリプタセットの個数分データを持つこと。
+///            例えば、set = 0とset = 1があり、それぞれ3個と4個確保されている場合、
+///            indicesの要素数は2、indicesの各要素は0-2と0-3を取る。
 ///
-/// indicesはディスクリプタセットの個数分データを持つこと。
-///
-/// 例えば、set = 0とset = 1があり、それぞれ2個と3個確保されている場合、
-/// indicesの要素数は2、indicesの各要素は0-1と0-2を取る。
-API_EXPORT uint8_t orgeBindDescriptorSets(const char *pipelineId, uint32_t const *indices);
+/// WARN: レンダーパスが開始されていること。
+API_EXPORT uint8_t orgeBindPipeline(const char *pipelineId, uint32_t const *indices);
 
 /// 描画関数
 ///
-/// pipelineIdはバインドするパイプラインのID。
-/// pipelineIdがnullptrであったり、既にバインドされているパイプラインのIDである場合、バインドはスキップされる。
+/// - instanceCount: 描画するインスタンスの個数
+/// - instanceOffset: 参照するインスタンスバッファのオフセット
 ///
-/// meshIdはバインドするメッシュのID。
-/// meshIdがnullptrであったり、既にバインドされているメッシュのIDである場合、バインドはスキップされる。
-API_EXPORT uint8_t orgeDraw(const char *pipelineId, const char *meshId, uint32_t instanceCount, uint32_t instanceOffset);
+/// WARN: パイプラインがバインドされていること。
+/// WARN: メッシュがバインドされていること。
+API_EXPORT uint8_t orgeDraw(uint32_t instanceCount, uint32_t instanceOffset);
 
-/// 次のサブパスへ移るための関数
-API_EXPORT uint8_t orgeNextSubpass(void);
-
-/// orgeの描画を終了する関数
-API_EXPORT uint8_t orgeEndRender(void);
+/// 描画関数 (メッシュをシェーダ内で構築する場合)
+///
+/// - vertexCount: メッシュの頂点数
+/// - instanceCount: 描画するインスタンスの個数
+/// - instanceOffset: 参照するインスタンスバッファのオフセット
+///
+/// WARN: パイプラインがバインドされていること。
+API_EXPORT uint8_t orgeDrawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset);
 
 // ================================================================================================================== //
 //     Input                                                                                                          //

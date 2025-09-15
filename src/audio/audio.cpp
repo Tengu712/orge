@@ -81,4 +81,25 @@ void Audio::play(const std::string &file, uint32_t index, bool loop) {
 	}
 }
 
+std::optional<Audio> g_audio;
+
+void initialize() {
+	if (g_audio) {
+		throw "audio already initialized.";
+	}
+	g_audio.emplace();
+}
+
+void destroy() noexcept {
+	g_audio.reset();
+}
+
+Audio &audio() {
+	if (g_audio) {
+		return g_audio.value();
+	} else {
+		throw "audio not initialized.";
+	}
+}
+
 } // namespace audio

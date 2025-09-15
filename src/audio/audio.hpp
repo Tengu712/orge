@@ -57,4 +57,10 @@ public:
 	void play(const std::string &file, uint32_t index, bool loop);
 };
 
+void initialize();
+
+void destroy() noexcept;
+
+Audio &audio();
+
 } // namespace audio

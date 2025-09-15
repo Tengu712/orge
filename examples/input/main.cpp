@@ -20,7 +20,6 @@ const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
 
 int main() {
 	TRY(orgeInitialize());
-	TRY(orgeLoadMesh("triangle"));
 
 	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0));
 	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0));
@@ -64,15 +63,17 @@ int main() {
 			std::cout << "left mouse button released" << std::endl;
 		}
 
-		CHECK(orgeUpdateBufferDescriptor("red",   "PL", 0, 0, 0, 0));
-		CHECK(orgeUpdateBufferDescriptor("green", "PL", 0, 1, 0, 0));
-		CHECK(orgeUpdateBufferDescriptor("blue",  "PL", 0, 2, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "red",   0, 0, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "green", 0, 1, 0, 0));
+		CHECK(orgeUpdateBufferDescriptor("RP", "PL", "blue",  0, 2, 0, 0));
 
 		const std::vector<uint32_t> sets{state};
 
 		CHECK(orgeBeginRender());
-		CHECK(orgeBindDescriptorSets("PL", sets.data()));
-		CHECK(orgeDraw("PL", "triangle", 1, 0));
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeBindPipeline("PL", sets.data()));
+		CHECK(orgeDrawDirectly(3, 1, 0));
+		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}
 
