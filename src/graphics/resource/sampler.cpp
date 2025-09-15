@@ -3,6 +3,8 @@
 #include "../../error/error.hpp"
 #include "../core/core.hpp"
 
+#include <unordered_map>
+
 namespace graphics::resource {
 
 std::unordered_map<std::string, vk::Sampler> g_samplers;
