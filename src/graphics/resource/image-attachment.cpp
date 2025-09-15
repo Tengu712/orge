@@ -23,6 +23,7 @@ void initializeAllAttachmentImages() {
 	const auto &swapchain = window::swapchain();
 	const auto &images = swapchain.getImages();
 	const auto &extent = swapchain.getExtent();
+	g_attachmentImages.reserve(images.size());
 	for (size_t i = 0; i < images.size(); ++i) {
 		std::unordered_map<std::string, Image> m;
 		for (const auto &[id, n]: config::config().attachments) {
@@ -35,7 +36,7 @@ void initializeAllAttachmentImages() {
 				m.try_emplace(id, extent.width, extent.height, nullptr, format, usage, aspect, 4);
 			}
 		}
-		g_attachmentImages.push_back(std::move(m));
+		g_attachmentImages.emplace_back(std::move(m));
 	}
 }
 

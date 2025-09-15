@@ -50,7 +50,7 @@ void initializeDescriptorPool() {
 		const auto fontCount = config::config().fonts.size();
 		maxSets += textRenderingPipelineCount * 2;
 		sizesMap[config::DescriptorType::StorageBuffer] += textRenderingPipelineCount;
-		sizesMap[config::DescriptorType::Texture] += textRenderingPipelineCount * fontCount;
+		sizesMap[config::DescriptorType::Texture] += textRenderingPipelineCount * static_cast<uint32_t>(fontCount);
 		sizesMap[config::DescriptorType::Sampler] += textRenderingPipelineCount;
 	}
 
