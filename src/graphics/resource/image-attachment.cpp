@@ -25,8 +25,8 @@ void initializeAllAttachmentImages() {
 	const auto &swapchain = window::swapchain();
 	const auto &images = swapchain.getImages();
 	const auto &extent = swapchain.getExtent();
-	g_attachmentImages.resize(images.size());
 	for (size_t i = 0; i < images.size(); ++i) {
+		g_attachmentImages.emplace_back();
 		for (const auto &[id, n]: config::config().attachments) {
 			const auto format = config::convertFormat(n.format, swapchain.getFormat());
 			const auto aspect = config::getImageAspectFromFormat(n.format);
