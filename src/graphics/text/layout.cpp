@@ -166,9 +166,12 @@ void layoutText(
 	// アップロード
 	resource::getBuffer("@buffer-tr@").update(instances.data(), instances.size() * sizeof(TextRenderingInstance), g_offset);
 
-	// TODO: 連続する場合、1ドローコールにまとめる。
-	//       前回のsubpassIndexを保持して比較すれば実装できそう。
-	g_indices[renderPassId][subpassIndex].emplace_back(g_offset, g_offset + instances.size());
+	auto &indexVec = g_indices[renderPassId][subpassIndex];
+	if (!indexVec.empty() && indexVec.back().second == g_offset) {
+		indexVec.back().second = g_offset + instances.size();
+	} else {
+		indexVec.emplace_back(g_offset, g_offset + instances.size());
+	}
 	g_offset += instances.size();
 }
 
