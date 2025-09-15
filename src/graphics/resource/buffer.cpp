@@ -4,6 +4,7 @@
 #include "../core/core.hpp"
 
 #include <format>
+#include <unordered_map>
 
 namespace graphics::resource {
 

@@ -7,6 +7,7 @@
 #include <memory>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <unordered_map>
 
 namespace graphics::resource {
 

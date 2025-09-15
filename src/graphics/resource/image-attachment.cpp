@@ -6,6 +6,8 @@
 // NOTE: 本来resourceはcoreにのみ依存したいが、attachmentだけは例外的にwindowを知って良いとする。
 #include "../window/swapchain.hpp"
 
+#include <unordered_map>
+
 namespace graphics::resource {
 
 std::vector<std::unordered_map<std::string, Image>> g_attachmentImages;

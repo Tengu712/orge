@@ -6,6 +6,8 @@
 #include "../core/core.hpp"
 #include "../utils.hpp"
 
+#include <unordered_map>
+
 namespace graphics::resource {
 
 const std::span<const unsigned char> getVerticesData(const std::string &id) {

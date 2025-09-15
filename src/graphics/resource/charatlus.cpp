@@ -8,6 +8,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <stb_truetype.h>
 #include <utf8cpp/utf8.h>
+#include <unordered_map>
 
 namespace graphics::resource {
 
