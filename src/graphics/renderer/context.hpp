@@ -124,7 +124,7 @@ public:
 		const auto &drawCalls = text::getIndices(_currentRenderPass().id(), _subpassIndex);
 		if (!drawCalls.empty()) {
 			for (const auto &[start, end]: drawCalls) {
-				_commandBuffer.draw(4, static_cast<uint32_t>(end - start), 0, start);
+				_commandBuffer.draw(4, static_cast<uint32_t>(end - start), 0, static_cast<uint32_t>(start));
 			}
 		}
 	}

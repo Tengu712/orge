@@ -2,6 +2,7 @@
 
 #include <format>
 #include <unordered_set>
+#include <optional>
 #include <yaml-cpp/yaml.h>
 
 namespace config {
