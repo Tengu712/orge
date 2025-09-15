@@ -14,6 +14,7 @@ private:
 	const std::vector<vk::ClearValue> _clearValues;
 	std::vector<vk::Framebuffer> _framebuffers;
 	std::unordered_map<std::string, GraphicsPipeline> _pipelines;
+	std::unordered_map<uint32_t, GraphicsPipeline> _trPipelines;
 
 public:
 	RenderPass() = delete;
@@ -31,6 +32,12 @@ public:
 	//       デメテルの法則ガン無視でPipelineインスタンスにアクセスさせる。
 	const GraphicsPipeline &getPipeline(const std::string &id) const {
 		return error::at(_pipelines, id, "pipelines");
+	}
+
+	// NOTE: プロキシメソッドがしんどいので、
+	//       デメテルの法則ガン無視でPipelineインスタンスにアクセスさせる。
+	const GraphicsPipeline &getTextRenderingPipeline(uint32_t subpassIndex) const {
+		return error::at(_trPipelines, subpassIndex, "text rendering pipelines");
 	}
 
 	void begin(const vk::CommandBuffer &commandBuffer, uint32_t index) const noexcept;

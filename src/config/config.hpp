@@ -24,6 +24,7 @@ struct Config {
 	const std::unordered_map<std::string, RenderPassConfig> renderPasses;
 
 	const std::unordered_map<std::string, uint32_t> assetMap;
+	const std::unordered_map<std::string, uint32_t> fontMap;
 
 	Config(const YAML::Node &node);
 };

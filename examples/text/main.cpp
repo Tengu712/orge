@@ -48,8 +48,9 @@ int main() {
 			vertical   = ORGE_TEXT_LOCATION_VERTICAL_MIDDLE;
 		}
 
-		CHECK(orgePutText(
-			"PL",
+		CHECK(orgeLayoutText(
+			"RP",
+			"SP",
 			"font",
 			"Text Rendering Sample",
 			320.0f,
@@ -58,8 +59,9 @@ int main() {
 			static_cast<uint32_t>(ORGE_TEXT_LOCATION_HORIZONTAL_CENTER),
 			static_cast<uint32_t>(ORGE_TEXT_LOCATION_VERTICAL_MIDDLE)
 		));
-		CHECK(orgePutText(
-			"PL",
+		CHECK(orgeLayoutText(
+			"RP",
+			"SP",
 			"font",
 			text.c_str(),
 			x,
@@ -69,7 +71,9 @@ int main() {
 			static_cast<uint32_t>(vertical)
 		));
 		CHECK(orgeBeginRender());
-		CHECK(orgeDrawTexts("PL"));
+		CHECK(orgeBeginRenderPass("RP"));
+		CHECK(orgeDrawTexts());
+		CHECK(orgeEndRenderPass());
 		CHECK(orgeEndRender());
 	}
 

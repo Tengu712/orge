@@ -210,54 +210,59 @@ API_EXPORT void orgeDestroyMesh(const char *id);
 //     Text Rendering                                                                                                 //
 // ================================================================================================================== //
 
-// enum OrgeTextLocationHorizontal {
-// 	ORGE_TEXT_LOCATION_HORIZONTAL_LEFT = 0,
-// 	ORGE_TEXT_LOCATION_HORIZONTAL_CENTER,
-// 	ORGE_TEXT_LOCATION_HORIZONTAL_RIGHT,
-// };
-// 
-// enum OrgeTextLocationVertical {
-// 	ORGE_TEXT_LOCATION_VERTICAL_TOP = 0,
-// 	ORGE_TEXT_LOCATION_VERTICAL_MIDDLE,
-// 	ORGE_TEXT_LOCATION_VERTICAL_BOTTOM,
-// };
-// 
-// /// 文字をラスタライズする関数
-// ///
-// /// - id: フォントID
-// /// - s: UTF-8文字列
-// ///
-// /// sの各文字がラスタライズされる。
-// /// 結合文字は結合されず、別々の文字として扱われる。
-// API_EXPORT uint8_t orgeRasterizeCharacters(const char *id, const char *s);
-// 
-// /// このフレームで描画する文字列を追加する関数
-// ///
-// /// - pipelineId: この文字列を描画するテキストレンダリングパイプラインのID
-// /// - fontId: フォントID
-// /// - text: UTF-8文字列
-// /// - x: 基準点X座標
-// /// - y: 基準点Y座標
-// /// - height: 文字の基準高
-// /// - horizontal: 水平方向の配置位置 (OrgeTextLocationHorizontal)
-// /// - vertical: 垂直方向の配置位置 (OrgeTextLocationVertical)
-// ///
-// /// 毎フレームorgeBeginRender()の前に呼ぶこと。
-// ///
-// /// 存在しない文字はスキップされる。
-// API_EXPORT uint8_t orgePutText(
-// 	const char *pipelineId,
-// 	const char *fontId,
-// 	const char *text,
-// 	float x,
-// 	float y,
-// 	float height,
-// 	uint32_t horizontal,
-// 	uint32_t vertical
-// );
-// 
-// /// orgePutText()で追加された文字列をすべて描画する関数
-// API_EXPORT uint8_t orgeDrawTexts(const char *pipelineId);
+enum OrgeTextLocationHorizontal {
+	ORGE_TEXT_LOCATION_HORIZONTAL_LEFT = 0,
+	ORGE_TEXT_LOCATION_HORIZONTAL_CENTER,
+	ORGE_TEXT_LOCATION_HORIZONTAL_RIGHT,
+};
+
+enum OrgeTextLocationVertical {
+	ORGE_TEXT_LOCATION_VERTICAL_TOP = 0,
+	ORGE_TEXT_LOCATION_VERTICAL_MIDDLE,
+	ORGE_TEXT_LOCATION_VERTICAL_BOTTOM,
+};
+
+/// 文字をラスタライズする関数
+///
+/// - id: フォントID
+/// - s: UTF-8文字列
+///
+/// sの各文字がラスタライズされる。
+/// 結合文字は結合されず、別々の文字として扱われる。
+API_EXPORT uint8_t orgeRasterizeCharacters(const char *id, const char *s);
+
+/// このフレームで描画する文字列を追加する関数
+///
+/// - renderPassId: この文字列を描画するレンダーパスのID
+/// - subpassId: この文字列を描画するサブパスのID
+/// - fontId: フォントID
+/// - text: UTF-8文字列
+/// - x: 基準点X座標
+/// - y: 基準点Y座標
+/// - height: 文字の基準高
+/// - horizontal: 水平方向の配置位置 (OrgeTextLocationHorizontal)
+/// - vertical: 垂直方向の配置位置 (OrgeTextLocationVertical)
+///
+/// 存在しない文字はスキップされる。
+///
+/// WARN: 毎フレームorgeBeginRender()の前に呼ぶこと。
+API_EXPORT uint8_t orgeLayoutText(
+	const char *renderPassId,
+	const char *subpassId,
+	const char *fontId,
+	const char *text,
+	float x,
+	float y,
+	float height,
+	uint32_t horizontal,
+	uint32_t vertical
+);
+
+/// orgeLayoutText()で追加された文字列をすべて描画する関数
+///
+/// WARN: レンダーパスが開始されていること。
+/// WARN: 正しいサブパスに移動されていること。
+API_EXPORT uint8_t orgeDrawTexts();
 
 // ================================================================================================================== //
 //     Rendering                                                                                                      //

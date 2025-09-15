@@ -29,6 +29,18 @@ std::unordered_map<std::string, uint32_t> collectAssetMap(const YAML::Node &node
 	return assetMap;
 }
 
+// NOTE: 文字アトラスの順番は実行時に決めて良い。
+std::unordered_map<std::string, uint32_t> collectFontMap(const std::unordered_map<std::string, FontConfig> &fonts) {
+	std::unordered_map<std::string, uint32_t> fontMap;
+	fontMap.reserve(fonts.size());
+	uint32_t i = 0;
+	for (const auto &[n, _]: fonts) {
+		fontMap.emplace(n, i);
+		i += 1;
+	}
+	return fontMap;
+}
+
 Config::Config(const YAML::Node &node):
 	title(s(node, "title")),
 	width(u(node, "width")),
@@ -43,7 +55,8 @@ Config::Config(const YAML::Node &node):
 	attachments(parseAttachmentConfigs(node)),
 	pipelines(parsePipelineConfigs(node)),
 	renderPasses(parseRenderPassConfigs(node)),
-	assetMap(collectAssetMap(node))
+	assetMap(collectAssetMap(node)),
+	fontMap(collectFontMap(fonts))
 {
 	checkUnexpectedKeys(
 		node,
@@ -97,7 +110,7 @@ Config::Config(const YAML::Node &node):
 			}
 			// パイプラインの存在確認
 			for (const auto &m: n.pipelines) {
-				if (!pipelines.contains(m)) {
+				if (m != "@text@" && !pipelines.contains(m)) {
 					throw std::format("config error: pipeline '{}' not defined.", m);
 				}
 			}

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <iostream>
+
 #include "../renderpass/renderpass.hpp"
+#include "../resource/charatlus.hpp"
 #include "../resource/mesh.hpp"
+#include "../text/text.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -10,6 +14,7 @@ namespace graphics::renderer {
 class RenderContext {
 private:
 	const uint32_t _index;
+	uint32_t _subpassIndex;
 	const vk::CommandBuffer &_commandBuffer;
 	const resource::Mesh *_mesh;
 	const renderpass::RenderPass *_renderPass;
@@ -33,7 +38,12 @@ private:
 
 public:
 	RenderContext(uint32_t index, const vk::CommandBuffer &commandBuffer):
-		_index(index), _commandBuffer(commandBuffer), _mesh(nullptr), _renderPass(nullptr), _pipeline(nullptr)
+		_index(index),
+		_subpassIndex(0),
+		_commandBuffer(commandBuffer),
+		_mesh(nullptr),
+		_renderPass(nullptr),
+		_pipeline(nullptr)
 	{}
 
 	uint32_t currentIndex() const noexcept {
@@ -55,6 +65,7 @@ public:
 			auto &renderPass = renderpass::getRenderPass(renderPassId);
 			renderPass.begin(_commandBuffer, _index);
 			_renderPass = &renderPass;
+			_subpassIndex = 0;
 		}
 	}
 
@@ -66,9 +77,10 @@ public:
 		}
 	}
 
-	void nextSubpass() const {
+	void nextSubpass() {
 		_currentRenderPass();
 		_commandBuffer.nextSubpass(vk::SubpassContents::eInline);
+		_subpassIndex += 1;
 	}
 
 	void bindPipeline(const std::string &pipelineId, uint32_t const *indices) {
@@ -97,6 +109,24 @@ public:
 			throw "no pipeline bound.";
 		}
 		_commandBuffer.draw(vertexCount, instanceCount, 0, instanceOffset);
+	}
+
+	void drawTexts() {
+		const auto &pipeline = _currentRenderPass().getTextRenderingPipeline(_subpassIndex);
+		pipeline.updateBufferDescriptor("@buffer-tr@", 0, 0, 0, 0);
+		pipeline.updateCharatlusDescriptors();
+		pipeline.updateSamplerDescriptor("@sampler-tr@", 1, 0, 1, 0);
+		pipeline.bind(_commandBuffer);
+		const std::array<uint32_t, 2> indices{0, 0};
+		pipeline.bindDescriptorSets(_commandBuffer, indices.data());
+		_pipeline = &pipeline;
+
+		const auto &drawCalls = text::getIndices(_currentRenderPass().id(), _subpassIndex);
+		if (!drawCalls.empty()) {
+			for (const auto &[start, end]: drawCalls) {
+				_commandBuffer.draw(4, static_cast<uint32_t>(end - start), 0, start);
+			}
+		}
 	}
 };
 

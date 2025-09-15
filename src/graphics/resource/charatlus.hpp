@@ -65,4 +65,6 @@ void initializeAllCharAtluses();
 
 CharAtlus &getCharAtlus(const std::string &id);
 
+const std::unordered_map<std::string, CharAtlus> &charAtluses() noexcept;
+
 } // namespace graphics::resource

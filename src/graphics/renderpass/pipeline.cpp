@@ -4,9 +4,11 @@
 #include "../../error/error.hpp"
 #include "../core/core.hpp"
 #include "../resource/buffer.hpp"
+#include "../resource/charatlus.hpp"
 #include "../resource/image-attachment.hpp"
 #include "../resource/image-user.hpp"
 #include "../resource/sampler.hpp"
+#include "pipeline-text.hpp"
 #include "pipeline-user.hpp"
 
 namespace graphics::renderpass {
@@ -120,6 +122,27 @@ void GraphicsPipeline::updateInputAttachmentDescriptor(
 	core::device().updateDescriptorSets(1, &ds, 0, nullptr);
 }
 
+void GraphicsPipeline::updateCharatlusDescriptors() const {
+	const auto &descSets = error::at(_descSets, 1, "descriptor sets");
+	const auto &descSet = error::at(descSets, 0, "descriptor sets allocated");
+	std::vector<vk::WriteDescriptorSet> sets;
+	sets.reserve(resource::charAtluses().size());
+	for (const auto &[id, n]: resource::charAtluses()) {
+		const auto offset = config::config().fontMap.at(id);
+		const auto ii = vk::DescriptorImageInfo(nullptr, n.get(), vk::ImageLayout::eShaderReadOnlyOptimal);
+		sets.push_back(
+			vk::WriteDescriptorSet()
+				.setDstSet(descSet)
+				.setDstBinding(0)
+				.setDstArrayElement(offset)
+				.setDescriptorCount(1)
+				.setDescriptorType(vk::DescriptorType::eSampledImage)
+				.setImageInfo(ii)
+		);
+	}
+	core::device().updateDescriptorSets(static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+}
+
 std::unordered_map<std::string, GraphicsPipeline> createPipelines(
 	const vk::RenderPass &renderPass,
 	const std::string &renderPassId
@@ -133,11 +156,29 @@ std::unordered_map<std::string, GraphicsPipeline> createPipelines(
 	std::unordered_map<std::string, GraphicsPipeline> pipelines;
 	for (size_t i = 0; i < rpconfig.subpasses.size(); ++i) {
 		for (const auto &n: rpconfig.subpasses[i].pipelines) {
-			createGraphicsPipeline(renderPass, n, static_cast<uint32_t>(i), pipelines);
+			if (n != "@text@") {
+				createGraphicsPipeline(renderPass, n, static_cast<uint32_t>(i), pipelines);
+			}
 		}
 	}
-	// TODO: テキストレンダリングパイプライン
 
+	// TODO: これパフォーマンスは大丈夫？
+	return pipelines;
+}
+
+std::unordered_map<uint32_t, GraphicsPipeline> createTextRenderingPipelines(
+	const vk::RenderPass &renderPass,
+	const std::string &renderPassId
+) {
+	const auto &rpconfig = config::config().renderPasses.at(renderPassId);
+	std::unordered_map<uint32_t, GraphicsPipeline> pipelines;
+	for (size_t i = 0; i < rpconfig.subpasses.size(); ++i) {
+		for (const auto &n: rpconfig.subpasses[i].pipelines) {
+			if (n == "@text@") {
+				createTextRenderingPipeline(renderPass, static_cast<uint32_t>(i), pipelines);
+			}
+		}
+	}
 	// TODO: これパフォーマンスは大丈夫？
 	return pipelines;
 }

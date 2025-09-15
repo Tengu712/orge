@@ -184,5 +184,6 @@ render-passes: []
         depends: string[]
 
         # 対応するすべてパイプラインID
+        # テキストレンダリングパイプラインを使う場合は @text@ を指定する
         pipelines: string[]
 ```

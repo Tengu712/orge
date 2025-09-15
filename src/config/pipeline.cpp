@@ -70,6 +70,9 @@ std::unordered_map<std::string, PipelineConfig> parsePipelineConfigs(const YAML:
 	std::unordered_map<std::string, PipelineConfig> pipelines;
 	for (const auto &n: node["pipelines"]) {
 		const auto id = s(n, "id");
+		if (id == "@text@") {
+			throw "config error: pipeline id must not be '@text@'.";
+		}
 		if (pipelines.contains(id)) {
 			throw std::format("config error: pipeline '{}' duplicated.", id);
 		}

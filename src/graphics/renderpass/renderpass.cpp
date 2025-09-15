@@ -83,7 +83,8 @@ RenderPass::RenderPass(const std::string &id):
 	_renderPass(createRenderPass(id)),
 	_clearValues(collectClearValues(id)),
 	_framebuffers(createFramebuffers(_renderPass, id)),
-	_pipelines(createPipelines(_renderPass, _id))
+	_pipelines(createPipelines(_renderPass, _id)),
+	_trPipelines(createTextRenderingPipelines(_renderPass, _id))
 {}
 
 RenderPass::~RenderPass() {

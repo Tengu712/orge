@@ -2,6 +2,7 @@
 
 #include "../../error/error.hpp"
 #include "../core/core.hpp"
+#include "../text/text.hpp"
 #include "../window/swapchain.hpp"
 
 namespace graphics::renderer {
@@ -83,15 +84,17 @@ void Renderer::end() {
 	}
 
 	_context.reset();
+	text::clearLayoutContext();
 }
 
 void Renderer::reset() {
 	_commandBuffer.reset();
+	_context.reset();
+	text::clearLayoutContext();
 	for (auto &n: _semaphoreForRenderFinisheds) {
 		core::device().destroySemaphore(n);
 		n = core::device().createSemaphore({});
 	}
-	_context.reset();
 }
 
 void Renderer::recreateSemaphoreForImageEnabled() {

@@ -65,9 +65,16 @@ public:
 		uint32_t offset,
 		uint32_t frameIndex
 	) const;
+
+	void updateCharatlusDescriptors() const;
 };
 
 std::unordered_map<std::string, GraphicsPipeline> createPipelines(
+	const vk::RenderPass &renderPass,
+	const std::string &renderPassId
+);
+
+std::unordered_map<uint32_t, GraphicsPipeline> createTextRenderingPipelines(
 	const vk::RenderPass &renderPass,
 	const std::string &renderPassId
 );

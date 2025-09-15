@@ -125,8 +125,9 @@ void CharAtlus::rasterizeCharacters(const std::string &s) {
 		);
 
 		// ラスタライズ先の左上座標を取得
-		auto x = _chars.size() % _width;
-		auto y = _chars.size() / _width;
+		const auto &cfg = config::config().fonts.at(_id);
+		auto x = _chars.size() % cfg.charAtlusCol * (cfg.charSize + 1);
+		auto y = _chars.size() / cfg.charAtlusCol * (cfg.charSize + 1);
 		_chars.popOldestIfSaturated(x, y);
 
 		// 有効な字に限り、送り幅を取得、アップロード
@@ -157,8 +158,8 @@ void CharAtlus::rasterizeCharacters(const std::string &s) {
 			static_cast<float>(ox),
 			static_cast<float>(oy),
 			static_cast<float>(advance) * _scale,
-			static_cast<float>(x) / _width,
-			static_cast<float>(y) / _height
+			static_cast<float>(x) / _widthf,
+			static_cast<float>(y) / _heightf
 		));
 	}
 }
@@ -180,6 +181,10 @@ void initializeAllCharAtluses() {
 
 CharAtlus &getCharAtlus(const std::string &id) {
 	return error::atMut(g_charAtluses, id, "char atluses");
+}
+
+const std::unordered_map<std::string, CharAtlus> &charAtluses() noexcept {
+	return g_charAtluses;
 }
 
 } // namespace graphics::resource
