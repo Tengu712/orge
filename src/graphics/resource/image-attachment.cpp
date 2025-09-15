@@ -12,7 +12,7 @@
 namespace graphics::resource {
 
 // NOTE: MSVCでunique_ptrを含むunordered_mapのコピーエラーが発生するので、shared_ptrで管理する。
-std::vector<std::unordered_map<std::string, std::shared_ptr<Image>>> g_attachmentImages;
+std::unordered_map<std::string, std::vector<std::unique_ptr<Image>>> g_attachmentImages;
 
 void destroyAllAttachmentImages() noexcept {
 	g_attachmentImages.clear();
@@ -25,24 +25,26 @@ void initializeAllAttachmentImages() {
 	const auto &swapchain = window::swapchain();
 	const auto &images = swapchain.getImages();
 	const auto &extent = swapchain.getExtent();
-	g_attachmentImages.resize(images.size());
-	for (size_t i = 0; i < images.size(); ++i) {
-		for (const auto &[id, n]: config::config().attachments) {
+	for (const auto &[id, n]: config::config().attachments) {
+		std::vector<std::unique_ptr<Image>> v;
+		v.reserve(images.size());
+		for (size_t i = 0; i < images.size(); ++i) {
 			const auto format = config::convertFormat(n.format, swapchain.getFormat());
 			const auto aspect = config::getImageAspectFromFormat(n.format);
 			if (n.format == config::Format::RenderTarget) {
-				g_attachmentImages[i].emplace(id, std::make_shared<Image>(images[i], format, aspect, 4));
+				v.emplace_back(std::make_unique<Image>(images[i], format, aspect, 4));
 			} else {
 				const auto usage = config::getImageUsageFromFormat(n.format);
-				g_attachmentImages[i].emplace(id, std::make_shared<Image>(extent.width, extent.height, nullptr, format, usage, aspect, 4));
+				v.emplace_back(std::make_unique<Image>(extent.width, extent.height, nullptr, format, usage, aspect, 4));
 			}
 		}
+		g_attachmentImages.emplace(id, std::move(v));
 	}
 }
 
 const Image &getAttachmentImage(uint32_t index, const std::string &id) {
-	const auto &images = error::at(g_attachmentImages, index, "attachments");
-	const auto &image = error::at(images, id, "attachments");
+	const auto &images = error::at(g_attachmentImages, id, "attachments");
+	const auto &image = error::at(images, index, "attachments");
 	return *image;
 }
 

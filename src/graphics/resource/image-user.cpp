@@ -44,7 +44,8 @@ void addUserImageFromFile(const std::string &file) {
 		throw std::format("'{}' is not RGBA.", file);
 	}
 
-	g_userImages.try_emplace(file,
+	g_userImages.try_emplace(
+		file,
 		width,
 		height,
 		pixels.get(),
