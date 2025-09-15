@@ -25,20 +25,18 @@ void initializeAllAttachmentImages() {
 	const auto &swapchain = window::swapchain();
 	const auto &images = swapchain.getImages();
 	const auto &extent = swapchain.getExtent();
-	g_attachmentImages.reserve(images.size());
+	g_attachmentImages.resize(images.size());
 	for (size_t i = 0; i < images.size(); ++i) {
-		std::unordered_map<std::string, std::unique_ptr<Image>> m;
 		for (const auto &[id, n]: config::config().attachments) {
 			const auto format = config::convertFormat(n.format, swapchain.getFormat());
 			const auto aspect = config::getImageAspectFromFormat(n.format);
 			if (n.format == config::Format::RenderTarget) {
-				m.emplace(id, std::make_unique<Image>(images[i], format, aspect, 4));
+				g_attachmentImages[i].emplace(id, std::make_unique<Image>(images[i], format, aspect, 4));
 			} else {
 				const auto usage = config::getImageUsageFromFormat(n.format);
-				m.emplace(id, std::make_unique<Image>(extent.width, extent.height, nullptr, format, usage, aspect, 4));
+				g_attachmentImages[i].emplace(id, std::make_unique<Image>(extent.width, extent.height, nullptr, format, usage, aspect, 4));
 			}
 		}
-		g_attachmentImages.emplace_back(std::move(m));
 	}
 }
 
