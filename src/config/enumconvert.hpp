@@ -1,6 +1,7 @@
 #pragma once
 
 #include "attachment.hpp"
+#include "compute.hpp"
 #include "pipeline.hpp"
 
 #include <vulkan/vulkan.hpp>
@@ -94,6 +95,23 @@ inline vk::ShaderStageFlags convertShaderStages(const ShaderStages &ss) {
 		return vk::ShaderStageFlagBits::eFragment;
 	case config::ShaderStages::VertexAndFragment:
 		return vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+	default:
+		throw;
+	}
+}
+
+inline vk::DescriptorType convertComputeDescriptorType(const ComputeDescriptorType &dt) {
+	switch (dt) {
+	case config::ComputeDescriptorType::Texture:
+		return vk::DescriptorType::eSampledImage;
+	case config::ComputeDescriptorType::Sampler:
+		return vk::DescriptorType::eSampler;
+	case config::ComputeDescriptorType::UniformBuffer:
+		return vk::DescriptorType::eUniformBuffer;
+	case config::ComputeDescriptorType::StorageBuffer:
+		return vk::DescriptorType::eStorageBuffer;
+	case config::ComputeDescriptorType::StorageImage:
+		return vk::DescriptorType::eStorageImage;
 	default:
 		throw;
 	}

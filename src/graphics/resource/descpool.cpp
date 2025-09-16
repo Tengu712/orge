@@ -15,27 +15,22 @@ void initializeDescriptorPool() {
 
 	// 集計
 	uint32_t maxSets = 0;
-	std::unordered_map<config::DescriptorType, uint32_t> sizesMap;
+	std::unordered_map<vk::DescriptorType, uint32_t> sizesMap;
 	for (const auto &[_, n]: config::config().pipelines) {
 		for (const auto &m: n.descSets) {
 			maxSets += m.count;
 
 			std::unordered_map<config::DescriptorType, uint32_t> map;
 			for (const auto &b: m.bindings) {
-				if (!map.contains(b.type)) {
-					map.emplace(b.type, 0);
-				}
-				map[b.type] += b.count;
-			}
-
-			for (const auto &[k, v]: map) {
-				sizesMap[k] += v * m.count;
+				const auto t = config::convertDescriptorType(b.type);
+				sizesMap[t] += b.count * m.count;
 			}
 		}
 	}
 
 	// テキストレンダリングパイプライン用のディスクリプタセットを追加
 	// TODO: こっちに統合した方が実際に使うパイプラインだけ列挙できるから良さそう？
+	// FIXME: というか、現状だと同じパイプラインを複数サブパスで使うことが想定されていない。
 	uint32_t textRenderingPipelineCount = 0;
 	for (const auto &[_, n]: config::config().renderPasses) {
 		for (const auto &m: n.subpasses) {
@@ -49,9 +44,22 @@ void initializeDescriptorPool() {
 	if (textRenderingPipelineCount > 0) {
 		const auto fontCount = config::config().fonts.size();
 		maxSets += textRenderingPipelineCount * 2;
-		sizesMap[config::DescriptorType::StorageBuffer] += textRenderingPipelineCount;
-		sizesMap[config::DescriptorType::Texture] += textRenderingPipelineCount * static_cast<uint32_t>(fontCount);
-		sizesMap[config::DescriptorType::Sampler] += textRenderingPipelineCount;
+		sizesMap[vk::DescriptorType::eStorageBuffer] += textRenderingPipelineCount;
+		sizesMap[vk::DescriptorType::eSampledImage] += textRenderingPipelineCount * static_cast<uint32_t>(fontCount);
+		sizesMap[vk::DescriptorType::eSampler] += textRenderingPipelineCount;
+	}
+
+	// コンピュートパイプライン用のディスクリプタセットを追加
+	for (const auto &[_, n]: config::config().computePipelines) {
+		for (const auto &m: n.descSets) {
+			maxSets += m.count;
+
+			std::unordered_map<config::DescriptorType, uint32_t> map;
+			for (const auto &b: m.bindings) {
+				const auto t = config::convertComputeDescriptorType(b.type);
+				sizesMap[t] += b.count * m.count;
+			}
+		}
 	}
 
 	// ディスクリプタセットが不要ならディスクリプタプールも不要
@@ -62,7 +70,7 @@ void initializeDescriptorPool() {
 	// マップからベクタへ
 	std::vector<vk::DescriptorPoolSize> poolSizes;
 	for (const auto &[k, v]: sizesMap) {
-		poolSizes.emplace_back(config::convertDescriptorType(k), v);
+		poolSizes.emplace_back(k, v);
 	}
 
 	// 作成

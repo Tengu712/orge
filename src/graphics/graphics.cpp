@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 
+#include "compute/pipeline.hpp"
 #include "core/core.hpp"
 #include "renderer/renderer.hpp"
 #include "renderpass/renderpass.hpp"
@@ -24,10 +25,12 @@ void initialize() {
 	text::initializeTextRenderingResources();
 	renderpass::initializeRenderPasses();
 	renderer::initializeRenderer();
+	compute::initializeComputePipelines();
 }
 
 void terminate() noexcept {
 	core::device().waitIdle();
+	compute::destroyAllComputePipelines();
 	renderer::destroyRenderer();
 	renderpass::destroyRenderPasses();
 	text::destroyTextRenderingResources();
