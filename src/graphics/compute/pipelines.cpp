@@ -102,8 +102,8 @@ void initializeComputePipelines() {
 
 		// パイプラインレイアウト
 		std::vector<vk::DescriptorSetLayout> rawDescSetLayouts;
-		for (const auto& n: descSetLayoutss.back()) {
-			rawDescSetLayouts.push_back(n.get());
+		for (const auto& m: descSetLayoutss.back()) {
+			rawDescSetLayouts.push_back(m.get());
 		}
 		const auto plci = vk::PipelineLayoutCreateInfo()
 			.setSetLayouts(rawDescSetLayouts);
