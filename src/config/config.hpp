@@ -1,6 +1,7 @@
 #pragma once
 
 #include "attachment.hpp"
+#include "compute.hpp"
 #include "font.hpp"
 #include "mesh.hpp"
 #include "pipeline.hpp"
@@ -22,6 +23,7 @@ struct Config {
 	const std::unordered_map<std::string, AttachmentConfig> attachments;
 	const std::unordered_map<std::string, PipelineConfig> pipelines;
 	const std::unordered_map<std::string, RenderPassConfig> renderPasses;
+	const std::unordered_map<std::string, ComputePipelineConfig> computePipelines;
 
 	const std::unordered_map<std::string, uint32_t> assetMap;
 	const std::unordered_map<std::string, uint32_t> fontMap;
