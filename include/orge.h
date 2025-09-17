@@ -111,6 +111,23 @@ API_EXPORT uint8_t orgeUpdateBufferDescriptor(
 	uint32_t offset
 );
 
+/// バッファディスクリプタを更新する関数 (コンピュートパイプライン)
+///
+/// - pipelineId: パイプラインID
+/// - id: バッファID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
+API_EXPORT uint8_t orgeUpdateComputeBufferDescriptor(
+	const char *pipelineId,
+	const char *id,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding,
+	uint32_t offset
+);
+
 /// orgeにイメージを追加する関数
 ///
 /// - file: アセットファイル名
@@ -130,6 +147,23 @@ API_EXPORT void orgeDestroyImage(const char *file);
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateImageDescriptor(
 	const char *renderPassId,
+	const char *pipelineId,
+	const char *id,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding,
+	uint32_t offset
+);
+
+/// イメージディスクリプタを更新する関数 (コンピュートパイプライン)
+///
+/// - pipelineId: パイプラインID
+/// - id: イメージID (アセットファイル名)
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
+API_EXPORT uint8_t orgeUpdateComputeImageDescriptor(
 	const char *pipelineId,
 	const char *id,
 	uint32_t set,
@@ -166,6 +200,23 @@ API_EXPORT void orgeDestroySampler(const char *id);
 /// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
 API_EXPORT uint8_t orgeUpdateSamplerDescriptor(
 	const char *renderPassId,
+	const char *pipelineId,
+	const char *id,
+	uint32_t set,
+	uint32_t index,
+	uint32_t binding,
+	uint32_t offset
+);
+
+/// サンプラディスクリプタを更新する関数 (コンピュート)
+///
+/// - pipelineId: パイプラインID
+/// - id: サンプラID
+/// - set: ディスクリプタセット番号
+/// - index: 何個目のディスクリプタセットか
+/// - binding: バインディング番号
+/// - offset: 配列上のオフセット (ディスクリプタが配列でないなら0)
+API_EXPORT uint8_t orgeUpdateComputeSamplerDescriptor(
 	const char *pipelineId,
 	const char *id,
 	uint32_t set,
@@ -329,6 +380,21 @@ API_EXPORT uint8_t orgeDraw(uint32_t instanceCount, uint32_t instanceOffset);
 ///
 /// WARN: パイプラインがバインドされていること。
 API_EXPORT uint8_t orgeDrawDirectly(uint32_t vertexCount, uint32_t instanceCount, uint32_t instanceOffset);
+
+// ================================================================================================================== //
+//     Compute                                                                                                        //
+// ================================================================================================================== //
+
+/// コンピュートパイプラインをバインドする関数
+///
+/// WARN: 描画が開始されていること。
+/// WARN: レンダーパスがバインドされていないこと。
+uint8_t orgeBindComputePipeline(const char *pipelineId, uint32_t const *indices);
+
+/// コンピュートパイプラインを実行する関数
+///
+/// WARN: パイプラインがバインドされていること。
+uint8_t orgeDispatch(uint32_t x, uint32_t y, uint32_t z);
 
 // ================================================================================================================== //
 //     Input                                                                                                          //

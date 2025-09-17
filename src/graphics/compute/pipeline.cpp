@@ -48,7 +48,7 @@ DEFINE_UPDATE_DESC_METHOD(updateBufferDescriptor) {
 	core::device().updateDescriptorSets(1, &ds, 0, nullptr);
 }
 
-DEFINE_UPDATE_DESC_METHOD(updateUserImageDescriptor) {
+DEFINE_UPDATE_DESC_METHOD(updateImageDescriptor) {
 	const auto &descSets = error::at(_descSetss, set, "descriptor sets");
 	const auto &descSet = error::at(descSets, index, "descriptor sets allocated");
 	const auto &image = resource::getUserImage(id);

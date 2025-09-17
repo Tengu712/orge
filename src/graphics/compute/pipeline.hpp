@@ -51,7 +51,7 @@ public:
 	) const
 
 	DECLARE_UPDATE_DESC_METHOD(updateBufferDescriptor);
-	DECLARE_UPDATE_DESC_METHOD(updateUserImageDescriptor);
+	DECLARE_UPDATE_DESC_METHOD(updateImageDescriptor);
 	DECLARE_UPDATE_DESC_METHOD(updateSamplerDescriptor);
 
 #undef DECLARE_UPDATE_DESC_METHOD

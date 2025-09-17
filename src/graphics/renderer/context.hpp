@@ -134,10 +134,14 @@ public:
 		if (_renderPass) {
 			throw std::format("render pass '{}' not ended.", _renderPass->id());
 		}
-		const auto &computePipeline = compute::getComputePipeline(pipelineId);
-		computePipeline.bind(_commandBuffer);
-		computePipeline.bindDescriptorSets(_commandBuffer, indices);
-		_computePipeline = &computePipeline;
+		if (!_computePipeline || _computePipeline->id() != pipelineId) {
+			const auto &computePipeline = compute::getComputePipeline(pipelineId);
+			computePipeline.bind(_commandBuffer);
+			if (indices) {
+				computePipeline.bindDescriptorSets(_commandBuffer, indices);
+			}
+			_computePipeline = &computePipeline;
+		}
 	}
 
 	void dispatch(uint32_t x, uint32_t y, uint32_t z) const {
