@@ -51,8 +51,8 @@ void orgeSetFullscreen(uint8_t toFullscreen) {
 //     Graphics Resources                                                                                             //
 // ================================================================================================================== //
 
-uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage) {
-	TRY(graphics::resource::addBuffer(id, size, static_cast<bool>(isStorage)));
+uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage, uint8_t isHostCoherent) {
+	TRY(graphics::resource::addBuffer(id, size, static_cast<bool>(isStorage), static_cast<bool>(isHostCoherent)));
 }
 
 void orgeDestroyBuffer(const char *id) {
@@ -61,6 +61,10 @@ void orgeDestroyBuffer(const char *id) {
 
 uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data) {
 	TRY(graphics::resource::getBuffer(id).update(data));
+}
+
+API_EXPORT uint8_t orgeCopyBufferTo(const char *id, uint8_t *data) {
+	TRY(graphics::resource::getBuffer(id).copyTo(data));
 }
 
 DEFINE_UPDATE_DESC_FUNC(Buffer, Buffer)

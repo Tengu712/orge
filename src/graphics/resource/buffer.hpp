@@ -16,7 +16,7 @@ public:
 	Buffer(const Buffer &) = delete;
 	Buffer &operator =(const Buffer &) = delete;
 
-	Buffer(uint64_t size, bool isStorage);
+	Buffer(uint64_t size, bool isStorage, bool isHostCoherent);
 	~Buffer();
 
 	const vk::Buffer &get() const noexcept {
@@ -36,11 +36,16 @@ public:
 	void update(const T *data, size_t size, size_t offset) const {
 		copyDataToMemory(_memory, data, size, offset);
 	}
+
+	template<typename T>
+	void copyTo(T *data) const {
+		copyMemotyToData(data, _memory, _size);
+	}
 };
 
 void destroyAllBuffers() noexcept;
 
-void addBuffer(const std::string &id, uint64_t size, bool isStorage);
+void addBuffer(const std::string &id, uint64_t size, bool isStorage, bool isHostCoherent);
 
 void destroyBuffer(const std::string &id) noexcept;
 

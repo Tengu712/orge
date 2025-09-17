@@ -82,7 +82,7 @@ API_EXPORT void orgeSetFullscreen(uint8_t toFullscreen);
 /// - id: バッファID
 /// - size: バッファのサイズ (バイト数)
 /// - isStorage: ストレージバッファか (falseの場合ユニフォームバッファとみなされる)
-API_EXPORT uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage);
+API_EXPORT uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage, uint8_t isHostCoherent);
 
 /// バッファを破棄する関数
 API_EXPORT void orgeDestroyBuffer(const char *id);
@@ -91,6 +91,11 @@ API_EXPORT void orgeDestroyBuffer(const char *id);
 ///
 /// dataはバッファ作成時に指定したサイズ分データを持つこと。
 API_EXPORT uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data);
+
+/// バッファをローカルバッファにコピーする関数
+///
+/// dataはバッファ作成時に指定したサイズ分データを持つこと。
+API_EXPORT uint8_t orgeCopyBufferTo(const char *id, uint8_t *data);
 
 /// バッファディスクリプタを更新する関数
 ///

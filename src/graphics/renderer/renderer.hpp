@@ -2,6 +2,8 @@
 
 #include "context.hpp"
 
+#include <optional>
+
 namespace graphics::renderer {
 
 class Renderer {

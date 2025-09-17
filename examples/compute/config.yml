@@ -1,0 +1,23 @@
+title: compute
+width: 640
+height: 480
+assets:
+  - shader.comp.spv
+attachments:
+  - id: RT
+    format: render-target
+    clear-value: [0.0, 0.0, 0.0, 1.0]
+render-passes:
+  - id: RP
+    subpasses:
+      - id: SP
+        outputs: [RT]
+        pipelines: []
+compute-pipelines:
+  - id: PL
+    shader: shader.comp.spv
+    desc-sets:
+      - count: 1
+        bindings:
+          - type: storage-buffer
+          - type: storage-buffer

@@ -28,7 +28,7 @@ void initializeTextRenderingResources() {
 
 	resource::initializeAllCharAtluses();
 	resource::addSampler("@sampler-tr@", true, true, false);
-	resource::addBuffer("@buffer-tr@", sizeof(TextRenderingInstance) * config::config().charCount, true);
+	resource::addBuffer("@buffer-tr@", sizeof(TextRenderingInstance) * config::config().charCount, true, false);
 }
 
 void rasterizeText(const std::string &fontId, const std::string &text) {
