@@ -3,6 +3,7 @@
 #include "graphics/renderer/renderer.hpp"
 #include "graphics/renderpass/renderpass.hpp"
 #include "graphics/resource/buffer.hpp"
+#include "graphics/resource/image-storage.hpp"
 #include "graphics/resource/image-user.hpp"
 #include "graphics/resource/mesh.hpp"
 #include "graphics/resource/sampler.hpp"
@@ -75,6 +76,14 @@ uint8_t orgeLoadImage(const char *file) {
 
 void orgeDestroyImage(const char *file) {
 	graphics::resource::destroyUserImage(file);
+}
+
+API_EXPORT uint8_t orgeCreateStorageImage(const char *id, uint32_t width, uint32_t height, uint32_t format) {
+	TRY(graphics::resource::addStorageImage(id, width, height, format));
+}
+
+API_EXPORT void orgeDestroyStorageImage(const char *id) {
+	graphics::resource::destroyStorageImage(id);
 }
 
 DEFINE_UPDATE_DESC_FUNC(Image, UserImage)

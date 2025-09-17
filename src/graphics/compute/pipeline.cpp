@@ -1,7 +1,9 @@
 #include "pipeline.hpp"
 
 #include "../../error/error.hpp"
+#include "../core/core.hpp"
 #include "../resource/buffer.hpp"
+#include "../resource/image-storage.hpp"
 #include "../resource/image-user.hpp"
 #include "../resource/sampler.hpp"
 
@@ -59,6 +61,21 @@ DEFINE_UPDATE_DESC_METHOD(updateImageDescriptor) {
 		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
 		.setDescriptorType(vk::DescriptorType::eSampledImage)
+		.setImageInfo(ii);
+	core::device().updateDescriptorSets(1, &ds, 0, nullptr);
+}
+
+DEFINE_UPDATE_DESC_METHOD(updateStorageImageDescriptor) {
+	const auto &descSets = error::at(_descSetss, set, "descriptor sets");
+	const auto &descSet = error::at(descSets, index, "descriptor sets allocated");
+	const auto &image = resource::getStorageImage(id);
+	const auto ii = vk::DescriptorImageInfo(nullptr, image.get(), vk::ImageLayout::eGeneral);
+	const auto ds = vk::WriteDescriptorSet()
+		.setDstSet(descSet.get())
+		.setDstBinding(binding)
+		.setDstArrayElement(offset)
+		.setDescriptorCount(1)
+		.setDescriptorType(vk::DescriptorType::eStorageImage)
 		.setImageInfo(ii);
 	core::device().updateDescriptorSets(1, &ds, 0, nullptr);
 }

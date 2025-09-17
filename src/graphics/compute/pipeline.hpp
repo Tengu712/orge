@@ -52,6 +52,7 @@ public:
 
 	DECLARE_UPDATE_DESC_METHOD(updateBufferDescriptor);
 	DECLARE_UPDATE_DESC_METHOD(updateImageDescriptor);
+	DECLARE_UPDATE_DESC_METHOD(updateStorageImageDescriptor);
 	DECLARE_UPDATE_DESC_METHOD(updateSamplerDescriptor);
 
 #undef DECLARE_UPDATE_DESC_METHOD
