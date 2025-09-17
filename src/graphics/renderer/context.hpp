@@ -1,9 +1,7 @@
 #pragma once
 
-#include <iostream>
-
+#include "../compute/pipeline.hpp"
 #include "../renderpass/renderpass.hpp"
-#include "../resource/charatlus.hpp"
 #include "../resource/mesh.hpp"
 #include "../text/text.hpp"
 
@@ -19,6 +17,7 @@ private:
 	const resource::Mesh *_mesh;
 	const renderpass::RenderPass *_renderPass;
 	const renderpass::GraphicsPipeline *_pipeline;
+	const compute::ComputePipeline *_computePipeline;
 
 	const resource::Mesh &_currentMesh() const {
 		if (_mesh) {
@@ -65,6 +64,7 @@ public:
 			auto &renderPass = renderpass::getRenderPass(renderPassId);
 			renderPass.begin(_commandBuffer, _index);
 			_renderPass = &renderPass;
+			_computePipeline = nullptr;
 			_subpassIndex = 0;
 		}
 	}
@@ -127,6 +127,28 @@ public:
 				_commandBuffer.draw(4, static_cast<uint32_t>(end - start), 0, static_cast<uint32_t>(start));
 			}
 		}
+	}
+
+	void bindComputePipeline(const std::string &pipelineId, uint32_t const *indices) {
+		// NOTE: レンダーパスが終了されてなければならない。
+		if (_renderPass) {
+			throw std::format("render pass '{}' not ended.", _renderPass->id());
+		}
+		if (!_computePipeline || _computePipeline->id() != pipelineId) {
+			const auto &computePipeline = compute::getComputePipeline(pipelineId);
+			computePipeline.bind(_commandBuffer);
+			if (indices) {
+				computePipeline.bindDescriptorSets(_commandBuffer, indices);
+			}
+			_computePipeline = &computePipeline;
+		}
+	}
+
+	void dispatch(uint32_t x, uint32_t y, uint32_t z) const {
+		if (!_computePipeline) {
+			throw "no compute pipeline bound.";
+		}
+		_commandBuffer.dispatch(x, y, z);
 	}
 };
 

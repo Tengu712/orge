@@ -3,6 +3,7 @@
 #include "graphics/renderer/renderer.hpp"
 #include "graphics/renderpass/renderpass.hpp"
 #include "graphics/resource/buffer.hpp"
+#include "graphics/resource/image-storage.hpp"
 #include "graphics/resource/image-user.hpp"
 #include "graphics/resource/mesh.hpp"
 #include "graphics/resource/sampler.hpp"
@@ -51,8 +52,8 @@ void orgeSetFullscreen(uint8_t toFullscreen) {
 //     Graphics Resources                                                                                             //
 // ================================================================================================================== //
 
-uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage) {
-	TRY(graphics::resource::addBuffer(id, size, static_cast<bool>(isStorage)));
+uint8_t orgeCreateBuffer(const char *id, uint64_t size, uint8_t isStorage, uint8_t isHostCoherent) {
+	TRY(graphics::resource::addBuffer(id, size, static_cast<bool>(isStorage), static_cast<bool>(isHostCoherent)));
 }
 
 void orgeDestroyBuffer(const char *id) {
@@ -63,6 +64,10 @@ uint8_t orgeUpdateBuffer(const char *id, const uint8_t *data) {
 	TRY(graphics::resource::getBuffer(id).update(data));
 }
 
+API_EXPORT uint8_t orgeCopyBufferTo(const char *id, uint8_t *data) {
+	TRY(graphics::resource::getBuffer(id).copyTo(data));
+}
+
 DEFINE_UPDATE_DESC_FUNC(Buffer, Buffer)
 
 uint8_t orgeLoadImage(const char *file) {
@@ -71,6 +76,14 @@ uint8_t orgeLoadImage(const char *file) {
 
 void orgeDestroyImage(const char *file) {
 	graphics::resource::destroyUserImage(file);
+}
+
+API_EXPORT uint8_t orgeCreateStorageImage(const char *id, uint32_t width, uint32_t height, uint32_t format) {
+	TRY(graphics::resource::addStorageImage(id, width, height, format));
+}
+
+API_EXPORT void orgeDestroyStorageImage(const char *id) {
+	graphics::resource::destroyStorageImage(id);
 }
 
 DEFINE_UPDATE_DESC_FUNC(Image, UserImage)

@@ -55,6 +55,7 @@ Config::Config(const YAML::Node &node):
 	attachments(parseAttachmentConfigs(node)),
 	pipelines(parsePipelineConfigs(node)),
 	renderPasses(parseRenderPassConfigs(node)),
+	computePipelines(parseComputePipelineConfigs(node)),
 	assetMap(collectAssetMap(node)),
 	fontMap(collectFontMap(fonts))
 {
@@ -75,6 +76,7 @@ Config::Config(const YAML::Node &node):
 			"attachments",
 			"pipelines",
 			"render-passes",
+			"compute-pipelines",
 		}
 	);
 

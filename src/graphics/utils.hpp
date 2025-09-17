@@ -60,6 +60,14 @@ inline void copyDataToMemory(const vk::DeviceMemory &dst, const T *src, size_t s
 	device.unmapMemory(dst);
 }
 
+template<typename T>
+inline void copyMemotyToData(T *dst, const vk::DeviceMemory &src, size_t size) {
+	const auto &device = core::device();
+	const auto p = static_cast<T *>(device.mapMemory(src, 0, size));
+	memcpy(dst, p, size);
+	device.unmapMemory(src);
+}
+
 void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::PipelineStageFlags visibleStages);
 
 void uploadImage(

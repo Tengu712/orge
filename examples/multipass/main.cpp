@@ -24,7 +24,7 @@ int main() {
 	TRY(orgeLoadMesh("triangle"));
 	TRY(orgeLoadMesh("square"));
 
-	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), false));
+	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0, 0));
 	TRY(orgeCreateSampler("sampler", 1, 1, 0));
 
 	std::array<float, 16> transform{

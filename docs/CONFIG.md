@@ -186,4 +186,32 @@ render-passes: []
         # 対応するすべてパイプラインID
         # テキストレンダリングパイプラインを使う場合は @text@ を指定する
         pipelines: string[]
+
+# ========== Compute Pipeline Definition ================ #
+
+# 省略可能
+compute-pipelines: []
+  - id: string
+
+    # シェーダアセット名
+    shader: string
+
+    desc-sets: []
+        # アロケートするこのディスクリプタセットの個数
+      - count: unsigned int
+
+        # ディスクリプタの配列
+        bindings: []
+            # ディスクリプタの種類
+            # 取りうる値は以下:
+            #   - texture
+            #   - sampler
+            #   - uniform-buffer
+            #   - storage-buffer
+            #   - storage-image
+          - type: string
+
+            # ディスクリプタの数
+            # 省略された場合、1とみなされる
+            count: unsigned int
 ```

@@ -8,7 +8,7 @@
 
 namespace graphics::resource {
 
-Buffer::Buffer(uint64_t size, bool isStorage):
+Buffer::Buffer(uint64_t size, bool isStorage, bool isHostCoherent):
 	_isStorage(isStorage),
 	_size(static_cast<vk::DeviceSize>(size)),
 	_buffer(core::device().createBuffer(
@@ -17,7 +17,12 @@ Buffer::Buffer(uint64_t size, bool isStorage):
 			.setUsage(_isStorage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 			.setSharingMode(vk::SharingMode::eExclusive)
 	)),
-	_memory(allocateMemory(_buffer, vk::MemoryPropertyFlagBits::eHostVisible))
+	_memory(allocateMemory(
+		_buffer,
+		isHostCoherent
+			? vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+			: vk::MemoryPropertyFlagBits::eHostVisible
+	))
 {}
 
 Buffer::~Buffer() {
@@ -31,11 +36,11 @@ void destroyAllBuffers() noexcept {
 	g_buffers.clear();
 }
 
-void addBuffer(const std::string &id, uint64_t size, bool isStorage) {
+void addBuffer(const std::string &id, uint64_t size, bool isStorage, bool isHostCoherent) {
 	if (g_buffers.contains(id)) {
 		throw std::format("buffer '{}' already created.", id);
 	}
-	g_buffers.try_emplace(id, size, isStorage);
+	g_buffers.try_emplace(id, size, isStorage, isHostCoherent);
 }
 
 void destroyBuffer(const std::string &id) noexcept {

@@ -20,8 +20,8 @@ const std::vector<uint32_t> SET_INDICES{0, 0};
 int main() {
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0));
-	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0));
+	TRY(orgeCreateBuffer("transform", static_cast<uint64_t>(sizeof(float) * 16), 0, 0));
+	TRY(orgeCreateBuffer("sampler-index", static_cast<uint64_t>(sizeof(uint32_t)), 0, 0));
 	TRY(orgeLoadImage("image.png"));
 	TRY(orgeCreateSampler("nearest", 0, 0, 0));
 	TRY(orgeCreateSampler("linear",  1, 1, 0));
