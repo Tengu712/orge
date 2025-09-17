@@ -22,7 +22,7 @@ int main() {
 
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateBuffer("buffer", static_cast<uint64_t>(sizeof(float) * buffer.size()),  1, 1));
+	TRY(orgeCreateBuffer("buffer", static_cast<uint64_t>(sizeof(float) * buffer.size()), 1, 1));
 	TRY(orgeUpdateBuffer("buffer", reinterpret_cast<const uint8_t *>(buffer.data())));
 
 	while (orgeUpdate()) {
