@@ -18,21 +18,17 @@
 std::array<uint32_t, 1> SETS{0};
 
 int main() {
-	std::vector<float> input{2, 3, 4};
-	std::vector<float> output{0, 0, 0};
+	std::vector<float> buffer{2, 3, 4};
 
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateBuffer("input",  static_cast<uint64_t>(sizeof(float) * input.size()),  1, 1));
-	TRY(orgeCreateBuffer("output", static_cast<uint64_t>(sizeof(float) * output.size()), 1, 1));
-	TRY(orgeUpdateBuffer("input",  reinterpret_cast<const uint8_t *>(input.data())));
-	TRY(orgeUpdateBuffer("output", reinterpret_cast<const uint8_t *>(output.data())));
+	TRY(orgeCreateBuffer("buffer", static_cast<uint64_t>(sizeof(float) * buffer.size()),  1, 1));
+	TRY(orgeUpdateBuffer("buffer", reinterpret_cast<const uint8_t *>(buffer.data())));
 
 	while (orgeUpdate()) {
 		const auto shouldDispatch = orgeGetKeyState(static_cast<uint32_t>(ORGE_SCANCODE_RETURN)) == 1;
 
-		CHECK(orgeUpdateComputeBufferDescriptor("PL", "input",  0, 0, 0, 0));
-		CHECK(orgeUpdateComputeBufferDescriptor("PL", "output", 0, 0, 1, 0));
+		CHECK(orgeUpdateComputeBufferDescriptor("PL", "buffer", 0, 0, 0, 0));
 
 		CHECK(orgeBeginRender());
 		if (shouldDispatch) {
@@ -44,8 +40,8 @@ int main() {
 		CHECK(orgeEndRender());
 
 		if (shouldDispatch) {
-			CHECK(orgeCopyBufferTo("output", reinterpret_cast<uint8_t *>(output.data())));
-			std::cout << output[0] << " " << output[1] << " " << output[2] << std::endl;
+			CHECK(orgeCopyBufferTo("buffer", reinterpret_cast<uint8_t *>(buffer.data())));
+			std::cout << buffer[0] << " " << buffer[1] << " " << buffer[2] << std::endl;
 		}
 	}
 

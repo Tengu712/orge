@@ -394,12 +394,12 @@ API_EXPORT uint8_t orgeDrawDirectly(uint32_t vertexCount, uint32_t instanceCount
 ///
 /// WARN: 描画が開始されていること。
 /// WARN: レンダーパスがバインドされていないこと。
-uint8_t orgeBindComputePipeline(const char *pipelineId, uint32_t const *indices);
+API_EXPORT uint8_t orgeBindComputePipeline(const char *pipelineId, uint32_t const *indices);
 
 /// コンピュートパイプラインを実行する関数
 ///
 /// WARN: パイプラインがバインドされていること。
-uint8_t orgeDispatch(uint32_t x, uint32_t y, uint32_t z);
+API_EXPORT uint8_t orgeDispatch(uint32_t x, uint32_t y, uint32_t z);
 
 // ================================================================================================================== //
 //     Input                                                                                                          //

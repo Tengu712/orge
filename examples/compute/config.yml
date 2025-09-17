@@ -20,4 +20,3 @@ compute-pipelines:
       - count: 1
         bindings:
           - type: storage-buffer
-          - type: storage-buffer
