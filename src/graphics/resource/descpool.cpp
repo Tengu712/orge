@@ -16,37 +16,34 @@ void initializeDescriptorPool() {
 	// 集計
 	uint32_t maxSets = 0;
 	std::unordered_map<vk::DescriptorType, uint32_t> sizesMap;
-	for (const auto &[_, n]: config::config().pipelines) {
-		for (const auto &m: n.descSets) {
-			maxSets += m.count;
+	const auto fontCount = config::config().fonts.size();
 
-			std::unordered_map<config::DescriptorType, uint32_t> map;
-			for (const auto &b: m.bindings) {
-				const auto t = config::convertDescriptorType(b.type);
-				sizesMap[t] += b.count * m.count;
-			}
-		}
-	}
-
-	// テキストレンダリングパイプライン用のディスクリプタセットを追加
-	// TODO: こっちに統合した方が実際に使うパイプラインだけ列挙できるから良さそう？
-	// FIXME: というか、現状だと同じパイプラインを複数サブパスで使うことが想定されていない。
-	uint32_t textRenderingPipelineCount = 0;
+	// グラフィックスパイプライン用のディスクリプタセットを追加
 	for (const auto &[_, n]: config::config().renderPasses) {
 		for (const auto &m: n.subpasses) {
 			for (const auto &o: m.pipelines) {
+				// テキストレンダリングパイプライン
 				if (o == "@text@") {
-					textRenderingPipelineCount += 1;
+					maxSets += 2;
+					sizesMap[vk::DescriptorType::eStorageBuffer] += 1;
+					sizesMap[vk::DescriptorType::eSampledImage] += static_cast<uint32_t>(fontCount);
+					sizesMap[vk::DescriptorType::eSampler] += 1;
+					continue;
+				}
+
+				// 一般パイプライン
+				const auto &plconfig = config::config().pipelines.at(o);
+				for (const auto &d: plconfig.descSets) {
+					maxSets += d.count;
+
+					std::unordered_map<config::DescriptorType, uint32_t> map;
+					for (const auto &b: d.bindings) {
+						const auto t = config::convertDescriptorType(b.type);
+						sizesMap[t] += b.count * d.count;
+					}
 				}
 			}
 		}
-	}
-	if (textRenderingPipelineCount > 0) {
-		const auto fontCount = config::config().fonts.size();
-		maxSets += textRenderingPipelineCount * 2;
-		sizesMap[vk::DescriptorType::eStorageBuffer] += textRenderingPipelineCount;
-		sizesMap[vk::DescriptorType::eSampledImage] += textRenderingPipelineCount * static_cast<uint32_t>(fontCount);
-		sizesMap[vk::DescriptorType::eSampler] += textRenderingPipelineCount;
 	}
 
 	// コンピュートパイプライン用のディスクリプタセットを追加
