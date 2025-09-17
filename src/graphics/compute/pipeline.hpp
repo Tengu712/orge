@@ -40,6 +40,21 @@ public:
 	}
 
 	void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, uint32_t const *indices) const;
+
+#define DECLARE_UPDATE_DESC_METHOD(n) \
+	void n( \
+		const std::string &id, \
+		uint32_t set, \
+		uint32_t index, \
+		uint32_t binding, \
+		uint32_t offset \
+	) const
+
+	DECLARE_UPDATE_DESC_METHOD(updateBufferDescriptor);
+	DECLARE_UPDATE_DESC_METHOD(updateUserImageDescriptor);
+	DECLARE_UPDATE_DESC_METHOD(updateSamplerDescriptor);
+
+#undef DECLARE_UPDATE_DESC_METHOD
 };
 
 void destroyAllComputePipelines();
