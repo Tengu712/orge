@@ -21,9 +21,9 @@ const std::vector<float> BLUE {0.0f, 0.0f, 1.0f, 1.0f};
 int main() {
 	TRY(orgeInitialize());
 
-	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0));
-	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0));
-	TRY(orgeCreateBuffer("blue",  static_cast<uint64_t>(sizeof(float) * BLUE.size()),  0));
+	TRY(orgeCreateBuffer("red",   static_cast<uint64_t>(sizeof(float) * RED.size()),   0, 0));
+	TRY(orgeCreateBuffer("green", static_cast<uint64_t>(sizeof(float) * GREEN.size()), 0, 0));
+	TRY(orgeCreateBuffer("blue",  static_cast<uint64_t>(sizeof(float) * BLUE.size()),  0, 0));
 	TRY(orgeUpdateBuffer("red",   reinterpret_cast<const uint8_t *>(RED.data())));
 	TRY(orgeUpdateBuffer("green", reinterpret_cast<const uint8_t *>(GREEN.data())));
 	TRY(orgeUpdateBuffer("blue",  reinterpret_cast<const uint8_t *>(BLUE.data())));

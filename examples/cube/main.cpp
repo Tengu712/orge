@@ -57,11 +57,11 @@ int main() {
 	TRY(orgeInitialize());
 	TRY(orgeLoadMesh("cube"));
 
-	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0));
+	TRY(orgeCreateBuffer("camera", static_cast<uint32_t>(sizeof(Camera)), 0, 0));
 	TRY(orgeUpdateBuffer("camera", reinterpret_cast<const uint8_t *>(&CAMERA)));
 
-	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0));
-	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0));
+	TRY(orgeCreateBuffer("scl", static_cast<uint32_t>(sizeof(float) * SCL.size()), 0, 0));
+	TRY(orgeCreateBuffer("rot", static_cast<uint32_t>(sizeof(float) *         16), 0, 0));
 	TRY(orgeUpdateBuffer("scl", reinterpret_cast<const uint8_t *>(SCL.data())));
 
 	TRY(orgeLoadImage("image.png"));
