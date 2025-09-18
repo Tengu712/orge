@@ -23,7 +23,7 @@ std::vector<const char *> getInstanceLayers() {
 #endif
 }
 
-vk::Instance createInstance() {
+vk::UniqueInstance createInstance() {
 #ifdef __APPLE__
 	const auto flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
 #else
@@ -39,7 +39,7 @@ vk::Instance createInstance() {
 		.setPApplicationInfo(&ai)
 		.setPEnabledExtensionNames(extensions)
 		.setPEnabledLayerNames(layers);
-	return vk::createInstance(ci);
+	return vk::createInstanceUnique(ci);
 }
 
 vk::PhysicalDevice selectPhysicalDevice(const vk::Instance &instance) {
@@ -64,7 +64,7 @@ uint32_t getQueueFamilyIndex(const vk::PhysicalDevice &physicalDevice) {
 	return static_cast<uint32_t>(std::distance(props.cbegin(), iter));
 }
 
-vk::Device createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queueFamilyIndex) {
+vk::UniqueDevice createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queueFamilyIndex) {
 #ifdef __APPLE__
 	const std::array<const char *, 2> extensions{"VK_KHR_swapchain", "VK_KHR_portability_subset"};
 #else
@@ -77,7 +77,7 @@ vk::Device createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queue
 	const auto ci = vk::DeviceCreateInfo()
 		.setQueueCreateInfos(qci)
 		.setPEnabledExtensionNames(extensions);
-	return physicalDevice.createDevice(ci);
+	return physicalDevice.createDeviceUnique(ci);
 }
 
 } // namespace
@@ -85,12 +85,12 @@ vk::Device createDevice(const vk::PhysicalDevice &physicalDevice, uint32_t queue
 namespace graphics::core {
 
 struct Core {
-	const vk::Instance instance;
+	const vk::UniqueInstance instance;
 	const vk::PhysicalDevice physicalDevice;
 	const uint32_t queueFamilyIndex;
-	const vk::Device device;
+	const vk::UniqueDevice device;
 	const vk::Queue queue;
-	const vk::CommandPool commandPool;
+	const vk::UniqueCommandPool commandPool;
 
 	Core(const Core &) = delete;
 	Core(const Core &&) = delete;
@@ -99,23 +99,16 @@ struct Core {
 
 	Core():
 		instance(createInstance()),
-		physicalDevice(selectPhysicalDevice(instance)),
+		physicalDevice(selectPhysicalDevice(instance.get())),
 		queueFamilyIndex(getQueueFamilyIndex(physicalDevice)),
 		device(createDevice(physicalDevice, queueFamilyIndex)),
-		queue(device.getQueue(queueFamilyIndex, 0)),
-		commandPool(device.createCommandPool(
+		queue(device->getQueue(queueFamilyIndex, 0)),
+		commandPool(device->createCommandPoolUnique(
 		vk::CommandPoolCreateInfo()
 			.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer)
 			.setQueueFamilyIndex(queueFamilyIndex)
 		))
 	{}
-
-	~Core() {
-		device.waitIdle();
-		device.destroy(commandPool);
-		device.destroy();
-		instance.destroy();
-	}
 };
 
 std::optional<Core> g_core;
@@ -139,7 +132,7 @@ void destroyCore() noexcept {
 
 const vk::Instance &instance() {
 	ensureCoreInitialized();
-	return g_core->instance;
+	return g_core->instance.get();
 }
 
 const vk::PhysicalDevice &physicalDevice() {
@@ -149,7 +142,7 @@ const vk::PhysicalDevice &physicalDevice() {
 
 const vk::Device &device() {
 	ensureCoreInitialized();
-	return g_core->device;
+	return g_core->device.get();
 }
 
 const vk::Queue &queue() {
@@ -159,7 +152,7 @@ const vk::Queue &queue() {
 
 const vk::CommandPool &commandPool() {
 	ensureCoreInitialized();
-	return g_core->commandPool;
+	return g_core->commandPool.get();
 }
 
 } // namespace graphics::core

@@ -25,8 +25,8 @@ void createTextRenderingPipeline(
 	const auto fspi = vk::SpecializationInfo(1, &fspme, sizeof(uint32_t), &fontCount);
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
 	shaderStages.reserve(2);
-	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eVertex,   vs, "main");
-	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment, fs, "main", &fspi);
+	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eVertex,   vs.get(), "main");
+	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment, fs.get(), "main", &fspi);
 
 	// 頂点入力
 	std::vector<vk::VertexInputAttributeDescription> viads;
@@ -73,7 +73,7 @@ void createTextRenderingPipeline(
 		.setAttachments(cbass);
 
 	// ディスクリプタセットレイアウト
-	std::vector<vk::DescriptorSetLayout> descSetLayouts;
+	std::vector<vk::UniqueDescriptorSetLayout> descSetLayouts;
 	descSetLayouts.reserve(2);
 	std::vector<vk::DescriptorSetLayoutBinding> bindings;
 	bindings.reserve(2);
@@ -84,7 +84,7 @@ void createTextRenderingPipeline(
 		vk::ShaderStageFlagBits::eVertex,
 		nullptr
 	);
-	descSetLayouts.push_back(device.createDescriptorSetLayout(
+	descSetLayouts.push_back(device.createDescriptorSetLayoutUnique(
 		vk::DescriptorSetLayoutCreateInfo().setBindings(bindings)
 	));
 	bindings.clear();
@@ -102,33 +102,37 @@ void createTextRenderingPipeline(
 		vk::ShaderStageFlagBits::eFragment,
 		nullptr
 	);
-	descSetLayouts.push_back(device.createDescriptorSetLayout(
+	descSetLayouts.push_back(device.createDescriptorSetLayoutUnique(
 		vk::DescriptorSetLayoutCreateInfo().setBindings(bindings)
 	));
 
-	// パイプラインレイアウト
-	const auto plci = vk::PipelineLayoutCreateInfo()
-		.setSetLayouts(descSetLayouts);
-	const auto pipelineLayout = device.createPipelineLayout(plci);
-
 	// ディスクリプタセット確保
-	std::vector<std::vector<vk::DescriptorSet>> descSets;
-	descSets.reserve(2);
+	std::vector<std::vector<vk::UniqueDescriptorSet>> descSetss;
+	descSetss.reserve(2);
 	std::vector<vk::DescriptorSetLayout> layouts;
 	layouts.reserve(1);
-	layouts.push_back(descSetLayouts[0]);
-	descSets.push_back(device.allocateDescriptorSets(
+	layouts.push_back(descSetLayouts[0].get());
+	descSetss.push_back(device.allocateDescriptorSetsUnique(
 		vk::DescriptorSetAllocateInfo()
 			.setDescriptorPool(resource::descpool())
 			.setSetLayouts(layouts)
 	));
 	layouts.clear();
-	layouts.push_back(descSetLayouts[1]);
-	descSets.push_back(device.allocateDescriptorSets(
+	layouts.push_back(descSetLayouts[1].get());
+	descSetss.push_back(device.allocateDescriptorSetsUnique(
 		vk::DescriptorSetAllocateInfo()
 			.setDescriptorPool(resource::descpool())
 			.setSetLayouts(layouts)
 	));
+
+	// パイプラインレイアウト
+	std::vector<vk::DescriptorSetLayout> rawDescSetLayouts;
+	for (const auto& m: descSetLayouts) {
+		rawDescSetLayouts.push_back(m.get());
+	}
+	const auto plci = vk::PipelineLayoutCreateInfo()
+		.setSetLayouts(rawDescSetLayouts);
+	auto pipelineLayout = device.createPipelineLayoutUnique(plci);
 
 	// 他
 	const auto viewportState = createPipelineViewStateCreateInfo();
@@ -147,25 +151,22 @@ void createTextRenderingPipeline(
 			.setPMultisampleState(&multisampleState)
 			.setPDepthStencilState(&depthStencilState)
 			.setPColorBlendState(&colorBlendState)
-			.setLayout(pipelineLayout)
+			.setLayout(pipelineLayout.get())
 			.setRenderPass(renderPass)
 			.setSubpass(subpassIndex)
 	);
-	const auto createds = device.createGraphicsPipelines(nullptr, cis).value;
+	auto createds = device.createGraphicsPipelinesUnique(nullptr, cis).value;
 	if (createds.empty()) {
 		throw "failed to create a text rendering pipeline.";
 	}
 
-	core::device().destroy(vs);
-	core::device().destroy(fs);
-
 	pipelines.try_emplace(
 		subpassIndex,
 		"@text@",
-		createds[0],
-		pipelineLayout,
+		std::move(createds[0]),
+		std::move(pipelineLayout),
 		std::move(descSetLayouts),
-		std::move(descSets)
+		std::move(descSetss)
 	);
 }
 

@@ -7,12 +7,9 @@
 
 namespace graphics::resource {
 
-std::unordered_map<std::string, vk::Sampler> g_samplers;
+std::unordered_map<std::string, vk::UniqueSampler> g_samplers;
 
 void destroyAllSamplers() noexcept {
-	for (const auto &[_, n]: g_samplers) {
-		core::device().destroy(n);
-	}
 	g_samplers.clear();
 }
 
@@ -20,7 +17,7 @@ void addSampler(const std::string &id, bool linearMagFilter, bool linearMinFilte
 	if (g_samplers.contains(id)) {
 		throw std::format("sampler '{}' already created.", id);
 	}
-	g_samplers.emplace(id, core::device().createSampler(
+	g_samplers.emplace(id, core::device().createSamplerUnique(
 		vk::SamplerCreateInfo()
 			.setMagFilter(linearMagFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
 			.setMinFilter(linearMinFilter ? vk::Filter::eLinear : vk::Filter::eNearest)
@@ -33,13 +30,12 @@ void addSampler(const std::string &id, bool linearMagFilter, bool linearMinFilte
 
 void destroySampler(const std::string &id) noexcept {
 	if (g_samplers.contains(id)) {
-		core::device().destroy(g_samplers[id]);
 		g_samplers.erase(id);
 	}
 }
 
 const vk::Sampler &getSampler(const std::string &id) {
-	return error::at(g_samplers, id, "samplers");
+	return error::at(g_samplers, id, "samplers").get();
 }
 
 } // namespace graphics::resource

@@ -11,9 +11,9 @@ namespace graphics::renderpass {
 class RenderPass {
 private:
 	const std::string _id;
-	const vk::RenderPass _renderPass;
+	const vk::UniqueRenderPass _renderPass;
 	const std::vector<vk::ClearValue> _clearValues;
-	std::vector<vk::Framebuffer> _framebuffers;
+	std::vector<vk::UniqueFramebuffer> _framebuffers;
 	std::unordered_map<std::string, GraphicsPipeline> _pipelines;
 	std::unordered_map<uint32_t, GraphicsPipeline> _trPipelines;
 
@@ -23,7 +23,6 @@ public:
 	RenderPass &operator =(const RenderPass &) = delete;
 
 	RenderPass(const std::string &id);
-	~RenderPass();
 
 	const std::string &id() const noexcept {
 		return _id;

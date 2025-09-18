@@ -4,6 +4,9 @@
 
 namespace graphics::renderpass {
 
-std::vector<vk::Framebuffer> createFramebuffers(const vk::RenderPass &renderPass, const std::string renderPassId);
+std::vector<vk::UniqueFramebuffer> createFramebuffers(
+	const vk::RenderPass &renderPass,
+	const std::string &renderPassId
+);
 
 } // namespace graphics::renderpass

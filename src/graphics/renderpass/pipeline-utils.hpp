@@ -44,14 +44,14 @@ inline vk::PipelineMultisampleStateCreateInfo createPipelineMultisampleStateCrea
 		.setRasterizationSamples(vk::SampleCountFlagBits::e1);
 }
 
-inline vk::ShaderModule createShaderModule(const unsigned char *data, size_t length) {
+inline vk::UniqueShaderModule createShaderModule(const unsigned char *data, size_t length) {
 	const auto code = std::vector<uint32_t>(
 		reinterpret_cast<const uint32_t *>(data),
 		reinterpret_cast<const uint32_t *>(data + length)
 	);
 	const auto ci = vk::ShaderModuleCreateInfo()
 		.setCode(code);
-	return core::device().createShaderModule(ci);
+	return core::device().createShaderModuleUnique(ci);
 }
 
 } // namespace graphics::renderpass

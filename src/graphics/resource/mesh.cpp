@@ -25,38 +25,31 @@ const std::span<const unsigned char> getIndicesData(const std::string &id) {
 Mesh::Mesh(const std::string &id):
 	_id(id),
 	_iCount(static_cast<uint32_t>(getIndicesData(id).size() / sizeof(uint32_t))),
-	_vb(core::device().createBuffer(
+	_vb(core::device().createBufferUnique(
 		vk::BufferCreateInfo()
 			.setSize(static_cast<uint32_t>(getVerticesData(id).size()))
 			.setUsage(vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 	)),
-	_ib(core::device().createBuffer(
+	_ib(core::device().createBufferUnique(
 		vk::BufferCreateInfo()
 			.setSize(static_cast<uint32_t>(getIndicesData(id).size()))
 			.setUsage(vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 	)),
-	_vbMemory(allocateMemory(_vb, vk::MemoryPropertyFlagBits::eDeviceLocal)),
-	_ibMemory(allocateMemory(_ib, vk::MemoryPropertyFlagBits::eDeviceLocal))
+	_vbMemory(allocateMemory(_vb.get(), vk::MemoryPropertyFlagBits::eDeviceLocal)),
+	_ibMemory(allocateMemory(_ib.get(), vk::MemoryPropertyFlagBits::eDeviceLocal))
 {
 	uploadBuffer(
-		_vb,
+		_vb.get(),
 		static_cast<const void *>(getVerticesData(id).data()),
 		getVerticesData(id).size(),
 		vk::PipelineStageFlagBits::eVertexShader
 	);
 	uploadBuffer(
-		_ib,
+		_ib.get(),
 		static_cast<const void *>(getIndicesData(id).data()),
 		getIndicesData(id).size(),
 		vk::PipelineStageFlagBits::eVertexShader
 	);
-}
-
-Mesh::~Mesh() {
-	core::device().free(_ibMemory);
-	core::device().free(_vbMemory);
-	core::device().destroy(_ib);
-	core::device().destroy(_vb);
 }
 
 std::unordered_map<std::string, Mesh> g_meshes;

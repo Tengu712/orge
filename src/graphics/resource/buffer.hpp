@@ -8,8 +8,8 @@ class Buffer {
 private:
 	const bool _isStorage;
 	const vk::DeviceSize _size;
-	const vk::Buffer _buffer;
-	const vk::DeviceMemory _memory;
+	const vk::UniqueBuffer _buffer;
+	const vk::UniqueDeviceMemory _memory;
 
 public:
 	Buffer() = delete;
@@ -17,10 +17,9 @@ public:
 	Buffer &operator =(const Buffer &) = delete;
 
 	Buffer(uint64_t size, bool isStorage, bool isHostCoherent);
-	~Buffer();
 
 	const vk::Buffer &get() const noexcept {
-		return _buffer;
+		return _buffer.get();
 	}
 
 	bool isStorage() const noexcept {
@@ -29,17 +28,17 @@ public:
 
 	template<typename T>
 	void update(const T *data) const {
-		copyDataToMemory(_memory, data, _size);
+		copyDataToMemory(_memory.get(), data, _size);
 	}
 
 	template<typename T>
 	void update(const T *data, size_t size, size_t offset) const {
-		copyDataToMemory(_memory, data, size, offset);
+		copyDataToMemory(_memory.get(), data, size, offset);
 	}
 
 	template<typename T>
 	void copyTo(T *data) const {
-		copyMemotyToData(data, _memory, _size);
+		copyMemotyToData(data, _memory.get(), _size);
 	}
 };
 

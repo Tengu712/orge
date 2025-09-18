@@ -8,10 +8,10 @@ class Mesh {
 private:
 	const std::string &_id;
 	const uint32_t _iCount;
-	const vk::Buffer _vb;
-	const vk::Buffer _ib;
-	const vk::DeviceMemory _vbMemory;
-	const vk::DeviceMemory _ibMemory;
+	const vk::UniqueBuffer _vb;
+	const vk::UniqueBuffer _ib;
+	const vk::UniqueDeviceMemory _vbMemory;
+	const vk::UniqueDeviceMemory _ibMemory;
 
 public:
 	Mesh() = delete;
@@ -19,7 +19,6 @@ public:
 	Mesh &operator =(const Mesh &) = delete;
 
 	Mesh(const std::string &id);
-	~Mesh();
 
 	const std::string &id() const noexcept {
 		return _id;
@@ -31,8 +30,8 @@ public:
 
 	void bind(const vk::CommandBuffer &commandBuffer) const noexcept {
 		const VkDeviceSize offset = 0;
-		commandBuffer.bindVertexBuffers(0, 1, &_vb, &offset);
-		commandBuffer.bindIndexBuffer(_ib, offset, vk::IndexType::eUint32);
+		commandBuffer.bindVertexBuffers(0, 1, &_vb.get(), &offset);
+		commandBuffer.bindIndexBuffer(_ib.get(), offset, vk::IndexType::eUint32);
 	}
 };
 

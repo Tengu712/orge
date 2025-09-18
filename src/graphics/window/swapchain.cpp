@@ -32,10 +32,10 @@ Window createWindow() {
 	return Window(window, SDL_DestroyWindow);
 }
 
-vk::SurfaceKHR createSurface(const Window &window) {
+vk::UniqueSurfaceKHR createSurface(const Window &window) {
 	VkSurfaceKHR surface;
 	if (SDL_Vulkan_CreateSurface(window.get(), core::instance(), NULL, &surface)) {
-		return static_cast<vk::SurfaceKHR>(surface);
+		return vk::UniqueSurfaceKHR(surface, core::instance());
 	} else {
 		throw std::format("failed to create a surface: {}", SDL_GetError());
 	}
@@ -60,7 +60,7 @@ vk::Format getFormatFrom(const vk::SurfaceKHR &surface) {
 	throw "the surface format and color space are invalid.";
 }
 
-vk::SwapchainKHR createSwapchain(
+vk::UniqueSwapchainKHR createSwapchain(
 	const vk::SurfaceKHR &surface,
 	const vk::Extent2D &extent,
 	const vk::Format &format,
@@ -81,7 +81,7 @@ vk::SwapchainKHR createSwapchain(
 		.setPresentMode(config::config().disableVsync ? vk::PresentModeKHR::eImmediate : vk::PresentModeKHR::eFifo)
 		.setClipped(vk::True)
 		.setOldSwapchain(oldSwapchain);
-	return core::device().createSwapchainKHR(ci);
+	return core::device().createSwapchainKHRUnique(ci);
 }
 
 std::vector<vk::Image> getImagesFrom(const vk::SurfaceKHR &surface, const vk::SwapchainKHR &swapchain) {
@@ -100,35 +100,28 @@ Swapchain::Swapchain():
 	_height(config::config().height),
 	_window(createWindow()),
 	_surface(createSurface(_window)),
-	_extent(core::physicalDevice().getSurfaceCapabilitiesKHR(_surface).currentExtent),
-	_format(getFormatFrom(_surface)),
-	_swapchain(createSwapchain(_surface, _extent, _format)),
-	_images(getImagesFrom(_surface, _swapchain))
+	_extent(core::physicalDevice().getSurfaceCapabilitiesKHR(_surface.get()).currentExtent),
+	_format(getFormatFrom(_surface.get())),
+	_swapchain(createSwapchain(_surface.get(), _extent, _format)),
+	_images(getImagesFrom(_surface.get(), _swapchain.get()))
 {}
 
-Swapchain::~Swapchain() {
-	core::device().destroySwapchainKHR(_swapchain);
-	core::instance().destroySurfaceKHR(_surface);
-}
-
 void Swapchain::recreateSwapchain() {
-	const auto old = _swapchain;
-	_extent = core::physicalDevice().getSurfaceCapabilitiesKHR(_surface).currentExtent;
-	_format = getFormatFrom(_surface);
-	_swapchain = createSwapchain(_surface, _extent, _format, old);
-	_images = getImagesFrom(_surface, _swapchain);
-	core::device().destroySwapchainKHR(old);
+	const auto old = std::move(_swapchain);
+	_extent = core::physicalDevice().getSurfaceCapabilitiesKHR(_surface.get()).currentExtent;
+	_format = getFormatFrom(_surface.get());
+	_swapchain = createSwapchain(_surface.get(), _extent, _format, old.get());
+	_images = getImagesFrom(_surface.get(), _swapchain.get());
 }
 
 void Swapchain::recreateSurface() {
-	const auto old = _surface;
+	const auto old = std::move(_surface);
 	_surface = createSurface(_window);
 	recreateSwapchain();
-	core::instance().destroySurfaceKHR(old);
 }
 
 uint32_t Swapchain::acquireNextImageIndex(const vk::Semaphore &semaphore) {
-	const auto result = core::device().acquireNextImageKHR(_swapchain, UINT64_MAX, semaphore, nullptr);
+	const auto result = core::device().acquireNextImageKHR(_swapchain.get(), UINT64_MAX, semaphore, nullptr);
 	if (result.result == vk::Result::eSuccess) {
 		return result.value;
 	} else {
@@ -139,7 +132,7 @@ uint32_t Swapchain::acquireNextImageIndex(const vk::Semaphore &semaphore) {
 void Swapchain::present(const vk::Semaphore &semaphore, uint32_t index) const {
 	const auto pi = vk::PresentInfoKHR()
 		.setWaitSemaphores({semaphore})
-		.setSwapchains({_swapchain})
+		.setSwapchains({_swapchain.get()})
 		.setImageIndices({index});
 	if (core::queue().presentKHR(pi) != vk::Result::eSuccess) {
 		throw "failed to present the screen.";

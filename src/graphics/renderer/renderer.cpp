@@ -7,50 +7,46 @@
 
 namespace graphics::renderer {
 
-vk::CommandBuffer createCommandBuffer() {
+vk::UniqueCommandBuffer createCommandBuffer() {
 	const auto ai = vk::CommandBufferAllocateInfo()
 		.setCommandPool(core::commandPool())
 		.setLevel(vk::CommandBufferLevel::ePrimary)
 		.setCommandBufferCount(1);
-	return error::at(core::device().allocateCommandBuffers(ai), 0, "command buffers allocated");
+	auto commandBuffers = core::device().allocateCommandBuffersUnique(ai);
+	if (commandBuffers.empty()) {
+		throw "failed to allocate a command buffer.";
+	}
+	return std::move(commandBuffers[0]);
 }
 
-std::vector<vk::Semaphore> createSemaphores() {
+std::vector<vk::UniqueSemaphore> createSemaphores() {
 	const auto count = window::swapchain().getImages().size();
-	std::vector<vk::Semaphore> semaphores;
+	std::vector<vk::UniqueSemaphore> semaphores;
 	semaphores.reserve(count);
 	for (size_t i = 0; i < count; ++i) {
-		semaphores.push_back(core::device().createSemaphore({}));
+		semaphores.push_back(core::device().createSemaphoreUnique({}));
 	}
 	return semaphores;
 }
 
 Renderer::Renderer():
 	_commandBuffer(createCommandBuffer()),
-	_semaphoreForImageEnabled(core::device().createSemaphore({})),
+	_semaphoreForImageEnabled(core::device().createSemaphoreUnique({})),
 	_semaphoreForRenderFinisheds(createSemaphores()),
-	_frameInFlightFence(core::device().createFence({vk::FenceCreateFlagBits::eSignaled}))
+	_frameInFlightFence(core::device().createFenceUnique({vk::FenceCreateFlagBits::eSignaled}))
 {}
-
-Renderer::~Renderer() {
-	core::device().destroy(_frameInFlightFence);
-	for (const auto &n: _semaphoreForRenderFinisheds) {
-		core::device().destroy(n);
-	}
-	core::device().destroy(_semaphoreForImageEnabled);
-}
 
 void Renderer::begin() {
 	_context.reset();
 
-	const auto index = window::swapchain().acquireNextImageIndex(_semaphoreForImageEnabled);
+	const auto index = window::swapchain().acquireNextImageIndex(_semaphoreForImageEnabled.get());
 
-	_commandBuffer.reset();
+	_commandBuffer->reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-	_commandBuffer.begin(cbi);
+	_commandBuffer->begin(cbi);
 
-	_context.emplace(index, _commandBuffer);
+	_context.emplace(index, _commandBuffer.get());
 }
 
 void Renderer::end() {
@@ -59,9 +55,9 @@ void Renderer::end() {
 	}
 	// TODO: レンダーパス終了忘れも検知したい。
 
-	_commandBuffer.end();
+	_commandBuffer->end();
 
-	core::device().resetFences({_frameInFlightFence});
+	core::device().resetFences({_frameInFlightFence.get()});
 
 	const vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
 	const auto &semaphore = error::at(
@@ -70,16 +66,16 @@ void Renderer::end() {
 		"semaphores for waiting for rendering finished"
 	);
 	const auto si = vk::SubmitInfo()
-		.setWaitSemaphores({_semaphoreForImageEnabled})
+		.setWaitSemaphores({_semaphoreForImageEnabled.get()})
 		.setWaitDstStageMask({waitStage})
-		.setCommandBuffers({_commandBuffer})
-		.setSignalSemaphores({semaphore});
-	core::queue().submit(si, _frameInFlightFence);
+		.setCommandBuffers({_commandBuffer.get()})
+		.setSignalSemaphores({semaphore.get()});
+	core::queue().submit(si, _frameInFlightFence.get());
 
-	window::swapchain().present(semaphore, _context->currentIndex());
+	window::swapchain().present(semaphore.get(), _context->currentIndex());
 
 	// 前のフレームのGPU処理が完全に終了するまで待機
-	if (core::device().waitForFences({_frameInFlightFence}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+	if (core::device().waitForFences({_frameInFlightFence.get()}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
 		throw "failed to wait for rendering comletion.";
 	}
 
@@ -88,18 +84,16 @@ void Renderer::end() {
 }
 
 void Renderer::reset() {
-	_commandBuffer.reset();
+	_commandBuffer->reset();
 	_context.reset();
 	text::clearLayoutContext();
 	for (auto &n: _semaphoreForRenderFinisheds) {
-		core::device().destroySemaphore(n);
-		n = core::device().createSemaphore({});
+		n = core::device().createSemaphoreUnique({});
 	}
 }
 
 void Renderer::recreateSemaphoreForImageEnabled() {
-	core::device().destroy(_semaphoreForImageEnabled);
-	_semaphoreForImageEnabled = core::device().createSemaphore({});
+	_semaphoreForImageEnabled = core::device().createSemaphoreUnique({});
 }
 
 std::optional<Renderer> g_renderer;

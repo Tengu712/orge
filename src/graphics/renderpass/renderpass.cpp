@@ -10,7 +10,7 @@
 
 namespace graphics::renderpass {
 
-vk::RenderPass createRenderPass(const std::string &id) {
+vk::UniqueRenderPass createRenderPass(const std::string &id) {
 	const auto &rpconfig = config::config().renderPasses.at(id);
 	const auto &swapchain = window::swapchain();
 
@@ -60,7 +60,7 @@ vk::RenderPass createRenderPass(const std::string &id) {
 		.setAttachments(attachments)
 		.setSubpasses(subpasses)
 		.setDependencies(dependencies);
-	return core::device().createRenderPass(ci);
+	return core::device().createRenderPassUnique(ci);
 }
 
 std::vector<vk::ClearValue> collectClearValues(const std::string &id) {
@@ -82,42 +82,31 @@ RenderPass::RenderPass(const std::string &id):
 	_id(id),
 	_renderPass(createRenderPass(id)),
 	_clearValues(collectClearValues(id)),
-	_framebuffers(createFramebuffers(_renderPass, id)),
-	_pipelines(createPipelines(_renderPass, _id)),
-	_trPipelines(createTextRenderingPipelines(_renderPass, _id))
+	_framebuffers(createFramebuffers(_renderPass.get(), id)),
+	_pipelines(createPipelines(_renderPass.get(), _id)),
+	_trPipelines(createTextRenderingPipelines(_renderPass.get(), _id))
 {}
-
-RenderPass::~RenderPass() {
-	_pipelines.clear();
-	for (const auto &n: _framebuffers) {
-		core::device().destroy(n);
-	}
-	core::device().destroy(_renderPass);
-}
 
 void RenderPass::begin(const vk::CommandBuffer &commandBuffer, uint32_t index) const noexcept {
 	const auto &extent = window::swapchain().getExtent();
 	const auto rbi = vk::RenderPassBeginInfo()
-		.setRenderPass(_renderPass)
-		.setFramebuffer(_framebuffers[index])
+		.setRenderPass(_renderPass.get())
+		.setFramebuffer(_framebuffers[index].get())
 		.setRenderArea(vk::Rect2D({0, 0}, extent))
 		.setClearValues(_clearValues);
 	commandBuffer.beginRenderPass(rbi, vk::SubpassContents::eInline);
 }
 
 void RenderPass::destroyFramebuffersAndPipelines() noexcept {
-	for (const auto &n: _framebuffers) {
-		core::device().destroy(n);
-	}
 	_framebuffers.clear();
 	_pipelines.clear();
 	_trPipelines.clear();
 }
 
 void RenderPass::createFramebuffersAndPipelines() {
-	_framebuffers = createFramebuffers(_renderPass, _id);
-	_pipelines = createPipelines(_renderPass, _id);
-	_trPipelines = createTextRenderingPipelines(_renderPass, _id);
+	_framebuffers = createFramebuffers(_renderPass.get(), _id);
+	_pipelines = createPipelines(_renderPass.get(), _id);
+	_trPipelines = createTextRenderingPipelines(_renderPass.get(), _id);
 }
 
 std::unordered_map<std::string, RenderPass> g_renderPasses;

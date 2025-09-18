@@ -12,9 +12,7 @@ private:
 	const uint32_t _chCount;
 
 public:
-	// Image() = delete;
-	// Image(const Image &) = delete;
-	// Image &operator =(const Image &) = delete;
+	Image() = delete;
 
 	Image(
 		const vk::Image &image,
