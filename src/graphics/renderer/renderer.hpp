@@ -10,22 +10,21 @@ class Renderer {
 private:
 	/// 描画処理コマンド用のコマンドバッファ
 	/// orgeは描画完了まで待機するので1個で十分
-	const vk::CommandBuffer _commandBuffer;
+	const vk::UniqueCommandBuffer _commandBuffer;
 	/// スワップチェインイメージ取得の完了を知るためのセマフォ
 	/// コマンドバッファ提出を待機させるために使う
-	vk::Semaphore _semaphoreForImageEnabled;
+	vk::UniqueSemaphore _semaphoreForImageEnabled;
 	/// コマンドバッファ実行の完了を知るためのセマフォ
 	/// プレゼンテーション開始を待機させるために使う
-	std::vector<vk::Semaphore> _semaphoreForRenderFinisheds;
+	std::vector<vk::UniqueSemaphore> _semaphoreForRenderFinisheds;
 	/// フレーム完了を監視するフェンス
 	/// 次フレーム開始前にGPU処理完了を待機するために使う
-	const vk::Fence _frameInFlightFence;
+	const vk::UniqueFence _frameInFlightFence;
 	/// レンダリング中の必要な情報をまとめたもの
 	std::optional<RenderContext> _context;
 
 public:
 	Renderer();
-	~Renderer();
 
 	RenderContext &getContext() {
 		if (_context) {
