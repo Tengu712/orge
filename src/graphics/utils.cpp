@@ -191,11 +191,4 @@ void uploadImage(
 	}
 }
 
-
-
-
-
-
-
-
 } // namespace graphics
