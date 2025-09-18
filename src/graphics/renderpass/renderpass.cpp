@@ -111,11 +111,13 @@ void RenderPass::destroyFramebuffersAndPipelines() noexcept {
 	}
 	_framebuffers.clear();
 	_pipelines.clear();
+	_trPipelines.clear();
 }
 
 void RenderPass::createFramebuffersAndPipelines() {
 	_framebuffers = createFramebuffers(_renderPass, _id);
 	_pipelines = createPipelines(_renderPass, _id);
+	_trPipelines = createTextRenderingPipelines(_renderPass, _id);
 }
 
 std::unordered_map<std::string, RenderPass> g_renderPasses;
