@@ -6,7 +6,7 @@
 
 namespace graphics::resource {
 
-std::optional<vk::DescriptorPool> g_descpool;
+std::optional<vk::UniqueDescriptorPool> g_descpool;
 
 void initializeDescriptorPool() {
 	if (g_descpool) {
@@ -75,19 +75,18 @@ void initializeDescriptorPool() {
 		.setFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
 		.setMaxSets(maxSets)
 		.setPoolSizes(poolSizes);
-	g_descpool = core::device().createDescriptorPool(ci);
+	g_descpool = core::device().createDescriptorPoolUnique(ci);
 }
 
 void destroyDescriptorPool() noexcept {
 	if (g_descpool) {
-		core::device().destroy(g_descpool.value());
 		g_descpool.reset();
 	}
 }
 
 const vk::DescriptorPool &descpool() {
 	if (g_descpool) {
-		return g_descpool.value();
+		return g_descpool.value().get();
 	} else {
 		throw "descriptor pool not initialized.";
 	}

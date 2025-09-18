@@ -26,12 +26,12 @@ inline uint32_t findMemoryType(uint32_t typeBits, vk::MemoryPropertyFlags mask) 
 	return result;
 }
 
-inline vk::DeviceMemory allocateMemory(const vk::Buffer &buffer, vk::MemoryPropertyFlags mask) {
+inline vk::UniqueDeviceMemory allocateMemory(const vk::Buffer &buffer, vk::MemoryPropertyFlags mask) {
 	const auto &device = core::device();
 	const auto reqs = device.getBufferMemoryRequirements(buffer);
 	const auto type = findMemoryType(reqs.memoryTypeBits, mask);
-	const auto memory = device.allocateMemory(vk::MemoryAllocateInfo(reqs.size, type));
-	device.bindBufferMemory(buffer, memory, 0);
+	auto memory = device.allocateMemoryUnique(vk::MemoryAllocateInfo(reqs.size, type));
+	device.bindBufferMemory(buffer, memory.get(), 0);
 	return memory;
 }
 

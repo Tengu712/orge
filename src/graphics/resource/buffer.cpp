@@ -11,24 +11,19 @@ namespace graphics::resource {
 Buffer::Buffer(uint64_t size, bool isStorage, bool isHostCoherent):
 	_isStorage(isStorage),
 	_size(static_cast<vk::DeviceSize>(size)),
-	_buffer(core::device().createBuffer(
+	_buffer(core::device().createBufferUnique(
 		vk::BufferCreateInfo()
 			.setSize(size)
 			.setUsage(_isStorage ? vk::BufferUsageFlagBits::eStorageBuffer : vk::BufferUsageFlagBits::eUniformBuffer)
 			.setSharingMode(vk::SharingMode::eExclusive)
 	)),
 	_memory(allocateMemory(
-		_buffer,
+		_buffer.get(),
 		isHostCoherent
 			? vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 			: vk::MemoryPropertyFlagBits::eHostVisible
 	))
 {}
-
-Buffer::~Buffer() {
-	core::device().free(_memory);
-	core::device().destroy(_buffer);
-}
 
 std::unordered_map<std::string, Buffer> g_buffers;
 
