@@ -1,20 +1,14 @@
 #include "utils.hpp"
 
-#include <optional>
-
 namespace graphics {
 
-std::optional<vk::UniqueCommandBuffer> g_commandBuffer;
-std::optional<vk::UniqueFence> g_fence;
+vk::UniqueCommandBuffer g_commandBuffer;
+vk::UniqueFence g_fence;
 
 void terminateUtils() {
-	if (g_fence) {
-		g_fence.reset();
-	}
-	if (g_commandBuffer) {
-		// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。
-		g_commandBuffer.reset();
-	}
+	g_fence.reset();
+	// NOTE: コマンドプール全体を破棄するので個別に解放する必要はない。
+	g_commandBuffer.reset();
 }
 
 void initializeUtils() {
@@ -33,8 +27,6 @@ void initializeUtils() {
 
 void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::PipelineStageFlags visibleStages) {
 	const auto &device = core::device();
-	const auto &fence = g_fence.value();
-	const auto &commandBuffer = g_commandBuffer.value();
 
 	// ステージングバッファ作成
 	const auto bci = vk::BufferCreateInfo()
@@ -48,10 +40,10 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 	copyDataToMemory(bufferMemory.get(), src, size);
 
 	// アップロード準備
-	commandBuffer->reset();
+	g_commandBuffer->reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-	commandBuffer->begin(cbi);
+	g_commandBuffer->begin(cbi);
 
 	// メモリバリア (undegined -> transferDstOptimal)
 	const auto bmb = vk::BufferMemoryBarrier(
@@ -63,7 +55,7 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 		0,
 		size
 	);
-	commandBuffer->pipelineBarrier(
+	g_commandBuffer->pipelineBarrier(
 		vk::PipelineStageFlagBits::eAllCommands,
 		vk::PipelineStageFlagBits::eTransfer,
 		vk::DependencyFlags(),
@@ -74,7 +66,7 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 
 	// アップロード
 	const auto cr = vk::BufferCopy(0, 0, size);
-	commandBuffer->copyBuffer(buffer.get(), dst, {cr});
+	g_commandBuffer->copyBuffer(buffer.get(), dst, {cr});
 
 	// メモリバリア (transferDstOptimal -> shaderReadOnlyOptimal)
 	const auto amb = vk::BufferMemoryBarrier(
@@ -86,7 +78,7 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 		0,
 		size
 	);
-	commandBuffer->pipelineBarrier(
+	g_commandBuffer->pipelineBarrier(
 		vk::PipelineStageFlagBits::eTransfer,
 		visibleStages,
 		vk::DependencyFlags(),
@@ -96,14 +88,14 @@ void uploadBuffer(const vk::Buffer &dst, const void *src, size_t size, vk::Pipel
 	);
 
 	// アップロード提出
-	commandBuffer->end();
-	device.resetFences({fence.get()});
+	g_commandBuffer->end();
+	device.resetFences({g_fence.get()});
 	const auto si = vk::SubmitInfo()
-		.setCommandBuffers({commandBuffer.get()});
-	core::queue().submit(si, fence.get());
+		.setCommandBuffers({g_commandBuffer.get()});
+	core::queue().submit(si, g_fence.get());
 
 	// 完了まで待機
-	if (device.waitForFences({fence.get()}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+	if (device.waitForFences({g_fence.get()}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
 		throw "failed to wait for uploading a buffer.";
 	}
 }
@@ -118,8 +110,6 @@ void uploadImage(
 	const uint8_t *src
 ) {
 	const auto &device = core::device();
-	const auto &fence = g_fence.value();
-	const auto &commandBuffer = g_commandBuffer.value();
 	const auto extent = vk::Extent3D(width, height, 1);
 	const auto subresRange = vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 
@@ -136,10 +126,10 @@ void uploadImage(
 	copyDataToMemory(bufferMemory.get(), src, bufferSize);
 
 	// アップロード準備
-	commandBuffer->reset();
+	g_commandBuffer->reset();
 	const auto cbi = vk::CommandBufferBeginInfo()
 		.setFlags(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-	commandBuffer->begin(cbi);
+	g_commandBuffer->begin(cbi);
 
 	// メモリバリア (undegined -> transferDstOptimal)
 	const auto bmb = vk::ImageMemoryBarrier(
@@ -152,7 +142,7 @@ void uploadImage(
 		dst,
 		subresRange
 	);
-	commandBuffer->pipelineBarrier(
+	g_commandBuffer->pipelineBarrier(
 		vk::PipelineStageFlagBits::eAllCommands,
 		vk::PipelineStageFlagBits::eTransfer,
 		vk::DependencyFlags(),
@@ -166,7 +156,7 @@ void uploadImage(
 		.setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
 		.setImageOffset(vk::Offset3D(offsetX, offsetY, 0))
 		.setImageExtent(extent);
-	commandBuffer->copyBufferToImage(buffer.get(), dst, vk::ImageLayout::eTransferDstOptimal, {cr});
+	g_commandBuffer->copyBufferToImage(buffer.get(), dst, vk::ImageLayout::eTransferDstOptimal, {cr});
 
 	// メモリバリア (transferDstOptimal -> shaderReadOnlyOptimal)
 	const auto amb = vk::ImageMemoryBarrier(
@@ -179,7 +169,7 @@ void uploadImage(
 		dst,
 		subresRange
 	);
-	commandBuffer->pipelineBarrier(
+	g_commandBuffer->pipelineBarrier(
 		vk::PipelineStageFlagBits::eTransfer,
 		vk::PipelineStageFlagBits::eFragmentShader,
 		vk::DependencyFlags(),
@@ -189,14 +179,14 @@ void uploadImage(
 	);
 
 	// アップロード提出
-	commandBuffer->end();
-	device.resetFences({fence.get()});
+	g_commandBuffer->end();
+	device.resetFences({g_fence.get()});
 	const auto si = vk::SubmitInfo()
-		.setCommandBuffers({commandBuffer.get()});
-	core::queue().submit(si, fence.get());
+		.setCommandBuffers({g_commandBuffer.get()});
+	core::queue().submit(si, g_fence.get());
 
 	// 完了まで待機
-	if (device.waitForFences({fence.get()}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+	if (device.waitForFences({g_fence.get()}, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
 		throw "failed to wait for uploading an image.";
 	}
 }
