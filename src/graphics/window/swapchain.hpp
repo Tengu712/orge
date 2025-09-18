@@ -13,10 +13,10 @@ private:
 	const uint32_t _width;
 	const uint32_t _height;
 	const Window _window;
-	vk::SurfaceKHR _surface;
+	vk::UniqueSurfaceKHR _surface;
 	vk::Extent2D _extent;
 	vk::Format _format;
-	vk::SwapchainKHR _swapchain;
+	vk::UniqueSwapchainKHR _swapchain;
 	std::vector<vk::Image> _images;
 
 public:
@@ -26,7 +26,6 @@ public:
 	Swapchain &operator=(const Swapchain &&) = delete;
 
 	Swapchain();
-	~Swapchain();
 
 	const vk::Extent2D &getExtent() const noexcept {
 		return _extent;
