@@ -8,10 +8,10 @@ namespace graphics::renderpass {
 class GraphicsPipeline {
 private:
 	const std::string _id;
-	const vk::Pipeline _pipeline;
-	const vk::PipelineLayout _pipelineLayout;
-	const std::vector<vk::DescriptorSetLayout> _descSetLayouts;
-	const std::vector<std::vector<vk::DescriptorSet>> _descSets;
+	const vk::UniquePipeline _pipeline;
+	const vk::UniquePipelineLayout _pipelineLayout;
+	const std::vector<vk::UniqueDescriptorSetLayout> _descSetLayouts;
+	const std::vector<std::vector<vk::UniqueDescriptorSet>> _descSets;
 
 public:
 	GraphicsPipeline() = delete;
@@ -20,25 +20,24 @@ public:
 
 	GraphicsPipeline(
 		const std::string &id,
-		const vk::Pipeline &pipeline,
-		const vk::PipelineLayout &pipelineLayout,
-		const std::vector<vk::DescriptorSetLayout> &&descSetLayouts,
-		const std::vector<std::vector<vk::DescriptorSet>> &&descSets
+		vk::UniquePipeline &&pipeline,
+		vk::UniquePipelineLayout &&pipelineLayout,
+		std::vector<vk::UniqueDescriptorSetLayout> &&descSetLayouts,
+		std::vector<std::vector<vk::UniqueDescriptorSet>> &&descSets
 	):
 		_id(id),
-		_pipeline(pipeline),
-		_pipelineLayout(pipelineLayout),
+		_pipeline(std::move(pipeline)),
+		_pipelineLayout(std::move(pipelineLayout)),
 		_descSetLayouts(std::move(descSetLayouts)),
 		_descSets(std::move(descSets))
 	{}
-	~GraphicsPipeline();
 
 	const std::string &id() const noexcept {
 		return _id;
 	}
 
 	void bind(const vk::CommandBuffer &commandBuffer) const noexcept {
-		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline);
+		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _pipeline.get());
 	}
 
 	void bindDescriptorSets(const vk::CommandBuffer &commandBuffer, uint32_t const *indices) const;

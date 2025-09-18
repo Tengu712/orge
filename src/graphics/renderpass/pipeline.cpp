@@ -13,23 +13,15 @@
 
 namespace graphics::renderpass {
 
-GraphicsPipeline::~GraphicsPipeline() {
-	for (const auto &n: _descSetLayouts) {
-		core::device().destroyDescriptorSetLayout(n);
-	}
-	core::device().destroyPipelineLayout(_pipelineLayout);
-	core::device().destroyPipeline(_pipeline);
-}
-
 void GraphicsPipeline::bindDescriptorSets(const vk::CommandBuffer &commandBuffer, uint32_t const *indices) const {
 	std::vector<vk::DescriptorSet> sets;
 	sets.reserve(_descSets.size());
 	for (size_t i = 0; i < _descSets.size(); ++i) {
-		sets.push_back(error::at(_descSets[i], indices[i], "descriptor sets allocated"));
+		sets.push_back(error::at(_descSets[i], indices[i], "descriptor sets allocated").get());
 	}
 	commandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics,
-		_pipelineLayout,
+		_pipelineLayout.get(),
 		0,
 		static_cast<uint32_t>(sets.size()),
 		sets.data(),
@@ -53,7 +45,7 @@ DECLARE_UPDATE_DESC_METHOD(updateBufferDescriptor) {
 	const auto &buffer = resource::getBuffer(id);
 	const auto bi = vk::DescriptorBufferInfo(buffer.get(), 0, vk::WholeSize);
 	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(descSet)
+		.setDstSet(descSet.get())
 		.setDstBinding(binding)
 		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
@@ -68,7 +60,7 @@ DECLARE_UPDATE_DESC_METHOD(updateUserImageDescriptor) {
 	const auto &image = resource::getUserImage(id);
 	const auto ii = vk::DescriptorImageInfo(nullptr, image.get(), vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(descSet)
+		.setDstSet(descSet.get())
 		.setDstBinding(binding)
 		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
@@ -83,7 +75,7 @@ DECLARE_UPDATE_DESC_METHOD(updateSamplerDescriptor) {
 	const auto &sampler = resource::getSampler(id);
 	const auto ii = vk::DescriptorImageInfo(sampler, nullptr, vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(descSet)
+		.setDstSet(descSet.get())
 		.setDstBinding(binding)
 		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
@@ -113,7 +105,7 @@ void GraphicsPipeline::updateInputAttachmentDescriptor(
 	const auto &image = resource::getAttachmentImage(frameIndex, id);
 	const auto ii = vk::DescriptorImageInfo(nullptr, image.get(), vk::ImageLayout::eShaderReadOnlyOptimal);
 	const auto ds = vk::WriteDescriptorSet()
-		.setDstSet(descSet)
+		.setDstSet(descSet.get())
 		.setDstBinding(binding)
 		.setDstArrayElement(offset)
 		.setDescriptorCount(1)
@@ -132,7 +124,7 @@ void GraphicsPipeline::updateCharatlusDescriptors() const {
 		const auto ii = vk::DescriptorImageInfo(nullptr, n.get(), vk::ImageLayout::eShaderReadOnlyOptimal);
 		sets.push_back(
 			vk::WriteDescriptorSet()
-				.setDstSet(descSet)
+				.setDstSet(descSet.get())
 				.setDstBinding(0)
 				.setDstArrayElement(offset)
 				.setDescriptorCount(1)

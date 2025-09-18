@@ -28,8 +28,8 @@ void createGraphicsPipeline(
 	const auto fs = createShaderModule(fsRaw.data(), fsRaw.size());
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
 	shaderStages.reserve(2);
-	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eVertex,   vs, "main");
-	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment, fs, "main");
+	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eVertex,   vs.get(), "main");
+	shaderStages.emplace_back(vk::PipelineShaderStageCreateFlags(), vk::ShaderStageFlagBits::eFragment, fs.get(), "main");
 
 	// 頂点入力
 	std::vector<vk::VertexInputAttributeDescription> viads;
@@ -95,7 +95,7 @@ void createGraphicsPipeline(
 		.setAttachments(cbass);
 
 	// ディスクリプタセットレイアウト
-	std::vector<vk::DescriptorSetLayout> descSetLayouts;
+	std::vector<vk::UniqueDescriptorSetLayout> descSetLayouts;
 	descSetLayouts.reserve(n.descSets.size());
 	for (const auto &m: n.descSets) {
 		std::vector<vk::DescriptorSetLayoutBinding> bindings;
@@ -110,27 +110,31 @@ void createGraphicsPipeline(
 		}
 		const auto ci = vk::DescriptorSetLayoutCreateInfo()
 			.setBindings(bindings);
-		descSetLayouts.push_back(device.createDescriptorSetLayout(ci));
+		descSetLayouts.push_back(device.createDescriptorSetLayoutUnique(ci));
 	}
 
-	// パイプラインレイアウト
-	const auto plci = vk::PipelineLayoutCreateInfo()
-		.setSetLayouts(descSetLayouts);
-	const auto pipelineLayout = device.createPipelineLayout(plci);
-
 	// ディスクリプタセット確保
-	std::vector<std::vector<vk::DescriptorSet>> descSets;
-	descSets.reserve(n.descSets.size());
+	std::vector<std::vector<vk::UniqueDescriptorSet>> descSetss;
+	descSetss.reserve(n.descSets.size());
 	for (size_t i = 0; i < n.descSets.size(); ++i) {
 		std::vector<vk::DescriptorSetLayout> layouts;
 		for (size_t j = 0; j < n.descSets[i].count; ++j) {
-			layouts.push_back(descSetLayouts[i]);
+			layouts.push_back(descSetLayouts[i].get());
 		}
 		const auto ai = vk::DescriptorSetAllocateInfo()
 			.setDescriptorPool(resource::descpool())
 			.setSetLayouts(layouts);
-		descSets.push_back(device.allocateDescriptorSets(ai));
+		descSetss.push_back(device.allocateDescriptorSetsUnique(ai));
 	}
+
+	// パイプラインレイアウト
+	std::vector<vk::DescriptorSetLayout> rawDescSetLayouts;
+	for (const auto& m: descSetLayouts) {
+		rawDescSetLayouts.push_back(m.get());
+	}
+	const auto plci = vk::PipelineLayoutCreateInfo()
+		.setSetLayouts(rawDescSetLayouts);
+	auto pipelineLayout = device.createPipelineLayoutUnique(plci);
 
 	// 他
 	const auto viewportState = createPipelineViewStateCreateInfo();
@@ -149,25 +153,22 @@ void createGraphicsPipeline(
 			.setPMultisampleState(&multisampleState)
 			.setPDepthStencilState(&depthStencilState)
 			.setPColorBlendState(&colorBlendState)
-			.setLayout(pipelineLayout)
+			.setLayout(pipelineLayout.get())
 			.setRenderPass(renderPass)
 			.setSubpass(subpassIndex)
 	);
-	const auto createds = device.createGraphicsPipelines(nullptr, cis).value;
+	auto createds = device.createGraphicsPipelinesUnique(nullptr, cis).value;
 	if (createds.empty()) {
 		throw std::format("failed to create a pipeline, '{}'.", pipelineId);
 	}
 
-	core::device().destroy(vs);
-	core::device().destroy(fs);
-
 	pipelines.try_emplace(
 		pipelineId,
 		pipelineId,
-		createds[0],
-		pipelineLayout,
+		std::move(createds[0]),
+		std::move(pipelineLayout),
 		std::move(descSetLayouts),
-		std::move(descSets)
+		std::move(descSetss)
 	);
 }
 

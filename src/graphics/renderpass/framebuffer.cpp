@@ -7,10 +7,13 @@
 
 namespace graphics::renderpass {
 
-std::vector<vk::Framebuffer> createFramebuffers(const vk::RenderPass &renderPass, const std::string renderPassId) {
+std::vector<vk::UniqueFramebuffer> createFramebuffers(
+	const vk::RenderPass &renderPass,
+	const std::string &renderPassId
+) {
 	const auto &swapchain = window::swapchain();
 
-	std::vector<vk::Framebuffer> framebuffers;
+	std::vector<vk::UniqueFramebuffer> framebuffers;
 	framebuffers.reserve(swapchain.getImages().size());
 
 	for (size_t i = 0; i < swapchain.getImages().size(); ++i) {
@@ -29,7 +32,7 @@ std::vector<vk::Framebuffer> createFramebuffers(const vk::RenderPass &renderPass
 			.setWidth(extent.width)
 			.setHeight(extent.height)
 			.setLayers(1);
-		framebuffers.push_back(core::device().createFramebuffer(ci));
+		framebuffers.push_back(core::device().createFramebufferUnique(ci));
 	}
 
 	return framebuffers;
