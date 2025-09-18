@@ -1,6 +1,7 @@
 #include "orge-private.hpp"
 
 #include "graphics/core/core.hpp"
+#include "graphics/compute/pipeline.hpp"
 #include "graphics/renderpass/renderpass.hpp"
 #include "graphics/renderer/renderer.hpp"
 #include "graphics/resource/descpool.hpp"
@@ -16,11 +17,13 @@
 	graphics::core::device().waitIdle(); \
 	graphics::renderer::renderer().recreateSemaphoreForImageEnabled(); \
 	graphics::renderpass::destroyAllFramebuffersAndPipelines(); \
+	graphics::compute::destroyAllComputePipelines(); \
 	graphics::resource::destroyAllAttachmentImages(); \
 	graphics::resource::destroyDescriptorPool(); \
 	graphics::window::swapchain().recreate##which(); \
 	graphics::resource::initializeDescriptorPool(); \
 	graphics::resource::initializeAllAttachmentImages(); \
+	graphics::compute::initializeComputePipelines(); \
 	graphics::renderpass::createAllFramebuffersAndPipelines()
 
 namespace orge {
