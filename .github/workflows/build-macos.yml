@@ -19,6 +19,16 @@ jobs:
     - name: install meson
       run: pip install meson
 
+    - name: Check file line limits
+      run: |
+        for file in $(find src/ -name "*.cpp" -o -name "*.hpp"); do
+          lines=$(wc -l < "$file")
+          if [ "$lines" -gt 200 ]; then
+            echo "ERROR: $file has $lines lines (limit: 200)"
+            exit 1
+          fi
+        done
+
     - name: Cache vcpkg packages
       id: cache-vcpkg
       uses: actions/cache@v4
