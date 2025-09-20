@@ -1,34 +1,18 @@
-#include "orge-private.hpp"
+#pragma once
 
-#include "graphics/core/core.hpp"
-#include "graphics/compute/pipeline.hpp"
-#include "graphics/renderpass/renderpass.hpp"
-#include "graphics/renderer/renderer.hpp"
-#include "graphics/resource/descpool.hpp"
-#include "graphics/resource/image-attachment.hpp"
-#include "graphics/window/swapchain.hpp"
+#include "../graphics/graphics.hpp"
+#include "error.hpp"
 
 #include <SDL3/SDL.h>
+#include <vulkan/vulkan.hpp>
 
 #define ABORT_WITH_ERROR_DIALOG(msg) \
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", (msg), nullptr); \
 	abort()
-#define RECREATE_SWAPCHAIN_OR_SURFACE(which) \
-	graphics::core::device().waitIdle(); \
-	graphics::renderer::renderer().recreateSemaphoreForImageEnabled(); \
-	graphics::renderpass::destroyAllFramebuffersAndPipelines(); \
-	graphics::compute::destroyAllComputePipelines(); \
-	graphics::resource::destroyAllAttachmentImages(); \
-	graphics::resource::destroyDescriptorPool(); \
-	graphics::window::swapchain().recreate##which(); \
-	graphics::resource::initializeDescriptorPool(); \
-	graphics::resource::initializeAllAttachmentImages(); \
-	graphics::compute::initializeComputePipelines(); \
-	graphics::renderpass::createAllFramebuffersAndPipelines()
 
-namespace orge {
+namespace error {
 
-void handleVkResult(const vk::Result &e) {
+inline void handleVkResult(const vk::Result &e) {
 	switch (e) {
 	case vk::Result::eErrorInitializationFailed:
 		ABORT_WITH_ERROR_DIALOG("Failed to initialize Vulkan. Is Vulkan availabe and latest?");
@@ -46,12 +30,12 @@ void handleVkResult(const vk::Result &e) {
 		ABORT_WITH_ERROR_DIALOG("Video Std parameter is invalid.");
 	case vk::Result::eSuboptimalKHR:
 	case vk::Result::eErrorOutOfDateKHR:
-		error::setMessage("swapchain is out of date, performing recreation.");
-		RECREATE_SWAPCHAIN_OR_SURFACE(Swapchain);
+		setMessage("swapchain is out of date, performing recreation.");
+		graphics::recreateSwapchain();
 		break;
 	case vk::Result::eErrorSurfaceLostKHR:
 		error::setMessage("surface is out of date, performing recreation.");
-		RECREATE_SWAPCHAIN_OR_SURFACE(Surface);
+		graphics::recreateSurface();
 		break;
 	default:
 		error::setMessage("vulkan error: " + vk::to_string(e) + " (" + std::to_string(static_cast<int64_t>(e)) + ")");
@@ -59,4 +43,4 @@ void handleVkResult(const vk::Result &e) {
 	}
 }
 
-} // namespace orge
+} // namespace error
