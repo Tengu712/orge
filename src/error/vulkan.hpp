@@ -3,16 +3,18 @@
 #include "../graphics/graphics.hpp"
 #include "error.hpp"
 
+#include <orge/orge.h>
 #include <SDL3/SDL.h>
 #include <vulkan/vulkan.hpp>
 
 #define ABORT_WITH_ERROR_DIALOG(msg) \
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "fatal error", (msg), nullptr); \
-	abort()
+	abort(); \
+	break;
 
 namespace error {
 
-inline void handleVkResult(const vk::Result &e) {
+inline OrgeApiResult handleVkResult(const vk::Result &e) {
 	switch (e) {
 	case vk::Result::eErrorInitializationFailed:
 		ABORT_WITH_ERROR_DIALOG("Failed to initialize Vulkan. Is Vulkan availabe and latest?");
@@ -30,17 +32,16 @@ inline void handleVkResult(const vk::Result &e) {
 		ABORT_WITH_ERROR_DIALOG("Video Std parameter is invalid.");
 	case vk::Result::eSuboptimalKHR:
 	case vk::Result::eErrorOutOfDateKHR:
-		setMessage("swapchain is out of date, performing recreation.");
 		graphics::recreateSwapchain();
-		break;
+		return ORGE_SWAPCHAIN_RECREATED;
 	case vk::Result::eErrorSurfaceLostKHR:
-		error::setMessage("surface is out of date, performing recreation.");
 		graphics::recreateSurface();
-		break;
+		return ORGE_SURFACE_RECREATED;
 	default:
 		error::setMessage("vulkan error: " + vk::to_string(e) + " (" + std::to_string(static_cast<int64_t>(e)) + ")");
 		break;
 	}
+	return ORGE_ERROR;
 }
 
 } // namespace error
