@@ -6,6 +6,7 @@ extern "C" {
 
 #include "audio.h"
 #include "compute.h"
+#include "config.h"
 #include "dialog.h"
 #include "input.h"
 #include "rendering.h"

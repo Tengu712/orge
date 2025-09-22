@@ -11,6 +11,7 @@ std::vector<unsigned char> g_dat;
 std::unordered_map<uint32_t, AssetEntry> g_assetMap;
 
 void loadDatFile() {
+	// TODO: ファイル名を指定できるように
 	std::ifstream file(".dat", std::ios::binary);
 	if (!file) {
 		throw ".dat not found.";
@@ -56,15 +57,8 @@ void initialize() {
 	analyzeDat();
 }
 
-std::span<const unsigned char> getConfigData() {
-	const auto &entry = g_assetMap[0];
-	const unsigned char *data = g_dat.data() + entry.offset;
-	return std::span<const unsigned char>(data, entry.size);
-}
-
 std::span<const unsigned char> getAsset(uint32_t id) {
-	// NOTE: 0はconfigファイルに予約されているので+1する。
-	const auto &entry = g_assetMap[id + 1];
+	const auto &entry = g_assetMap[id];
 	const unsigned char *data = g_dat.data() + entry.offset;
 	return std::span<const unsigned char>(data, entry.size);
 }

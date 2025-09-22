@@ -21,7 +21,7 @@
 
 namespace api {
 
-inline void initialize() {
+inline void initialize(OrgeInitializeParam *param) {
 	if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		throw std::format("failed to prepare for creating a window: {}", SDL_GetError());
 	}
@@ -29,8 +29,7 @@ inline void initialize() {
 		throw std::format("failed to load Vulkan: {}", SDL_GetError());
 	}
 	asset::initialize();
-	// TODO: param化
-	config::initialize();
+	config::initialize(param);
 	graphics::initialize();
 	audio::initialize();
 	input::initialize();

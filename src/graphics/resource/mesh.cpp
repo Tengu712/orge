@@ -10,29 +10,23 @@
 
 namespace graphics::resource {
 
-const std::span<const unsigned char> getVerticesData(const std::string &id) {
-	const auto vertices = error::at(config::config().meshes, id, "meshes").vertices;
-	const auto assetId = error::at(config::config().assetMap, vertices, "assets");
-	return asset::getAsset(assetId);
-}
-
-const std::span<const unsigned char> getIndicesData(const std::string &id) {
-	const auto indices = error::at(config::config().meshes, id, "meshes").indices;
-	const auto assetId = error::at(config::config().assetMap, indices, "assets");
+const std::span<const unsigned char> getData(const std::string &id, const std::string &ext) {
+	const auto fileName = std::format("{}.{}", id, ext);
+	const auto assetId = error::at(config::config().assetMap, fileName, "assets");
 	return asset::getAsset(assetId);
 }
 
 Mesh::Mesh(const std::string &id):
 	_id(id),
-	_iCount(static_cast<uint32_t>(getIndicesData(id).size() / sizeof(uint32_t))),
+	_iCount(static_cast<uint32_t>(getData(id, "i").size() / sizeof(uint32_t))),
 	_vb(core::device().createBufferUnique(
 		vk::BufferCreateInfo()
-			.setSize(static_cast<uint32_t>(getVerticesData(id).size()))
+			.setSize(static_cast<uint32_t>(getData(id, "v").size()))
 			.setUsage(vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 	)),
 	_ib(core::device().createBufferUnique(
 		vk::BufferCreateInfo()
-			.setSize(static_cast<uint32_t>(getIndicesData(id).size()))
+			.setSize(static_cast<uint32_t>(getData(id, "i").size()))
 			.setUsage(vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst)
 	)),
 	_vbMemory(allocateMemory(_vb.get(), vk::MemoryPropertyFlagBits::eDeviceLocal)),
@@ -40,14 +34,14 @@ Mesh::Mesh(const std::string &id):
 {
 	uploadBuffer(
 		_vb.get(),
-		static_cast<const void *>(getVerticesData(id).data()),
-		getVerticesData(id).size(),
+		static_cast<const void *>(getData(id, "v").data()),
+		getData(id, "v").size(),
 		vk::PipelineStageFlagBits::eVertexShader
 	);
 	uploadBuffer(
 		_ib.get(),
-		static_cast<const void *>(getIndicesData(id).data()),
-		getIndicesData(id).size(),
+		static_cast<const void *>(getData(id, "i").data()),
+		getData(id, "i").size(),
 		vk::PipelineStageFlagBits::eVertexShader
 	);
 }

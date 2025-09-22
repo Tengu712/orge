@@ -24,7 +24,7 @@ inline OrgeApiResult dispatchApi(OrgeApiCallType type, void *param) {
 		break;
 
 	case ORGE_INITIALIZE:
-		initialize();
+		initialize(static_cast<OrgeInitializeParam *>(param));
 		break;
 	case ORGE_TERMINATE:
 		terminate();

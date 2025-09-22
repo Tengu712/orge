@@ -7,6 +7,12 @@
 int main() {
 	TRY(ORGE_INITIALIZE, nullptr);
 
+	OrgeInitializeParam config{};
+	config.title = "simple";
+	config.width = 640;
+	config.height = 480;
+	config.
+
 	OrgeBeginRenderPassParam beginRenderPassParam{"RP"};
 
 	int count = 0;
