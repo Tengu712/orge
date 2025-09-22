@@ -45,4 +45,32 @@ void terminate() noexcept {
 	core::destroyCore();
 }
 
+void recreateSwapchain() {
+	graphics::core::device().waitIdle();
+	graphics::renderer::renderer().recreateSemaphoreForImageEnabled();
+	graphics::renderpass::destroyAllFramebuffersAndPipelines();
+	graphics::compute::destroyAllComputePipelines();
+	graphics::resource::destroyAllAttachmentImages();
+	graphics::resource::destroyDescriptorPool();
+	graphics::window::swapchain().recreateSwapchain();
+	graphics::resource::initializeDescriptorPool();
+	graphics::resource::initializeAllAttachmentImages();
+	graphics::compute::initializeComputePipelines();
+	graphics::renderpass::createAllFramebuffersAndPipelines();
+}
+
+void recreateSurface() {
+	graphics::core::device().waitIdle();
+	graphics::renderer::renderer().recreateSemaphoreForImageEnabled();
+	graphics::renderpass::destroyAllFramebuffersAndPipelines();
+	graphics::compute::destroyAllComputePipelines();
+	graphics::resource::destroyAllAttachmentImages();
+	graphics::resource::destroyDescriptorPool();
+	graphics::window::swapchain().recreateSurface();
+	graphics::resource::initializeDescriptorPool();
+	graphics::resource::initializeAllAttachmentImages();
+	graphics::compute::initializeComputePipelines();
+	graphics::renderpass::createAllFramebuffersAndPipelines();
+}
+
 } // namespace graphics

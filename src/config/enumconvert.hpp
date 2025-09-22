@@ -1,8 +1,6 @@
 #pragma once
 
-#include "attachment.hpp"
-#include "compute.hpp"
-#include "pipeline.hpp"
+#include "config.hpp"
 
 #include <vulkan/vulkan.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <orge.h>
+#include <orge/orge.h>
 #include <string>
 #include <vector>
 

@@ -1,6 +1,7 @@
 #include "asset.hpp"
 
 #include <assetdef.hpp>
+#include <format>
 #include <fstream>
 #include <unordered_map>
 #include <vector>
@@ -10,10 +11,10 @@ namespace asset {
 std::vector<unsigned char> g_dat;
 std::unordered_map<uint32_t, AssetEntry> g_assetMap;
 
-void loadDatFile() {
-	std::ifstream file(".dat", std::ios::binary);
+void loadDatFile(const std::string &path) {
+	std::ifstream file(path, std::ios::binary);
 	if (!file) {
-		throw ".dat not found.";
+		throw std::format("assets data file not found: {}", path);
 	}
 
 	file.seekg(0, std::ios::end);
@@ -51,20 +52,13 @@ void analyzeDat() {
 	}
 }
 
-void initialize() {
-	loadDatFile();
+void initialize(const std::string &path) {
+	loadDatFile(path);
 	analyzeDat();
 }
 
-std::span<const unsigned char> getConfigData() {
-	const auto &entry = g_assetMap[0];
-	const unsigned char *data = g_dat.data() + entry.offset;
-	return std::span<const unsigned char>(data, entry.size);
-}
-
 std::span<const unsigned char> getAsset(uint32_t id) {
-	// NOTE: 0はconfigファイルに予約されているので+1する。
-	const auto &entry = g_assetMap[id + 1];
+	const auto &entry = g_assetMap[id];
 	const unsigned char *data = g_dat.data() + entry.offset;
 	return std::span<const unsigned char>(data, entry.size);
 }

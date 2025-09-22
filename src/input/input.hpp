@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mutex>
-#include <orge.h>
+#include <orge/orge.h>
 #include <unordered_map>
 
 namespace input {
