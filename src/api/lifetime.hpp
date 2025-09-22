@@ -28,7 +28,9 @@ inline void initialize(OrgeInitializeParam *param) {
 	if (!SDL_Vulkan_LoadLibrary(nullptr)) {
 		throw std::format("failed to load Vulkan: {}", SDL_GetError());
 	}
-	asset::initialize();
+	if (param->assetsPath) {
+		asset::initialize(param->assetsPath);
+	}
 	config::initialize(param);
 	graphics::initialize();
 	audio::initialize();
@@ -48,7 +50,7 @@ inline OrgeApiResult update() {
 			return ORGE_WINDOW_CLOSED;
 		}
 		if (
-			config::config().altReturnToggleFullscreen
+			!config::config().disableFullscreenShortcut
 				&& event.type == SDL_EVENT_KEY_DOWN
 				&& event.key.key == SDLK_RETURN
 				&& (event.key.mod & MODKEY)

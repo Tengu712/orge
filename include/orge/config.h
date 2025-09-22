@@ -129,10 +129,11 @@ struct OrgeInitializeParam {
 	uint32_t width;
 	uint32_t height;
 	uint8_t fullscreen;
+	uint8_t disableFullscreenShortcut;
 	uint8_t disableVsync;
-	uint8_t altReturnToggleFullscreen;
 	uint32_t audioChannelCount;
 	uint32_t charCount;
+	const char *assetsPath;
 	uint32_t assetCount;
 	const char **assets;
 	uint32_t fontCount;

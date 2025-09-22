@@ -2,10 +2,11 @@
 
 #include <cstdint>
 #include <span>
+#include <string>
 
 namespace asset {
 
-void initialize();
+void initialize(const std::string &path);
 
 std::span<const unsigned char> getAsset(uint32_t id);
 

@@ -2,36 +2,21 @@
 #include <fstream>
 #include <format>
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <vector>
-#include <yaml-cpp/yaml.h>
 
-std::vector<std::string> parseAssetFileNames(const std::string &yamlFilePath) {
-	const auto node = YAML::LoadFile(yamlFilePath);
-
-	std::vector<std::string> paths;
-	paths.push_back(yamlFilePath);
-
-	if (!node["assets"]) {
-		return paths;
-	}
-	if (!node["assets"].IsSequence()) {
-		throw std::runtime_error("YAML must contain 'assets' as a sequence.");
-	}
-
-	for (const auto &n: node["assets"]) {
-		paths.push_back(n.as<std::string>());
-	}
-
-	std::set<std::string> pathSet;
-	for (const auto &n: paths) {
-		if (pathSet.contains(n)) {
-			throw std::runtime_error(std::format("'{}' duplicated.", n));
+std::vector<std::string> collectAssetNames(int argc, char *argv[]) {
+	std::vector<std::string> result;
+	std::unordered_set<std::string> checkSet;
+	result.reserve(argc - 1);
+	checkSet.reserve(argc - 1);
+	for (int i = 1; i < argc; ++i) {
+		if (!checkSet.contains(argv[i])) {
+			result.emplace_back(argv[i]);
+			checkSet.insert(argv[i]);
 		}
-		pathSet.emplace(n);
 	}
-
-	return paths;
+	return result;
 }
 
 std::vector<unsigned char> loadFile(const std::string &path) {
@@ -50,12 +35,7 @@ std::vector<unsigned char> loadFile(const std::string &path) {
 	return data;
 }
 
-void run(const std::string &yamlFilePath) {
-	const auto fileNames = parseAssetFileNames(yamlFilePath);
-	if (fileNames.empty()) {
-		throw std::runtime_error("no asset files specified in config.");
-	}
-
+void run(const std::vector<std::string> &fileNames) {
 	// .dat出力開始
 	std::ofstream out(".dat", std::ios::binary);
 	if (!out) {
@@ -91,19 +71,20 @@ void run(const std::string &yamlFilePath) {
 }
 
 int main(int argc, char *argv[]) {
-	if (argc != 2) {
-		std::cerr << "usage: assetzip <config-file-path>" << std::endl;
-		return 1;
+	const auto fileNames = collectAssetNames(argc, argv);
+	if (fileNames.empty()) {
+		std::cout << "usage: assetzip <asset1> <asset2> ..." << std::endl;
+		std::cout << "nothing generated." << std::endl;
+		return 0;
 	}
 
 	try {
-		run(argv[1]);
-	} catch (const YAML::Exception &e) {
+		run(fileNames);
+	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		std::cerr << "failed to zip asset files." << std::endl;
 		return 1;
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+	} catch (...) {
 		std::cerr << "failed to zip asset files." << std::endl;
 		return 1;
 	}

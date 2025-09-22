@@ -200,8 +200,8 @@ struct Config {
 	const uint32_t width;
 	const uint32_t height;
 	const bool fullscreen;
+	const bool disableFullscreenShortcut;
 	const bool disableVsync;
-	const bool altReturnToggleFullscreen;
 	const uint32_t audioChannelCount;
 	const uint32_t charCount;
 	const std::unordered_map<std::string, FontConfig> fonts;
@@ -218,8 +218,8 @@ struct Config {
 		uint32_t width,
 		uint32_t height,
 		bool fullscreen,
+		bool disableFullscreenShortcut,
 		bool disableVsync,
-		bool altReturnToggleFullscreen,
 		uint32_t audioChannelCount,
 		uint32_t charCount,
 		std::unordered_map<std::string, FontConfig> &&fonts,
@@ -234,8 +234,8 @@ struct Config {
 		width(width),
 		height(height),
 		fullscreen(fullscreen),
+		disableFullscreenShortcut(disableFullscreenShortcut),
 		disableVsync(disableVsync),
-		altReturnToggleFullscreen(altReturnToggleFullscreen),
 		audioChannelCount(audioChannelCount),
 		charCount(charCount),
 		fonts(std::move(fonts)),

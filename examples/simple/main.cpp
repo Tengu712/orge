@@ -5,13 +5,33 @@
 #define CHECK(type, param) if (orgeApiCall((type), (param)) != ORGE_OK) continue;
 
 int main() {
-	TRY(ORGE_INITIALIZE, nullptr);
-
+	const char *renderTargetId = "RT";
+	OrgeAttachmentConfig attachmentConfig{};
+	attachmentConfig.id = renderTargetId;
+	attachmentConfig.format = ORGE_FORMAT_RENDER_TARGET;
+	attachmentConfig.clearValueType = ORGE_CLEAR_VALUE_TYPE_COLOR;
+	attachmentConfig.clearValue[0] = 0.894f;
+	attachmentConfig.clearValue[1] = 0.619f;
+	attachmentConfig.clearValue[2] = 0.38f;
+	attachmentConfig.clearValue[3] = 1.0f;
+	OrgeSubpassConfig subpassConfig{};
+	subpassConfig.id = "SP";
+	subpassConfig.outputCount = 1;
+	subpassConfig.outputs = &renderTargetId;
+	OrgeRenderPassConfig renderPassConfig{};
+	renderPassConfig.id = "RP";
+	renderPassConfig.subpassCount = 1;
+	renderPassConfig.subpasses = &subpassConfig;
 	OrgeInitializeParam config{};
 	config.title = "simple";
 	config.width = 640;
 	config.height = 480;
-	config.
+	config.attachmentCount = 1;
+	config.attachments = &attachmentConfig;
+	config.renderPassCount = 1;
+	config.renderPasses = &renderPassConfig;
+
+	TRY(ORGE_INITIALIZE, &config);
 
 	OrgeBeginRenderPassParam beginRenderPassParam{"RP"};
 
